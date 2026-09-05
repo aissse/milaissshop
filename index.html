@@ -140,21 +140,15 @@
     color:#8a8a8a; font-size:10px; cursor:pointer; position:relative;
   }
   .navitem.active{ color:#fff; }
-  .navitem .dot{
-    width:5px; height:5px; border-radius:50%; background:var(--orange);
-    position:absolute; top:-9px;
-  }
   .cart-badge{
     position:absolute; top:-6px; right:-8px; background:var(--orange); color:#fff;
     font-size:9px; font-weight:700; width:15px; height:15px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
   }
 
-  /* Product detail */
-  .detail{ display:none; }
-  .detail.active{ display:block; }
-  .home{ display:block; }
-  .home.hidden{ display:none; }
+  /* Screens */
+  .screen{ display:none; }
+  .screen.active{ display:block; }
 
   .detail-top{
     display:flex; align-items:center; justify-content:space-between;
@@ -175,7 +169,7 @@
   .detail-body .p{ font-family:'Space Grotesk'; font-size:22px; font-weight:700; white-space:nowrap; }
   .rating{ font-size:12px; color:var(--muted); margin-top:6px; }
 
-  .block-label{ font-size:12px; font-weight:700; margin:20px 0 10px; color:var(--muted); text-transform:none; }
+  .block-label{ font-size:12px; font-weight:700; margin:20px 0 10px; color:var(--muted); }
   .sizes{ display:flex; gap:8px; flex-wrap:wrap; }
   .size-pill{
     width:44px; height:40px; border-radius:12px; border:1px solid var(--line);
@@ -190,9 +184,7 @@
 
   .desc{ font-size:13px; line-height:1.6; color:#555; margin-top:6px; }
 
-  .buybar{
-    display:flex; gap:10px; padding:18px 20px 28px;
-  }
+  .buybar{ display:flex; gap:10px; padding:18px 20px 28px; }
   .qty-btn{
     width:52px; height:52px; border-radius:16px; border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center; font-size:20px; background:var(--bg);
@@ -207,13 +199,40 @@
     border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
     cursor:pointer;
   }
+
+  /* Cart */
+  .cart-title{ padding:18px 20px 6px; }
+  .cart-title h2{ font-family:'Space Grotesk'; font-size:21px; }
+  .cart-list{ padding:10px 20px; display:flex; flex-direction:column; gap:12px; }
+  .cart-item{
+    display:flex; gap:12px; border:1px solid var(--line); border-radius:16px; padding:12px;
+  }
+  .cart-item .thumb{
+    width:56px; height:56px; border-radius:12px; background:var(--stone);
+    display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0;
+  }
+  .cart-item .meta{ flex:1; }
+  .cart-item .meta .name{ font-size:13px; font-weight:600; }
+  .cart-item .meta .opts{ font-size:11px; color:var(--muted); margin:2px 0 6px; }
+  .cart-item .meta .price{ font-family:'Space Grotesk'; font-weight:700; font-size:14px; }
+  .cart-item .remove{ align-self:flex-start; color:var(--muted); font-size:12px; cursor:pointer; }
+  .cart-empty{ padding:60px 20px; text-align:center; color:var(--muted); font-size:13px; }
+
+  .cart-summary{ padding:16px 20px 4px; }
+  .sum-row{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; color:#555; }
+  .sum-row.total{ font-family:'Space Grotesk'; font-size:17px; font-weight:700; color:var(--ink); }
+  .checkout-btn{
+    width:calc(100% - 40px); margin:14px 20px 24px; background:var(--orange); color:#fff;
+    border:none; border-radius:16px; padding:16px; font-weight:700; font-size:15px; cursor:pointer;
+  }
+  .hint{ padding:0 20px 20px; font-size:11px; color:var(--muted); line-height:1.5; }
 </style>
 </head>
 <body>
 <div class="app">
 
   <!-- ===== HOME ===== -->
-  <div class="home" id="home">
+  <div class="screen active" id="home">
     <div class="topbar">
       <div class="greet">
         <p>Привет 👋</p>
@@ -255,9 +274,9 @@
   </div>
 
   <!-- ===== PRODUCT DETAIL ===== -->
-  <div class="detail" id="detail">
+  <div class="screen" id="detail">
     <div class="detail-top">
-      <div class="back-circle" onclick="goHome()">←</div>
+      <div class="back-circle" onclick="showScreen('home')">←</div>
       <div class="back-circle">♡</div>
     </div>
     <div class="detail-img" id="detailImg"></div>
@@ -288,11 +307,22 @@
     </div>
   </div>
 
+  <!-- ===== CART ===== -->
+  <div class="screen" id="cart">
+    <div class="detail-top">
+      <div class="back-circle" onclick="showScreen('home')">←</div>
+      <div></div>
+    </div>
+    <div class="cart-title"><h2 class="display">Корзина</h2></div>
+
+    <div id="cartContent"></div>
+  </div>
+
   <!-- ===== BOTTOM NAV ===== -->
   <div class="bottomnav">
-    <div class="navitem active" onclick="goHome()"><span>🏠</span><span>Главная</span></div>
+    <div class="navitem active" data-screen="home" onclick="showScreen('home')"><span>🏠</span><span>Главная</span></div>
     <div class="navitem"><span>♡</span><span>Избранное</span></div>
-    <div class="navitem" style="position:relative;">
+    <div class="navitem" data-screen="cart" style="position:relative;" onclick="showScreen('cart')">
       <span>🛍️</span><span>Корзина</span>
       <span class="cart-badge" id="cartCount">0</span>
     </div>
@@ -305,12 +335,17 @@
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if (tg) { tg.ready(); tg.expand(); }
 
+// Куда будет уходить готовый текст заказа — поменяй на свой юзернейм без @
+const ADMIN_USERNAME = "isssroilov";
+
 const products = [
-  {emoji:"👟", name:"Nike Dunk Low Panda", sub:"Best collection", price:"250 000 сум", colors:["#c0392b","#d8c9a3","#3a6b7a"], desc:"Культовая расцветка Dunk Low в чёрно-белом сочетании. Верх из натуральной и искусственной кожи."},
-  {emoji:"🥿", name:"Low Panda Multivers", sub:"Limited drop", price:"310 000 сум", colors:["#e07a3f","#1a1a1a","#8a8479"], desc:"Смелая многоцветная модель с акцентными вставками, лёгкая подошва для города."},
-  {emoji:"👞", name:"Jordan 4 Fire Red", sub:"Retro", price:"420 000 сум", colors:["#c0392b","#1a1a1a"], desc:"Ретро-силуэт с фирменной сеткой и амортизацией Air — для тех, кто ценит классику."},
-  {emoji:"🩴", name:"Air Force Oversized", sub:"Best seller", price:"280 000 сум", colors:["#f4f1ec","#8a8479","#1a1a1a"], desc:"Массивная подошва и чистые линии — универсальная пара под любой образ."},
+  {emoji:"👟", name:"Nike Dunk Low Panda", sub:"Best collection", price:250000, colors:["#c0392b","#d8c9a3","#3a6b7a"], desc:"Культовая расцветка Dunk Low в чёрно-белом сочетании. Верх из натуральной и искусственной кожи."},
+  {emoji:"🥿", name:"Low Panda Multivers", sub:"Limited drop", price:310000, colors:["#e07a3f","#1a1a1a","#8a8479"], desc:"Смелая многоцветная модель с акцентными вставками, лёгкая подошва для города."},
+  {emoji:"👞", name:"Jordan 4 Fire Red", sub:"Retro", price:420000, colors:["#c0392b","#1a1a1a"], desc:"Ретро-силуэт с фирменной сеткой и амортизацией Air — для тех, кто ценит классику."},
+  {emoji:"🩴", name:"Air Force Oversized", sub:"Best seller", price:280000, colors:["#f4f1ec","#8a8479","#1a1a1a"], desc:"Массивная подошва и чистые линии — универсальная пара под любой образ."},
 ];
+
+function fmt(n){ return n.toLocaleString('ru-RU') + " сум"; }
 
 const grid = document.getElementById('productGrid');
 products.forEach((p, i) => {
@@ -322,55 +357,140 @@ products.forEach((p, i) => {
     <div class="info">
       <div class="name">${p.name}</div>
       <div class="sub">${p.sub}</div>
-      <div class="price">${p.price}</div>
+      <div class="price">${fmt(p.price)}</div>
     </div>`;
   grid.appendChild(card);
 });
 
-let cartCount = 0;
+let cart = [];
+let currentProduct = null;
+let selectedSize = "39";
+let selectedColorIdx = 0;
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  document.querySelectorAll('.navitem').forEach(n => n.classList.remove('active'));
+  const nav = document.querySelector(`.navitem[data-screen="${name}"]`);
+  if (nav) nav.classList.add('active');
+  if (name === 'cart') renderCart();
+  window.scrollTo(0,0);
+}
 
 function openProduct(i){
-  const p = products[i];
-  document.getElementById('detailImg').textContent = p.emoji;
-  document.getElementById('detailName').textContent = p.name;
-  document.getElementById('detailPrice').textContent = p.price;
-  document.getElementById('detailDesc').textContent = p.desc;
+  currentProduct = products[i];
+  selectedSize = "39";
+  selectedColorIdx = 0;
+
+  document.getElementById('detailImg').textContent = currentProduct.emoji;
+  document.getElementById('detailName').textContent = currentProduct.name;
+  document.getElementById('detailPrice').textContent = fmt(currentProduct.price);
+  document.getElementById('detailDesc').textContent = currentProduct.desc;
 
   const sizeRow = document.getElementById('sizeRow');
   sizeRow.innerHTML = '';
-  ["38","39","40","41","42","43"].forEach((s, idx) => {
+  ["38","39","40","41","42","43"].forEach((s) => {
     const el = document.createElement('div');
-    el.className = 'size-pill' + (idx===1 ? ' active' : '');
+    el.className = 'size-pill' + (s === selectedSize ? ' active' : '');
     el.textContent = s;
-    el.onclick = () => { document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
+    el.onclick = () => { selectedSize = s; document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
     sizeRow.appendChild(el);
   });
 
   const colorRow = document.getElementById('colorRow');
   colorRow.innerHTML = '';
-  p.colors.forEach((c, idx) => {
+  currentProduct.colors.forEach((c, idx) => {
     const el = document.createElement('div');
     el.className = 'color-dot' + (idx===0 ? ' active' : '');
     el.style.background = c;
-    el.onclick = () => { document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
+    el.onclick = () => { selectedColorIdx = idx; document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
     colorRow.appendChild(el);
   });
 
-  document.getElementById('home').classList.add('hidden');
-  document.getElementById('detail').classList.add('active');
-  window.scrollTo(0,0);
-}
-
-function goHome(){
-  document.getElementById('detail').classList.remove('active');
-  document.getElementById('home').classList.remove('hidden');
-  window.scrollTo(0,0);
+  showScreen('detail');
 }
 
 function addToCart(){
-  cartCount++;
-  document.getElementById('cartCount').textContent = cartCount;
+  const existing = cart.find(c => c.name === currentProduct.name && c.size === selectedSize && c.colorIdx === selectedColorIdx);
+  if (existing){
+    existing.qty++;
+  } else {
+    cart.push({
+      name: currentProduct.name,
+      emoji: currentProduct.emoji,
+      price: currentProduct.price,
+      size: selectedSize,
+      colorIdx: selectedColorIdx,
+      qty: 1
+    });
+  }
+  updateCartBadge();
   if (tg) tg.HapticFeedback.notificationOccurred('success');
+  showScreen('cart');
+}
+
+function updateCartBadge(){
+  const count = cart.reduce((a,c) => a + c.qty, 0);
+  document.getElementById('cartCount').textContent = count;
+}
+
+function removeFromCart(idx){
+  cart.splice(idx, 1);
+  updateCartBadge();
+  renderCart();
+}
+
+function renderCart(){
+  const content = document.getElementById('cartContent');
+  if (cart.length === 0){
+    content.innerHTML = `<div class="cart-empty">Корзина пуста<br>Загляни в каталог 👟</div>`;
+    return;
+  }
+
+  let total = 0;
+  const itemsHtml = cart.map((item, idx) => {
+    total += item.price * item.qty;
+    return `
+      <div class="cart-item">
+        <div class="thumb">${item.emoji}</div>
+        <div class="meta">
+          <div class="name">${item.name}</div>
+          <div class="opts">Размер ${item.size} · ${item.qty} шт</div>
+          <div class="price">${fmt(item.price * item.qty)}</div>
+        </div>
+        <div class="remove" onclick="removeFromCart(${idx})">Убрать</div>
+      </div>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="cart-list">${itemsHtml}</div>
+    <div class="cart-summary">
+      <div class="sum-row"><span>Товары</span><span>${fmt(total)}</span></div>
+      <div class="sum-row"><span>Доставка</span><span>По согласованию</span></div>
+      <div class="sum-row total"><span>Итого</span><span>${fmt(total)}</span></div>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">Оформить заказ</button>
+    <div class="hint">Нажимая "Оформить заказ", откроется чат с продавцом — останется только отправить готовое сообщение.</div>
+  `;
+}
+
+function checkout(){
+  if (cart.length === 0) return;
+  let total = 0;
+  let text = "Здравствуйте! Хочу оформить заказ:\n\n";
+  cart.forEach(item => {
+    total += item.price * item.qty;
+    text += `• ${item.name} — размер ${item.size}, ${item.qty} шт — ${fmt(item.price * item.qty)}\n`;
+  });
+  text += `\nИтого: ${fmt(total)}`;
+
+  const url = `https://t.me/${ADMIN_USERNAME}?text=${encodeURIComponent(text)}`;
+
+  if (tg && tg.openTelegramLink){
+    tg.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank');
+  }
 }
 
 document.querySelectorAll('.chip').forEach(chip => {
