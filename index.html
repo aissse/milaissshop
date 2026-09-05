@@ -7,24 +7,25 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#ffffff; --ink:#141414; --stone:#f4f1ec; --line:#e7e2d9;
     --orange:#ff5a1f; --orange-dark:#e14e17; --muted:#8a8479; --navbg:#141414;
+    --logofont:'Cormorant Garamond',serif; --colordot-border:#141414;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{ font-family:'Inter',sans-serif; background:var(--stone); color:var(--ink); -webkit-font-smoothing:antialiased; }
   .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; overflow-x:hidden; padding-bottom:84px; }
   .display{ font-family:'Space Grotesk',sans-serif; }
-  .logo{ font-family:'Pacifico',cursive; font-size:26px; text-align:center; color:var(--ink); }
+  .logo{ font-family:var(--logofont); font-size:32px; font-weight:600; text-align:center; color:var(--ink); letter-spacing:.02em; }
 
   .topbar{ display:flex; align-items:center; gap:8px; padding:18px 20px 8px; }
   .topbar .logo{ flex:1; }
-  .icon-btn{ width:38px; height:38px; border-radius:12px; background:var(--stone); display:flex; align-items:center; justify-content:center; border:1px solid var(--line); cursor:pointer; flex-shrink:0; position:relative; }
+  .icon-btn{ height:38px; border-radius:12px; background:var(--stone); display:flex; align-items:center; justify-content:center; border:1px solid var(--line); cursor:pointer; flex-shrink:0; position:relative; padding:0 10px; gap:4px; }
   .icon-btn svg{ width:18px; height:18px; }
 
-  .lang-menu{ position:absolute; top:44px; right:0; background:var(--bg); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); overflow:hidden; z-index:80; display:none; min-width:120px; }
+  .lang-menu{ position:absolute; top:44px; right:0; background:var(--bg); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); overflow:hidden; z-index:80; display:none; min-width:140px; }
   .lang-menu.open{ display:block; }
   .lang-menu div{ padding:10px 14px; font-size:13px; cursor:pointer; }
   .lang-menu div:hover{ background:var(--stone); }
@@ -53,8 +54,8 @@
   .card .imgwrap{ background:var(--stone); aspect-ratio:1/0.9; display:flex; align-items:center; justify-content:center; font-size:44px; position:relative; background-size:cover; background-position:center; }
   .card .imgwrap.oos::before{ content:attr(data-oos-label); position:absolute; inset:0; background:rgba(255,255,255,.8); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#c0392b; text-align:center; padding:10px; }
   .heart-btn{ position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.9); display:flex; align-items:center; justify-content:center; z-index:5; cursor:pointer; }
-  .heart-btn svg{ width:16px; height:16px; }
-  .heart-btn path{ fill:none; stroke:#141414; stroke-width:2; }
+  .heart-btn svg{ width:16px; height:16px; display:block; }
+  .heart-btn path{ fill:none; stroke:#141414; stroke-width:1.6; }
   .heart-btn.active path{ fill:#e74c3c; stroke:#e74c3c; }
   .card .info{ padding:10px 12px 14px; }
   .card .name{ font-size:13px; font-weight:600; line-height:1.3; margin-bottom:2px; }
@@ -65,7 +66,6 @@
   .navitem{ display:flex; flex-direction:column; align-items:center; gap:3px; color:#8a8a8a; font-size:10px; cursor:pointer; position:relative; }
   .navitem svg{ width:20px; height:20px; }
   .navitem.active{ color:#fff; }
-  .navitem svg path, .navitem svg circle, .navitem svg rect{ stroke:currentColor; }
   .cart-badge{ position:absolute; top:-6px; right:6px; background:var(--orange); color:#fff; font-size:9px; font-weight:700; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
 
   .screen{ display:none; }
@@ -76,8 +76,8 @@
   .carousel{ border-radius:22px; aspect-ratio:1/0.85; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .carousel::-webkit-scrollbar{ display:none; }
   .carousel .slide{ min-width:100%; scroll-snap-align:start; background:var(--stone); display:flex; align-items:center; justify-content:center; font-size:110px; background-size:cover; background-position:center; cursor:zoom-in; }
-  .carousel-wrap .heart-btn{ top:12px; right:12px; width:34px; height:34px; }
-  .carousel-wrap .heart-btn svg{ width:18px; height:18px; }
+  .carousel-wrap .heart-btn{ top:12px; right:12px; width:36px; height:36px; }
+  .carousel-wrap .heart-btn svg{ width:19px; height:19px; }
   .dots{ display:flex; gap:6px; justify-content:center; margin:14px 0; }
   .dots span{ width:6px; height:6px; border-radius:50%; background:var(--line); transition:background .15s; }
   .dots span.on{ background:var(--ink); }
@@ -99,7 +99,7 @@
 
   .colors{ display:flex; gap:10px; }
   .color-dot{ width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; position:relative; }
-  .color-dot.active{ border-color:var(--ink); }
+  .color-dot.active{ border-color:var(--colordot-border); }
   .color-dot.oos::after{ content:""; position:absolute; inset:-2px; border-radius:50%; background:linear-gradient(to top right, transparent 47%, #c0392b 48%, #c0392b 52%, transparent 53%); }
 
   .desc{ font-size:13px; line-height:1.6; color:#555; margin-top:6px; }
@@ -132,10 +132,12 @@
   .toast{ position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:100px; font-size:13px; font-weight:600; opacity:0; transition:all .25s; z-index:200; white-space:nowrap; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
-  .lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:300; display:none; align-items:center; justify-content:center; }
-  .lightbox.open{ display:flex; }
-  .lightbox img{ max-width:92%; max-height:80%; border-radius:12px; }
-  .lightbox .close-x{ position:absolute; top:24px; right:24px; color:#fff; font-size:28px; cursor:pointer; }
+  .lightbox{ position:fixed; inset:0; background:#000; z-index:300; display:none; }
+  .lightbox.open{ display:block; }
+  .lightbox-carousel{ width:100%; height:100%; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
+  .lightbox-carousel::-webkit-scrollbar{ display:none; }
+  .lightbox-carousel .lb-slide{ min-width:100%; height:100%; flex-shrink:0; scroll-snap-align:start; background-size:contain; background-repeat:no-repeat; background-position:center; }
+  .lightbox .close-x{ position:absolute; top:24px; right:24px; color:#fff; font-size:28px; cursor:pointer; z-index:2; }
 
   .order-card{ border:1px solid var(--line); border-radius:16px; padding:14px; margin:0 20px 14px; }
   .order-card .odate{ font-size:11px; color:var(--muted); margin-bottom:8px; }
@@ -144,8 +146,11 @@
   .review-btn{ margin-top:10px; font-size:12px; color:var(--orange); font-weight:700; cursor:pointer; }
   .review-form{ margin-top:8px; display:none; }
   .review-form.open{ display:block; }
-  .review-form textarea{ width:100%; border:1px solid var(--line); border-radius:10px; padding:8px; font-size:12px; font-family:'Inter'; }
-  .review-form button{ margin-top:6px; background:var(--ink); color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; cursor:pointer; }
+  .review-form textarea{ width:100%; border:1px solid var(--line); border-radius:10px; padding:8px; font-size:12px; font-family:'Inter'; margin-bottom:6px; }
+  .review-form .stars{ display:flex; gap:4px; margin-bottom:6px; font-size:18px; }
+  .review-form .stars span{ cursor:pointer; color:var(--line); }
+  .review-form .stars span.on{ color:#f5a623; }
+  .review-form button{ background:var(--ink); color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; cursor:pointer; }
 
   .reviews-list{ padding:0 20px 20px; }
   .review-item{ border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; line-height:1.5; }
@@ -157,8 +162,8 @@
   <div class="screen active" id="home">
     <div class="topbar">
       <div class="logo">milaisss</div>
-      <div class="icon-btn" id="langBtn" onclick="toggleLangMenu()">
-        🌐
+      <div class="icon-btn" id="langBtn" onclick="toggleLangMenu(event)">
+        <span id="langFlag">🇷🇺</span><span style="font-size:10px;">⌄</span>
         <div class="lang-menu" id="langMenu">
           <div onclick="setLang('ru')">🇷🇺 Русский</div>
           <div onclick="setLang('uz')">🇺🇿 Oʻzbek</div>
@@ -167,18 +172,17 @@
           <div onclick="setLang('en')">🇬🇧 English</div>
         </div>
       </div>
-      <div class="icon-btn">🔔</div>
     </div>
     <div class="search-row">
       <div class="search-box"><span>🔍</span><input type="text" id="searchInput" data-i18n-ph="search" placeholder="Найти кроссовки"></div>
-      <div class="icon-btn" onclick="showScreen('settings')">⚙️</div>
+      <div class="icon-btn" style="width:38px;" onclick="showScreen('settings')">⚙️</div>
     </div>
     <div class="cats" id="catRow"></div>
     <div class="hero">
       <div class="hero-text">
-        <div class="tag">НОВАЯ КОЛЛЕКЦИЯ</div>
-        <h2 class="display">Скидка 20% на первый дроп</h2>
-        <button class="hero-btn">Смотреть</button>
+        <div class="tag" data-i18n="heroTag">НОВАЯ КОЛЛЕКЦИЯ</div>
+        <h2 class="display" data-i18n="heroTitle">Скидка 20% на первый дроп</h2>
+        <button class="hero-btn" data-i18n="heroBtn">Смотреть</button>
       </div>
     </div>
     <div class="section-head"><h3 class="display" id="sectionTitle">Все товары</h3></div>
@@ -192,21 +196,21 @@
     </div>
     <div class="carousel-wrap">
       <div class="carousel" id="detailCarousel"></div>
-      <div class="heart-btn" id="detailFavBtn" onclick="toggleCurrentFavorite()"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.2 2 4.5 5.6 4.1c2-.2 3.7.9 4.9 2.6 1.2-1.7 2.9-2.8 4.9-2.6C19 4.5 20.6 8.2 19 11.7 16.5 16.4 12 21 12 21z"/></svg></div>
+      <div class="heart-btn" id="detailFavBtn" onclick="toggleCurrentFavorite()"><svg viewBox="0 0 24 24"><path d="M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09 C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5 c0,3.78-3.4,6.86-8.55,11.54L12,21.35z"/></svg></div>
     </div>
     <div class="dots" id="detailDots"></div>
     <div class="detail-body">
       <div class="rowtop">
         <div>
           <h2 class="display" id="detailName"></h2>
-          <div class="rating">★ 4.8 · <span class="rlink" id="reviewsLink" onclick="openReviews()">0 отзывов</span></div>
+          <div class="rating" id="ratingLine">★ — · <span class="rlink" id="reviewsLink" onclick="openReviews()">0 отзывов</span></div>
           <div class="stock-note" id="stockNote"></div>
         </div>
         <div class="p" id="detailPrice"></div>
       </div>
       <div class="block-label" data-i18n="sizeLabel">Размер</div>
       <div class="sizes" id="sizeRow"></div>
-      <div class="block-label">Цвет: <span id="colorLabel" style="color:var(--ink); font-weight:700;"></span></div>
+      <div class="block-label"><span data-i18n="colorLabelWord">Цвет</span>: <span id="colorLabel" style="color:var(--ink); font-weight:700;"></span></div>
       <div class="colors" id="colorRow"></div>
       <div class="block-label" data-i18n="descLabel">Описание</div>
       <p class="desc" id="detailDesc"></p>
@@ -257,20 +261,20 @@
 
   <div class="bottomnav" id="bottomNav">
     <div class="navitem active" data-screen="home" onclick="showScreen('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
       <span data-i18n="navHome">Главная</span>
     </div>
     <div class="navitem" data-screen="favorites" onclick="showScreen('favorites')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.2 2 4.5 5.6 4.1c2-.2 3.7.9 4.9 2.6 1.2-1.7 2.9-2.8 4.9-2.6C19 4.5 20.6 8.2 19 11.7 16.5 16.4 12 21 12 21z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09 C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5 c0,3.78-3.4,6.86-8.55,11.54L12,21.35z"/></svg>
       <span data-i18n="navFav">Избранное</span>
     </div>
     <div class="navitem" data-screen="cart" style="position:relative;" onclick="showScreen('cart')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
       <span data-i18n="navCart">Корзина</span>
       <span class="cart-badge" id="cartCount">0</span>
     </div>
     <div class="navitem" data-screen="profile" onclick="showScreen('profile')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
       <span data-i18n="navProfile">Профиль</span>
     </div>
   </div>
@@ -278,9 +282,9 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <span class="close-x">✕</span>
-  <img id="lightboxImg" src="">
+<div class="lightbox" id="lightbox">
+  <span class="close-x" onclick="closeLightbox()">✕</span>
+  <div class="lightbox-carousel" id="lightboxCarousel"></div>
 </div>
 
 <script>
@@ -303,44 +307,59 @@ const db = firebase.firestore();
 function fmt(n){ return Number(n||0).toLocaleString('ru-RU') + " сум"; }
 
 /* ---------- i18n ---------- */
+const FLAGS = { ru:"🇷🇺", uz:"🇺🇿", tr:"🇹🇷", az:"🇦🇿", en:"🇬🇧" };
 const STR = {
   ru: { search:"Найти кроссовки", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
         addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
-        sizeLabel:"Размер", descLabel:"Описание", allCat:"Все", outOfStock:"Товар закончился", empty:"Корзина пуста" },
+        sizeLabel:"Размер", descLabel:"Описание", colorLabelWord:"Цвет", allCat:"Все", outOfStock:"Товар закончился",
+        empty:"Корзина пуста", heroTag:"НОВАЯ КОЛЛЕКЦИЯ", heroTitle:"Скидка 20% на первый дроп", heroBtn:"Смотреть",
+        goodsLabel:"Товары", deliveryLabel:"Доставка", totalLabel:"Итого", checkoutBtn:"Оформить заказ",
+        allProducts:"Все товары", noProductsYet:"Товары скоро появятся 👟", noFav:"Пока нет избранных товаров 🤍",
+        noOrders:"Заказов пока нет", noRating:"Нет оценок", stockRemain:"Осталось", inStockWord:"В наличии" },
   uz: { search:"Krossovka qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
         addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
-        sizeLabel:"O‘lcham", descLabel:"Tavsif", allCat:"Barchasi", outOfStock:"Mahsulot tugagan", empty:"Savat bo‘sh" },
+        sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
+        empty:"Savat bo‘sh", heroTag:"YANGI KOLLEKSIYA", heroTitle:"Birinchi tashlashga 20% chegirma", heroBtn:"Ko‘rish",
+        goodsLabel:"Mahsulotlar", deliveryLabel:"Yetkazib berish", totalLabel:"Jami", checkoutBtn:"Buyurtma berish",
+        allProducts:"Barcha mahsulotlar", noProductsYet:"Mahsulotlar tez orada 👟", noFav:"Sevimlilar hali yo‘q 🤍",
+        noOrders:"Buyurtmalar yo‘q", noRating:"Baho yo‘q", stockRemain:"Qoldi", inStockWord:"Mavjud" },
   tr: { search:"Spor ayakkabı ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
         addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
-        sizeLabel:"Beden", descLabel:"Açıklama", allCat:"Tümü", outOfStock:"Ürün tükendi", empty:"Sepet boş" },
+        sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
+        empty:"Sepet boş", heroTag:"YENİ KOLEKSİYON", heroTitle:"İlk drop'ta %20 indirim", heroBtn:"İncele",
+        goodsLabel:"Ürünler", deliveryLabel:"Teslimat", totalLabel:"Toplam", checkoutBtn:"Sipariş ver",
+        allProducts:"Tüm ürünler", noProductsYet:"Ürünler yakında 👟", noFav:"Favori yok 🤍",
+        noOrders:"Sipariş yok", noRating:"Puan yok", stockRemain:"Kaldı", inStockWord:"Stokta" },
   az: { search:"Krossovka axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
         addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
-        sizeLabel:"Ölçü", descLabel:"Təsvir", allCat:"Hamısı", outOfStock:"Məhsul bitib", empty:"Səbət boşdur" },
+        sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
+        empty:"Səbət boşdur", heroTag:"YENİ KOLLEKSİYA", heroTitle:"İlk drop-a 20% endirim", heroBtn:"Bax",
+        goodsLabel:"Mallar", deliveryLabel:"Çatdırılma", totalLabel:"Cəmi", checkoutBtn:"Sifariş et",
+        allProducts:"Bütün mallar", noProductsYet:"Mallar tezliklə 👟", noFav:"Seçilmiş yoxdur 🤍",
+        noOrders:"Sifariş yoxdur", noRating:"Reytinq yoxdur", stockRemain:"Qalıb", inStockWord:"Mövcuddur" },
   en: { search:"Search sneakers", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
         addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
-        sizeLabel:"Size", descLabel:"Description", allCat:"All", outOfStock:"Out of stock", empty:"Cart is empty" }
+        sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
+        empty:"Cart is empty", heroTag:"NEW COLLECTION", heroTitle:"20% off the first drop", heroBtn:"Shop now",
+        goodsLabel:"Items", deliveryLabel:"Delivery", totalLabel:"Total", checkoutBtn:"Checkout",
+        allProducts:"All products", noProductsYet:"Products coming soon 👟", noFav:"No favorites yet 🤍",
+        noOrders:"No orders yet", noRating:"No ratings", stockRemain:"Left", inStockWord:"In stock" }
 };
 let lang = localStorage.getItem('milaisss_lang') || 'ru';
-
 function t(key){ return (STR[lang] && STR[lang][key]) || STR.ru[key] || key; }
 
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.getAttribute('data-i18n')));
   document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.getAttribute('data-i18n-ph')));
+  document.getElementById('langFlag').textContent = FLAGS[lang];
   renderCategoryChips();
   renderGrid();
   renderFavGrid();
 }
-
-function toggleLangMenu(event){
-  if (event) event.stopPropagation();
-  document.getElementById('langMenu').classList.toggle('open');
-}
+function toggleLangMenu(event){ if (event) event.stopPropagation(); document.getElementById('langMenu').classList.toggle('open'); }
 document.addEventListener('click', () => document.getElementById('langMenu').classList.remove('open'));
-
 function setLang(l){
-  lang = l;
-  localStorage.setItem('milaisss_lang', l);
+  lang = l; localStorage.setItem('milaisss_lang', l);
   document.getElementById('langMenu').classList.remove('open');
   applyLang();
 }
@@ -348,22 +367,34 @@ function setLang(l){
 /* ---------- toast ---------- */
 function showToast(msg){
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+  el.textContent = msg; el.classList.add('show');
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), 1600);
 }
 
-/* ---------- lightbox ---------- */
-function openLightbox(url){
-  if (!url) return;
-  document.getElementById('lightboxImg').src = url;
+/* ---------- lightbox (swipe left/right + swipe down to close) ---------- */
+let lbImages = [];
+function openLightbox(images, startIdx){
+  lbImages = images.filter(Boolean);
+  if (lbImages.length === 0) return;
+  const wrap = document.getElementById('lightboxCarousel');
+  wrap.innerHTML = lbImages.map(url => `<div class="lb-slide" style="background-image:url('${url}')"></div>`).join('');
   document.getElementById('lightbox').classList.add('open');
+  requestAnimationFrame(() => { wrap.scrollLeft = (startIdx||0) * wrap.clientWidth; });
+
+  let startY = null, startX = null;
+  wrap.ontouchstart = (e) => { startY = e.touches[0].clientY; startX = e.touches[0].clientX; };
+  wrap.ontouchmove = (e) => {
+    if (startY === null) return;
+    const dy = e.touches[0].clientY - startY;
+    const dx = Math.abs(e.touches[0].clientX - startX);
+    if (dy > 60 && dx < 40){ closeLightbox(); startY = null; }
+  };
 }
 function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
 
-/* ---------- categories ---------- */
-const CATEGORIES = ["Тренды","Oversize","Минимализм","Лимитки"];
+/* ---------- categories (dynamic from settings) ---------- */
+let CATEGORIES = ["Тренды","Oversize","Минимализм","Лимитки"];
 let activeCategory = "Все";
 
 function renderCategoryChips(){
@@ -421,6 +452,7 @@ let cart = [];
 let currentProduct = null;
 let selectedSize = "";
 let selectedColorIdx = 0;
+let currentColors = [];
 
 const grid = document.getElementById('productGrid');
 const favGrid = document.getElementById('favGrid');
@@ -431,7 +463,7 @@ function productCardHTML(p){
   const favActive = isFavorite(p.id) ? ' active' : '';
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${p.image ? '' : (p.emoji || '👟')}
-      <div class="heart-btn${favActive}" data-fav="${p.id}"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.2 2 4.5 5.6 4.1c2-.2 3.7.9 4.9 2.6 1.2-1.7 2.9-2.8 4.9-2.6C19 4.5 20.6 8.2 19 11.7 16.5 16.4 12 21 12 21z"/></svg></div>
+      <div class="heart-btn${favActive}" data-fav="${p.id}"><svg viewBox="0 0 24 24"><path d="M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09 C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5 c0,3.78-3.4,6.86-8.55,11.54L12,21.35z"/></svg></div>
     </div>
     <div class="info">
       <div class="name">${p.name}</div>
@@ -442,12 +474,9 @@ function productCardHTML(p){
 
 function renderGrid(){
   const list = filteredProducts();
-  document.getElementById('sectionTitle').textContent = activeCategory === 'Все' ? (lang==='ru'?'Все товары':t('allCat')) : activeCategory;
+  document.getElementById('sectionTitle').textContent = activeCategory === 'Все' ? t('allProducts') : activeCategory;
   grid.innerHTML = '';
-  if (list.length === 0){
-    grid.innerHTML = '<div class="empty-state">Товары скоро появятся 👟</div>';
-    return;
-  }
+  if (list.length === 0){ grid.innerHTML = `<div class="empty-state">${t('noProductsYet')}</div>`; return; }
   list.forEach((p) => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -461,10 +490,7 @@ function renderGrid(){
 function renderFavGrid(){
   favGrid.innerHTML = '';
   const favProducts = products.filter(p => isFavorite(p.id));
-  if (favProducts.length === 0){
-    favGrid.innerHTML = '<div class="empty-state">Пока нет избранных товаров 🤍</div>';
-    return;
-  }
+  if (favProducts.length === 0){ favGrid.innerHTML = `<div class="empty-state">${t('noFav')}</div>`; return; }
   favProducts.forEach((p) => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -488,10 +514,13 @@ db.collection('reviews').onSnapshot(snap => {
 });
 
 db.collection('settings').doc('shop').onSnapshot(doc => {
-  if (doc.exists){
-    const data = doc.data();
-    if (data.navColor) document.getElementById('bottomNav').style.background = data.navColor;
-  }
+  if (!doc.exists) return;
+  const data = doc.data();
+  if (data.navColor) document.getElementById('bottomNav').style.background = data.navColor;
+  if (data.bgColor) document.documentElement.style.setProperty('--stone', data.bgColor);
+  if (data.colorBorder) document.documentElement.style.setProperty('--colordot-border', data.colorBorder);
+  if (data.fontFamily) document.documentElement.style.setProperty('--logofont', `'${data.fontFamily}',serif`);
+  if (data.categories && data.categories.length){ CATEGORIES = data.categories; renderCategoryChips(); }
 });
 
 /* ---------- screens ---------- */
@@ -511,6 +540,14 @@ function showScreen(name){
 function updateReviewsSummary(){
   const approved = reviews.filter(r => r.productId === currentProduct.id && r.approved);
   document.getElementById('reviewsLink').textContent = `${approved.length} отзывов`;
+  const rated = approved.filter(r => typeof r.rating === 'number');
+  const ratingLine = document.getElementById('ratingLine');
+  if (rated.length === 0){
+    ratingLine.innerHTML = `${t('noRating')} · <span class="rlink" id="reviewsLink" onclick="openReviews()">${approved.length} отзывов</span>`;
+  } else {
+    const avg = (rated.reduce((s,r)=>s+r.rating,0) / rated.length).toFixed(1);
+    ratingLine.innerHTML = `★ ${avg} · <span class="rlink" id="reviewsLink" onclick="openReviews()">${approved.length} отзывов</span>`;
+  }
 }
 
 function openReviews(){
@@ -519,7 +556,7 @@ function openReviews(){
   if (approved.length === 0){
     list.innerHTML = '<p class="hint">Пока нет отзывов по этому товару</p>';
   } else {
-    list.innerHTML = approved.map(r => `<div class="review-item">${r.text}</div>`).join('');
+    list.innerHTML = approved.map(r => `<div class="review-item">${r.rating ? '★'.repeat(r.rating)+' ' : ''}${r.text}</div>`).join('');
   }
   showScreen('reviewsScreen');
 }
@@ -529,17 +566,19 @@ function openProduct(id){
   if (!currentProduct) return;
   const sizes = (currentProduct.sizes && currentProduct.sizes.length) ? currentProduct.sizes : ["38","39","40","41","42","43"];
   const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", hex:"#f4f1ec", stock: currentProduct.stock || 0}];
+  currentColors = colors;
   selectedSize = sizes[0];
   selectedColorIdx = 0;
 
   const carousel = document.getElementById('detailCarousel');
   const dotsWrap = document.getElementById('detailDots');
   carousel.innerHTML = ''; dotsWrap.innerHTML = '';
+  const imagesList = colors.map(c => c.image || currentProduct.image || '');
   colors.forEach((c, idx) => {
-    const img = c.image || currentProduct.image || '';
+    const img = imagesList[idx];
     const slide = document.createElement('div');
     slide.className = 'slide';
-    if (img){ slide.style.backgroundImage = `url('${img}')`; slide.onclick = () => openLightbox(img); }
+    if (img){ slide.style.backgroundImage = `url('${img}')`; slide.onclick = () => openLightbox(imagesList, selectedColorIdx); }
     else { slide.textContent = currentProduct.emoji || '👟'; }
     carousel.appendChild(slide);
     const dot = document.createElement('span');
@@ -564,11 +603,11 @@ function openProduct(id){
       stockNote.className = 'stock-note out';
       addBtn.disabled = true; addBtn.textContent = t('outOfStock');
     } else if (colorStock <= 3){
-      stockNote.textContent = `Осталось ${colorStock} шт (${colors[idx].name})`;
+      stockNote.textContent = `${t('stockRemain')} ${colorStock} шт (${colors[idx].name})`;
       stockNote.className = 'stock-note low';
       addBtn.disabled = false; addBtn.textContent = t('addToCart');
     } else {
-      stockNote.textContent = `В наличии (${colors[idx].name})`;
+      stockNote.textContent = `${t('inStockWord')} (${colors[idx].name})`;
       stockNote.className = 'stock-note';
       addBtn.disabled = false; addBtn.textContent = t('addToCart');
     }
@@ -625,13 +664,16 @@ function openProduct(id){
 /* ---------- cart ---------- */
 function addToCart(){
   if (!currentProduct) return;
-  const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", hex:"#f4f1ec", stock: currentProduct.stock || 0}];
-  const chosen = colors[selectedColorIdx];
-  if (!chosen || Number(chosen.stock||0) <= 0) return;
+  const chosen = currentColors[selectedColorIdx];
+  if (!chosen) return;
+  const stockLimit = typeof chosen.stock === 'number' ? chosen.stock : Number(currentProduct.stock||0);
+  if (stockLimit <= 0) return;
   const colorName = chosen.name;
   const existing = cart.find(c => c.productId === currentProduct.id && c.size === selectedSize && c.colorName === colorName);
-  if (existing){ existing.qty++; }
-  else {
+  if (existing){
+    if (existing.qty >= stockLimit){ showToast('Больше нет в наличии'); return; }
+    existing.qty++;
+  } else {
     cart.push({
       productId: currentProduct.id, name: currentProduct.name,
       image: chosen.image || currentProduct.image || '', emoji: currentProduct.emoji || '👟',
@@ -673,12 +715,12 @@ function renderCart(){
   content.innerHTML = `
     <div class="cart-list">${itemsHtml}</div>
     <div class="cart-summary">
-      <div class="sum-row"><span>Товары</span><span>${fmt(total)}</span></div>
-      <div class="sum-row"><span>Доставка</span><span>По согласованию</span></div>
-      <div class="sum-row total"><span>Итого</span><span>${fmt(total)}</span></div>
+      <div class="sum-row"><span>${t('goodsLabel')}</span><span>${fmt(total)}</span></div>
+      <div class="sum-row"><span>${t('deliveryLabel')}</span><span>По согласованию</span></div>
+      <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
-    <button class="checkout-btn" onclick="checkout()">Оформить заказ</button>
-    <div class="hint">Нажимая "Оформить заказ", откроется чат с продавцом — останется только отправить готовое сообщение.</div>
+    <button class="checkout-btn" onclick="checkout()">${t('checkoutBtn')}</button>
+    <div class="hint">Нажимая "${t('checkoutBtn')}", откроется чат с продавцом — останется только отправить готовое сообщение.</div>
   `;
 }
 
@@ -690,7 +732,7 @@ function checkout(){
   cart.forEach(item => {
     total += item.price * item.qty;
     text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт — ${fmt(item.price * item.qty)}\n`;
-    orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price, reviewed:false });
+    orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price });
   });
   text += `\nИтого: ${fmt(total)}`;
 
@@ -702,9 +744,7 @@ function checkout(){
   const url = `https://t.me/${ADMIN_USERNAME}?text=${encodeURIComponent(text)}`;
   if (tg && tg.openTelegramLink){ tg.openTelegramLink(url); } else { window.open(url, '_blank'); }
 
-  cart = [];
-  updateCartBadge();
-  renderCart();
+  cart = []; updateCartBadge(); renderCart();
 }
 
 /* ---------- profile / orders / reviews ---------- */
@@ -712,10 +752,7 @@ function renderOrders(){
   const wrap = document.getElementById('ordersList');
   let orders = [];
   try { orders = JSON.parse(localStorage.getItem('milaisss_orders')||'[]'); } catch(e){ orders = []; }
-  if (orders.length === 0){
-    wrap.innerHTML = '<div class="empty-state">Заказов пока нет</div>';
-    return;
-  }
+  if (orders.length === 0){ wrap.innerHTML = `<div class="empty-state">${t('noOrders')}</div>`; return; }
   wrap.innerHTML = orders.map((order, oi) => `
     <div class="order-card">
       <div class="odate">${order.date}</div>
@@ -723,6 +760,9 @@ function renderOrders(){
         <div class="order-line"><span>${it.name} (${it.size}, ${it.colorName}) × ${it.qty}</span><span>${fmt(it.price*it.qty)}</span></div>
         <div class="review-btn" onclick="toggleReviewForm(${oi},${ii})">Оставить отзыв</div>
         <div class="review-form" id="rf-${oi}-${ii}">
+          <div class="stars" id="stars-${oi}-${ii}">
+            ${[1,2,3,4,5].map(n => `<span data-n="${n}" onclick="setStar(${oi},${ii},${n})">★</span>`).join('')}
+          </div>
           <textarea id="rt-${oi}-${ii}" placeholder="Расскажите о товаре..." rows="2"></textarea>
           <button onclick="submitReview(${oi},${ii})">Отправить</button>
         </div>
@@ -732,19 +772,25 @@ function renderOrders(){
   `).join('');
 }
 
-function toggleReviewForm(oi, ii){
-  document.getElementById(`rf-${oi}-${ii}`).classList.toggle('open');
+let reviewStars = {};
+function setStar(oi, ii, n){
+  reviewStars[`${oi}-${ii}`] = n;
+  document.querySelectorAll(`#stars-${oi}-${ii} span`).forEach(s => {
+    s.classList.toggle('on', Number(s.getAttribute('data-n')) <= n);
+  });
 }
+function toggleReviewForm(oi, ii){ document.getElementById(`rf-${oi}-${ii}`).classList.toggle('open'); }
 
 function submitReview(oi, ii){
   let orders = [];
   try { orders = JSON.parse(localStorage.getItem('milaisss_orders')||'[]'); } catch(e){ orders = []; }
   const item = orders[oi].items[ii];
   const text = document.getElementById(`rt-${oi}-${ii}`).value.trim();
+  const rating = reviewStars[`${oi}-${ii}`] || null;
   if (!text) return;
-  db.collection('reviews').add({
-    productId: item.productId, productName: item.name, text, approved: false, createdAt: Date.now()
-  }).then(() => {
+  const payload = { productId: item.productId, productName: item.name, text, approved: false, createdAt: Date.now() };
+  if (rating) payload.rating = rating;
+  db.collection('reviews').add(payload).then(() => {
     showToast('Спасибо! Отзыв отправлен на проверку');
     document.getElementById(`rf-${oi}-${ii}`).classList.remove('open');
   });
