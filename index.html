@@ -339,10 +339,10 @@ if (tg) { tg.ready(); tg.expand(); }
 const ADMIN_USERNAME = "isssroilov";
 
 const products = [
-  {emoji:"👟", name:"Nike Dunk Low Panda", sub:"Best collection", price:250000, colors:["#c0392b","#d8c9a3","#3a6b7a"], desc:"Культовая расцветка Dunk Low в чёрно-белом сочетании. Верх из натуральной и искусственной кожи."},
-  {emoji:"🥿", name:"Low Panda Multivers", sub:"Limited drop", price:310000, colors:["#e07a3f","#1a1a1a","#8a8479"], desc:"Смелая многоцветная модель с акцентными вставками, лёгкая подошва для города."},
-  {emoji:"👞", name:"Jordan 4 Fire Red", sub:"Retro", price:420000, colors:["#c0392b","#1a1a1a"], desc:"Ретро-силуэт с фирменной сеткой и амортизацией Air — для тех, кто ценит классику."},
-  {emoji:"🩴", name:"Air Force Oversized", sub:"Best seller", price:280000, colors:["#f4f1ec","#8a8479","#1a1a1a"], desc:"Массивная подошва и чистые линии — универсальная пара под любой образ."},
+  {emoji:"👟", name:"Nike Dunk Low Panda", sub:"Best collection", price:250000, colors:[{hex:"#c0392b",name:"Красный"},{hex:"#d8c9a3",name:"Бежевый"},{hex:"#3a6b7a",name:"Синий"}], desc:"Культовая расцветка Dunk Low в чёрно-белом сочетании. Верх из натуральной и искусственной кожи."},
+  {emoji:"🥿", name:"Low Panda Multivers", sub:"Limited drop", price:310000, colors:[{hex:"#e07a3f",name:"Оранжевый"},{hex:"#1a1a1a",name:"Чёрный"},{hex:"#8a8479",name:"Серый"}], desc:"Смелая многоцветная модель с акцентными вставками, лёгкая подошва для города."},
+  {emoji:"👞", name:"Jordan 4 Fire Red", sub:"Retro", price:420000, colors:[{hex:"#c0392b",name:"Красный"},{hex:"#1a1a1a",name:"Чёрный"}], desc:"Ретро-силуэт с фирменной сеткой и амортизацией Air — для тех, кто ценит классику."},
+  {emoji:"🩴", name:"Air Force Oversized", sub:"Best seller", price:280000, colors:[{hex:"#f4f1ec",name:"Белый"},{hex:"#8a8479",name:"Серый"},{hex:"#1a1a1a",name:"Чёрный"}], desc:"Массивная подошва и чистые линии — универсальная пара под любой образ."},
 ];
 
 function fmt(n){ return n.toLocaleString('ru-RU') + " сум"; }
@@ -402,7 +402,8 @@ function openProduct(i){
   currentProduct.colors.forEach((c, idx) => {
     const el = document.createElement('div');
     el.className = 'color-dot' + (idx===0 ? ' active' : '');
-    el.style.background = c;
+    el.style.background = c.hex;
+    el.title = c.name;
     el.onclick = () => { selectedColorIdx = idx; document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
     colorRow.appendChild(el);
   });
@@ -421,6 +422,7 @@ function addToCart(){
       price: currentProduct.price,
       size: selectedSize,
       colorIdx: selectedColorIdx,
+      colorName: currentProduct.colors[selectedColorIdx].name,
       qty: 1
     });
   }
@@ -455,7 +457,7 @@ function renderCart(){
         <div class="thumb">${item.emoji}</div>
         <div class="meta">
           <div class="name">${item.name}</div>
-          <div class="opts">Размер ${item.size} · ${item.qty} шт</div>
+          <div class="opts">Размер ${item.size} · ${item.colorName} · ${item.qty} шт</div>
           <div class="price">${fmt(item.price * item.qty)}</div>
         </div>
         <div class="remove" onclick="removeFromCart(${idx})">Убрать</div>
@@ -480,7 +482,7 @@ function checkout(){
   let text = "Здравствуйте! Хочу оформить заказ:\n\n";
   cart.forEach(item => {
     total += item.price * item.qty;
-    text += `• ${item.name} — размер ${item.size}, ${item.qty} шт — ${fmt(item.price * item.qty)}\n`;
+    text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт — ${fmt(item.price * item.qty)}\n`;
   });
   text += `\nИтого: ${fmt(total)}`;
 
