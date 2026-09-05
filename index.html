@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>milaisss — кроссовки</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#141414;
+    --stone:#f4f1ec;
+    --line:#e7e2d9;
+    --orange:#ff5a1f;
+    --orange-dark:#e14e17;
+    --muted:#8a8479;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--stone);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--bg);
+    position:relative;
+    overflow-x:hidden;
+    padding-bottom:84px;
+  }
+  .display{ font-family:'Space Grotesk',sans-serif; }
+
+  /* Top bar */
+  .topbar{
+    display:flex; align-items:center; gap:10px;
+    padding:18px 20px 8px;
+  }
+  .topbar .greet{ flex:1; }
+  .topbar .greet p{ font-size:12px; color:var(--muted); }
+  .topbar .greet h1{ font-family:'Space Grotesk'; font-size:20px; font-weight:700; }
+  .icon-btn{
+    width:38px; height:38px; border-radius:12px;
+    background:var(--stone); display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); cursor:pointer;
+  }
+
+  /* Search */
+  .search-row{ display:flex; gap:8px; padding:8px 20px 16px; }
+  .search-box{
+    flex:1; display:flex; align-items:center; gap:8px;
+    background:var(--stone); border:1px solid var(--line);
+    border-radius:14px; padding:11px 14px;
+  }
+  .search-box input{
+    border:none; background:transparent; outline:none;
+    font-size:14px; width:100%; font-family:'Inter';
+  }
+
+  /* Categories */
+  .cats{
+    display:flex; gap:8px; padding:0 20px 18px;
+    overflow-x:auto; scrollbar-width:none;
+  }
+  .cats::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex:0 0 auto; padding:9px 16px; border-radius:100px;
+    font-size:13px; font-weight:600; white-space:nowrap;
+    background:var(--stone); border:1px solid var(--line); color:var(--ink);
+    cursor:pointer;
+  }
+  .chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  /* Hero */
+  .hero{
+    margin:0 20px 22px; border-radius:20px;
+    background:linear-gradient(135deg,#1a1a1a 0%,#2b2b2b 100%);
+    color:#fff; padding:22px 20px; position:relative; overflow:hidden;
+    min-height:130px; display:flex; align-items:center;
+  }
+  .hero::after{
+    content:""; position:absolute; right:-30px; bottom:-40px;
+    width:160px; height:160px; border-radius:50%;
+    background:var(--orange); opacity:0.35; filter:blur(30px);
+  }
+  .hero-text{ position:relative; z-index:2; max-width:62%; }
+  .hero-text .tag{ font-size:11px; color:var(--orange); font-weight:700; letter-spacing:.02em; }
+  .hero-text h2{ font-family:'Space Grotesk'; font-size:19px; margin:6px 0 12px; line-height:1.25; }
+  .hero-btn{
+    background:var(--orange); color:#fff; border:none; padding:9px 16px;
+    border-radius:100px; font-size:12px; font-weight:700; cursor:pointer;
+  }
+
+  /* Section heading */
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding:0 20px; margin-bottom:12px;
+  }
+  .section-head h3{ font-family:'Space Grotesk'; font-size:17px; }
+  .section-head span{ font-size:12px; color:var(--muted); }
+
+  /* Product grid */
+  .grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px;
+    padding:0 20px 26px;
+  }
+  .card{
+    background:var(--bg); border:1px solid var(--line); border-radius:18px;
+    overflow:hidden; cursor:pointer; position:relative;
+  }
+  .card .imgwrap{
+    background:var(--stone); aspect-ratio:1/0.9;
+    display:flex; align-items:center; justify-content:center;
+    font-size:44px; position:relative;
+  }
+  .heart{
+    position:absolute; top:10px; right:10px; width:28px; height:28px;
+    border-radius:50%; background:rgba(255,255,255,.85);
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+  }
+  .card .info{ padding:10px 12px 14px; }
+  .card .name{ font-size:13px; font-weight:600; line-height:1.3; margin-bottom:2px; }
+  .card .sub{ font-size:11px; color:var(--muted); margin-bottom:8px; }
+  .card .price{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; }
+
+  /* Bottom nav */
+  .bottomnav{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:16px;
+    max-width:440px; width:calc(100% - 40px);
+    background:var(--ink); border-radius:100px;
+    display:flex; justify-content:space-around; padding:12px 10px;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+    z-index:50;
+  }
+  .navitem{
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:#8a8a8a; font-size:10px; cursor:pointer; position:relative;
+  }
+  .navitem.active{ color:#fff; }
+  .navitem .dot{
+    width:5px; height:5px; border-radius:50%; background:var(--orange);
+    position:absolute; top:-9px;
+  }
+  .cart-badge{
+    position:absolute; top:-6px; right:-8px; background:var(--orange); color:#fff;
+    font-size:9px; font-weight:700; width:15px; height:15px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* Product detail */
+  .detail{ display:none; }
+  .detail.active{ display:block; }
+  .home{ display:block; }
+  .home.hidden{ display:none; }
+
+  .detail-top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px;
+  }
+  .detail-img{
+    margin:0 20px; border-radius:22px; background:var(--stone);
+    aspect-ratio:1/0.85; display:flex; align-items:center; justify-content:center;
+    font-size:110px;
+  }
+  .dots{ display:flex; gap:6px; justify-content:center; margin:14px 0; }
+  .dots span{ width:6px; height:6px; border-radius:50%; background:var(--line); }
+  .dots span.on{ background:var(--ink); }
+
+  .detail-body{ padding:0 20px; }
+  .detail-body .rowtop{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .detail-body h2{ font-family:'Space Grotesk'; font-size:21px; line-height:1.3; }
+  .detail-body .p{ font-family:'Space Grotesk'; font-size:22px; font-weight:700; white-space:nowrap; }
+  .rating{ font-size:12px; color:var(--muted); margin-top:6px; }
+
+  .block-label{ font-size:12px; font-weight:700; margin:20px 0 10px; color:var(--muted); text-transform:none; }
+  .sizes{ display:flex; gap:8px; flex-wrap:wrap; }
+  .size-pill{
+    width:44px; height:40px; border-radius:12px; border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600;
+    cursor:pointer; background:var(--bg);
+  }
+  .size-pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .colors{ display:flex; gap:10px; }
+  .color-dot{ width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; position:relative; }
+  .color-dot.active{ border-color:var(--ink); }
+
+  .desc{ font-size:13px; line-height:1.6; color:#555; margin-top:6px; }
+
+  .buybar{
+    display:flex; gap:10px; padding:18px 20px 28px;
+  }
+  .qty-btn{
+    width:52px; height:52px; border-radius:16px; border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:20px; background:var(--bg);
+  }
+  .add-btn{
+    flex:1; background:var(--orange); color:#fff; border:none; border-radius:16px;
+    font-weight:700; font-size:15px; cursor:pointer;
+  }
+
+  .back-circle{
+    width:38px; height:38px; border-radius:50%; background:var(--stone);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== HOME ===== -->
+  <div class="home" id="home">
+    <div class="topbar">
+      <div class="greet">
+        <p>Привет 👋</p>
+        <h1 class="display">milaisss</h1>
+      </div>
+      <div class="icon-btn">🔔</div>
+    </div>
+
+    <div class="search-row">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" placeholder="Найти кроссовки">
+      </div>
+      <div class="icon-btn">⚙️</div>
+    </div>
+
+    <div class="cats">
+      <div class="chip active">Тренды</div>
+      <div class="chip">Oversize</div>
+      <div class="chip">До 500 000</div>
+      <div class="chip">Минимализм</div>
+      <div class="chip">Лимитки</div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-text">
+        <div class="tag">НОВАЯ КОЛЛЕКЦИЯ</div>
+        <h2 class="display">Скидка 20% на первый дроп</h2>
+        <button class="hero-btn">Смотреть</button>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h3 class="display">Популярное 🔥</h3>
+      <span>Все</span>
+    </div>
+
+    <div class="grid" id="productGrid"></div>
+  </div>
+
+  <!-- ===== PRODUCT DETAIL ===== -->
+  <div class="detail" id="detail">
+    <div class="detail-top">
+      <div class="back-circle" onclick="goHome()">←</div>
+      <div class="back-circle">♡</div>
+    </div>
+    <div class="detail-img" id="detailImg"></div>
+    <div class="dots"><span class="on"></span><span></span><span></span></div>
+
+    <div class="detail-body">
+      <div class="rowtop">
+        <div>
+          <h2 class="display" id="detailName"></h2>
+          <div class="rating">★ 4.8 · 1 200+ отзывов</div>
+        </div>
+        <div class="p" id="detailPrice"></div>
+      </div>
+
+      <div class="block-label">Размер</div>
+      <div class="sizes" id="sizeRow"></div>
+
+      <div class="block-label">Цвет</div>
+      <div class="colors" id="colorRow"></div>
+
+      <div class="block-label">Описание</div>
+      <p class="desc" id="detailDesc"></p>
+    </div>
+
+    <div class="buybar">
+      <div class="qty-btn">+</div>
+      <button class="add-btn" onclick="addToCart()">Добавить в корзину</button>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <div class="bottomnav">
+    <div class="navitem active" onclick="goHome()"><span>🏠</span><span>Главная</span></div>
+    <div class="navitem"><span>♡</span><span>Избранное</span></div>
+    <div class="navitem" style="position:relative;">
+      <span>🛍️</span><span>Корзина</span>
+      <span class="cart-badge" id="cartCount">0</span>
+    </div>
+    <div class="navitem"><span>👤</span><span>Профиль</span></div>
+  </div>
+
+</div>
+
+<script>
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if (tg) { tg.ready(); tg.expand(); }
+
+const products = [
+  {emoji:"👟", name:"Nike Dunk Low Panda", sub:"Best collection", price:"250 000 сум", colors:["#c0392b","#d8c9a3","#3a6b7a"], desc:"Культовая расцветка Dunk Low в чёрно-белом сочетании. Верх из натуральной и искусственной кожи."},
+  {emoji:"🥿", name:"Low Panda Multivers", sub:"Limited drop", price:"310 000 сум", colors:["#e07a3f","#1a1a1a","#8a8479"], desc:"Смелая многоцветная модель с акцентными вставками, лёгкая подошва для города."},
+  {emoji:"👞", name:"Jordan 4 Fire Red", sub:"Retro", price:"420 000 сум", colors:["#c0392b","#1a1a1a"], desc:"Ретро-силуэт с фирменной сеткой и амортизацией Air — для тех, кто ценит классику."},
+  {emoji:"🩴", name:"Air Force Oversized", sub:"Best seller", price:"280 000 сум", colors:["#f4f1ec","#8a8479","#1a1a1a"], desc:"Массивная подошва и чистые линии — универсальная пара под любой образ."},
+];
+
+const grid = document.getElementById('productGrid');
+products.forEach((p, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.onclick = () => openProduct(i);
+  card.innerHTML = `
+    <div class="imgwrap">${p.emoji}<div class="heart">♡</div></div>
+    <div class="info">
+      <div class="name">${p.name}</div>
+      <div class="sub">${p.sub}</div>
+      <div class="price">${p.price}</div>
+    </div>`;
+  grid.appendChild(card);
+});
+
+let cartCount = 0;
+
+function openProduct(i){
+  const p = products[i];
+  document.getElementById('detailImg').textContent = p.emoji;
+  document.getElementById('detailName').textContent = p.name;
+  document.getElementById('detailPrice').textContent = p.price;
+  document.getElementById('detailDesc').textContent = p.desc;
+
+  const sizeRow = document.getElementById('sizeRow');
+  sizeRow.innerHTML = '';
+  ["38","39","40","41","42","43"].forEach((s, idx) => {
+    const el = document.createElement('div');
+    el.className = 'size-pill' + (idx===1 ? ' active' : '');
+    el.textContent = s;
+    el.onclick = () => { document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
+    sizeRow.appendChild(el);
+  });
+
+  const colorRow = document.getElementById('colorRow');
+  colorRow.innerHTML = '';
+  p.colors.forEach((c, idx) => {
+    const el = document.createElement('div');
+    el.className = 'color-dot' + (idx===0 ? ' active' : '');
+    el.style.background = c;
+    el.onclick = () => { document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
+    colorRow.appendChild(el);
+  });
+
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('detail').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome(){
+  document.getElementById('detail').classList.remove('active');
+  document.getElementById('home').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+function addToCart(){
+  cartCount++;
+  document.getElementById('cartCount').textContent = cartCount;
+  if (tg) tg.HapticFeedback.notificationOccurred('success');
+}
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.onclick = () => {
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+  };
+});
+</script>
+</body>
+</html>
