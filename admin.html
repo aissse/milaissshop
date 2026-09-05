@@ -73,6 +73,9 @@
   .order-admin-card .oline{ font-size:12px; margin-bottom:3px; }
   .order-admin-card .ototal{ font-weight:700; font-size:13px; margin:6px 0; }
   .status-select{ width:100%; margin-top:6px; }
+  .chat-bubble{ padding:8px 12px; border-radius:12px; max-width:80%; font-size:13px; margin-bottom:8px; }
+  .chat-bubble.admin{ align-self:flex-end; background:var(--maroon); color:#fff; margin-left:auto; }
+  .chat-bubble.customer{ align-self:flex-start; background:#fdf6f7; color:var(--maroon-dark); }
   .cat-tag{ display:inline-flex; align-items:center; gap:6px; background:var(--pink); border-radius:100px; padding:6px 12px; font-size:12px; font-weight:600; margin:0 6px 6px 0; }
   .cat-tag .x{ cursor:pointer; color:#a83232; font-weight:700; }
 </style>
@@ -93,6 +96,7 @@
     <div class="tab" data-tab="reviews" onclick="switchTab('reviews')">Отзывы</div>
     <div class="tab" data-tab="stock" onclick="switchTab('stock')">Склад</div>
     <div class="tab" data-tab="delivery" onclick="switchTab('delivery')">Доставка</div>
+    <div class="tab" data-tab="support" onclick="switchTab('support')">Чат с клиентами</div>
     <div class="tab" data-tab="finance" onclick="switchTab('finance')">Финансы</div>
     <div class="tab" data-tab="design" onclick="switchTab('design')">Оформление</div>
   </div>
@@ -162,6 +166,14 @@
         <h1>Заказы и доставка</h1>
         <p class="hint" style="margin-top:0;">Меняй статус — покупатель сразу увидит его в своём профиле.</p>
         <div id="ordersAdminList"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-support">
+      <div class="card">
+        <h1>Чат с клиентами</h1>
+        <p class="hint" style="margin-top:0;">Здесь появляются покупатели, которые писали в поддержку.</p>
+        <div id="supportTabContent"></div>
       </div>
     </div>
 
@@ -236,6 +248,7 @@ function checkPassword(){
     loadSettings();
     loadReviews();
     loadOrders();
+    loadSupport();
     addColorRow();
   } else {
     alert('Неверный пароль');
@@ -479,6 +492,67 @@ function loadOrders(){
       wrap.appendChild(card);
     });
   });
+}
+
+let supportData = {};
+let selectedSupportCustomer = null;
+
+function loadSupport(){
+  db.collection('support').onSnapshot(snap => {
+    supportData = {};
+    snap.forEach(doc => {
+      const m = { id: doc.id, ...doc.data() };
+      if (!supportData[m.customerId]) supportData[m.customerId] = { name: m.customerName, messages: [] };
+      supportData[m.customerId].messages.push(m);
+      supportData[m.customerId].name = m.customerName || supportData[m.customerId].name;
+    });
+    Object.values(supportData).forEach(c => c.messages.sort((a,b) => (a.createdAt||0)-(b.createdAt||0)));
+    renderSupportTab();
+  });
+}
+
+function renderSupportTab(){
+  const wrap = document.getElementById('supportTabContent');
+  if (selectedSupportCustomer && supportData[selectedSupportCustomer]){
+    const c = supportData[selectedSupportCustomer];
+    wrap.innerHTML = `
+      <div style="margin-bottom:10px; cursor:pointer; color:var(--maroon); font-weight:700;" onclick="selectedSupportCustomer=null; renderSupportTab();">← Все чаты</div>
+      <div style="font-weight:700; margin-bottom:10px;">${c.name}</div>
+      <div style="max-height:360px; overflow-y:auto; display:flex; flex-direction:column; margin-bottom:10px;">
+        ${c.messages.map(m => `<div class="chat-bubble ${m.sender}">${m.text}</div>`).join('')}
+      </div>
+      <input type="text" id="supportReplyInput" placeholder="Ответ клиенту...">
+      <button class="btn" onclick="sendSupportReply()">Отправить</button>
+    `;
+  } else {
+    const list = Object.entries(supportData).sort((a,b) => {
+      const at = a[1].messages[a[1].messages.length-1]?.createdAt || 0;
+      const bt = b[1].messages[b[1].messages.length-1]?.createdAt || 0;
+      return bt - at;
+    });
+    if (list.length === 0){ wrap.innerHTML = '<p class="hint">Сообщений пока нет</p>'; return; }
+    wrap.innerHTML = list.map(([cid,c]) => {
+      const last = c.messages[c.messages.length-1];
+      return `<div class="prod-row" style="cursor:pointer;" onclick="openSupportChat('${cid}')">
+        <div class="ph">💬</div>
+        <div class="meta"><div class="name">${c.name}</div><div class="info">${(last.text||'').slice(0,40)}</div></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function openSupportChat(cid){ selectedSupportCustomer = cid; renderSupportTab(); }
+
+function sendSupportReply(){
+  const input = document.getElementById('supportReplyInput');
+  const text = input.value.trim();
+  if (!text || !selectedSupportCustomer) return;
+  db.collection('support').add({
+    customerId: selectedSupportCustomer,
+    customerName: supportData[selectedSupportCustomer].name,
+    sender: 'admin', text, createdAt: Date.now()
+  });
+  input.value = '';
 }
 
 function loadGoogleFont(fontName){
