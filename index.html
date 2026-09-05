@@ -294,7 +294,7 @@
       <div class="block-label">Размер</div>
       <div class="sizes" id="sizeRow"></div>
 
-      <div class="block-label">Цвет</div>
+      <div class="block-label">Цвет: <span id="colorLabel" style="color:var(--ink); font-weight:700;"></span></div>
       <div class="colors" id="colorRow"></div>
 
       <div class="block-label">Описание</div>
@@ -399,12 +399,18 @@ function openProduct(i){
 
   const colorRow = document.getElementById('colorRow');
   colorRow.innerHTML = '';
+  document.getElementById('colorLabel').textContent = currentProduct.colors[0].name;
   currentProduct.colors.forEach((c, idx) => {
     const el = document.createElement('div');
     el.className = 'color-dot' + (idx===0 ? ' active' : '');
     el.style.background = c.hex;
     el.title = c.name;
-    el.onclick = () => { selectedColorIdx = idx; document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
+    el.onclick = () => {
+      selectedColorIdx = idx;
+      document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('colorLabel').textContent = c.name;
+    };
     colorRow.appendChild(el);
   });
 
