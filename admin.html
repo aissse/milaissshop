@@ -188,7 +188,12 @@
     </div>
 
     <div class="tab-panel" id="tab-finance">
-      <div class="card"><div class="placeholder-box">Раздел "Финансы" скоро появится</div></div>
+      <div class="card">
+        <h1>Карты для приёма оплаты</h1>
+        <label>Реквизиты для перевода (карта, имя получателя)</label>
+        <textarea id="f_paymentInfo" placeholder="Например: Uzcard 8600 1234 5678 9012, Aziz Isroilov" rows="3" onchange="saveSetting('paymentCardInfo', this.value)"></textarea>
+        <div class="hint">Покупатель увидит это в корзине перед оформлением заказа. После перевода заказ получает статус "Ожидает оплаты" — как только увидишь поступление, смени статус в разделе "Доставка".</div>
+      </div>
     </div>
 
     <div class="tab-panel" id="tab-design">
@@ -229,6 +234,16 @@
         </div>
         <button class="btn secondary" onclick="addCategory()">+ Добавить категорию</button>
         <div class="hint">Эти категории отображаются кнопками-фильтрами на главной странице магазина.</div>
+      </div>
+
+      <div class="card">
+        <h1>Пункты БТС</h1>
+        <div id="btsTags"></div>
+        <div class="row" style="margin-top:10px;">
+          <input type="text" id="newBtsInput" placeholder="Адрес пункта БТС">
+        </div>
+        <button class="btn secondary" onclick="addBtsBranch()">+ Добавить пункт</button>
+        <div class="hint">Покупатель выберет ближайший пункт из этого списка при оформлении заказа.</div>
       </div>
     </div>
 
@@ -443,6 +458,9 @@ function loadSettings(){
     categories = data.categories || ["Тренды","Oversize","Минимализм","Лимитки"];
     renderCategoryTags();
     renderCategorySelect();
+    if (data.paymentCardInfo) document.getElementById('f_paymentInfo').value = data.paymentCardInfo;
+    btsBranches = data.btsBranches || [];
+    renderBtsTags();
   });
 }
 
@@ -476,7 +494,25 @@ function removeCategory(i){
   saveSetting('categories', categories);
 }
 
-const STATUS_OPTIONS = ['Собирается','Отправляется','В пути','Доставлено'];
+let btsBranches = [];
+function renderBtsTags(){
+  const wrap = document.getElementById('btsTags');
+  wrap.innerHTML = btsBranches.map((b,i) => `<span class="cat-tag">${b} <span class="x" onclick="removeBtsBranch(${i})">✕</span></span>`).join('');
+}
+function addBtsBranch(){
+  const input = document.getElementById('newBtsInput');
+  const val = input.value.trim();
+  if (!val || btsBranches.includes(val)) return;
+  btsBranches.push(val);
+  saveSetting('btsBranches', btsBranches);
+  input.value = '';
+}
+function removeBtsBranch(i){
+  btsBranches.splice(i, 1);
+  saveSetting('btsBranches', btsBranches);
+}
+
+const STATUS_OPTIONS = ['Ожидает оплаты','Собирается','Отправляется','В пути','Доставлено'];
 let allOrders = [];
 
 function loadOrders(){
