@@ -321,8 +321,8 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
-const ADMIN_CHAT_ID = "6620851909";
+const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
+const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -448,6 +448,8 @@ function closeLightbox(){ document.getElementById('lightbox').classList.remove('
 /* ---------- categories (dynamic from settings) ---------- */
 let CATEGORIES = ["Тренды","Oversize","Минимализм","Лимитки"];
 let activeCategory = "Все";
+let paymentCardInfo = '';
+let btsBranches = [];
 
 function renderCategoryChips(){
   const row = document.getElementById('catRow');
@@ -578,6 +580,8 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
     link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(data.fontFamily).replace(/%20/g,'+')}:wght@600;700&display=swap`;
   }
   if (data.categories && data.categories.length){ CATEGORIES = data.categories; renderCategoryChips(); }
+  paymentCardInfo = data.paymentCardInfo || '';
+  btsBranches = data.btsBranches || [];
 });
 
 /* ---------- screens ---------- */
@@ -801,6 +805,11 @@ function renderCart(){
         <div class="remove" onclick="removeFromCart(${idx})">Убрать</div>
       </div>`;
   }).join('');
+
+  const branchOptions = btsBranches.length
+    ? `<option value="">— выберите пункт —</option>` + btsBranches.map(b => `<option value="${b}">${b}</option>`).join('')
+    : `<option value="">Пункты пока не добавлены</option>`;
+
   content.innerHTML = `
     <div class="cart-list">${itemsHtml}</div>
     <div class="cart-summary">
@@ -808,6 +817,22 @@ function renderCart(){
       <div class="sum-row"><span>${t('deliveryLabel')}</span><span>По согласованию</span></div>
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
+
+    ${paymentCardInfo ? `
+    <div class="hint" style="padding:0 20px; margin-bottom:14px;">
+      <div style="background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:14px; color:var(--ink); font-size:13px; line-height:1.6;">
+        💳 <strong>Оплата переводом</strong><br>${paymentCardInfo}<br><br>
+        После перевода оформите заказ — продавец подтвердит поступление и начнёт сборку.
+      </div>
+    </div>` : ''}
+
+    <div style="padding:0 20px 14px;">
+      <label class="block-label" style="margin:0 0 8px;">Ближайший пункт БТС</label>
+      <select id="btsSelect" style="width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:13px; background:var(--bg);">
+        ${branchOptions}
+      </select>
+    </div>
+
     <button class="checkout-btn" onclick="checkout()">${t('checkoutBtn')}</button>
     <div class="hint">Продавец получит детали заказа автоматически. Вопросы — через поддержку в профиле.</div>
   `;
@@ -820,17 +845,21 @@ function checkout(){
   const orderItems = [];
   cart.forEach(item => {
     total += item.price * item.qty;
-    text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт — ${fmt(item.price * item.qty)}\n`;
+    text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
     orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price });
   });
   text += `\nИтого: ${fmt(total)}`;
+
+  const btsSelect = document.getElementById('btsSelect');
+  const btsBranch = btsSelect ? btsSelect.value : '';
+  if (btsBranch) text += `\n\n📍 Пункт БТС: ${btsBranch}`;
 
   const customerId = getCustomerId();
   const customerName = getCustomerName();
 
   db.collection('orders').add({
-    customerId, customerName, items: orderItems, total,
-    status: 'Собирается', createdAt: Date.now()
+    customerId, customerName, items: orderItems, total, btsBranch: btsBranch || '',
+    status: 'Ожидает оплаты', createdAt: Date.now()
   });
 
   let notifyText = `🛍️ Новый заказ от ${customerName}\n\n` + text;
@@ -841,7 +870,7 @@ function checkout(){
 }
 
 /* ---------- profile / orders / reviews ---------- */
-const STATUS_LABELS = { 'Собирается':'Собирается', 'Отправляется':'Отправляется', 'В пути':'В пути', 'Доставлено':'Доставлено' };
+const STATUS_LABELS = { 'Ожидает оплаты':'Ожидает оплаты', 'Собирается':'Собирается', 'Отправляется':'Отправляется', 'В пути':'В пути', 'Доставлено':'Доставлено' };
 
 function renderOrders(){
   const wrap = document.getElementById('ordersList');
@@ -854,6 +883,7 @@ function renderOrders(){
     wrap.innerHTML = orders.map((order) => `
       <div class="order-card">
         <div class="odate">${new Date(order.createdAt).toLocaleDateString('ru-RU')} · <strong>${STATUS_LABELS[order.status] || order.status}</strong></div>
+        ${order.btsBranch ? `<div class="odate">📍 ${order.btsBranch}</div>` : ''}
         ${order.items.map((it, ii) => `
           <div class="order-line"><span>${it.name} (${it.size}, ${it.colorName}) × ${it.qty}</span><span>${fmt(it.price*it.qty)}</span></div>
           ${order.status === 'Доставлено' ? `
