@@ -293,6 +293,32 @@ if (tg) { tg.ready(); tg.expand(); }
 
 const ADMIN_USERNAME = "isssroilov";
 
+// Настройки бота, который присылает тебе уведомления о заказах.
+// Как получить — см. инструкцию после обновления файла.
+const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
+const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
+
+function getCustomerId(){
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
+  let gid = localStorage.getItem('milaisss_guest_id');
+  if (!gid){ gid = 'guest_' + Date.now(); localStorage.setItem('milaisss_guest_id', gid); }
+  return gid;
+}
+function getCustomerName(){
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user){
+    const u = tg.initDataUnsafe.user;
+    return (u.first_name||'') + (u.last_name ? (' '+u.last_name) : '') + (u.username ? (' (@'+u.username+')') : '');
+  }
+  return 'Гость (браузер)';
+}
+function notifyAdmin(text){
+  if (!NOTIFY_BOT_TOKEN || NOTIFY_BOT_TOKEN.startsWith('ВСТАВЬ')) return;
+  fetch(`https://api.telegram.org/bot${NOTIFY_BOT_TOKEN}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text })
+  }).catch(() => {});
+}
+
 const firebaseConfig = {
   apiKey: "AIzaSyAPg6nCQ4I9vTKX5AXlmHM5gwYAsrNvW40",
   authDomain: "milaisss.firebaseapp.com",
@@ -519,7 +545,12 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   if (data.navColor) document.getElementById('bottomNav').style.background = data.navColor;
   if (data.bgColor) document.documentElement.style.setProperty('--stone', data.bgColor);
   if (data.colorBorder) document.documentElement.style.setProperty('--colordot-border', data.colorBorder);
-  if (data.fontFamily) document.documentElement.style.setProperty('--logofont', `'${data.fontFamily}',serif`);
+  if (data.fontFamily){
+    document.documentElement.style.setProperty('--logofont', `'${data.fontFamily}',serif`);
+    let link = document.getElementById('dynamicFontLink');
+    if (!link){ link = document.createElement('link'); link.id = 'dynamicFontLink'; link.rel = 'stylesheet'; document.head.appendChild(link); }
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(data.fontFamily).replace(/%20/g,'+')}:wght@600;700&display=swap`;
+  }
   if (data.categories && data.categories.length){ CATEGORIES = data.categories; renderCategoryChips(); }
 });
 
@@ -736,10 +767,16 @@ function checkout(){
   });
   text += `\nИтого: ${fmt(total)}`;
 
-  let orders = [];
-  try { orders = JSON.parse(localStorage.getItem('milaisss_orders')||'[]'); } catch(e){ orders = []; }
-  orders.unshift({ id: Date.now(), date: new Date().toLocaleDateString('ru-RU'), items: orderItems, total });
-  localStorage.setItem('milaisss_orders', JSON.stringify(orders));
+  const customerId = getCustomerId();
+  const customerName = getCustomerName();
+
+  db.collection('orders').add({
+    customerId, customerName, items: orderItems, total,
+    status: 'Собирается', createdAt: Date.now()
+  });
+
+  let notifyText = `🛍️ Новый заказ от ${customerName}\n\n` + text;
+  notifyAdmin(notifyText);
 
   const url = `https://t.me/${ADMIN_USERNAME}?text=${encodeURIComponent(text)}`;
   if (tg && tg.openTelegramLink){ tg.openTelegramLink(url); } else { window.open(url, '_blank'); }
@@ -748,28 +785,35 @@ function checkout(){
 }
 
 /* ---------- profile / orders / reviews ---------- */
+const STATUS_LABELS = { 'Собирается':'Собирается', 'Отправляется':'Отправляется', 'В пути':'В пути', 'Доставлено':'Доставлено' };
+
 function renderOrders(){
   const wrap = document.getElementById('ordersList');
-  let orders = [];
-  try { orders = JSON.parse(localStorage.getItem('milaisss_orders')||'[]'); } catch(e){ orders = []; }
-  if (orders.length === 0){ wrap.innerHTML = `<div class="empty-state">${t('noOrders')}</div>`; return; }
-  wrap.innerHTML = orders.map((order, oi) => `
-    <div class="order-card">
-      <div class="odate">${order.date}</div>
-      ${order.items.map((it, ii) => `
-        <div class="order-line"><span>${it.name} (${it.size}, ${it.colorName}) × ${it.qty}</span><span>${fmt(it.price*it.qty)}</span></div>
-        <div class="review-btn" onclick="toggleReviewForm(${oi},${ii})">Оставить отзыв</div>
-        <div class="review-form" id="rf-${oi}-${ii}">
-          <div class="stars" id="stars-${oi}-${ii}">
-            ${[1,2,3,4,5].map(n => `<span data-n="${n}" onclick="setStar(${oi},${ii},${n})">★</span>`).join('')}
-          </div>
-          <textarea id="rt-${oi}-${ii}" placeholder="Расскажите о товаре..." rows="2"></textarea>
-          <button onclick="submitReview(${oi},${ii})">Отправить</button>
-        </div>
-      `).join('')}
-      <div class="order-total">Итого: ${fmt(order.total)}</div>
-    </div>
-  `).join('');
+  const customerId = getCustomerId();
+  db.collection('orders').where('customerId','==',customerId).onSnapshot(snap => {
+    if (snap.empty){ wrap.innerHTML = `<div class="empty-state">${t('noOrders')}</div>`; return; }
+    const orders = [];
+    snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+    orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+    wrap.innerHTML = orders.map((order) => `
+      <div class="order-card">
+        <div class="odate">${new Date(order.createdAt).toLocaleDateString('ru-RU')} · <strong>${STATUS_LABELS[order.status] || order.status}</strong></div>
+        ${order.items.map((it, ii) => `
+          <div class="order-line"><span>${it.name} (${it.size}, ${it.colorName}) × ${it.qty}</span><span>${fmt(it.price*it.qty)}</span></div>
+          ${order.status === 'Доставлено' ? `
+            <div class="review-btn" onclick="toggleReviewForm('${order.id}',${ii})">Оставить отзыв</div>
+            <div class="review-form" id="rf-${order.id}-${ii}">
+              <div class="stars" id="stars-${order.id}-${ii}">
+                ${[1,2,3,4,5].map(n => `<span data-n="${n}" onclick="setStar('${order.id}',${ii},${n})">★</span>`).join('')}
+              </div>
+              <textarea id="rt-${order.id}-${ii}" placeholder="Расскажите о товаре..." rows="2"></textarea>
+              <button onclick="submitReview('${order.id}',${ii},'${it.productId}','${(it.name||'').replace(/'/g,"")}')">Отправить</button>
+            </div>` : ''}
+        `).join('')}
+        <div class="order-total">Итого: ${fmt(order.total)}</div>
+      </div>
+    `).join('');
+  });
 }
 
 let reviewStars = {};
@@ -781,18 +825,15 @@ function setStar(oi, ii, n){
 }
 function toggleReviewForm(oi, ii){ document.getElementById(`rf-${oi}-${ii}`).classList.toggle('open'); }
 
-function submitReview(oi, ii){
-  let orders = [];
-  try { orders = JSON.parse(localStorage.getItem('milaisss_orders')||'[]'); } catch(e){ orders = []; }
-  const item = orders[oi].items[ii];
-  const text = document.getElementById(`rt-${oi}-${ii}`).value.trim();
-  const rating = reviewStars[`${oi}-${ii}`] || null;
+function submitReview(orderId, ii, productId, productName){
+  const text = document.getElementById(`rt-${orderId}-${ii}`).value.trim();
+  const rating = reviewStars[`${orderId}-${ii}`] || null;
   if (!text) return;
-  const payload = { productId: item.productId, productName: item.name, text, approved: false, createdAt: Date.now() };
+  const payload = { productId, productName, text, approved: false, createdAt: Date.now() };
   if (rating) payload.rating = rating;
   db.collection('reviews').add(payload).then(() => {
     showToast('Спасибо! Отзыв отправлен на проверку');
-    document.getElementById(`rf-${oi}-${ii}`).classList.remove('open');
+    document.getElementById(`rf-${orderId}-${ii}`).classList.remove('open');
   });
 }
 
