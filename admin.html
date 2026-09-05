@@ -6,127 +6,191 @@
 <title>milaisss — админка</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{ --bg:#ffffff; --ink:#141414; --stone:#f4f1ec; --line:#e2ddd3; --orange:#ff5a1f; --muted:#8a8479; }
+  :root{ --bg:#ffffff; --pink:#fbe4e8; --maroon:#5c1a24; --maroon-dark:#42121a; --line:#ecd3d7; --muted:#9c7b80; }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{ font-family:'Inter',sans-serif; background:var(--stone); color:var(--ink); padding-bottom:60px; }
-  .wrap{ max-width:560px; margin:0 auto; padding:20px; }
-  h1{ font-family:'Space Grotesk'; font-size:22px; margin-bottom:4px; }
-  .sub{ color:var(--muted); font-size:13px; margin-bottom:20px; }
+  body{ font-family:'Inter',sans-serif; background:var(--pink); color:var(--maroon-dark); padding-bottom:60px; }
+  .logo{ font-family:'Cormorant Garamond',serif; font-weight:700; }
+  .wrap{ max-width:560px; margin:0 auto; padding:0 20px 20px; }
+  h1{ font-family:'Cormorant Garamond'; font-size:20px; margin-bottom:4px; }
+  .sub{ color:var(--muted); font-size:13px; margin-bottom:16px; }
   .card{ background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:16px; }
   label{ font-size:12px; font-weight:700; color:var(--muted); display:block; margin:12px 0 5px; }
   label:first-child{ margin-top:0; }
-  input[type=text], input[type=number], input[type=url], textarea{
+  input[type=text], input[type=number], input[type=url], textarea, select{
     width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px;
-    font-family:'Inter'; font-size:14px; background:var(--stone); outline:none;
+    font-family:'Inter'; font-size:14px; background:#fdf6f7; outline:none;
   }
   textarea{ resize:vertical; min-height:60px; }
   input[type=color]{ width:44px; height:36px; border:none; border-radius:8px; padding:0; }
   .row{ display:flex; gap:10px; }
   .row > div{ flex:1; }
-  .btn{ background:var(--orange); color:#fff; border:none; border-radius:12px; padding:12px 16px; font-weight:700; font-size:14px; cursor:pointer; margin-top:14px; width:100%; }
-  .btn.secondary{ background:var(--ink); }
-  .btn.danger{ background:#c0392b; }
+  .btn{ background:var(--maroon); color:#fff; border:none; border-radius:12px; padding:12px 16px; font-weight:700; font-size:14px; cursor:pointer; margin-top:14px; width:100%; }
+  .btn.secondary{ background:#2b2b2b; }
+  .btn.danger{ background:#a83232; }
   .prod-row{ display:flex; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
   .prod-row:last-child{ border-bottom:none; }
-  .prod-row img, .prod-row .ph{ width:48px; height:48px; border-radius:10px; object-fit:cover; background:var(--stone); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+  .prod-row img, .prod-row .ph{ width:48px; height:48px; border-radius:10px; object-fit:cover; background:var(--pink); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
   .prod-row .meta{ flex:1; min-width:0; }
   .prod-row .meta .name{ font-size:13px; font-weight:600; }
   .prod-row .meta .info{ font-size:11px; color:var(--muted); }
   .prod-row .acts{ display:flex; gap:8px; }
   .prod-row .acts span{ font-size:12px; cursor:pointer; color:var(--muted); font-weight:600; }
-  .prod-row .acts .edit{ color:var(--ink); }
-  .prod-row .acts .del{ color:#c0392b; }
-  .lock-screen{ max-width:340px; margin:100px auto; text-align:center; }
-  .lock-screen input{ margin-top:16px; text-align:center; }
+  .prod-row .acts .edit{ color:var(--maroon); }
+  .prod-row .acts .del{ color:#a83232; }
+  .lock-screen{ max-width:340px; margin:0 auto; text-align:center; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+  .lock-screen .logo{ font-size:44px; margin-bottom:6px; }
+  .lock-screen .sub{ margin-bottom:0; }
+  .lock-screen input{ margin-top:20px; text-align:center; }
+  .lock-screen .btn{ background:var(--maroon); }
   .hint{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5; }
   .color-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
   .color-row input[type=text]{ flex:1; }
   .color-row input[type=color]{ flex-shrink:0; }
-  .color-row .rm{ flex-shrink:0; color:#c0392b; font-size:18px; cursor:pointer; padding:0 4px; font-weight:700; }
+  .color-row .rm{ flex-shrink:0; color:#a83232; font-size:18px; cursor:pointer; padding:0 4px; font-weight:700; }
   .review-row{ border-bottom:1px solid var(--line); padding:10px 0; }
   .review-row:last-child{ border-bottom:none; }
   .review-row .rtext{ font-size:13px; margin-bottom:6px; line-height:1.5; }
   .review-row .rmeta{ font-size:11px; color:var(--muted); margin-bottom:6px; }
   .review-row label{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; margin:0; }
-  .review-row .rdel{ float:right; color:#c0392b; font-size:12px; cursor:pointer; font-weight:600; }
+  .review-row .rdel{ float:right; color:#a83232; font-size:12px; cursor:pointer; font-weight:600; }
+
+  .topbar{ display:flex; align-items:center; justify-content:center; padding:20px 0 10px; position:relative; }
+  .topbar .logo{ font-size:26px; }
+  .tabs{ display:flex; gap:8px; overflow-x:auto; padding:0 20px 16px; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar{ display:none; }
+  .tab{ flex:0 0 auto; padding:8px 14px; border-radius:100px; font-size:12px; font-weight:700; background:#fff; border:1px solid var(--line); color:var(--maroon-dark); cursor:pointer; white-space:nowrap; }
+  .tab.active{ background:var(--maroon); color:#fff; border-color:var(--maroon); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+  .placeholder-box{ text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
+  .stock-item{ display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-bottom:1px dashed var(--line); }
+  .stock-item.zero{ color:#a83232; font-weight:700; }
+  .cat-tag{ display:inline-flex; align-items:center; gap:6px; background:var(--pink); border-radius:100px; padding:6px 12px; font-size:12px; font-weight:600; margin:0 6px 6px 0; }
+  .cat-tag .x{ cursor:pointer; color:#a83232; font-weight:700; }
 </style>
 </head>
 <body>
 
 <div id="lockScreen" class="lock-screen">
-  <h1 class="display" style="font-family:'Space Grotesk'">Админка milaisss</h1>
+  <div class="logo">milaisss</div>
   <p class="sub">Введите пароль владельца</p>
   <input type="text" id="pwInput" placeholder="Пароль">
   <button class="btn" onclick="checkPassword()">Войти</button>
 </div>
 
-<div class="wrap" id="adminWrap" style="display:none;">
-  <h1>Товары</h1>
-  <p class="sub">Добавляй, редактируй и убирай товары — изменения сразу видны в магазине.</p>
+<div id="adminWrap" style="display:none;">
+  <div class="topbar"><div class="logo">milaisss</div></div>
+  <div class="tabs">
+    <div class="tab active" data-tab="products" onclick="switchTab('products')">Товары</div>
+    <div class="tab" data-tab="reviews" onclick="switchTab('reviews')">Отзывы</div>
+    <div class="tab" data-tab="stock" onclick="switchTab('stock')">Склад</div>
+    <div class="tab" data-tab="delivery" onclick="switchTab('delivery')">Доставка</div>
+    <div class="tab" data-tab="finance" onclick="switchTab('finance')">Финансы</div>
+    <div class="tab" data-tab="design" onclick="switchTab('design')">Оформление</div>
+  </div>
 
-  <div class="card">
-    <label>Название товара</label>
-    <input type="text" id="f_name" placeholder="Nike Dunk Low Panda">
+  <div class="wrap">
 
-    <label>Подзаголовок (необязательно)</label>
-    <input type="text" id="f_sub" placeholder="Best collection">
+    <div class="tab-panel active" id="tab-products">
+      <div class="card">
+        <label>Название товара</label>
+        <input type="text" id="f_name" placeholder="Nike Dunk Low Panda">
 
-    <label>Категория (для фильтров на сайте)</label>
-    <select id="f_category" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-family:'Inter'; font-size:14px; background:var(--stone);">
-      <option value="">Без категории</option>
-      <option value="Тренды">Тренды</option>
-      <option value="Oversize">Oversize</option>
-      <option value="Минимализм">Минимализм</option>
-      <option value="Лимитки">Лимитки</option>
-    </select>
+        <label>Подзаголовок (необязательно)</label>
+        <input type="text" id="f_sub" placeholder="Best collection">
 
-    <div class="row">
-      <div>
+        <label>Категория (для фильтров на сайте)</label>
+        <select id="f_category"><option value="">Без категории</option></select>
+
         <label>Цена (сум)</label>
         <input type="number" id="f_price" placeholder="250000">
+
+        <label>Ссылка на фото товара (общее, если у цвета нет своего)</label>
+        <input type="url" id="f_image" placeholder="https://...">
+        <div class="hint">Загрузи фото в любой хостинг картинок (например imgur.com) и вставь сюда ссылку.</div>
+
+        <label>Размеры (через запятую)</label>
+        <input type="text" id="f_sizes" placeholder="38, 39, 40, 41, 42, 43">
+
+        <label>Цвета, фото и наличие по каждому</label>
+        <div id="colorRows"></div>
+        <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow()">+ Добавить цвет</button>
+        <div class="hint">Наличие указывается по каждому цвету отдельно — покупатель видит остаток именно по выбранному цвету.</div>
+
+        <label>Цвет карточки товара (фон, если нет фото)</label>
+        <input type="color" id="f_cardcolor" value="#f4f1ec">
+
+        <label>Описание</label>
+        <textarea id="f_desc" placeholder="Короткое описание товара"></textarea>
+
+        <button class="btn" onclick="saveProduct()" id="saveBtn">Добавить товар</button>
+        <button class="btn secondary" onclick="resetForm()" id="cancelBtn" style="display:none;">Отменить редактирование</button>
+      </div>
+
+      <div class="card">
+        <h1>Список товаров</h1>
+        <div id="prodList"></div>
       </div>
     </div>
 
-    <label>Ссылка на фото товара (общее, если у цвета нет своего)</label>
-    <input type="url" id="f_image" placeholder="https://...">
-    <div class="hint">Загрузи фото в любой хостинг картинок (например imgur.com или прямо в Telegram-канал) и вставь сюда ссылку на изображение.</div>
+    <div class="tab-panel" id="tab-reviews">
+      <div class="card">
+        <h1>Отзывы покупателей</h1>
+        <p class="hint" style="margin-top:0;">Отмечай галочкой те отзывы, которые должны быть видны покупателям в карточке товара.</p>
+        <div id="reviewList"></div>
+      </div>
+    </div>
 
-    <label>Размеры (через запятую)</label>
-    <input type="text" id="f_sizes" placeholder="38, 39, 40, 41, 42, 43">
+    <div class="tab-panel" id="tab-stock">
+      <div class="card">
+        <h1>Остатки по складу</h1>
+        <p class="hint" style="margin-top:0;">Наличие по каждому цвету всех товаров.</p>
+        <div id="stockList"></div>
+      </div>
+    </div>
 
-    <label>Цвета, фото и наличие по каждому</label>
-    <div id="colorRows"></div>
-    <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow()">+ Добавить цвет</button>
-    <div class="hint">Укажи для каждого цвета своё количество в наличии — покупатель увидит остаток именно по выбранному цвету, а не по товару в целом.</div>
+    <div class="tab-panel" id="tab-delivery">
+      <div class="card"><div class="placeholder-box">Раздел "Доставка" скоро появится</div></div>
+    </div>
 
-    <label>Цвет карточки товара (фон, если нет фото)</label>
-    <input type="color" id="f_cardcolor" value="#f4f1ec">
+    <div class="tab-panel" id="tab-finance">
+      <div class="card"><div class="placeholder-box">Раздел "Финансы" скоро появится</div></div>
+    </div>
 
-    <label>Описание</label>
-    <textarea id="f_desc" placeholder="Короткое описание товара"></textarea>
+    <div class="tab-panel" id="tab-design">
+      <div class="card">
+        <h1>Панель меню и фон</h1>
+        <label>Цвет нижней панели (Главная / Избранное / Корзина / Профиль)</label>
+        <input type="color" id="f_navcolor" value="#141414" onchange="saveSetting('navColor', this.value)">
 
-    <button class="btn" onclick="saveProduct()" id="saveBtn">Добавить товар</button>
-    <button class="btn secondary" onclick="resetForm()" id="cancelBtn" style="display:none;">Отменить редактирование</button>
-  </div>
+        <label>Цвет фона магазина</label>
+        <input type="color" id="f_bgcolor" value="#f4f1ec" onchange="saveSetting('bgColor', this.value)">
 
-  <div class="card">
-    <h1 style="font-size:16px; margin-bottom:10px;">Список товаров</h1>
-    <div id="prodList"></div>
-  </div>
+        <label>Цвет рамки вокруг выбранного цвета товара</label>
+        <input type="color" id="f_borderColor" value="#141414" onchange="saveSetting('colorBorder', this.value)">
 
-  <div class="card">
-    <h1 style="font-size:16px; margin-bottom:10px;">Оформление панели меню</h1>
-    <label>Цвет нижней панели (Главная / Избранное / Корзина / Профиль)</label>
-    <input type="color" id="f_navcolor" value="#141414" onchange="saveNavColor()">
-    <div class="hint">Меняется сразу во всём магазине после выбора цвета.</div>
-  </div>
+        <label>Шрифт названия магазина</label>
+        <select id="f_font" onchange="saveSetting('fontFamily', this.value)">
+          <option value="Cormorant Garamond">Cormorant Garamond (элегантный)</option>
+          <option value="Playfair Display">Playfair Display</option>
+          <option value="Pacifico">Pacifico (рукописный)</option>
+          <option value="Space Grotesk">Space Grotesk (現代)</option>
+        </select>
+      </div>
 
-  <div class="card">
-    <h1 style="font-size:16px; margin-bottom:10px;">Отзывы покупателей</h1>
-    <p class="hint" style="margin-top:0;">Отмечай галочкой те отзывы, которые должны быть видны покупателям в карточке товара. Неотмеченные видишь только ты.</p>
-    <div id="reviewList"></div>
+      <div class="card">
+        <h1>Категории в магазине</h1>
+        <div id="catTags"></div>
+        <div class="row" style="margin-top:10px;">
+          <input type="text" id="newCatInput" placeholder="Название категории">
+        </div>
+        <button class="btn secondary" onclick="addCategory()">+ Добавить категорию</button>
+        <div class="hint">Эти категории отображаются кнопками-фильтрами на главной странице магазина.</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -150,7 +214,7 @@ function checkPassword(){
     document.getElementById('lockScreen').style.display = 'none';
     document.getElementById('adminWrap').style.display = 'block';
     loadProducts();
-    loadNavColor();
+    loadSettings();
     loadReviews();
     addColorRow();
   } else {
@@ -158,7 +222,13 @@ function checkPassword(){
   }
 }
 
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `tab-${name}`));
+}
+
 let editingId = null;
+let categories = [];
 
 function addColorRow(data){
   data = data || { name: '', hex: '#8a8479', image: '', stock: 0 };
@@ -189,10 +259,7 @@ function collectColors(){
   });
   return colors;
 }
-
-function clearColorRows(){
-  document.getElementById('colorRows').innerHTML = '';
-}
+function clearColorRows(){ document.getElementById('colorRows').innerHTML = ''; }
 
 function saveProduct(){
   const name = document.getElementById('f_name').value.trim();
@@ -207,18 +274,11 @@ function saveProduct(){
   const cardColor = document.getElementById('f_cardcolor').value;
   const desc = document.getElementById('f_desc').value.trim();
 
-  if (!name || !price){
-    alert('Укажи хотя бы название и цену');
-    return;
-  }
+  if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
   const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc };
-
-  if (editingId){
-    db.collection('products').doc(editingId).update(data).then(resetForm);
-  } else {
-    db.collection('products').add(data).then(resetForm);
-  }
+  if (editingId){ db.collection('products').doc(editingId).update(data).then(resetForm); }
+  else { db.collection('products').add(data).then(resetForm); }
 }
 
 function resetForm(){
@@ -229,8 +289,7 @@ function resetForm(){
   document.getElementById('f_price').value = '';
   document.getElementById('f_image').value = '';
   document.getElementById('f_sizes').value = '';
-  clearColorRows();
-  addColorRow();
+  clearColorRows(); addColorRow();
   document.getElementById('f_cardcolor').value = '#f4f1ec';
   document.getElementById('f_desc').value = '';
   document.getElementById('saveBtn').textContent = 'Добавить товар';
@@ -246,34 +305,30 @@ function editProduct(id, p){
   document.getElementById('f_image').value = p.image || '';
   document.getElementById('f_sizes').value = (p.sizes || []).join(', ');
   clearColorRows();
-  if (p.colors && p.colors.length){
-    p.colors.forEach(c => addColorRow(c));
-  } else {
-    addColorRow();
-  }
+  if (p.colors && p.colors.length){ p.colors.forEach(c => addColorRow(c)); } else { addColorRow(); }
   document.getElementById('f_cardcolor').value = p.cardColor || '#f4f1ec';
   document.getElementById('f_desc').value = p.desc || '';
   document.getElementById('saveBtn').textContent = 'Сохранить изменения';
   document.getElementById('cancelBtn').style.display = 'block';
+  switchTab('products');
   window.scrollTo(0,0);
 }
 
 function deleteProduct(id){
-  if (confirm('Удалить этот товар?')){
-    db.collection('products').doc(id).delete();
-  }
+  if (confirm('Удалить этот товар?')) db.collection('products').doc(id).delete();
 }
+
+let allProducts = [];
 
 function loadProducts(){
   db.collection('products').onSnapshot(snap => {
+    allProducts = [];
     const list = document.getElementById('prodList');
-    if (snap.empty){
-      list.innerHTML = '<p class="hint">Товаров пока нет</p>';
-      return;
-    }
+    if (snap.empty){ list.innerHTML = '<p class="hint">Товаров пока нет</p>'; renderStockList(); return; }
     list.innerHTML = '';
     snap.forEach(doc => {
-      const p = doc.data();
+      const p = { id: doc.id, ...doc.data() };
+      allProducts.push(p);
       const row = document.createElement('div');
       row.className = 'prod-row';
       const thumb = p.image ? `<img src="${p.image}">` : `<div class="ph">👟</div>`;
@@ -291,29 +346,26 @@ function loadProducts(){
       row.querySelector('.del').onclick = () => deleteProduct(doc.id);
       list.appendChild(row);
     });
+    renderStockList();
   });
 }
 
-function loadNavColor(){
-  db.collection('settings').doc('shop').get().then(doc => {
-    if (doc.exists && doc.data().navColor){
-      document.getElementById('f_navcolor').value = doc.data().navColor;
-    }
-  });
-}
-
-function saveNavColor(){
-  const color = document.getElementById('f_navcolor').value;
-  db.collection('settings').doc('shop').set({ navColor: color }, { merge: true });
+function renderStockList(){
+  const wrap = document.getElementById('stockList');
+  if (allProducts.length === 0){ wrap.innerHTML = '<p class="hint">Пока нет товаров</p>'; return; }
+  wrap.innerHTML = allProducts.map(p => {
+    const colors = (p.colors && p.colors.length) ? p.colors : [{name:'Стандарт', stock:p.stock||0}];
+    return `<div style="margin-bottom:10px;">
+      <div style="font-weight:700; font-size:13px; margin-bottom:4px;">${p.name}</div>
+      ${colors.map(c => `<div class="stock-item ${Number(c.stock||0)<=0?'zero':''}"><span>${c.name}</span><span>${c.stock||0} шт</span></div>`).join('')}
+    </div>`;
+  }).join('');
 }
 
 function loadReviews(){
   db.collection('reviews').onSnapshot(snap => {
     const wrap = document.getElementById('reviewList');
-    if (snap.empty){
-      wrap.innerHTML = '<p class="hint">Отзывов пока нет</p>';
-      return;
-    }
+    if (snap.empty){ wrap.innerHTML = '<p class="hint">Отзывов пока нет</p>'; return; }
     wrap.innerHTML = '';
     snap.forEach(doc => {
       const r = doc.data();
@@ -321,19 +373,58 @@ function loadReviews(){
       row.className = 'review-row';
       row.innerHTML = `
         <span class="rdel" data-id="${doc.id}">Удалить</span>
-        <div class="rmeta">${r.productName || ''}</div>
+        <div class="rmeta">${r.productName || ''}${r.rating ? ' · ' + '★'.repeat(r.rating) : ''}</div>
         <div class="rtext">${r.text}</div>
         <label><input type="checkbox" class="rcheck" data-id="${doc.id}" ${r.approved ? 'checked' : ''}> Показывать покупателям</label>
       `;
-      row.querySelector('.rcheck').onchange = (e) => {
-        db.collection('reviews').doc(doc.id).update({ approved: e.target.checked });
-      };
-      row.querySelector('.rdel').onclick = () => {
-        if (confirm('Удалить отзыв?')) db.collection('reviews').doc(doc.id).delete();
-      };
+      row.querySelector('.rcheck').onchange = (e) => db.collection('reviews').doc(doc.id).update({ approved: e.target.checked });
+      row.querySelector('.rdel').onclick = () => { if (confirm('Удалить отзыв?')) db.collection('reviews').doc(doc.id).delete(); };
       wrap.appendChild(row);
     });
   });
+}
+
+function loadSettings(){
+  db.collection('settings').doc('shop').onSnapshot(doc => {
+    const data = doc.exists ? doc.data() : {};
+    if (data.navColor) document.getElementById('f_navcolor').value = data.navColor;
+    if (data.bgColor) document.getElementById('f_bgcolor').value = data.bgColor;
+    if (data.colorBorder) document.getElementById('f_borderColor').value = data.colorBorder;
+    if (data.fontFamily) document.getElementById('f_font').value = data.fontFamily;
+    categories = data.categories || ["Тренды","Oversize","Минимализм","Лимитки"];
+    renderCategoryTags();
+    renderCategorySelect();
+  });
+}
+
+function saveSetting(key, value){
+  db.collection('settings').doc('shop').set({ [key]: value }, { merge: true });
+}
+
+function renderCategoryTags(){
+  const wrap = document.getElementById('catTags');
+  wrap.innerHTML = categories.map((c,i) => `<span class="cat-tag">${c} <span class="x" onclick="removeCategory(${i})">✕</span></span>`).join('');
+}
+
+function renderCategorySelect(){
+  const sel = document.getElementById('f_category');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Без категории</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+  sel.value = current;
+}
+
+function addCategory(){
+  const input = document.getElementById('newCatInput');
+  const val = input.value.trim();
+  if (!val || categories.includes(val)) return;
+  categories.push(val);
+  saveSetting('categories', categories);
+  input.value = '';
+}
+
+function removeCategory(i){
+  categories.splice(i, 1);
+  saveSetting('categories', categories);
 }
 </script>
 </body>
