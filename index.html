@@ -64,9 +64,12 @@
   .screen.active{ display:block; }
 
   .detail-top{ display:flex; align-items:center; justify-content:space-between; padding:18px 20px; }
-  .detail-img{ margin:0 20px; border-radius:22px; background:var(--stone); aspect-ratio:1/0.85; display:flex; align-items:center; justify-content:center; font-size:110px; background-size:cover; background-position:center; }
+  .detail-img{ margin:0 20px; border-radius:22px; background:var(--stone); aspect-ratio:1/0.85; display:flex; align-items:center; justify-content:center; font-size:110px; background-size:cover; background-position:center; overflow:hidden; }
+  .carousel{ margin:0 20px; border-radius:22px; aspect-ratio:1/0.85; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .carousel::-webkit-scrollbar{ display:none; }
+  .carousel .slide{ min-width:100%; scroll-snap-align:start; background:var(--stone); display:flex; align-items:center; justify-content:center; font-size:110px; background-size:cover; background-position:center; }
   .dots{ display:flex; gap:6px; justify-content:center; margin:14px 0; }
-  .dots span{ width:6px; height:6px; border-radius:50%; background:var(--line); }
+  .dots span{ width:6px; height:6px; border-radius:50%; background:var(--line); transition:background .15s; }
   .dots span.on{ background:var(--ink); }
 
   .detail-body{ padding:0 20px; }
@@ -151,8 +154,8 @@
       <div class="back-circle" onclick="showScreen('home')">←</div>
       <div class="back-circle" id="detailFavBtn" onclick="toggleCurrentFavorite()">♡</div>
     </div>
-    <div class="detail-img" id="detailImg"></div>
-    <div class="dots"><span class="on"></span><span></span><span></span></div>
+    <div class="carousel" id="detailCarousel"></div>
+    <div class="dots" id="detailDots"></div>
     <div class="detail-body">
       <div class="rowtop">
         <div>
@@ -347,16 +350,44 @@ function openProduct(id){
   selectedColorIdx = 0;
 
   const detailImg = document.getElementById('detailImg');
-  function setDetailImage(url){
-    if (url){
-      detailImg.style.backgroundImage = `url('${url}')`;
-      detailImg.textContent = '';
-    } else {
-      detailImg.style.backgroundImage = '';
-      detailImg.textContent = currentProduct.emoji || '👟';
-    }
+  const carousel = document.getElementById('detailCarousel');
+  const dotsWrap = document.getElementById('detailDots');
+
+  carousel.innerHTML = '';
+  dotsWrap.innerHTML = '';
+  colors.forEach((c, idx) => {
+    const img = c.image || currentProduct.image || '';
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+    if (img){ slide.style.backgroundImage = `url('${img}')`; } else { slide.textContent = currentProduct.emoji || '👟'; }
+    carousel.appendChild(slide);
+
+    const dot = document.createElement('span');
+    if (idx === 0) dot.className = 'on';
+    dotsWrap.appendChild(dot);
+  });
+  carousel.scrollLeft = 0;
+
+  function updateActiveColor(idx){
+    selectedColorIdx = idx;
+    document.querySelectorAll('.color-dot').forEach((el,i) => el.classList.toggle('active', i===idx));
+    document.querySelectorAll('#detailDots span').forEach((el,i) => el.classList.toggle('on', i===idx));
+    document.getElementById('colorLabel').textContent = colors[idx].name;
   }
-  setDetailImage(colors[0].image || currentProduct.image);
+
+  function scrollToSlide(idx){
+    carousel.scrollTo({ left: idx * carousel.clientWidth, behavior: 'smooth' });
+    updateActiveColor(idx);
+  }
+
+  carousel.onscroll = () => {
+    clearTimeout(carousel._t);
+    carousel._t = setTimeout(() => {
+      const idx = Math.round(carousel.scrollLeft / carousel.clientWidth);
+      if (idx !== selectedColorIdx && colors[idx]) updateActiveColor(idx);
+    }, 80);
+  };
+
   updateDetailFavIcon();
 
   document.getElementById('detailName').textContent = currentProduct.name;
@@ -401,13 +432,7 @@ function openProduct(id){
     el.className = 'color-dot' + (idx===0 ? ' active' : '');
     el.style.background = c.hex;
     el.title = c.name;
-    el.onclick = () => {
-      selectedColorIdx = idx;
-      document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('colorLabel').textContent = c.name;
-      setDetailImage(c.image || currentProduct.image);
-    };
+    el.onclick = () => scrollToSlide(idx);
     colorRow.appendChild(el);
   });
 
