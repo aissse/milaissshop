@@ -45,6 +45,12 @@
   .color-row input[type=text]{ flex:1; }
   .color-row input[type=color]{ flex-shrink:0; }
   .color-row .rm{ flex-shrink:0; color:#c0392b; font-size:18px; cursor:pointer; padding:0 4px; font-weight:700; }
+  .review-row{ border-bottom:1px solid var(--line); padding:10px 0; }
+  .review-row:last-child{ border-bottom:none; }
+  .review-row .rtext{ font-size:13px; margin-bottom:6px; line-height:1.5; }
+  .review-row .rmeta{ font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .review-row label{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; margin:0; }
+  .review-row .rdel{ float:right; color:#c0392b; font-size:12px; cursor:pointer; font-weight:600; }
 </style>
 </head>
 <body>
@@ -66,6 +72,15 @@
 
     <label>Подзаголовок (необязательно)</label>
     <input type="text" id="f_sub" placeholder="Best collection">
+
+    <label>Категория (для фильтров на сайте)</label>
+    <select id="f_category" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-family:'Inter'; font-size:14px; background:var(--stone);">
+      <option value="">Без категории</option>
+      <option value="Тренды">Тренды</option>
+      <option value="Oversize">Oversize</option>
+      <option value="Минимализм">Минимализм</option>
+      <option value="Лимитки">Лимитки</option>
+    </select>
 
     <div class="row">
       <div>
@@ -107,6 +122,12 @@
     <input type="color" id="f_navcolor" value="#141414" onchange="saveNavColor()">
     <div class="hint">Меняется сразу во всём магазине после выбора цвета.</div>
   </div>
+
+  <div class="card">
+    <h1 style="font-size:16px; margin-bottom:10px;">Отзывы покупателей</h1>
+    <p class="hint" style="margin-top:0;">Отмечай галочкой те отзывы, которые должны быть видны покупателям в карточке товара. Неотмеченные видишь только ты.</p>
+    <div id="reviewList"></div>
+  </div>
 </div>
 
 <script>
@@ -130,6 +151,7 @@ function checkPassword(){
     document.getElementById('adminWrap').style.display = 'block';
     loadProducts();
     loadNavColor();
+    loadReviews();
     addColorRow();
   } else {
     alert('Неверный пароль');
@@ -175,6 +197,7 @@ function clearColorRows(){
 function saveProduct(){
   const name = document.getElementById('f_name').value.trim();
   const sub = document.getElementById('f_sub').value.trim();
+  const category = document.getElementById('f_category').value;
   const price = Number(document.getElementById('f_price').value) || 0;
   const image = document.getElementById('f_image').value.trim();
   const sizesRaw = document.getElementById('f_sizes').value.trim();
@@ -189,7 +212,7 @@ function saveProduct(){
     return;
   }
 
-  const data = { name, sub, price, stock, image, sizes, colors, cardColor, desc };
+  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc };
 
   if (editingId){
     db.collection('products').doc(editingId).update(data).then(resetForm);
@@ -202,6 +225,7 @@ function resetForm(){
   editingId = null;
   document.getElementById('f_name').value = '';
   document.getElementById('f_sub').value = '';
+  document.getElementById('f_category').value = '';
   document.getElementById('f_price').value = '';
   document.getElementById('f_image').value = '';
   document.getElementById('f_sizes').value = '';
@@ -217,6 +241,7 @@ function editProduct(id, p){
   editingId = id;
   document.getElementById('f_name').value = p.name || '';
   document.getElementById('f_sub').value = p.sub || '';
+  document.getElementById('f_category').value = p.category || '';
   document.getElementById('f_price').value = p.price || '';
   document.getElementById('f_image').value = p.image || '';
   document.getElementById('f_sizes').value = (p.sizes || []).join(', ');
@@ -280,6 +305,35 @@ function loadNavColor(){
 function saveNavColor(){
   const color = document.getElementById('f_navcolor').value;
   db.collection('settings').doc('shop').set({ navColor: color }, { merge: true });
+}
+
+function loadReviews(){
+  db.collection('reviews').onSnapshot(snap => {
+    const wrap = document.getElementById('reviewList');
+    if (snap.empty){
+      wrap.innerHTML = '<p class="hint">Отзывов пока нет</p>';
+      return;
+    }
+    wrap.innerHTML = '';
+    snap.forEach(doc => {
+      const r = doc.data();
+      const row = document.createElement('div');
+      row.className = 'review-row';
+      row.innerHTML = `
+        <span class="rdel" data-id="${doc.id}">Удалить</span>
+        <div class="rmeta">${r.productName || ''}</div>
+        <div class="rtext">${r.text}</div>
+        <label><input type="checkbox" class="rcheck" data-id="${doc.id}" ${r.approved ? 'checked' : ''}> Показывать покупателям</label>
+      `;
+      row.querySelector('.rcheck').onchange = (e) => {
+        db.collection('reviews').doc(doc.id).update({ approved: e.target.checked });
+      };
+      row.querySelector('.rdel').onclick = () => {
+        if (confirm('Удалить отзыв?')) db.collection('reviews').doc(doc.id).delete();
+      };
+      wrap.appendChild(row);
+    });
+  });
 }
 </script>
 </body>
