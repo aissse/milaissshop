@@ -81,8 +81,9 @@
     <label>Размеры (через запятую)</label>
     <input type="text" id="f_sizes" placeholder="38, 39, 40, 41, 42, 43">
 
-    <label>Цвета (формат: Название:код, через запятую)</label>
-    <input type="text" id="f_colors" placeholder="Красный:#c0392b, Чёрный:#1a1a1a">
+    <label>Цвета (формат: Название:код:ссылка_на_фото, через запятую — фото можно не указывать)</label>
+    <input type="text" id="f_colors" placeholder="Серый:#8a8479:https://... , Бежевый:#d8c9a3">
+    <div class="hint">Если для цвета указать отдельную ссылку на фото — при выборе этого цвета в магазине покупатель увидит именно это фото товара.</div>
 
     <label>Цвет карточки товара (фон, если нет фото)</label>
     <input type="color" id="f_cardcolor" value="#f4f1ec">
@@ -108,7 +109,7 @@
 </div>
 
 <script>
-const ADMIN_PASSWORD = "milaisss0143274"; // смени на свой пароль
+const ADMIN_PASSWORD = "milaisss2026"; // смени на свой пароль
 
 const firebaseConfig = {
   apiKey: "AIzaSyAPg6nCQ4I9vTKX5AXlmHM5gwYAsrNvW40",
@@ -138,14 +139,19 @@ let editingId = null;
 function parseColors(str){
   if (!str.trim()) return [];
   return str.split(',').map(s => {
-    const [name, hex] = s.split(':').map(x => x.trim());
-    return { name: name || 'Цвет', hex: hex || '#000000' };
+    const parts = s.split(':').map(x => x.trim());
+    const name = parts[0] || 'Цвет';
+    const hex = parts[1] || '#000000';
+    const image = parts[2] || '';
+    const obj = { name, hex };
+    if (image) obj.image = image;
+    return obj;
   });
 }
 
 function colorsToString(colors){
   if (!colors || !colors.length) return '';
-  return colors.map(c => `${c.name}:${c.hex}`).join(', ');
+  return colors.map(c => c.image ? `${c.name}:${c.hex}:${c.image}` : `${c.name}:${c.hex}`).join(', ');
 }
 
 function saveProduct(){
