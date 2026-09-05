@@ -41,6 +41,10 @@
   .lock-screen{ max-width:340px; margin:100px auto; text-align:center; }
   .lock-screen input{ margin-top:16px; text-align:center; }
   .hint{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5; }
+  .color-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .color-row input[type=text]{ flex:1; }
+  .color-row input[type=color]{ flex-shrink:0; }
+  .color-row .rm{ flex-shrink:0; color:#c0392b; font-size:18px; cursor:pointer; padding:0 4px; font-weight:700; }
 </style>
 </head>
 <body>
@@ -81,9 +85,10 @@
     <label>Размеры (через запятую)</label>
     <input type="text" id="f_sizes" placeholder="38, 39, 40, 41, 42, 43">
 
-    <label>Цвета (формат: Название:код:ссылка_на_фото, через запятую — фото можно не указывать)</label>
-    <input type="text" id="f_colors" placeholder="Серый:#8a8479:https://... , Бежевый:#d8c9a3">
-    <div class="hint">Если для цвета указать отдельную ссылку на фото — при выборе этого цвета в магазине покупатель увидит именно это фото товара.</div>
+    <label>Цвета и фото для каждого</label>
+    <div id="colorRows"></div>
+    <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow()">+ Добавить цвет</button>
+    <div class="hint">Для каждого цвета можно указать своё фото — в магазине покупатель сможет листать фото товара свайпом или нажатием на кружок цвета.</div>
 
     <label>Цвет карточки товара (фон, если нет фото)</label>
     <input type="color" id="f_cardcolor" value="#f4f1ec">
@@ -129,6 +134,7 @@ function checkPassword(){
     document.getElementById('adminWrap').style.display = 'block';
     loadProducts();
     loadNavColor();
+    addColorRow();
   } else {
     alert('Неверный пароль');
   }
@@ -136,22 +142,36 @@ function checkPassword(){
 
 let editingId = null;
 
-function parseColors(str){
-  if (!str.trim()) return [];
-  return str.split(',').map(s => {
-    const parts = s.split(':').map(x => x.trim());
-    const name = parts[0] || 'Цвет';
-    const hex = parts[1] || '#000000';
-    const image = parts[2] || '';
-    const obj = { name, hex };
-    if (image) obj.image = image;
-    return obj;
-  });
+function addColorRow(data){
+  data = data || { name: '', hex: '#8a8479', image: '' };
+  const row = document.createElement('div');
+  row.className = 'color-row';
+  row.innerHTML = `
+    <input type="color" class="c-hex" value="${data.hex || '#8a8479'}">
+    <input type="text" class="c-name" placeholder="Название цвета" value="${(data.name||'').replace(/"/g,'&quot;')}" style="max-width:110px;">
+    <input type="url" class="c-image" placeholder="Ссылка на фото (необязательно)" value="${(data.image||'').replace(/"/g,'&quot;')}">
+    <span class="rm" onclick="this.parentElement.remove()">✕</span>
+  `;
+  document.getElementById('colorRows').appendChild(row);
 }
 
-function colorsToString(colors){
-  if (!colors || !colors.length) return '';
-  return colors.map(c => c.image ? `${c.name}:${c.hex}:${c.image}` : `${c.name}:${c.hex}`).join(', ');
+function collectColors(){
+  const rows = document.querySelectorAll('#colorRows .color-row');
+  const colors = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.c-name').value.trim();
+    const hex = row.querySelector('.c-hex').value;
+    const image = row.querySelector('.c-image').value.trim();
+    if (!name) return;
+    const obj = { name, hex };
+    if (image) obj.image = image;
+    colors.push(obj);
+  });
+  return colors;
+}
+
+function clearColorRows(){
+  document.getElementById('colorRows').innerHTML = '';
 }
 
 function saveProduct(){
@@ -162,7 +182,7 @@ function saveProduct(){
   const image = document.getElementById('f_image').value.trim();
   const sizesRaw = document.getElementById('f_sizes').value.trim();
   const sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-  const colors = parseColors(document.getElementById('f_colors').value);
+  const colors = collectColors();
   const cardColor = document.getElementById('f_cardcolor').value;
   const desc = document.getElementById('f_desc').value.trim();
 
@@ -188,7 +208,8 @@ function resetForm(){
   document.getElementById('f_stock').value = '';
   document.getElementById('f_image').value = '';
   document.getElementById('f_sizes').value = '';
-  document.getElementById('f_colors').value = '';
+  clearColorRows();
+  addColorRow();
   document.getElementById('f_cardcolor').value = '#f4f1ec';
   document.getElementById('f_desc').value = '';
   document.getElementById('saveBtn').textContent = 'Добавить товар';
@@ -203,7 +224,12 @@ function editProduct(id, p){
   document.getElementById('f_stock').value = p.stock || '';
   document.getElementById('f_image').value = p.image || '';
   document.getElementById('f_sizes').value = (p.sizes || []).join(', ');
-  document.getElementById('f_colors').value = colorsToString(p.colors);
+  clearColorRows();
+  if (p.colors && p.colors.length){
+    p.colors.forEach(c => addColorRow(c));
+  } else {
+    addColorRow();
+  }
   document.getElementById('f_cardcolor').value = p.cardColor || '#f4f1ec';
   document.getElementById('f_desc').value = p.desc || '';
   document.getElementById('saveBtn').textContent = 'Сохранить изменения';
