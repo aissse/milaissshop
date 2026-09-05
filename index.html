@@ -154,6 +154,15 @@
 
   .reviews-list{ padding:0 20px 20px; }
   .review-item{ border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; line-height:1.5; }
+
+  .support-entry{ margin:0 20px 16px; background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-weight:600; font-size:13px; }
+  .support-msgs{ padding:12px 20px; display:flex; flex-direction:column; gap:10px; min-height:50vh; }
+  .msg{ max-width:78%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.4; }
+  .msg.customer{ align-self:flex-end; background:var(--orange); color:#fff; border-bottom-right-radius:4px; }
+  .msg.admin{ align-self:flex-start; background:var(--stone); color:var(--ink); border-bottom-left-radius:4px; }
+  .support-input-row{ display:flex; gap:8px; padding:12px 20px 24px; }
+  .support-input-row input{ flex:1; border:1px solid var(--line); border-radius:100px; padding:10px 16px; font-size:13px; outline:none; }
+  .support-input-row button{ background:var(--orange); color:#fff; border:none; border-radius:50%; width:42px; height:42px; cursor:pointer; flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -246,8 +255,22 @@
 
   <div class="screen" id="profile">
     <div class="topbar"><div class="logo">milaisss</div></div>
+    <div class="support-entry" onclick="showScreen('support')"><span>💬 Поддержка</span><span>→</span></div>
     <div class="cart-title"><h2 class="display" data-i18n="profileTitle">Мои заказы</h2></div>
     <div id="ordersList"></div>
+  </div>
+
+  <div class="screen" id="support">
+    <div class="detail-top">
+      <div class="back-circle" onclick="showScreen('profile')">←</div>
+      <div></div>
+    </div>
+    <div class="cart-title"><h2 class="display">Поддержка</h2></div>
+    <div class="support-msgs" id="supportMsgs"></div>
+    <div class="support-input-row">
+      <input type="text" id="supportInput" placeholder="Напишите сообщение...">
+      <button onclick="sendSupportMessage()">➤</button>
+    </div>
   </div>
 
   <div class="screen" id="settings">
@@ -295,8 +318,8 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
-const ADMIN_CHAT_ID = "6620851909";
+const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
+const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -567,6 +590,33 @@ function showScreen(name){
   window.scrollTo(0,0);
 }
 
+/* ---------- support chat ---------- */
+function setupSupportListener(){
+  const customerId = getCustomerId();
+  db.collection('support').where('customerId','==',customerId).onSnapshot(snap => {
+    let msgs = [];
+    snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+    msgs.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+    const wrap = document.getElementById('supportMsgs');
+    if (msgs.length === 0){
+      wrap.innerHTML = '<div class="empty-state">Нет сообщений. Напишите нам, если есть вопросы 💬</div>';
+    } else {
+      wrap.innerHTML = msgs.map(m => `<div class="msg ${m.sender}">${m.text}</div>`).join('');
+    }
+    wrap.scrollTop = wrap.scrollHeight;
+  });
+}
+
+function sendSupportMessage(){
+  const input = document.getElementById('supportInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const customerName = getCustomerName();
+  db.collection('support').add({ customerId: getCustomerId(), customerName, sender:'customer', text, createdAt: Date.now() });
+  notifyAdmin(`💬 Сообщение в поддержку от ${customerName}:\n${text}`);
+  input.value = '';
+}
+
 /* ---------- product detail ---------- */
 function updateReviewsSummary(){
   const approved = reviews.filter(r => r.productId === currentProduct.id && r.approved);
@@ -751,7 +801,7 @@ function renderCart(){
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
     <button class="checkout-btn" onclick="checkout()">${t('checkoutBtn')}</button>
-    <div class="hint">Нажимая "${t('checkoutBtn')}", откроется чат с продавцом — останется только отправить готовое сообщение.</div>
+    <div class="hint">Продавец получит детали заказа автоматически. Вопросы — через поддержку в профиле.</div>
   `;
 }
 
@@ -778,9 +828,7 @@ function checkout(){
   let notifyText = `🛍️ Новый заказ от ${customerName}\n\n` + text;
   notifyAdmin(notifyText);
 
-  const url = `https://t.me/${ADMIN_USERNAME}?text=${encodeURIComponent(text)}`;
-  if (tg && tg.openTelegramLink){ tg.openTelegramLink(url); } else { window.open(url, '_blank'); }
-
+  showToast('Заказ оформлен! Продавец уже получил детали ✓');
   cart = []; updateCartBadge(); renderCart();
 }
 
@@ -839,6 +887,7 @@ function submitReview(orderId, ii, productId, productName){
 
 /* ---------- init ---------- */
 applyLang();
+setupSupportListener();
 </script>
 </body>
 </html>
