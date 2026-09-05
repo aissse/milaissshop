@@ -67,6 +67,12 @@
   .placeholder-box{ text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
   .stock-item{ display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-bottom:1px dashed var(--line); }
   .stock-item.zero{ color:#a83232; font-weight:700; }
+  .order-admin-card{ border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
+  .order-admin-card .who{ font-size:13px; font-weight:700; margin-bottom:4px; }
+  .order-admin-card .odate{ font-size:11px; color:var(--muted); margin-bottom:8px; }
+  .order-admin-card .oline{ font-size:12px; margin-bottom:3px; }
+  .order-admin-card .ototal{ font-weight:700; font-size:13px; margin:6px 0; }
+  .status-select{ width:100%; margin-top:6px; }
   .cat-tag{ display:inline-flex; align-items:center; gap:6px; background:var(--pink); border-radius:100px; padding:6px 12px; font-size:12px; font-weight:600; margin:0 6px 6px 0; }
   .cat-tag .x{ cursor:pointer; color:#a83232; font-weight:700; }
 </style>
@@ -152,7 +158,11 @@
     </div>
 
     <div class="tab-panel" id="tab-delivery">
-      <div class="card"><div class="placeholder-box">Раздел "Доставка" скоро появится</div></div>
+      <div class="card">
+        <h1>Заказы и доставка</h1>
+        <p class="hint" style="margin-top:0;">Меняй статус — покупатель сразу увидит его в своём профиле.</p>
+        <div id="ordersAdminList"></div>
+      </div>
     </div>
 
     <div class="tab-panel" id="tab-finance">
@@ -171,13 +181,22 @@
         <label>Цвет рамки вокруг выбранного цвета товара</label>
         <input type="color" id="f_borderColor" value="#141414" onchange="saveSetting('colorBorder', this.value)">
 
-        <label>Шрифт названия магазина</label>
-        <select id="f_font" onchange="saveSetting('fontFamily', this.value)">
+        <label>Шрифт названия магазина — быстрый выбор</label>
+        <select id="f_font" onchange="applyPresetFont(this.value)">
           <option value="Cormorant Garamond">Cormorant Garamond (элегантный)</option>
           <option value="Playfair Display">Playfair Display</option>
           <option value="Pacifico">Pacifico (рукописный)</option>
-          <option value="Space Grotesk">Space Grotesk (現代)</option>
+          <option value="Space Grotesk">Space Grotesk (современный)</option>
         </select>
+
+        <label>Или найди любой другой шрифт на fonts.google.com</label>
+        <input type="text" id="customFontInput" placeholder="Например: Marck Script, Bebas Neue, Cinzel...">
+        <div class="row" style="margin-top:8px;">
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="previewFont()">Просмотреть</button>
+          <button type="button" class="btn" style="margin-top:0;" onclick="saveCustomFont()">Сохранить этот шрифт</button>
+        </div>
+        <div id="fontPreview" style="margin-top:14px; font-size:32px; text-align:center; padding:14px; border:1px dashed var(--line); border-radius:12px;">milaisss</div>
+        <div class="hint">Открой fonts.google.com в другой вкладке, найди шрифт, который нравится, и впиши его точное название сюда.</div>
       </div>
 
       <div class="card">
@@ -216,6 +235,7 @@ function checkPassword(){
     loadProducts();
     loadSettings();
     loadReviews();
+    loadOrders();
     addColorRow();
   } else {
     alert('Неверный пароль');
@@ -390,7 +410,11 @@ function loadSettings(){
     if (data.navColor) document.getElementById('f_navcolor').value = data.navColor;
     if (data.bgColor) document.getElementById('f_bgcolor').value = data.bgColor;
     if (data.colorBorder) document.getElementById('f_borderColor').value = data.colorBorder;
-    if (data.fontFamily) document.getElementById('f_font').value = data.fontFamily;
+    if (data.fontFamily){
+      document.getElementById('customFontInput').value = data.fontFamily;
+      loadGoogleFont(data.fontFamily);
+      setTimeout(() => { document.getElementById('fontPreview').style.fontFamily = `'${data.fontFamily}', serif`; }, 300);
+    }
     categories = data.categories || ["Тренды","Oversize","Минимализм","Лимитки"];
     renderCategoryTags();
     renderCategorySelect();
@@ -426,6 +450,71 @@ function removeCategory(i){
   categories.splice(i, 1);
   saveSetting('categories', categories);
 }
+
+const STATUS_OPTIONS = ['Собирается','Отправляется','В пути','Доставлено'];
+
+function loadOrders(){
+  db.collection('orders').onSnapshot(snap => {
+    const wrap = document.getElementById('ordersAdminList');
+    if (snap.empty){ wrap.innerHTML = '<p class="hint">Заказов пока нет</p>'; return; }
+    const orders = [];
+    snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+    orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+    wrap.innerHTML = '';
+    orders.forEach(o => {
+      const card = document.createElement('div');
+      card.className = 'order-admin-card';
+      card.innerHTML = `
+        <div class="who">${o.customerName || 'Покупатель'}</div>
+        <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
+        ${o.items.map(it => `<div class="oline">${it.name} (${it.size}, ${it.colorName}) × ${it.qty} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
+        <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
+        <select class="status-select">
+          ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      `;
+      card.querySelector('.status-select').onchange = (e) => {
+        db.collection('orders').doc(o.id).update({ status: e.target.value });
+      };
+      wrap.appendChild(card);
+    });
+  });
+}
+
+function loadGoogleFont(fontName){
+  const id = 'dynamicFontLink';
+  let link = document.getElementById(id);
+  if (!link){
+    link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+  }
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g,'+')}:wght@600;700&display=swap`;
+}
+
+function previewFont(){
+  const name = document.getElementById('customFontInput').value.trim();
+  if (!name) return;
+  loadGoogleFont(name);
+  const preview = document.getElementById('fontPreview');
+  setTimeout(() => { preview.style.fontFamily = `'${name}', serif`; }, 300);
+}
+
+function saveCustomFont(){
+  const name = document.getElementById('customFontInput').value.trim();
+  if (!name) { alert('Сначала впиши название шрифта'); return; }
+  saveSetting('fontFamily', name);
+  showAdminToast('Шрифт сохранён — открой магазин, чтобы проверить');
+}
+
+function applyPresetFont(name){
+  document.getElementById('customFontInput').value = name;
+  previewFont();
+  saveSetting('fontFamily', name);
+}
+
+function showAdminToast(msg){ alert(msg); }
 </script>
 </body>
 </html>
