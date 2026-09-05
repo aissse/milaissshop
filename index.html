@@ -154,6 +154,9 @@
 
   .reviews-list{ padding:0 20px 20px; }
   .review-item{ border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; line-height:1.5; }
+  .review-item .rhead{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:4px; }
+  .review-item .rauthor{ font-weight:700; color:var(--ink); }
+  .review-item .rphoto{ width:100%; max-width:200px; border-radius:10px; margin-top:8px; display:block; }
 
   .support-entry{ margin:0 20px 16px; background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-weight:600; font-size:13px; }
   .support-msgs{ padding:12px 20px; display:flex; flex-direction:column; gap:10px; min-height:50vh; }
@@ -637,7 +640,12 @@ function openReviews(){
   if (approved.length === 0){
     list.innerHTML = '<p class="hint">Пока нет отзывов по этому товару</p>';
   } else {
-    list.innerHTML = approved.map(r => `<div class="review-item">${r.rating ? '★'.repeat(r.rating)+' ' : ''}${r.text}</div>`).join('');
+    list.innerHTML = approved.map(r => `
+      <div class="review-item">
+        <div class="rhead"><span class="rauthor">${r.anonymous ? 'Аноним' : (r.authorName || 'Покупатель')}</span><span>${r.colorName ? 'Цвет: '+r.colorName : ''}</span></div>
+        <div>${r.rating ? '★'.repeat(r.rating)+' ' : ''}${r.text}</div>
+        ${r.photo ? `<img class="rphoto" src="${r.photo}">` : ''}
+      </div>`).join('');
   }
   showScreen('reviewsScreen');
 }
@@ -855,7 +863,11 @@ function renderOrders(){
                 ${[1,2,3,4,5].map(n => `<span data-n="${n}" onclick="setStar('${order.id}',${ii},${n})">★</span>`).join('')}
               </div>
               <textarea id="rt-${order.id}-${ii}" placeholder="Расскажите о товаре..." rows="2"></textarea>
-              <button onclick="submitReview('${order.id}',${ii},'${it.productId}','${(it.name||'').replace(/'/g,"")}')">Отправить</button>
+              <input type="url" id="rp-${order.id}-${ii}" placeholder="Ссылка на фото к отзыву (необязательно)" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:8px; font-size:12px; margin-bottom:6px;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:8px;">
+                <input type="checkbox" id="ra-${order.id}-${ii}"> Оставить анонимно
+              </label>
+              <button onclick="submitReview('${order.id}',${ii},'${it.productId}','${(it.name||'').replace(/'/g,"")}','${(it.colorName||'').replace(/'/g,"")}')">Отправить</button>
             </div>` : ''}
         `).join('')}
         <div class="order-total">Итого: ${fmt(order.total)}</div>
@@ -873,12 +885,18 @@ function setStar(oi, ii, n){
 }
 function toggleReviewForm(oi, ii){ document.getElementById(`rf-${oi}-${ii}`).classList.toggle('open'); }
 
-function submitReview(orderId, ii, productId, productName){
+function submitReview(orderId, ii, productId, productName, colorName){
   const text = document.getElementById(`rt-${orderId}-${ii}`).value.trim();
   const rating = reviewStars[`${orderId}-${ii}`] || null;
+  const photo = document.getElementById(`rp-${orderId}-${ii}`).value.trim();
+  const anonymous = document.getElementById(`ra-${orderId}-${ii}`).checked;
   if (!text) return;
-  const payload = { productId, productName, text, approved: false, createdAt: Date.now() };
+  const payload = {
+    productId, productName, colorName: colorName || '', text, approved: false, createdAt: Date.now(),
+    anonymous, authorName: anonymous ? '' : getCustomerName()
+  };
   if (rating) payload.rating = rating;
+  if (photo) payload.photo = photo;
   db.collection('reviews').add(payload).then(() => {
     showToast('Спасибо! Отзыв отправлен на проверку');
     document.getElementById(`rf-${orderId}-${ii}`).classList.remove('open');
