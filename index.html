@@ -373,6 +373,7 @@ function openProduct(id){
     document.querySelectorAll('.color-dot').forEach((el,i) => el.classList.toggle('active', i===idx));
     document.querySelectorAll('#detailDots span').forEach((el,i) => el.classList.toggle('on', i===idx));
     document.getElementById('colorLabel').textContent = colors[idx].name;
+    refreshStockUI(idx);
   }
 
   function scrollToSlide(idx){
@@ -394,25 +395,29 @@ function openProduct(id){
   document.getElementById('detailPrice').textContent = fmt(currentProduct.price);
   document.getElementById('detailDesc').textContent = currentProduct.desc || '';
 
-  const stock = Number(currentProduct.stock || 0);
   const stockNote = document.getElementById('stockNote');
   const addBtn = document.getElementById('addBtn');
-  if (stock <= 0){
-    stockNote.textContent = 'Нет в наличии';
-    stockNote.className = 'stock-note out';
-    addBtn.disabled = true;
-    addBtn.textContent = 'Нет в наличии';
-  } else if (stock <= 3){
-    stockNote.textContent = `Осталось ${stock} шт`;
-    stockNote.className = 'stock-note low';
-    addBtn.disabled = false;
-    addBtn.textContent = 'Добавить в корзину';
-  } else {
-    stockNote.textContent = 'В наличии';
-    stockNote.className = 'stock-note';
-    addBtn.disabled = false;
-    addBtn.textContent = 'Добавить в корзину';
+
+  function refreshStockUI(idx){
+    const colorStock = (colors[idx] && typeof colors[idx].stock === 'number') ? colors[idx].stock : Number(currentProduct.stock || 0);
+    if (colorStock <= 0){
+      stockNote.textContent = `Нет в наличии (${colors[idx].name})`;
+      stockNote.className = 'stock-note out';
+      addBtn.disabled = true;
+      addBtn.textContent = 'Нет в наличии';
+    } else if (colorStock <= 3){
+      stockNote.textContent = `Осталось ${colorStock} шт (${colors[idx].name})`;
+      stockNote.className = 'stock-note low';
+      addBtn.disabled = false;
+      addBtn.textContent = 'Добавить в корзину';
+    } else {
+      stockNote.textContent = `В наличии (${colors[idx].name})`;
+      stockNote.className = 'stock-note';
+      addBtn.disabled = false;
+      addBtn.textContent = 'Добавить в корзину';
+    }
   }
+  refreshStockUI(0);
 
   const sizeRow = document.getElementById('sizeRow');
   sizeRow.innerHTML = '';
@@ -440,9 +445,11 @@ function openProduct(id){
 }
 
 function addToCart(){
-  if (!currentProduct || Number(currentProduct.stock||0) <= 0) return;
-  const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", hex:"#f4f1ec"}];
-  const colorName = colors[selectedColorIdx].name;
+  if (!currentProduct) return;
+  const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", hex:"#f4f1ec", stock: currentProduct.stock || 0}];
+  const chosen = colors[selectedColorIdx];
+  if (!chosen || Number(chosen.stock||0) <= 0) return;
+  const colorName = chosen.name;
   const existing = cart.find(c => c.productId === currentProduct.id && c.size === selectedSize && c.colorName === colorName);
   if (existing){
     existing.qty++;
