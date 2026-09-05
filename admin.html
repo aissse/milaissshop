@@ -165,6 +165,16 @@
       <div class="card">
         <h1>Заказы и доставка</h1>
         <p class="hint" style="margin-top:0;">Меняй статус — покупатель сразу увидит его в своём профиле.</p>
+        <div class="row" style="margin-bottom:10px;">
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setDateRange('today')">Сегодня</button>
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setDateRange('yesterday')">Вчера</button>
+        </div>
+        <div class="row">
+          <div><label>От</label><input type="date" id="dateFrom" onchange="filterAndRenderOrders()"></div>
+          <div><label>До</label><input type="date" id="dateTo" onchange="filterAndRenderOrders()"></div>
+        </div>
+        <button type="button" class="btn secondary" onclick="clearDateRange()">Сбросить фильтр</button>
+        <div style="margin:14px 0; font-weight:700; font-size:14px;" id="ordersCount"></div>
         <div id="ordersAdminList"></div>
       </div>
     </div>
@@ -406,8 +416,10 @@ function loadReviews(){
       row.className = 'review-row';
       row.innerHTML = `
         <span class="rdel" data-id="${doc.id}">Удалить</span>
-        <div class="rmeta">${r.productName || ''}${r.rating ? ' · ' + '★'.repeat(r.rating) : ''}</div>
+        <div class="rmeta">${r.productName || ''}${r.colorName ? ' · цвет: '+r.colorName : ''}${r.rating ? ' · ' + '★'.repeat(r.rating) : ''}</div>
+        <div class="rmeta">${r.anonymous ? '👤 Аноним' : '👤 ' + (r.authorName || 'Покупатель')}</div>
         <div class="rtext">${r.text}</div>
+        ${r.photo ? `<img src="${r.photo}" style="max-width:140px; border-radius:8px; margin-bottom:8px; display:block;">` : ''}
         <label><input type="checkbox" class="rcheck" data-id="${doc.id}" ${r.approved ? 'checked' : ''}> Показывать покупателям</label>
       `;
       row.querySelector('.rcheck').onchange = (e) => db.collection('reviews').doc(doc.id).update({ approved: e.target.checked });
@@ -465,32 +477,66 @@ function removeCategory(i){
 }
 
 const STATUS_OPTIONS = ['Собирается','Отправляется','В пути','Доставлено'];
+let allOrders = [];
 
 function loadOrders(){
   db.collection('orders').onSnapshot(snap => {
-    const wrap = document.getElementById('ordersAdminList');
-    if (snap.empty){ wrap.innerHTML = '<p class="hint">Заказов пока нет</p>'; return; }
-    const orders = [];
-    snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
-    orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-    wrap.innerHTML = '';
-    orders.forEach(o => {
-      const card = document.createElement('div');
-      card.className = 'order-admin-card';
-      card.innerHTML = `
-        <div class="who">${o.customerName || 'Покупатель'}</div>
-        <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
-        ${o.items.map(it => `<div class="oline">${it.name} (${it.size}, ${it.colorName}) × ${it.qty} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
-        <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
-        <select class="status-select">
-          ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-      `;
-      card.querySelector('.status-select').onchange = (e) => {
-        db.collection('orders').doc(o.id).update({ status: e.target.value });
-      };
-      wrap.appendChild(card);
-    });
+    allOrders = [];
+    snap.forEach(doc => allOrders.push({ id: doc.id, ...doc.data() }));
+    allOrders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+    filterAndRenderOrders();
+  });
+}
+
+function setDateRange(preset){
+  const now = new Date();
+  let day = new Date(now);
+  if (preset === 'yesterday') day.setDate(day.getDate() - 1);
+  const iso = day.toISOString().slice(0,10);
+  document.getElementById('dateFrom').value = iso;
+  document.getElementById('dateTo').value = iso;
+  filterAndRenderOrders();
+}
+
+function clearDateRange(){
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value = '';
+  filterAndRenderOrders();
+}
+
+function filterAndRenderOrders(){
+  const fromVal = document.getElementById('dateFrom').value;
+  const toVal = document.getElementById('dateTo').value;
+  let orders = allOrders;
+  if (fromVal){
+    const fromTs = new Date(fromVal + 'T00:00:00').getTime();
+    orders = orders.filter(o => (o.createdAt||0) >= fromTs);
+  }
+  if (toVal){
+    const toTs = new Date(toVal + 'T23:59:59').getTime();
+    orders = orders.filter(o => (o.createdAt||0) <= toTs);
+  }
+
+  document.getElementById('ordersCount').textContent = `Заказов: ${orders.length}`;
+  const wrap = document.getElementById('ordersAdminList');
+  if (orders.length === 0){ wrap.innerHTML = '<p class="hint">Заказов за этот период нет</p>'; return; }
+  wrap.innerHTML = '';
+  orders.forEach(o => {
+    const card = document.createElement('div');
+    card.className = 'order-admin-card';
+    card.innerHTML = `
+      <div class="who">${o.customerName || 'Покупатель'}</div>
+      <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
+      ${o.items.map(it => `<div class="oline">${it.name} (${it.size}, ${it.colorName}) × ${it.qty} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
+      <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
+      <select class="status-select">
+        ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    `;
+    card.querySelector('.status-select').onchange = (e) => {
+      db.collection('orders').doc(o.id).update({ status: e.target.value });
+    };
+    wrap.appendChild(card);
   });
 }
 
