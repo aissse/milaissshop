@@ -72,23 +72,19 @@
         <label>Цена (сум)</label>
         <input type="number" id="f_price" placeholder="250000">
       </div>
-      <div>
-        <label>В наличии (шт)</label>
-        <input type="number" id="f_stock" placeholder="10">
-      </div>
     </div>
 
-    <label>Ссылка на фото товара</label>
+    <label>Ссылка на фото товара (общее, если у цвета нет своего)</label>
     <input type="url" id="f_image" placeholder="https://...">
     <div class="hint">Загрузи фото в любой хостинг картинок (например imgur.com или прямо в Telegram-канал) и вставь сюда ссылку на изображение.</div>
 
     <label>Размеры (через запятую)</label>
     <input type="text" id="f_sizes" placeholder="38, 39, 40, 41, 42, 43">
 
-    <label>Цвета и фото для каждого</label>
+    <label>Цвета, фото и наличие по каждому</label>
     <div id="colorRows"></div>
     <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow()">+ Добавить цвет</button>
-    <div class="hint">Для каждого цвета можно указать своё фото — в магазине покупатель сможет листать фото товара свайпом или нажатием на кружок цвета.</div>
+    <div class="hint">Укажи для каждого цвета своё количество в наличии — покупатель увидит остаток именно по выбранному цвету, а не по товару в целом.</div>
 
     <label>Цвет карточки товара (фон, если нет фото)</label>
     <input type="color" id="f_cardcolor" value="#f4f1ec">
@@ -114,7 +110,7 @@
 </div>
 
 <script>
-const ADMIN_PASSWORD = "milaisss0143274"; // смени на свой пароль
+const ADMIN_PASSWORD = "milaisss2026"; // смени на свой пароль
 
 const firebaseConfig = {
   apiKey: "AIzaSyAPg6nCQ4I9vTKX5AXlmHM5gwYAsrNvW40",
@@ -143,12 +139,13 @@ function checkPassword(){
 let editingId = null;
 
 function addColorRow(data){
-  data = data || { name: '', hex: '#8a8479', image: '' };
+  data = data || { name: '', hex: '#8a8479', image: '', stock: 0 };
   const row = document.createElement('div');
   row.className = 'color-row';
   row.innerHTML = `
     <input type="color" class="c-hex" value="${data.hex || '#8a8479'}">
-    <input type="text" class="c-name" placeholder="Название цвета" value="${(data.name||'').replace(/"/g,'&quot;')}" style="max-width:110px;">
+    <input type="text" class="c-name" placeholder="Название" value="${(data.name||'').replace(/"/g,'&quot;')}" style="max-width:90px;">
+    <input type="number" class="c-stock" placeholder="Кол-во" value="${data.stock || 0}" style="max-width:70px;">
     <input type="url" class="c-image" placeholder="Ссылка на фото (необязательно)" value="${(data.image||'').replace(/"/g,'&quot;')}">
     <span class="rm" onclick="this.parentElement.remove()">✕</span>
   `;
@@ -162,8 +159,9 @@ function collectColors(){
     const name = row.querySelector('.c-name').value.trim();
     const hex = row.querySelector('.c-hex').value;
     const image = row.querySelector('.c-image').value.trim();
+    const stock = Number(row.querySelector('.c-stock').value) || 0;
     if (!name) return;
-    const obj = { name, hex };
+    const obj = { name, hex, stock };
     if (image) obj.image = image;
     colors.push(obj);
   });
@@ -178,11 +176,11 @@ function saveProduct(){
   const name = document.getElementById('f_name').value.trim();
   const sub = document.getElementById('f_sub').value.trim();
   const price = Number(document.getElementById('f_price').value) || 0;
-  const stock = Number(document.getElementById('f_stock').value) || 0;
   const image = document.getElementById('f_image').value.trim();
   const sizesRaw = document.getElementById('f_sizes').value.trim();
   const sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
   const colors = collectColors();
+  const stock = colors.reduce((sum, c) => sum + (c.stock || 0), 0);
   const cardColor = document.getElementById('f_cardcolor').value;
   const desc = document.getElementById('f_desc').value.trim();
 
@@ -205,7 +203,6 @@ function resetForm(){
   document.getElementById('f_name').value = '';
   document.getElementById('f_sub').value = '';
   document.getElementById('f_price').value = '';
-  document.getElementById('f_stock').value = '';
   document.getElementById('f_image').value = '';
   document.getElementById('f_sizes').value = '';
   clearColorRows();
@@ -221,7 +218,6 @@ function editProduct(id, p){
   document.getElementById('f_name').value = p.name || '';
   document.getElementById('f_sub').value = p.sub || '';
   document.getElementById('f_price').value = p.price || '';
-  document.getElementById('f_stock').value = p.stock || '';
   document.getElementById('f_image').value = p.image || '';
   document.getElementById('f_sizes').value = (p.sizes || []).join(', ');
   clearColorRows();
