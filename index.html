@@ -48,6 +48,13 @@
 
   .section-head{ display:flex; align-items:baseline; justify-content:space-between; padding:0 20px; margin-bottom:12px; }
   .section-head h3{ font-family:'Space Grotesk'; font-size:17px; }
+  .view-toggle{ display:flex; gap:6px; }
+  .vt-btn{ width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:var(--muted); border:1px solid var(--line); }
+  .vt-btn.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .grid.list-view{ grid-template-columns:1fr; }
+  .grid.list-view .card{ display:flex; }
+  .grid.list-view .card .imgwrap{ width:120px; aspect-ratio:1/1; flex-shrink:0; }
+  .grid.list-view .card .info{ flex:1; display:flex; flex-direction:column; justify-content:center; }
 
   .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:0 20px 26px; }
   .card{ background:var(--bg); border:1px solid var(--line); border-radius:18px; overflow:hidden; cursor:pointer; position:relative; }
@@ -153,7 +160,14 @@
   .review-form button{ background:var(--ink); color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; cursor:pointer; }
 
   .reviews-list{ padding:0 20px 20px; }
-  .review-item{ border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; line-height:1.5; }
+  .review-item{ border-bottom:1px solid var(--line); padding:14px 0; font-size:13px; line-height:1.5; }
+  .reviews-summary-head{ display:flex; align-items:baseline; gap:8px; padding:6px 0 16px; }
+  .rs-avg{ font-family:'Space Grotesk'; font-size:26px; font-weight:700; }
+  .rs-sub{ font-size:12px; color:var(--muted); }
+  .rev-top{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .rev-avatar{ width:36px; height:36px; border-radius:50%; background:var(--stone); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+  .rev-stars{ color:#f5a623; font-size:12px; }
+  .rev-text{ font-size:13px; color:#444; }
 
   .pay-field{ margin:0 20px; }
   .pay-field input[type=text], .pay-field input[type=file]{ width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:14px; background:var(--bg); }
@@ -161,6 +175,67 @@
   .pay-note{ font-size:11px; color:var(--muted); margin-top:5px; }
   .bts-result-item{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px; margin-bottom:6px; cursor:pointer; background:var(--bg); }
   .bts-result-item:active{ background:var(--stone); }
+  .pay-methods{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .pay-method-card{ border:2px solid var(--line); border-radius:14px; padding:12px 8px; text-align:center; cursor:pointer; font-size:11px; font-weight:600; }
+  .pay-method-card.selected{ border-color:var(--orange); background:#fff3e9; }
+  .pay-method-card.soon{ opacity:.55; }
+  .pmc-icon{ width:32px; height:32px; border-radius:8px; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px; }
+
+  .drawer-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:150; display:none; }
+  .drawer-overlay.open{ display:block; }
+  .drawer-panel{ position:fixed; top:0; left:0; bottom:0; width:78%; max-width:300px; background:#fff; z-index:151; transform:translateX(-100%); transition:transform .25s ease; padding:24px 20px; overflow-y:auto; }
+  .drawer-panel.open{ transform:translateX(0); }
+  .drawer-panel .logo{ text-align:left; margin-bottom:20px; }
+  .drawer-item{ padding:14px 4px; font-size:15px; font-weight:600; border-bottom:1px solid var(--line); cursor:pointer; }
+  .drawer-item.active{ color:var(--orange); }
+
+  .faq-section{ padding:10px 20px 30px; }
+  .faq-item{ border-bottom:1px solid var(--line); }
+  .faq-q{ display:flex; justify-content:space-between; align-items:center; padding:16px 0; cursor:pointer; font-size:14px; font-weight:600; }
+  .faq-q .chev{ transition:transform .2s; color:var(--muted); font-size:14px; }
+  .faq-item.open .faq-q .chev{ transform:rotate(180deg); }
+  .faq-a{ max-height:0; overflow:hidden; transition:max-height .25s ease; font-size:13px; color:#555; line-height:1.6; }
+  .faq-item.open .faq-a{ max-height:200px; padding-bottom:16px; }
+
+  .hero-photo{ margin:0 20px 0; border-radius:20px; aspect-ratio:16/11; background:linear-gradient(135deg,#1a1a1a 0%,#2b2b2b 100%); background-size:cover; background-position:center; position:relative; display:flex; align-items:flex-end; overflow:hidden; }
+  .hero-photo::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.55), transparent 60%); }
+  .hero-photo-text{ position:relative; z-index:2; padding:22px; color:#fff; }
+  .hero-photo-text .tag{ font-size:11px; color:var(--orange); font-weight:700; letter-spacing:.02em; }
+  .hero-photo-text h2{ font-family:'Space Grotesk'; font-size:20px; margin:6px 0 12px; line-height:1.25; }
+
+  .shipping-strip{ margin:16px 20px 6px; text-align:center; font-size:12px; font-weight:700; color:var(--orange); letter-spacing:.02em; }
+
+  .collections-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 20px 26px; }
+  .collection-tile{ position:relative; border-radius:16px; aspect-ratio:1/1; background:var(--stone); background-size:cover; background-position:center; overflow:hidden; cursor:pointer; display:flex; align-items:flex-end; }
+  .collection-tile::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.5), transparent 55%); }
+  .collection-tile span{ position:relative; z-index:2; color:#fff; font-weight:700; font-size:14px; padding:14px; }
+
+  .rating-summary{ text-align:center; padding:10px 20px 30px; }
+  .rating-summary .stars-big{ color:#f5a623; font-size:20px; letter-spacing:2px; }
+  .rating-summary .rs-num{ font-family:'Space Grotesk'; font-weight:700; font-size:18px; margin-left:6px; }
+  .rating-summary .rs-count{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+  .newsletter-block{ background:var(--stone); margin:0 20px 30px; border-radius:18px; padding:26px 20px; text-align:center; }
+  .newsletter-block h3{ font-size:18px; margin-bottom:6px; }
+  .newsletter-block p{ font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .newsletter-row{ display:flex; gap:8px; }
+  .newsletter-row input{ flex:1; border:1px solid var(--line); border-radius:100px; padding:11px 16px; font-size:13px; background:var(--bg); }
+  .newsletter-row button{ width:44px; height:44px; border-radius:50%; background:var(--orange); color:#fff; border:none; font-size:16px; cursor:pointer; flex-shrink:0; }
+
+  .shop-footer{ text-align:center; padding:30px 20px 40px; border-top:1px solid var(--line); }
+  .footer-contacts{ font-size:12px; color:var(--muted); line-height:1.8; margin:12px 0; }
+  .footer-copy{ font-size:11px; color:var(--muted); }
+  .social-follow{ padding:10px 20px 30px; }
+  .social-icons{ display:flex; justify-content:center; gap:14px; }
+  .social-icons a{ width:44px; height:44px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; text-decoration:none; }
+
+  .policy-accordion{ margin-top:10px; border-top:1px solid var(--line); }
+  .policy-item{ border-bottom:1px solid var(--line); }
+  .policy-q{ display:flex; justify-content:space-between; align-items:center; padding:14px 0; cursor:pointer; font-size:13px; font-weight:600; }
+  .policy-q .chev{ transition:transform .2s; color:var(--muted); }
+  .policy-item.open .policy-q .chev{ transform:rotate(180deg); }
+  .policy-a{ max-height:0; overflow:hidden; transition:max-height .25s ease; font-size:12px; color:#555; line-height:1.6; }
+  .policy-item.open .policy-a{ max-height:300px; padding-bottom:14px; }
 
   .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
   .modal-overlay.open{ display:flex; }
@@ -186,6 +261,7 @@
 
   <div class="screen active" id="home">
     <div class="topbar">
+      <div class="icon-btn" style="width:38px;" onclick="toggleDrawer()">☰</div>
       <div class="logo">milaisss</div>
       <div class="icon-btn" id="langBtn" onclick="toggleLangMenu(event)">
         <span id="langFlag">🇷🇺</span><span style="font-size:10px;">⌄</span>
@@ -203,15 +279,53 @@
       <div class="icon-btn" style="width:38px;" onclick="showScreen('settings')">⚙️</div>
     </div>
     <div class="cats" id="catRow"></div>
-    <div class="hero">
-      <div class="hero-text">
+
+    <div class="hero-photo" id="heroPhoto">
+      <div class="hero-photo-text">
         <div class="tag" data-i18n="heroTag">НОВАЯ КОЛЛЕКЦИЯ</div>
         <h2 class="display" data-i18n="heroTitle">Скидка 20% на первый дроп</h2>
         <button class="hero-btn" data-i18n="heroBtn">Смотреть</button>
       </div>
     </div>
-    <div class="section-head"><h3 class="display" id="sectionTitle">Все товары</h3></div>
+
+    <div class="shipping-strip" id="shippingStrip">Бесплатная доставка от 500 000 сум</div>
+
+    <div class="section-head"><h3 class="display">Коллекции</h3></div>
+    <div class="collections-grid" id="collectionsGrid"></div>
+
+    <div class="section-head">
+      <h3 class="display" id="sectionTitle">Все товары</h3>
+      <div class="view-toggle">
+        <span class="vt-btn active" data-view="grid" onclick="setGridView('grid')">▦</span>
+        <span class="vt-btn" data-view="list" onclick="setGridView('list')">☰</span>
+      </div>
+    </div>
     <div class="grid" id="productGrid"></div>
+
+    <div class="rating-summary" id="ratingSummary"></div>
+
+    <div class="section-head"><h3 class="display">Частые вопросы</h3></div>
+    <div class="faq-section" id="faqSection"></div>
+
+    <div class="newsletter-block">
+      <h3 class="display">Будьте в курсе</h3>
+      <p>Подпишись на новости о новых дропах и скидках</p>
+      <div class="newsletter-row">
+        <input type="email" id="newsletterEmail" placeholder="Ваш email">
+        <button onclick="submitNewsletter()">→</button>
+      </div>
+    </div>
+
+    <div class="social-follow">
+      <h3 class="display" style="text-align:center; margin-bottom:14px;">Мы в соцсетях</h3>
+      <div class="social-icons" id="socialIcons"></div>
+    </div>
+
+    <div class="shop-footer" id="shopFooter">
+      <div class="logo" style="font-size:24px;">milaisss</div>
+      <div class="footer-contacts" id="footerContacts"></div>
+      <div class="footer-copy">© 2026 milaisss</div>
+    </div>
   </div>
 
   <div class="screen" id="detail">
@@ -239,6 +353,7 @@
       <div class="colors" id="colorRow"></div>
       <div class="block-label" data-i18n="descLabel">Описание</div>
       <p class="desc" id="detailDesc"></p>
+      <div class="policy-accordion" id="policyAccordion"></div>
     </div>
     <div class="buybar">
       <button class="add-btn" id="addBtn" onclick="addToCart()" data-i18n="addToCart">Добавить в корзину</button>
@@ -269,13 +384,29 @@
       <div></div>
     </div>
     <div class="cart-title"><h2 class="display">Оплата и доставка</h2></div>
-    <div class="pay-field" id="paymentInfoBox" style="background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:14px; font-size:13px; line-height:1.6; margin-bottom:18px;"></div>
 
-    <div class="pay-field" style="background:#fff3e9; border:1px solid var(--orange); border-radius:14px; padding:14px; margin-bottom:18px; text-align:center;">
-      <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Код вашего заказа</div>
-      <div id="orderCodeDisplay" style="font-family:'Space Grotesk'; font-size:24px; font-weight:700; color:var(--orange);">#0000</div>
-      <div class="pay-note" style="margin-top:6px;">После перевода нажмите кнопку ниже — откроется чат в Telegram, куда нужно прикрепить скриншот перевода вместе с этим кодом.</div>
+    <div class="pay-field" style="margin-bottom:14px;">
+      <label class="block-label" style="margin-top:0;">Способ оплаты</label>
+      <div class="pay-methods" id="payMethods">
+        <div class="pay-method-card" data-method="payme" onclick="selectPayMethod('payme')">
+          <div class="pmc-icon" style="background:#00c9a7;">P</div><span>Payme</span>
+        </div>
+        <div class="pay-method-card" data-method="click" onclick="selectPayMethod('click')">
+          <div class="pmc-icon" style="background:#1877f2;">C</div><span>Click</span>
+        </div>
+        <div class="pay-method-card" data-method="card" onclick="selectPayMethod('card')">
+          <div class="pmc-icon" style="background:#141414;">💳</div><span>Карта</span>
+        </div>
+        <div class="pay-method-card soon" onclick="showSoonPopup()">
+          <div class="pmc-icon" style="background:#000;"></div><span>Apple Pay</span>
+        </div>
+        <div class="pay-method-card soon" onclick="showSoonPopup()">
+          <div class="pmc-icon" style="background:#4285F4;">G</div><span>Google Pay</span>
+        </div>
+      </div>
     </div>
+
+    <div class="pay-field" id="paymentInfoBox" style="background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:14px; font-size:13px; line-height:1.6; margin-bottom:18px; display:none;"></div>
 
     <div class="pay-field" style="margin-bottom:16px;">
       <label class="block-label" style="margin-top:0;">Ваш номер телефона</label>
@@ -358,9 +489,15 @@
 
 <div class="modal-overlay" id="paymentModal">
   <div class="modal-box">
-    <p>Откроется чат в Telegram — прикрепите там скриншот перевода с указанным кодом заказа. Если оплата не будет обнаружена, товар отправлен не будет. По всем вопросам обращайтесь в поддержку в вашем профиле.</p>
+    <p>Заказ оформлен. Продавец проверит поступление оплаты в своём приложении и подтвердит заказ. Если оплата не будет обнаружена, товар отправлен не будет. По всем вопросам обращайтесь в поддержку в вашем профиле.</p>
     <button onclick="closePaymentModal()">Понятно</button>
   </div>
+</div>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+<div class="drawer-panel" id="drawerPanel">
+  <div class="logo">milaisss</div>
+  <div id="drawerItems"></div>
 </div>
 
 <script>
@@ -373,7 +510,7 @@ const ADMIN_USERNAME = "isssroilov";
 // Как получить — см. инструкцию после обновления файла.
 const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
 const ADMIN_CHAT_ID = "6620851909";
-const NOTIFY_BOT_USERNAME = "MilaisssOthers_bot";
+const NOTIFY_BOT_USERNAME = "MilaisssOthers";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -500,7 +637,98 @@ function closeLightbox(){ document.getElementById('lightbox').classList.remove('
 let CATEGORIES = ["Тренды","Oversize","Минимализм","Лимитки"];
 let activeCategory = "Все";
 let paymentCardInfo = '';
+let paymentPaymeInfo = '';
+let paymentClickInfo = '';
 let btsBranches = [];
+let categoryImages = {};
+let shopContacts = '';
+let gridView = 'grid';
+function setGridView(v){
+  gridView = v;
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  renderGrid();
+}
+
+function renderCollectionsGrid(){
+  const wrap = document.getElementById('collectionsGrid');
+  wrap.innerHTML = CATEGORIES.map(cat => {
+    const img = categoryImages[cat];
+    const style = img ? `style="background-image:url('${img}')"` : '';
+    return `<div class="collection-tile" ${style} onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')"><span>${cat}</span></div>`;
+  }).join('');
+}
+
+function renderRatingSummary(){
+  const wrap = document.getElementById('ratingSummary');
+  const approved = reviews.filter(r => r.approved && typeof r.rating === 'number');
+  if (approved.length === 0){
+    wrap.innerHTML = `<div class="rs-count">Пока нет оценок покупателей</div>`;
+    return;
+  }
+  const avg = (approved.reduce((s,r)=>s+r.rating,0) / approved.length).toFixed(2);
+  const fullStars = Math.round(avg);
+  wrap.innerHTML = `
+    <span class="stars-big">${'★'.repeat(fullStars)}${'☆'.repeat(5-fullStars)}</span><span class="rs-num">${avg}</span>
+    <div class="rs-count">${approved.length} отзывов от покупателей</div>
+  `;
+}
+
+function submitNewsletter(){
+  const input = document.getElementById('newsletterEmail');
+  const email = input.value.trim();
+  if (!email || !email.includes('@')){ showToast('Введите корректный email'); return; }
+  db.collection('newsletter').add({ email, createdAt: Date.now() });
+  input.value = '';
+  showToast('Спасибо за подписку! ✓');
+}
+
+function renderFooterContacts(){
+  document.getElementById('footerContacts').innerHTML = shopContacts ? shopContacts.replace(/\n/g,'<br>') : '';
+}
+let faqItems = [
+  { q: "Как оформить заказ?", a: "Добавьте товар в корзину, выберите способ оплаты и укажите ближайший пункт БТС для получения." },
+  { q: "Сколько идёт доставка?", a: "Обычно 2–5 дней в зависимости от региона. Статус заказа виден в разделе «Профиль»." },
+  { q: "Можно ли вернуть товар?", a: "Да, если размер не подошёл — напишите в поддержку в течение 7 дней после получения." }
+];
+let policyItems = [
+  { q: "Возврат", a: "У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии." },
+  { q: "Доставка", a: "Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона." },
+  { q: "Уход за товаром", a: "Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке." }
+];
+let socialLinks = {};
+
+function renderPolicyAccordion(){
+  const wrap = document.getElementById('policyAccordion');
+  wrap.innerHTML = policyItems.map((p,i) => `
+    <div class="policy-item" id="policy-${i}">
+      <div class="policy-q" onclick="togglePolicy(${i})"><span>${p.q}</span><span class="chev">⌄</span></div>
+      <div class="policy-a">${p.a}</div>
+    </div>
+  `).join('');
+}
+function togglePolicy(i){ document.getElementById(`policy-${i}`).classList.toggle('open'); }
+
+function renderSocialIcons(){
+  const wrap = document.getElementById('socialIcons');
+  let html = '';
+  if (socialLinks.instagram) html += `<a href="${socialLinks.instagram}" target="_blank">📷</a>`;
+  if (socialLinks.tiktok) html += `<a href="${socialLinks.tiktok}" target="_blank">🎵</a>`;
+  wrap.innerHTML = html || '<span class="hint">Ссылки на соцсети скоро появятся</span>';
+}
+
+function renderFaq(){
+  const wrap = document.getElementById('faqSection');
+  wrap.innerHTML = faqItems.map((f, i) => `
+    <div class="faq-item" id="faq-${i}">
+      <div class="faq-q" onclick="toggleFaq(${i})"><span>${f.q}</span><span class="chev">⌄</span></div>
+      <div class="faq-a">${f.a}</div>
+    </div>
+  `).join('');
+}
+function toggleFaq(i){
+  document.getElementById(`faq-${i}`).classList.toggle('open');
+}
+renderFaq();
 
 function renderCategoryChips(){
   const row = document.getElementById('catRow');
@@ -528,6 +756,25 @@ function filteredProducts(){
   if (activeCategory === 'Все') return products;
   if (activeCategory === 'До 500 000') return products.filter(p => Number(p.price||0) <= 500000);
   return products.filter(p => p.category === activeCategory);
+}
+
+/* ---------- side drawer catalog ---------- */
+function toggleDrawer(){
+  document.getElementById('drawerOverlay').classList.toggle('open');
+  document.getElementById('drawerPanel').classList.toggle('open');
+  renderDrawer();
+}
+function renderDrawer(){
+  const wrap = document.getElementById('drawerItems');
+  const items = ['Все', ...CATEGORIES, 'До 500 000'];
+  wrap.innerHTML = items.map(cat => `<div class="drawer-item ${activeCategory===cat?'active':''}" onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')">${cat === 'Все' ? t('allCat') : cat}</div>`).join('');
+}
+function drawerSelect(cat){
+  activeCategory = cat;
+  renderCategoryChips();
+  renderGrid();
+  toggleDrawer();
+  showScreen('home');
 }
 
 /* ---------- favorites ---------- */
@@ -580,6 +827,7 @@ function productCardHTML(p){
 function renderGrid(){
   const list = filteredProducts();
   document.getElementById('sectionTitle').textContent = activeCategory === 'Все' ? t('allProducts') : activeCategory;
+  grid.className = 'grid' + (gridView === 'list' ? ' list-view' : '');
   grid.innerHTML = '';
   if (list.length === 0){ grid.innerHTML = `<div class="empty-state">${t('noProductsYet')}</div>`; return; }
   list.forEach((p) => {
@@ -616,6 +864,7 @@ db.collection('reviews').onSnapshot(snap => {
   reviews = [];
   snap.forEach(doc => reviews.push({ id: doc.id, ...doc.data() }));
   if (currentProduct) updateReviewsSummary();
+  renderRatingSummary();
 });
 
 db.collection('settings').doc('shop').onSnapshot(doc => {
@@ -630,9 +879,21 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
     if (!link){ link = document.createElement('link'); link.id = 'dynamicFontLink'; link.rel = 'stylesheet'; document.head.appendChild(link); }
     link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(data.fontFamily).replace(/%20/g,'+')}:wght@600;700&display=swap`;
   }
-  if (data.categories && data.categories.length){ CATEGORIES = data.categories; renderCategoryChips(); }
+  if (data.categories && data.categories.length){ CATEGORIES = data.categories; renderCategoryChips(); renderCollectionsGrid(); }
   paymentCardInfo = data.paymentCardInfo || '';
+  paymentPaymeInfo = data.paymentPaymeInfo || '';
+  paymentClickInfo = data.paymentClickInfo || '';
   btsBranches = data.btsBranches || [];
+  if (data.faqItems && data.faqItems.length){ faqItems = data.faqItems; renderFaq(); }
+  if (data.policyItems && data.policyItems.length){ policyItems = data.policyItems; }
+  socialLinks = data.socialLinks || {};
+  renderSocialIcons();
+  if (data.heroImage) document.getElementById('heroPhoto').style.backgroundImage = `url('${data.heroImage}')`;
+  if (data.shippingText) document.getElementById('shippingStrip').textContent = data.shippingText;
+  categoryImages = data.categoryImages || {};
+  renderCollectionsGrid();
+  shopContacts = data.shopContacts || '';
+  renderFooterContacts();
 });
 
 /* ---------- screens ---------- */
@@ -692,22 +953,39 @@ function updateReviewsSummary(){
 function openReviews(){
   const approved = reviews.filter(r => r.productId === currentProduct.id && r.approved);
   const list = document.getElementById('reviewsList');
+  const rated = approved.filter(r => typeof r.rating === 'number');
+  const avg = rated.length ? (rated.reduce((s,r)=>s+r.rating,0)/rated.length).toFixed(1) : '—';
+
+  let html = `<div class="reviews-summary-head"><span class="rs-avg">${avg}</span><span class="rs-sub">${approved.length} отзывов</span></div>`;
+
   if (approved.length === 0){
-    list.innerHTML = '<p class="hint">Пока нет отзывов по этому товару</p>';
+    html += '<p class="hint">Пока нет отзывов по этому товару</p>';
   } else {
-    list.innerHTML = approved.map(r => `
+    html += approved.map(r => {
+      const name = r.anonymous ? 'Аноним' : (r.authorName || 'Покупатель');
+      const initial = name.trim().charAt(0).toUpperCase();
+      return `
       <div class="review-item">
-        <div class="rhead"><span class="rauthor">${r.anonymous ? 'Аноним' : (r.authorName || 'Покупатель')}</span><span>${r.colorName ? 'Цвет: '+r.colorName : ''}</span></div>
-        <div>${r.rating ? '★'.repeat(r.rating)+' ' : ''}${r.text}</div>
+        <div class="rev-top">
+          <div class="rev-avatar">${initial}</div>
+          <div>
+            <div class="rauthor">${name}</div>
+            <div class="rev-stars">${r.rating ? '★'.repeat(r.rating)+'☆'.repeat(5-r.rating) : ''}</div>
+          </div>
+        </div>
+        <div class="rev-text">${r.text}${r.colorName ? ` <span class="hint" style="display:inline;">· цвет: ${r.colorName}</span>` : ''}</div>
         ${r.photo ? `<img class="rphoto" src="${r.photo}">` : ''}
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
+  list.innerHTML = html;
   showScreen('reviewsScreen');
 }
 
 function openProduct(id){
   currentProduct = products.find(p => p.id === id);
   if (!currentProduct) return;
+  renderPolicyAccordion();
   const sizes = (currentProduct.sizes && currentProduct.sizes.length) ? currentProduct.sizes : ["38","39","40","41","42","43"];
   const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", hex:"#f4f1ec", stock: currentProduct.stock || 0}];
   currentColors = colors;
@@ -871,23 +1149,40 @@ function renderCart(){
 
 function goToCheckoutFlow(){
   if (cart.length === 0) return;
-  document.getElementById('paymentInfoBox').innerHTML = paymentCardInfo
-    ? `💳 <strong>Переведите сумму на:</strong><br>${paymentCardInfo}`
-    : 'Реквизиты для оплаты пока не добавлены продавцом — напишите в поддержку.';
+  selectedPayMethod = '';
+  document.querySelectorAll('.pay-method-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('paymentInfoBox').style.display = 'none';
+  document.getElementById('paymentInfoBox').innerHTML = '';
 
   selectedBtsBranch = '';
   document.getElementById('btsSearchInput').value = '';
   document.getElementById('btsSelectedDisplay').style.display = 'none';
   document.getElementById('btsResults').innerHTML = '';
 
-  currentOrderCode = String(Math.floor(1000 + Math.random() * 9000));
-  document.getElementById('orderCodeDisplay').textContent = '#' + currentOrderCode;
-
   showScreen('checkoutFlow');
 }
 
-let currentOrderCode = '';
 let selectedBtsBranch = '';
+let selectedPayMethod = '';
+
+function showSoonPopup(){
+  showToast('Скоро будет доступно — пока выберите Payme, Click или карту');
+}
+
+function selectPayMethod(method){
+  selectedPayMethod = method;
+  document.querySelectorAll('.pay-method-card').forEach(c => c.classList.toggle('selected', c.dataset.method === method));
+
+  const box = document.getElementById('paymentInfoBox');
+  box.style.display = 'block';
+  if (method === 'payme'){
+    box.innerHTML = paymentPaymeInfo ? `<strong>Payme:</strong><br>Переведите на номер: ${paymentPaymeInfo}` : 'Реквизиты Payme пока не добавлены продавцом — напишите в поддержку.';
+  } else if (method === 'click'){
+    box.innerHTML = paymentClickInfo ? `<strong>Click:</strong><br>Переведите на номер: ${paymentClickInfo}` : 'Реквизиты Click пока не добавлены продавцом — напишите в поддержку.';
+  } else if (method === 'card'){
+    box.innerHTML = paymentCardInfo ? `💳 <strong>Переведите сумму на:</strong><br>${paymentCardInfo}` : 'Реквизиты карты пока не добавлены продавцом — напишите в поддержку.';
+  }
+}
 
 function filterBtsResults(query){
   const wrap = document.getElementById('btsResults');
@@ -911,11 +1206,14 @@ function confirmPayment(){
   const phone = document.getElementById('phoneInput').value.trim();
   const branch = selectedBtsBranch;
 
+  if (!selectedPayMethod){ showToast('Выберите способ оплаты'); return; }
   if (!phone){ showToast('Укажите номер телефона'); return; }
   if (!branch){ showToast('Выберите пункт БТС'); return; }
 
   finalizeOrder(phone, branch);
 }
+
+const PAY_METHOD_LABELS = { payme:'Payme', click:'Click', card:'Карта' };
 
 function finalizeOrder(phone, branch){
   let total = 0;
@@ -926,14 +1224,15 @@ function finalizeOrder(phone, branch){
     text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
     orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price });
   });
-  text += `\nИтого: ${fmt(total)}\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n🔑 Код заказа: #${currentOrderCode}\n(чек оплаты покупатель пришлёт отдельным сообщением с этим кодом)`;
+  const methodLabel = PAY_METHOD_LABELS[selectedPayMethod] || selectedPayMethod;
+  text += `\nИтого: ${fmt(total)}\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n💰 Способ оплаты: ${methodLabel}`;
 
   const customerId = getCustomerId();
   const customerName = getCustomerName();
 
   db.collection('orders').add({
     customerId, customerName, items: orderItems, total,
-    btsBranch: branch, phone, orderCode: currentOrderCode,
+    btsBranch: branch, phone, paymentMethod: methodLabel,
     status: 'Проверяется оплата', createdAt: Date.now()
   });
 
@@ -941,10 +1240,6 @@ function finalizeOrder(phone, branch){
   document.getElementById('phoneInput').value = '';
 
   notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text).finally(() => {
-    if (NOTIFY_BOT_USERNAME && !NOTIFY_BOT_USERNAME.startsWith('ВСТАВЬ')){
-      const chatUrl = `https://t.me/${NOTIFY_BOT_USERNAME}?text=${encodeURIComponent('Чек по заказу #' + currentOrderCode)}`;
-      if (tg && tg.openTelegramLink){ tg.openTelegramLink(chatUrl); } else { window.open(chatUrl, '_blank'); }
-    }
     document.getElementById('paymentModal').classList.add('open');
   });
 }
@@ -1021,6 +1316,8 @@ function submitReview(orderId, ii, productId, productName, colorName){
 /* ---------- init ---------- */
 applyLang();
 setupSupportListener();
+renderCollectionsGrid();
+renderRatingSummary();
 </script>
 </body>
 </html>
