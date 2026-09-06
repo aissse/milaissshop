@@ -512,7 +512,7 @@ function removeBtsBranch(i){
   saveSetting('btsBranches', btsBranches);
 }
 
-const STATUS_OPTIONS = ['Ожидает оплаты','Собирается','Отправляется','В пути','Доставлено'];
+const STATUS_OPTIONS = ['Проверяется оплата','Собирается','В пути','Доставлен'];
 let allOrders = [];
 
 function loadOrders(){
@@ -565,6 +565,9 @@ function filterAndRenderOrders(){
       <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
       ${o.items.map(it => `<div class="oline">${it.name} (${it.size}, ${it.colorName}) × ${it.qty} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
       <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
+      ${o.phone ? `<div class="oline">📞 ${o.phone}</div>` : ''}
+      ${o.btsBranch ? `<div class="oline">📍 ${o.btsBranch}</div>` : ''}
+      ${o.orderCode ? `<div class="oline">🔑 Код: #${o.orderCode} <span style="color:var(--muted); font-size:11px;">(ищи чек с этим кодом в чате бота)</span></div>` : ''}
       <select class="status-select">
         ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
       </select>
