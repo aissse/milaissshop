@@ -290,13 +290,13 @@
       <div class="icon-btn" style="width:38px;" onclick="toggleDrawer()">☰</div>
       <div class="logo">milaisss</div>
       <div class="icon-btn" id="langBtn" onclick="toggleLangMenu(event)">
-        <span id="langFlag" style="font-size:16px; line-height:1; display:inline-flex; align-items:center;">🇬🇧</span><span style="font-size:10px; line-height:1; display:inline-flex; align-items:center;">⌄</span>
+        <span id="langFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;"></span><span style="font-size:10px; line-height:1; display:inline-flex; align-items:center;">⌄</span>
         <div class="lang-menu" id="langMenu">
-          <div onclick="setLang('ru')">🇷🇺 Русский</div>
-          <div onclick="setLang('uz')">🇺🇿 Oʻzbek</div>
-          <div onclick="setLang('tr')">🇹🇷 Türkçe</div>
-          <div onclick="setLang('az')">🇦🇿 Azərbaycan</div>
-          <div onclick="setLang('en')">🇬🇧 English</div>
+          <div onclick="setLang('ru')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/ru.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Русский</div>
+          <div onclick="setLang('uz')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Oʻzbek</div>
+          <div onclick="setLang('tr')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/tr.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Türkçe</div>
+          <div onclick="setLang('az')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/az.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Azərbaycan</div>
+          <div onclick="setLang('en')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> English</div>
         </div>
       </div>
     </div>
@@ -584,7 +584,8 @@ const db = firebase.firestore();
 function fmt(n){ return Number(n||0).toLocaleString('ru-RU') + " сум"; }
 
 /* ---------- i18n ---------- */
-const FLAGS = { ru:"🇷🇺", uz:"🇺🇿", tr:"🇹🇷", az:"🇦🇿", en:"🇬🇧" };
+const FLAG_CODES = { ru:"ru", uz:"uz", tr:"tr", az:"az", en:"gb" };
+function flagImg(code){ return `<img src="https://flagcdn.com/w40/${FLAG_CODES[code]}.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;">`; }
 const STR = {
   ru: { search:"Найти", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
         addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
@@ -628,7 +629,7 @@ function t(key){ return (STR[lang] && STR[lang][key]) || STR.ru[key] || key; }
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.getAttribute('data-i18n')));
   document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.getAttribute('data-i18n-ph')));
-  document.getElementById('langFlag').textContent = FLAGS[lang];
+  document.getElementById('langFlag').innerHTML = flagImg(lang);
   renderCategoryChips();
   renderGrid();
   renderFavGrid();
