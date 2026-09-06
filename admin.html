@@ -775,53 +775,63 @@ function toggleCard(id){
 }
 
 let infoItems = [];
+const INFO_LANGS = [
+  { code: 'ru', label: 'Русский (основной)' },
+  { code: 'en', label: 'English' },
+  { code: 'uz', label: 'Oʻzbekcha' },
+  { code: 'tr', label: 'Türkçe' },
+  { code: 'az', label: 'Azərbaycan' }
+];
+
 function addInfoRow(data){
-  data = data || { title: '', body: '', titleTr: '', bodyTr: '' };
+  data = data || {};
   const row = document.createElement('div');
   row.className = 'faq-row';
+  const langFields = INFO_LANGS.map(l => `
+    <label style="margin:10px 0 4px;">${l.label} — заголовок</label>
+    <input type="text" class="info-title-${l.code}" placeholder="Заголовок" value="${((data[`title_${l.code}`])||'').replace(/"/g,'&quot;')}">
+    <label style="margin:6px 0 4px;">${l.label} — текст</label>
+    <textarea class="info-body-${l.code}" rows="3" style="width:100%;" placeholder="Текст под заголовком">${(data[`body_${l.code}`])||''}</textarea>
+  `).join('<div style="border-top:1px dashed var(--line); margin:12px 0;"></div>');
   row.innerHTML = `
-    <span class="rm" onclick="this.parentElement.remove()">✕ удалить</span>
-    <input type="text" class="info-title-input" placeholder="Заголовок (например О нас)" value="${(data.title||'').replace(/"/g,'&quot;')}">
-    <textarea class="info-body-input" rows="3" placeholder="Текст под заголовком">${data.body||''}</textarea>
-    <label style="margin:10px 0 4px;">Перевод заголовка (en:..., uz:..., tr:..., az:...)</label>
-    <textarea class="info-title-tr-input" rows="2" style="width:100%;" placeholder="en:About us, uz:Biz haqimizda, tr:..., az:...">${(data.titleTr||'')}</textarea>
-    <label style="margin:10px 0 4px;">Перевод текста (en:..., uz:..., tr:..., az:...)</label>
-    <textarea class="info-body-tr-input" rows="5" style="width:100%;" placeholder="en:..., uz:..., tr:..., az:...">${(data.bodyTr||'')}</textarea>
+    <span class="rm" onclick="this.parentElement.remove()">✕ удалить весь пункт</span>
+    ${langFields}
   `;
   document.getElementById('infoRows').appendChild(row);
 }
+
 function loadInfoRows(items){
   document.getElementById('infoRows').innerHTML = '';
-  (items && items.length ? items : []).forEach(it => addInfoRow({
-    title: it.title, body: it.body,
-    titleTr: it.titleTranslations ? ['en','uz','tr','az'].map(l => it.titleTranslations[l] ? `${l}:${it.titleTranslations[l]}` : '').filter(Boolean).join(', ') : '',
-    bodyTr: it.bodyTranslations ? ['en','uz','tr','az'].map(l => it.bodyTranslations[l] ? `${l}:${it.bodyTranslations[l]}` : '').filter(Boolean).join(', ') : ''
-  }));
+  (items && items.length ? items : []).forEach(it => {
+    const data = { title_ru: it.title, body_ru: it.body };
+    INFO_LANGS.forEach(l => {
+      if (l.code === 'ru') return;
+      data[`title_${l.code}`] = (it.titleTranslations && it.titleTranslations[l.code]) || '';
+      data[`body_${l.code}`] = (it.bodyTranslations && it.bodyTranslations[l.code]) || '';
+    });
+    addInfoRow(data);
+  });
   if (!items || !items.length) addInfoRow();
 }
-function parseTranslationString(str){
-  const obj = {};
-  str.split(',').forEach(pair => {
-    const idx = pair.indexOf(':');
-    if (idx === -1) return;
-    const l = pair.slice(0, idx).trim();
-    const v = pair.slice(idx+1).trim();
-    if (l && v) obj[l] = v;
-  });
-  return obj;
-}
+
 function saveInfoItems(){
   const rows = document.querySelectorAll('#infoRows .faq-row');
   const items = [];
   rows.forEach(row => {
-    const title = row.querySelector('.info-title-input').value.trim();
-    const body = row.querySelector('.info-body-input').value.trim();
-    const titleTr = row.querySelector('.info-title-tr-input').value.trim();
-    const bodyTr = row.querySelector('.info-body-tr-input').value.trim();
+    const title = row.querySelector('.info-title-ru').value.trim();
+    const body = row.querySelector('.info-body-ru').value.trim();
     if (!title) return;
     const item = { title, body };
-    if (titleTr) item.titleTranslations = parseTranslationString(titleTr);
-    if (bodyTr) item.bodyTranslations = parseTranslationString(bodyTr);
+    const titleTranslations = {}, bodyTranslations = {};
+    INFO_LANGS.forEach(l => {
+      if (l.code === 'ru') return;
+      const tv = row.querySelector(`.info-title-${l.code}`).value.trim();
+      const bv = row.querySelector(`.info-body-${l.code}`).value.trim();
+      if (tv) titleTranslations[l.code] = tv;
+      if (bv) bodyTranslations[l.code] = bv;
+    });
+    if (Object.keys(titleTranslations).length) item.titleTranslations = titleTranslations;
+    if (Object.keys(bodyTranslations).length) item.bodyTranslations = bodyTranslations;
     items.push(item);
   });
   saveSetting('infoItems', items);
