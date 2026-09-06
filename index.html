@@ -159,6 +159,8 @@
   .pay-field input[type=text], .pay-field input[type=file]{ width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:14px; background:var(--bg); }
   .pay-field select{ width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:13px; background:var(--bg); }
   .pay-note{ font-size:11px; color:var(--muted); margin-top:5px; }
+  .bts-result-item{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px; margin-bottom:6px; cursor:pointer; background:var(--bg); }
+  .bts-result-item:active{ background:var(--stone); }
 
   .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
   .modal-overlay.open{ display:flex; }
@@ -283,7 +285,9 @@
 
     <div class="pay-field" style="margin-bottom:16px;">
       <label class="block-label" style="margin-top:0;">Ближайший пункт БТС</label>
-      <select id="btsSelectFlow"></select>
+      <input type="text" id="btsSearchInput" placeholder="Начните вводить город или улицу..." oninput="filterBtsResults(this.value)">
+      <div id="btsSelectedDisplay" style="font-size:12px; font-weight:700; color:var(--orange); margin-top:6px; display:none;"></div>
+      <div id="btsResults" style="max-height:180px; overflow-y:auto; margin-top:6px;"></div>
     </div>
 
     <button class="checkout-btn" onclick="confirmPayment()" id="confirmPaymentBtn">Перевод совершён</button>
@@ -367,9 +371,9 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN = "bot8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
-const ADMIN_CHAT_ID = "6620851909";
-const NOTIFY_BOT_USERNAME = "MilaisssOthers_bot";
+const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
+const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
+const NOTIFY_BOT_USERNAME = "ВСТАВЬ_USERNAME_БОТА_БЕЗ_@";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -871,10 +875,10 @@ function goToCheckoutFlow(){
     ? `💳 <strong>Переведите сумму на:</strong><br>${paymentCardInfo}`
     : 'Реквизиты для оплаты пока не добавлены продавцом — напишите в поддержку.';
 
-  const sel = document.getElementById('btsSelectFlow');
-  sel.innerHTML = btsBranches.length
-    ? '<option value="">— выберите пункт —</option>' + btsBranches.map(b => `<option value="${b}">${b}</option>`).join('')
-    : '<option value="">Пункты пока не добавлены</option>';
+  selectedBtsBranch = '';
+  document.getElementById('btsSearchInput').value = '';
+  document.getElementById('btsSelectedDisplay').style.display = 'none';
+  document.getElementById('btsResults').innerHTML = '';
 
   currentOrderCode = String(Math.floor(1000 + Math.random() * 9000));
   document.getElementById('orderCodeDisplay').textContent = '#' + currentOrderCode;
@@ -883,10 +887,29 @@ function goToCheckoutFlow(){
 }
 
 let currentOrderCode = '';
+let selectedBtsBranch = '';
+
+function filterBtsResults(query){
+  const wrap = document.getElementById('btsResults');
+  const q = query.trim().toLowerCase();
+  if (!q){ wrap.innerHTML = ''; return; }
+  const matches = btsBranches.filter(b => b.toLowerCase().includes(q)).slice(0, 20);
+  if (matches.length === 0){ wrap.innerHTML = '<p class="pay-note">Ничего не найдено, попробуйте другой запрос</p>'; return; }
+  wrap.innerHTML = matches.map(b => `<div class="bts-result-item" onclick="selectBtsBranch('${b.replace(/'/g,"\\'")}')">${b}</div>`).join('');
+}
+
+function selectBtsBranch(branch){
+  selectedBtsBranch = branch;
+  document.getElementById('btsSearchInput').value = '';
+  document.getElementById('btsResults').innerHTML = '';
+  const disp = document.getElementById('btsSelectedDisplay');
+  disp.textContent = '✓ Выбрано: ' + branch;
+  disp.style.display = 'block';
+}
 
 function confirmPayment(){
   const phone = document.getElementById('phoneInput').value.trim();
-  const branch = document.getElementById('btsSelectFlow').value;
+  const branch = selectedBtsBranch;
 
   if (!phone){ showToast('Укажите номер телефона'); return; }
   if (!branch){ showToast('Выберите пункт БТС'); return; }
