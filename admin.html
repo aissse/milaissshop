@@ -23,6 +23,13 @@
   h1{ font-family:'Cormorant Garamond'; font-size:20px; margin-bottom:4px; }
   .sub{ color:var(--muted); font-size:13px; margin-bottom:16px; }
   .card{ background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:16px; }
+  .card.collapsible{ padding:0; overflow:hidden; }
+  .card-header{ display:flex; align-items:center; justify-content:space-between; padding:16px; cursor:pointer; }
+  .card-header h1{ margin:0; }
+  .card-chevron{ display:none; font-size:16px; color:var(--muted); }
+  .card.open .card-chevron{ display:inline-block; }
+  .card-body{ display:none; padding:0 16px 16px; }
+  .card.open .card-body{ display:block; }
   label{ font-size:12px; font-weight:700; color:var(--muted); display:block; margin:12px 0 5px; }
   label:first-child{ margin-top:0; }
   input[type=text], input[type=number], input[type=url], textarea, select{
@@ -236,8 +243,9 @@
     </div>
 
     <div class="tab-panel" id="tab-design">
-      <div class="card">
-        <h1>Цвета кнопок и элементов</h1>
+      <div class="card collapsible" id="card-colors">
+        <div class="card-header" onclick="toggleCard('card-colors')"><h1>Цвета кнопок и элементов</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
         <label>Основной цвет кнопок (Добавить в корзину, Оформить заказ)</label>
         <div class="color-row"><input type="color" id="f_orangeColor" value="#ff5a1f" onchange="syncHexInput('orangeColor', this.value)"><input type="text" id="f_orangeColorHex" placeholder="#ff5a1f" onchange="saveHexColor('orangeColor', this.value)"></div>
 
@@ -277,10 +285,12 @@
         </div>
         <div id="fontPreview" style="margin-top:14px; font-size:32px; text-align:center; padding:14px; border:1px dashed var(--line); border-radius:12px;">milaisss</div>
         <div class="hint">Открой fonts.google.com в другой вкладке, найди шрифт, который нравится, и впиши его точное название сюда.</div>
+        </div>
       </div>
 
-      <div class="card">
-        <h1>Главный баннер и витрина</h1>
+      <div class="card collapsible" id="card-hero">
+        <div class="card-header" onclick="toggleCard('card-hero')"><h1>Главный баннер и витрина</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
         <label>Фото для большого баннера на главной</label>
         <input type="url" id="f_heroImage" placeholder="https://..." onchange="saveSetting('heroImage', this.value)">
 
@@ -289,20 +299,34 @@
 
         <label>Контакты для футера сайта (email, адрес — по одному на строке)</label>
         <textarea id="f_shopContacts" rows="3" placeholder="hello@milaisss.uz&#10;Ташкент, Чиланзар" onchange="saveSetting('shopContacts', this.value)"></textarea>
+        </div>
       </div>
 
-      <div class="card">
-        <h1>Категории в магазине</h1>
+      <div class="card collapsible" id="card-categories">
+        <div class="card-header" onclick="toggleCard('card-categories')"><h1>Категории в магазине</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
         <div id="catTags"></div>
         <div class="row" style="margin-top:10px;">
           <input type="text" id="newCatInput" placeholder="Название категории">
         </div>
         <button class="btn secondary" onclick="addCategory()">+ Добавить категорию</button>
-        <div class="hint">Эти категории отображаются кнопками-фильтрами на главной странице магазина.</div>
+        <div class="hint">Эти категории отображаются кнопками-фильтрами на главной странице магазина. Это только товарные категории — для информационных кнопок вроде "О нас" используй раздел ниже.</div>
+        </div>
       </div>
 
-      <div class="card">
-        <h1>Пункты БТС</h1>
+      <div class="card collapsible" id="card-infoitems">
+        <div class="card-header" onclick="toggleCard('card-infoitems')"><h1>Информационные пункты (О нас и т.п.)</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
+        <div id="infoRows"></div>
+        <button class="btn secondary" onclick="addInfoRow()">+ Добавить пункт</button>
+        <button class="btn" onclick="saveInfoItems()">Сохранить</button>
+        <div class="hint">Эти пункты (например "О нас", "Контакты") показываются только в боковом меню сайта — отдельно от категорий товаров, и никак не влияют на каталог.</div>
+        </div>
+      </div>
+
+      <div class="card collapsible" id="card-bts">
+        <div class="card-header" onclick="toggleCard('card-bts')"><h1>Пункты БТС</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
         <div id="btsTags"></div>
         <div class="row" style="margin-top:10px;">
           <input type="text" id="newBtsInput" placeholder="Адрес пункта БТС">
@@ -314,31 +338,38 @@
         <textarea id="bulkBtsInput" rows="6" placeholder="Ташкент, Яккасарайский р-н — YAKKASAROY, ул. Бобур 22&#10;Самарканд — SAGDIANA, ул. Абу Бакр Розий&#10;..."></textarea>
         <button class="btn" onclick="bulkImportBts()">Импортировать список</button>
         <div class="hint">Вставь сразу весь список — каждая строка станет отдельным пунктом.</div>
+        </div>
       </div>
 
-      <div class="card">
-        <h1>Частые вопросы (FAQ)</h1>
+      <div class="card collapsible" id="card-faq">
+        <div class="card-header" onclick="toggleCard('card-faq')"><h1>Частые вопросы (FAQ)</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
         <div id="faqRows"></div>
         <button class="btn secondary" onclick="addFaqRow()">+ Добавить вопрос</button>
         <button class="btn" onclick="saveFaq()">Сохранить FAQ</button>
         <div class="hint">Показывается на главной странице магазина под каталогом.</div>
+        </div>
       </div>
 
-      <div class="card">
-        <h1>Политики в карточке товара</h1>
+      <div class="card collapsible" id="card-policy">
+        <div class="card-header" onclick="toggleCard('card-policy')"><h1>Политики в карточке товара</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
         <div id="policyRows"></div>
         <button class="btn secondary" onclick="addPolicyRow()">+ Добавить пункт</button>
         <button class="btn" onclick="savePolicy()">Сохранить</button>
         <div class="hint">Аккордеон "Возврат / Доставка / Уход" на странице товара.</div>
+        </div>
       </div>
 
-      <div class="card">
-        <h1>Соцсети</h1>
+      <div class="card collapsible" id="card-social">
+        <div class="card-header" onclick="toggleCard('card-social')"><h1>Соцсети</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
         <label>Instagram (ссылка)</label>
         <input type="url" id="f_instagram" placeholder="https://instagram.com/..." onchange="saveSocialLink('instagram', this.value)">
         <label>TikTok (ссылка)</label>
         <input type="url" id="f_tiktok" placeholder="https://tiktok.com/@..." onchange="saveSocialLink('tiktok', this.value)">
         <div class="hint">Иконки появятся внизу главной страницы магазина.</div>
+        </div>
       </div>
     </div>
 
@@ -598,6 +629,8 @@ function loadSettings(){
     faqItems = data.faqItems || [];
     loadFaqRows(faqItems);
     loadPolicyRows(data.policyItems || []);
+    infoItems = data.infoItems || [];
+    loadInfoRows(infoItems);
     socialLinks = data.socialLinks || {};
     if (socialLinks.instagram) document.getElementById('f_instagram').value = socialLinks.instagram;
     if (socialLinks.tiktok) document.getElementById('f_tiktok').value = socialLinks.tiktok;
@@ -737,6 +770,62 @@ function bulkImportBts(){
 }
 
 let faqItems = [];
+function toggleCard(id){
+  document.getElementById(id).classList.toggle('open');
+}
+
+let infoItems = [];
+function addInfoRow(data){
+  data = data || { title: '', body: '', titleTr: '', bodyTr: '' };
+  const row = document.createElement('div');
+  row.className = 'faq-row';
+  row.innerHTML = `
+    <span class="rm" onclick="this.parentElement.remove()">✕ удалить</span>
+    <input type="text" class="info-title-input" placeholder="Заголовок (например О нас)" value="${(data.title||'').replace(/"/g,'&quot;')}">
+    <textarea class="info-body-input" rows="2" placeholder="Текст под заголовком">${data.body||''}</textarea>
+    <input type="text" class="info-title-tr-input" style="margin-top:6px;" placeholder="Перевод заголовка: en:About us, uz:..., tr:..., az:..." value="${(data.titleTr||'').replace(/"/g,'&quot;')}">
+    <input type="text" class="info-body-tr-input" style="margin-top:6px;" placeholder="Перевод текста: en:..., uz:..., tr:..., az:..." value="${(data.bodyTr||'').replace(/"/g,'&quot;')}">
+  `;
+  document.getElementById('infoRows').appendChild(row);
+}
+function loadInfoRows(items){
+  document.getElementById('infoRows').innerHTML = '';
+  (items && items.length ? items : []).forEach(it => addInfoRow({
+    title: it.title, body: it.body,
+    titleTr: it.titleTranslations ? ['en','uz','tr','az'].map(l => it.titleTranslations[l] ? `${l}:${it.titleTranslations[l]}` : '').filter(Boolean).join(', ') : '',
+    bodyTr: it.bodyTranslations ? ['en','uz','tr','az'].map(l => it.bodyTranslations[l] ? `${l}:${it.bodyTranslations[l]}` : '').filter(Boolean).join(', ') : ''
+  }));
+  if (!items || !items.length) addInfoRow();
+}
+function parseTranslationString(str){
+  const obj = {};
+  str.split(',').forEach(pair => {
+    const idx = pair.indexOf(':');
+    if (idx === -1) return;
+    const l = pair.slice(0, idx).trim();
+    const v = pair.slice(idx+1).trim();
+    if (l && v) obj[l] = v;
+  });
+  return obj;
+}
+function saveInfoItems(){
+  const rows = document.querySelectorAll('#infoRows .faq-row');
+  const items = [];
+  rows.forEach(row => {
+    const title = row.querySelector('.info-title-input').value.trim();
+    const body = row.querySelector('.info-body-input').value.trim();
+    const titleTr = row.querySelector('.info-title-tr-input').value.trim();
+    const bodyTr = row.querySelector('.info-body-tr-input').value.trim();
+    if (!title) return;
+    const item = { title, body };
+    if (titleTr) item.titleTranslations = parseTranslationString(titleTr);
+    if (bodyTr) item.bodyTranslations = parseTranslationString(bodyTr);
+    items.push(item);
+  });
+  saveSetting('infoItems', items);
+  alert('Сохранено');
+}
+
 function addFaqRow(data){
   data = data || { q: '', a: '' };
   const row = document.createElement('div');
