@@ -243,7 +243,12 @@
           <input type="text" id="newBtsInput" placeholder="Адрес пункта БТС">
         </div>
         <button class="btn secondary" onclick="addBtsBranch()">+ Добавить пункт</button>
-        <div class="hint">Покупатель выберет ближайший пункт из этого списка при оформлении заказа.</div>
+        <div class="hint">Покупатель выберет ближайший пункт из этого списка при оформлении заказа (там будет поиск).</div>
+
+        <label style="margin-top:18px;">Массовое добавление (по одному адресу на строке)</label>
+        <textarea id="bulkBtsInput" rows="6" placeholder="Ташкент, Яккасарайский р-н — YAKKASAROY, ул. Бобур 22&#10;Самарканд — SAGDIANA, ул. Абу Бакр Розий&#10;..."></textarea>
+        <button class="btn" onclick="bulkImportBts()">Импортировать список</button>
+        <div class="hint">Вставь сразу весь список — каждая строка станет отдельным пунктом.</div>
       </div>
     </div>
 
@@ -497,7 +502,21 @@ function removeCategory(i){
 let btsBranches = [];
 function renderBtsTags(){
   const wrap = document.getElementById('btsTags');
-  wrap.innerHTML = btsBranches.map((b,i) => `<span class="cat-tag">${b} <span class="x" onclick="removeBtsBranch(${i})">✕</span></span>`).join('');
+  if (btsBranches.length > 25){
+    wrap.innerHTML = `<p class="hint" style="margin-top:0;">Пунктов в списке: ${btsBranches.length}. Список слишком большой, чтобы показать все теги — используй поиск ниже, если нужно удалить конкретный.</p>
+      <input type="text" id="btsAdminSearch" placeholder="Поиск пункта для удаления..." oninput="filterBtsAdminList(this.value)">
+      <div id="btsAdminSearchResults"></div>`;
+  } else {
+    wrap.innerHTML = btsBranches.map((b,i) => `<span class="cat-tag">${b} <span class="x" onclick="removeBtsBranch(${i})">✕</span></span>`).join('');
+  }
+}
+
+function filterBtsAdminList(query){
+  const wrap = document.getElementById('btsAdminSearchResults');
+  if (!query.trim()){ wrap.innerHTML = ''; return; }
+  const q = query.trim().toLowerCase();
+  const matches = btsBranches.map((b,i) => ({b,i})).filter(x => x.b.toLowerCase().includes(q)).slice(0, 15);
+  wrap.innerHTML = matches.map(m => `<span class="cat-tag">${m.b} <span class="x" onclick="removeBtsBranch(${m.i})">✕</span></span>`).join('') || '<p class="hint">Ничего не найдено</p>';
 }
 function addBtsBranch(){
   const input = document.getElementById('newBtsInput');
@@ -510,6 +529,19 @@ function addBtsBranch(){
 function removeBtsBranch(i){
   btsBranches.splice(i, 1);
   saveSetting('btsBranches', btsBranches);
+}
+
+function bulkImportBts(){
+  const raw = document.getElementById('bulkBtsInput').value;
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length === 0) return;
+  let added = 0;
+  lines.forEach(line => {
+    if (!btsBranches.includes(line)){ btsBranches.push(line); added++; }
+  });
+  saveSetting('btsBranches', btsBranches);
+  document.getElementById('bulkBtsInput').value = '';
+  alert(`Добавлено пунктов: ${added}`);
 }
 
 const STATUS_OPTIONS = ['Проверяется оплата','Собирается','В пути','Доставлен'];
@@ -561,13 +593,13 @@ function filterAndRenderOrders(){
     const card = document.createElement('div');
     card.className = 'order-admin-card';
     card.innerHTML = `
-      <div class="who">${o.customerName || 'Покупатель'}</div>
+      <div class="who">${o.customerName || 'Покупатель'} ${o.orderCode ? `<span style="color:var(--maroon); font-weight:700;">· #${o.orderCode}</span>` : ''}</div>
       <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
       ${o.items.map(it => `<div class="oline">${it.name} (${it.size}, ${it.colorName}) × ${it.qty} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
       <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
       ${o.phone ? `<div class="oline">📞 ${o.phone}</div>` : ''}
       ${o.btsBranch ? `<div class="oline">📍 ${o.btsBranch}</div>` : ''}
-      ${o.orderCode ? `<div class="oline">🔑 Код: #${o.orderCode} <span style="color:var(--muted); font-size:11px;">(ищи чек с этим кодом в чате бота)</span></div>` : ''}
+      ${o.orderCode ? `<div class="oline" style="color:var(--muted); font-size:11px;">чек в чате бота ищи по коду #${o.orderCode}</div>` : ''}
       <select class="status-select">
         ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
       </select>
