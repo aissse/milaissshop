@@ -54,6 +54,9 @@
   .cats::-webkit-scrollbar{ display:none; }
   .chip{ flex:0 0 auto; padding:9px 16px; border-radius:100px; font-size:13px; font-weight:600; white-space:nowrap; background:var(--stone); border:1px solid var(--line); color:var(--ink); cursor:pointer; }
   .chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .filter-panel{ display:none; padding:0 20px 16px; }
+  .filter-panel.open{ display:block; }
+  .btn-apply-filter{ margin-top:10px; width:100%; background:var(--ink); color:#fff; border:none; border-radius:12px; padding:11px; font-weight:700; font-size:13px; cursor:pointer; }
 
   .hero{ margin:0 20px 22px; border-radius:20px; background:linear-gradient(135deg,#1a1a1a 0%,#2b2b2b 100%); color:#fff; padding:22px 20px; position:relative; overflow:hidden; min-height:130px; display:flex; align-items:center; }
   .hero::after{ content:""; position:absolute; right:-30px; bottom:-40px; width:160px; height:160px; border-radius:50%; background:var(--orange); opacity:0.35; filter:blur(30px); }
@@ -78,8 +81,6 @@
   .card .imgwrap.oos::before{ content:attr(data-oos-label); position:absolute; inset:0; background:rgba(255,255,255,.8); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#c0392b; text-align:center; padding:10px; }
   .heart-btn{ position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.9); display:flex; align-items:center; justify-content:center; z-index:5; cursor:pointer; }
   .heart-btn svg{ width:16px; height:16px; display:block; }
-  .heart-btn path{ fill:none; stroke:#141414; stroke-width:1.6; }
-  .heart-btn.active path{ fill:#e74c3c; stroke:#e74c3c; }
   .card .info{ padding:10px 12px 14px; }
   .card .name{ font-size:13px; font-weight:600; line-height:1.3; margin-bottom:2px; }
   .card .sub{ font-size:11px; color:var(--muted); margin-bottom:8px; }
@@ -213,6 +214,11 @@
   .drawer-panel .logo{ text-align:left; margin-bottom:20px; }
   .drawer-item{ padding:14px 4px; font-size:15px; font-weight:600; border-bottom:1px solid var(--line); cursor:pointer; font-family:var(--catfont, inherit); }
   .drawer-item.active{ color:var(--catcolor, var(--orange)); }
+  .drawer-row{ display:flex; align-items:center; }
+  .drawer-chevron{ padding:8px; color:var(--muted); cursor:pointer; transition:transform .2s; }
+  .drawer-chevron.open{ transform:rotate(180deg); }
+  .drawer-info{ max-height:0; overflow:hidden; transition:max-height .25s ease; font-size:11px; color:var(--muted); line-height:1.5; }
+  .drawer-info.open{ max-height:150px; padding:4px 4px 10px; }
 
   .faq-section{ padding:10px 20px 30px; }
   .faq-item{ border-bottom:1px solid var(--line); }
@@ -273,6 +279,9 @@
   .review-item .rphoto{ width:100%; max-width:200px; border-radius:10px; margin-top:8px; display:block; }
 
   .support-entry{ margin:0 20px 16px; background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-weight:600; font-size:13px; }
+  .support-fab{ position:fixed; right:20px; bottom:110px; width:52px; height:52px; border-radius:50%; background:var(--orange); display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.2); z-index:60; transition:transform .35s ease, opacity .35s ease; }
+  .support-fab.hidden{ transform:translateX(90px); opacity:0; }
+  .support-fab svg{ width:24px; height:24px; }
   .support-msgs{ padding:12px 20px; display:flex; flex-direction:column; gap:10px; min-height:50vh; }
   .msg{ max-width:78%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.4; }
   .msg.customer{ align-self:flex-end; background:var(--orange); color:#fff; border-bottom-right-radius:4px; }
@@ -287,7 +296,7 @@
 
   <div class="screen active" id="home">
     <div class="topbar">
-      <div class="icon-btn" style="width:38px;" onclick="toggleDrawer()">☰</div>
+      <div class="icon-btn" style="width:38px;" onclick="toggleDrawer()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></div>
       <div class="logo">milaisss</div>
       <div class="icon-btn" id="langBtn" onclick="toggleLangMenu(event)">
         <span id="langFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;"></span><span style="font-size:10px; line-height:1; display:inline-flex; align-items:center;">⌄</span>
@@ -312,7 +321,7 @@
       <div class="hero-photo-text">
         <div class="tag" data-i18n="heroTag">НОВАЯ КОЛЛЕКЦИЯ</div>
         <h2 class="display" data-i18n="heroTitle">Скидка 20% на первый дроп</h2>
-        <button class="hero-btn" data-i18n="heroBtn">Смотреть</button>
+        <button class="hero-btn" data-i18n="heroBtn" onclick="openShopAll()">Смотреть</button>
       </div>
     </div>
 
@@ -332,12 +341,12 @@
 
     <div class="rating-summary" id="ratingSummary"></div>
 
-    <div class="section-head"><h3 class="display">Частые вопросы</h3></div>
+    <div class="section-head"><h3 class="display" data-i18n="faqHeader">Частые вопросы</h3></div>
     <div class="faq-section" id="faqSection"></div>
 
     <div class="newsletter-block">
-      <h3 class="display">Будьте в курсе</h3>
-      <p>Подпишись на новости о новых дропах и скидках</p>
+      <h3 class="display" data-i18n="newsletterTitle">Будьте в курсе</h3>
+      <p data-i18n="newsletterSub">Подпишись на новости о новых дропах и скидках</p>
       <div class="newsletter-row">
         <input type="email" id="newsletterEmail" placeholder="Ваш email">
         <button onclick="submitNewsletter()">→</button>
@@ -345,7 +354,7 @@
     </div>
 
     <div class="social-follow">
-      <h3 class="display" style="text-align:center; margin-bottom:14px;">Мы в соцсетях</h3>
+      <h3 class="display" style="text-align:center; margin-bottom:14px;" data-i18n="socialHeader">Мы в соцсетях</h3>
       <div class="social-icons" id="socialIcons"></div>
     </div>
 
@@ -358,12 +367,12 @@
 
   <div class="screen" id="detail">
     <div class="detail-top">
-      <div class="back-circle" onclick="showScreen('home')">←</div>
+      <div class="back-circle" onclick="showScreen('home')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
       <div></div>
     </div>
     <div class="carousel-wrap">
       <div class="carousel" id="detailCarousel"></div>
-      <div class="heart-btn" id="detailFavBtn" onclick="toggleCurrentFavorite()"><svg viewBox="0 0 24 24"><path d="M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09 C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5 c0,3.78-3.4,6.86-8.55,11.54L12,21.35z"/></svg></div>
+      <div class="heart-btn" id="detailFavBtn" onclick="toggleCurrentFavorite()"></div>
     </div>
     <div class="dots" id="detailDots"></div>
     <div class="detail-body">
@@ -390,7 +399,7 @@
 
   <div class="screen" id="reviewsScreen">
     <div class="detail-top">
-      <div class="back-circle" onclick="showScreen('detail')">←</div>
+      <div class="back-circle" onclick="showScreen('detail')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
       <div></div>
     </div>
     <div class="cart-title"><h2 class="display">Отзывы</h2></div>
@@ -399,7 +408,7 @@
 
   <div class="screen" id="cart">
     <div class="detail-top">
-      <div class="back-circle" onclick="showScreen('home')">←</div>
+      <div class="back-circle" onclick="showScreen('home')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
       <div></div>
     </div>
     <div class="cart-title"><h2 class="display" data-i18n="cartTitle">Корзина</h2></div>
@@ -408,7 +417,7 @@
 
   <div class="screen" id="checkoutFlow">
     <div class="detail-top">
-      <div class="back-circle" onclick="showScreen('cart')">←</div>
+      <div class="back-circle" onclick="showScreen('cart')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
       <div></div>
     </div>
     <div class="cart-title"><h2 class="display">Оплата и доставка</h2></div>
@@ -461,6 +470,26 @@
     <button class="checkout-btn" onclick="confirmPayment()" id="confirmPaymentBtn">Перевод совершён</button>
   </div>
 
+  <div class="screen" id="shopAll">
+    <div class="detail-top">
+      <div class="back-circle" onclick="showScreen('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="back-circle" onclick="toggleFilterPanel()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg>
+      </div>
+    </div>
+    <div class="cart-title"><h2 class="display">Все товары</h2></div>
+    <div class="cats" id="shopAllCats"></div>
+    <div class="filter-panel" id="filterPanel">
+      <label class="block-label" style="margin-top:0;">Цена, сум</label>
+      <div class="row" style="display:flex; gap:8px;">
+        <input type="number" id="filterMin" placeholder="От" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
+        <input type="number" id="filterMax" placeholder="До" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
+      </div>
+      <button class="btn-apply-filter" onclick="applyPriceFilter()">Применить</button>
+    </div>
+    <div class="grid" id="shopAllGrid"></div>
+  </div>
+
   <div class="screen" id="favorites">
     <div class="topbar"><div class="logo">milaisss</div></div>
     <div class="cart-title"><h2 class="display" data-i18n="favTitle">Избранное</h2></div>
@@ -469,14 +498,17 @@
 
   <div class="screen" id="profile">
     <div class="topbar"><div class="logo">milaisss</div></div>
-    <div class="support-entry" onclick="showScreen('support')"><span>💬 Поддержка</span><span>→</span></div>
     <div class="cart-title"><h2 class="display" data-i18n="profileTitle">Мои заказы</h2></div>
     <div id="ordersList"></div>
   </div>
 
+  <div class="support-fab" id="supportFab" onclick="showScreen('support')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+  </div>
+
   <div class="screen" id="support">
     <div class="detail-top">
-      <div class="back-circle" onclick="showScreen('profile')">←</div>
+      <div class="back-circle" onclick="showScreen('profile')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
       <div></div>
     </div>
     <div class="cart-title"><h2 class="display">Поддержка</h2></div>
@@ -489,7 +521,7 @@
 
   <div class="screen" id="settings">
     <div class="detail-top">
-      <div class="back-circle" onclick="showScreen('home')">←</div>
+      <div class="back-circle" onclick="showScreen('home')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
       <div></div>
     </div>
     <div class="cart-title"><h2 class="display">Настройки</h2></div>
@@ -547,7 +579,7 @@ const ADMIN_USERNAME = "isssroilov";
 // Как получить — см. инструкцию после обновления файла.
 const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
 const ADMIN_CHAT_ID = "6620851909";
-const NOTIFY_BOT_USERNAME = "MilaisssOthers_bot";
+const NOTIFY_BOT_USERNAME = "@MilaisssOthers_bot";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -593,35 +625,55 @@ const STR = {
         empty:"Корзина пуста", heroTag:"НОВАЯ КОЛЛЕКЦИЯ", heroTitle:"Скидка 20% на первый дроп", heroBtn:"Смотреть",
         goodsLabel:"Товары", deliveryLabel:"Доставка", totalLabel:"Итого", checkoutBtn:"Оформить заказ",
         allProducts:"Все товары", noProductsYet:"Товары скоро появятся 👟", noFav:"Пока нет избранных товаров 🤍",
-        noOrders:"Заказов пока нет", noRating:"Нет оценок", stockRemain:"Осталось", inStockWord:"В наличии" },
+        noOrders:"Заказов пока нет", noRating:"Нет оценок", stockRemain:"Осталось", inStockWord:"В наличии",
+        reviewsWord:"отзывов", pcsWord:"шт", socialHeader:"Мы в соцсетях", newsletterTitle:"Будьте в курсе", newsletterSub:"Подпишись на новости о новых дропах и скидках", supportLabel:"Поддержка", faqHeader:"Частые вопросы",
+        statusPaying:"Проверяется оплата", statusPacking:"Собирается", statusShipping:"В пути", statusDelivered:"Доставлен",
+        faqQ1:"Как оформить заказ?", faqA1:"Добавьте товар в корзину, выберите способ оплаты и укажите ближайший пункт БТС для получения.", faqQ2:"Сколько идёт доставка?", faqA2:"Обычно 2–5 дней в зависимости от региона. Статус заказа виден в разделе «Профиль».", faqQ3:"Можно ли вернуть товар?", faqA3:"Да, если размер не подошёл — напишите в поддержку в течение 7 дней после получения.",
+        policyReturn:"Возврат", policyReturnText:"У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии.", policyDelivery:"Доставка", policyDeliveryText:"Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона.", policyCare:"Уход за товаром", policyCareText:"Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке." },
   uz: { search:"Qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
         addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
         sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
         empty:"Savat bo‘sh", heroTag:"YANGI KOLLEKSIYA", heroTitle:"Birinchi tashlashga 20% chegirma", heroBtn:"Ko‘rish",
         goodsLabel:"Mahsulotlar", deliveryLabel:"Yetkazib berish", totalLabel:"Jami", checkoutBtn:"Buyurtma berish",
         allProducts:"Barcha mahsulotlar", noProductsYet:"Mahsulotlar tez orada 👟", noFav:"Sevimlilar hali yo‘q 🤍",
-        noOrders:"Buyurtmalar yo‘q", noRating:"Baho yo‘q", stockRemain:"Qoldi", inStockWord:"Mavjud" },
+        noOrders:"Buyurtmalar yo‘q", noRating:"Baho yo‘q", stockRemain:"Qoldi", inStockWord:"Mavjud",
+        reviewsWord:"sharh", pcsWord:"dona", socialHeader:"Ijtimoiy tarmoqlarda", newsletterTitle:"Yangiliklardan xabardor bo‘ling", newsletterSub:"Yangi kolleksiyalar va chegirmalar haqida bilib turing", supportLabel:"Qo‘llab-quvvatlash", faqHeader:"Ko‘p beriladigan savollar",
+        statusPaying:"To‘lov tekshirilmoqda", statusPacking:"Yig‘ilmoqda", statusShipping:"Yo‘lda", statusDelivered:"Yetkazib berildi",
+        faqQ1:"Buyurtmani qanday rasmiylashtirish mumkin?", faqA1:"Mahsulotni savatga qo‘shing, to‘lov usulini tanlang va yaqin BTS punktini ko‘rsating.", faqQ2:"Yetkazib berish qancha davom etadi?", faqA2:"Odatda hududga qarab 2–5 kun. Buyurtma holatini «Profil» bo‘limida ko‘rish mumkin.", faqQ3:"Mahsulotni qaytarish mumkinmi?", faqA3:"Ha, o‘lcham mos kelmasa — olgandan keyin 7 kun ichida qo‘llab-quvvatlashga yozing.",
+        policyReturn:"Qaytarish", policyReturnText:"Buyurtmani qaytarish uchun 14 kun vaqtingiz bor. Qaytarish xarajatlari xaridorga tegishli, mahsulot dastlabki holatida bo‘lishi kerak.", policyDelivery:"Yetkazib berish", policyDeliveryText:"Buyurtmani imkon qadar tez qayta ishlaymiz va yuboramiz. Odatda hududga qarab 2-5 kun.", policyCare:"Mahsulotga g‘amxo‘rlik", policyCareText:"Sovuq suvda yuving, mashinada quritmang, rasm/kashta ustiga to‘g‘ridan-to‘g‘ri dazmollamang." },
   tr: { search:"Ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
         addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
         sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
         empty:"Sepet boş", heroTag:"YENİ KOLEKSİYON", heroTitle:"İlk drop'ta %20 indirim", heroBtn:"İncele",
         goodsLabel:"Ürünler", deliveryLabel:"Teslimat", totalLabel:"Toplam", checkoutBtn:"Sipariş ver",
         allProducts:"Tüm ürünler", noProductsYet:"Ürünler yakında 👟", noFav:"Favori yok 🤍",
-        noOrders:"Sipariş yok", noRating:"Puan yok", stockRemain:"Kaldı", inStockWord:"Stokta" },
+        noOrders:"Sipariş yok", noRating:"Puan yok", stockRemain:"Kaldı", inStockWord:"Stokta",
+        reviewsWord:"değerlendirme", pcsWord:"adet", socialHeader:"Bizi takip edin", newsletterTitle:"Haberdar olun", newsletterSub:"Yeni koleksiyonlar ve indirimlerden haberdar olun", supportLabel:"Destek", faqHeader:"Sık sorulan sorular",
+        statusPaying:"Ödeme kontrol ediliyor", statusPacking:"Hazırlanıyor", statusShipping:"Yolda", statusDelivered:"Teslim edildi",
+        faqQ1:"Nasıl sipariş verilir?", faqA1:"Ürünü sepete ekleyin, ödeme yöntemini seçin ve en yakın BTS noktasını belirtin.", faqQ2:"Teslimat ne kadar sürer?", faqA2:"Genellikle bölgeye göre 2-5 gün. Sipariş durumu «Profil» bölümünde görünür.", faqQ3:"Ürün iade edilebilir mi?", faqA3:"Evet, beden uymazsa — teslim alındıktan sonra 7 gün içinde desteğe yazın.",
+        policyReturn:"İade", policyReturnText:"Siparişi iade etmek için 14 gününüz var. İade kargo masrafları alıcıya aittir, ürün orijinal durumda olmalıdır.", policyDelivery:"Teslimat", policyDeliveryText:"Siparişi mümkün olan en kısa sürede hazırlayıp gönderiyoruz. Genellikle bölgeye göre 2-5 gün.", policyCare:"Ürün bakımı", policyCareText:"Soğuk suda yıkayın, makinede kurutmayın, baskı/nakış üzerine doğrudan ütü yapmayın." },
   az: { search:"Axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
         addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
         sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
         empty:"Səbət boşdur", heroTag:"YENİ KOLLEKSİYA", heroTitle:"İlk drop-a 20% endirim", heroBtn:"Bax",
         goodsLabel:"Mallar", deliveryLabel:"Çatdırılma", totalLabel:"Cəmi", checkoutBtn:"Sifariş et",
         allProducts:"Bütün mallar", noProductsYet:"Mallar tezliklə 👟", noFav:"Seçilmiş yoxdur 🤍",
-        noOrders:"Sifariş yoxdur", noRating:"Reytinq yoxdur", stockRemain:"Qalıb", inStockWord:"Mövcuddur" },
+        noOrders:"Sifariş yoxdur", noRating:"Reytinq yoxdur", stockRemain:"Qalıb", inStockWord:"Mövcuddur",
+        reviewsWord:"rəy", pcsWord:"ədəd", socialHeader:"Bizi izləyin", newsletterTitle:"Xəbərdar olun", newsletterSub:"Yeni kolleksiyalar və endirimlərdən xəbərdar olun", supportLabel:"Dəstək", faqHeader:"Tez-tez verilən suallar",
+        statusPaying:"Ödəniş yoxlanılır", statusPacking:"Hazırlanır", statusShipping:"Yoldadır", statusDelivered:"Çatdırıldı",
+        faqQ1:"Sifarişi necə vermək olar?", faqA1:"Məhsulu səbətə əlavə edin, ödəniş üsulunu seçin və ən yaxın BTS məntəqəsini göstərin.", faqQ2:"Çatdırılma nə qədər çəkir?", faqA2:"Adətən bölgəyə görə 2-5 gün. Sifariş statusu «Profil» bölməsində görünür.", faqQ3:"Məhsulu qaytarmaq olarmı?", faqA3:"Bəli, ölçü uyğun gəlmirsə — aldıqdan sonra 7 gün ərzində dəstəyə yazın.",
+        policyReturn:"Qaytarma", policyReturnText:"Sifarişi qaytarmaq üçün 14 gününüz var. Geri göndərmə xərcləri alıcıya aiddir, məhsul ilkin vəziyyətdə olmalıdır.", policyDelivery:"Çatdırılma", policyDeliveryText:"Sifarişi mümkün qədər tez hazırlayıb göndəririk. Adətən bölgəyə görə 2-5 gün.", policyCare:"Məhsula qulluq", policyCareText:"Soyuq suda yuyun, maşında qurutmayın, çap/naxış üzərinə birbaşa ütü etməyin." },
   en: { search:"Search", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
         addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
         sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
         empty:"Cart is empty", heroTag:"NEW COLLECTION", heroTitle:"20% off the first drop", heroBtn:"Shop now",
         goodsLabel:"Items", deliveryLabel:"Delivery", totalLabel:"Total", checkoutBtn:"Checkout",
         allProducts:"All products", noProductsYet:"Products coming soon 👟", noFav:"No favorites yet 🤍",
-        noOrders:"No orders yet", noRating:"No ratings", stockRemain:"Left", inStockWord:"In stock" }
+        noOrders:"No orders yet", noRating:"No ratings", stockRemain:"Left", inStockWord:"In stock",
+        reviewsWord:"reviews", pcsWord:"pcs", socialHeader:"Follow us", newsletterTitle:"Stay updated", newsletterSub:"Subscribe for news on new drops and discounts", supportLabel:"Support", faqHeader:"Frequently asked questions",
+        statusPaying:"Payment being verified", statusPacking:"Packing", statusShipping:"On the way", statusDelivered:"Delivered",
+        faqQ1:"How do I place an order?", faqA1:"Add an item to your cart, choose a payment method and select the nearest BTS pickup point.", faqQ2:"How long does delivery take?", faqA2:"Usually 2-5 days depending on the region. Order status is visible in the Profile section.", faqQ3:"Can I return an item?", faqA3:"Yes, if the size does not fit - contact support within 7 days of receiving it.",
+        policyReturn:"Returns", policyReturnText:"You have 14 days to return your order. Return shipping costs are covered by the buyer, and the item must be in its original condition.", policyDelivery:"Delivery", policyDeliveryText:"We process and ship orders as fast as possible. Usually 2-5 days depending on the region.", policyCare:"Care instructions", policyCareText:"Wash in cold water, do not tumble dry, do not iron directly on prints/embroidery." }
 };
 let lang = localStorage.getItem('milaisss_lang') || 'en';
 function t(key){ return (STR[lang] && STR[lang][key]) || STR.ru[key] || key; }
@@ -634,8 +686,11 @@ function applyLang(){
   renderGrid();
   renderFavGrid();
   renderCollectionsGrid();
+  if (!faqCustomized){ faqItems = defaultFaqItems(); renderFaq(); }
+  if (!policyCustomized){ policyItems = defaultPolicyItems(); if (currentProduct) renderPolicyAccordion(); }
   if (currentProduct){
     document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
+    updateReviewsSummary();
   }
 }
 function toggleLangMenu(event){ if (event) event.stopPropagation(); document.getElementById('langMenu').classList.toggle('open'); }
@@ -684,6 +739,7 @@ let paymentClickInfo = '';
 let btsBranches = [];
 let categoryImages = {};
 let categoryTranslations = {};
+let categoryInfo = {};
 let shopContacts = '';
 let gridView = 'grid';
 function setGridView(v){
@@ -728,21 +784,38 @@ function submitNewsletter(){
 function renderFooterContacts(){
   document.getElementById('footerContacts').innerHTML = shopContacts ? shopContacts.replace(/\n/g,'<br>') : '';
 }
-let faqItems = [
-  { q: "Как оформить заказ?", a: "Добавьте товар в корзину, выберите способ оплаты и укажите ближайший пункт БТС для получения." },
-  { q: "Сколько идёт доставка?", a: "Обычно 2–5 дней в зависимости от региона. Статус заказа виден в разделе «Профиль»." },
-  { q: "Можно ли вернуть товар?", a: "Да, если размер не подошёл — напишите в поддержку в течение 7 дней после получения." }
-];
-let policyItems = [
-  { q: "Возврат", a: "У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии." },
-  { q: "Доставка", a: "Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона." },
-  { q: "Уход за товаром", a: "Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке." }
-];
+let faqCustomized = false;
+let policyCustomized = false;
+function defaultFaqItems(){
+  return [
+    { q: t('faqQ1'), a: t('faqA1') },
+    { q: t('faqQ2'), a: t('faqA2') },
+    { q: t('faqQ3'), a: t('faqA3') }
+  ];
+}
+function defaultPolicyItems(){
+  return [
+    { q: t('policyReturn'), a: t('policyReturnText') },
+    { q: t('policyDelivery'), a: t('policyDeliveryText') },
+    { q: t('policyCare'), a: t('policyCareText') }
+  ];
+}
+let faqItems = defaultFaqItems();
+let policyItems = defaultPolicyItems();
 let socialLinks = {};
 
 function renderPolicyAccordion(){
   const wrap = document.getElementById('policyAccordion');
-  wrap.innerHTML = policyItems.map((p,i) => `
+  const items = policyItems.map(p => {
+    const item = { q: p.q, a: p.a };
+    if (currentProduct){
+      if (p.q === 'Возврат' && currentProduct.returnPolicy) item.a = currentProduct.returnPolicy;
+      if (p.q === 'Доставка' && currentProduct.deliveryPolicy) item.a = currentProduct.deliveryPolicy;
+      if (p.q === 'Уход за товаром' && currentProduct.careInstructions) item.a = currentProduct.careInstructions;
+    }
+    return item;
+  });
+  wrap.innerHTML = items.map((p,i) => `
     <div class="policy-item" id="policy-${i}">
       <div class="policy-q" onclick="togglePolicy(${i})"><span>${p.q}</span><span class="chev">⌄</span></div>
       <div class="policy-a">${p.a}</div>
@@ -804,6 +877,61 @@ function clearSearch(){
   renderGrid();
 }
 
+/* ---------- shop all screen (from hero button) ---------- */
+let shopAllCategory = 'Все';
+let priceMin = null, priceMax = null;
+
+function openShopAll(){
+  shopAllCategory = 'Все';
+  priceMin = null; priceMax = null;
+  document.getElementById('filterPanel').classList.remove('open');
+  renderShopAllCats();
+  renderShopAllGrid();
+  showScreen('shopAll');
+}
+
+function toggleFilterPanel(){
+  document.getElementById('filterPanel').classList.toggle('open');
+}
+
+function applyPriceFilter(){
+  const min = document.getElementById('filterMin').value;
+  const max = document.getElementById('filterMax').value;
+  priceMin = min ? Number(min) : null;
+  priceMax = max ? Number(max) : null;
+  renderShopAllGrid();
+}
+
+function renderShopAllCats(){
+  const wrap = document.getElementById('shopAllCats');
+  const items = ['Все', ...CATEGORIES];
+  wrap.innerHTML = items.map(cat => `<div class="chip ${shopAllCategory===cat?'active':''}" onclick="selectShopAllCat('${cat.replace(/'/g,"\\'")}')">${translateCategory(cat)}</div>`).join('');
+}
+function selectShopAllCat(cat){
+  shopAllCategory = cat;
+  renderShopAllCats();
+  renderShopAllGrid();
+}
+
+function renderShopAllGrid(){
+  let list = products;
+  if (shopAllCategory !== 'Все') list = list.filter(p => p.category === shopAllCategory);
+  if (priceMin !== null) list = list.filter(p => Number(p.price||0) >= priceMin);
+  if (priceMax !== null) list = list.filter(p => Number(p.price||0) <= priceMax);
+
+  const wrap = document.getElementById('shopAllGrid');
+  wrap.innerHTML = '';
+  if (list.length === 0){ wrap.innerHTML = `<div class="empty-state">${t('noProductsYet')}</div>`; return; }
+  list.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.onclick = () => openProduct(p.id);
+    card.innerHTML = productCardHTML(p);
+    card.querySelector('[data-fav]').onclick = (e) => toggleFavorite(p.id, e);
+    wrap.appendChild(card);
+  });
+}
+
 /* ---------- side drawer catalog ---------- */
 function toggleDrawer(){
   document.getElementById('drawerOverlay').classList.toggle('open');
@@ -813,9 +941,24 @@ function toggleDrawer(){
 function renderDrawer(){
   const wrap = document.getElementById('drawerItems');
   const items = ['Все', ...CATEGORIES, 'До 500 000'];
-  let html = items.map(cat => `<div class="drawer-item ${activeCategory===cat?'active':''}" onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')">${translateCategory(cat)}</div>`).join('');
+  let html = items.map((cat, i) => {
+    const info = categoryInfo[cat];
+    const chevron = info ? `<span class="drawer-chevron" onclick="event.stopPropagation(); toggleDrawerInfo(${i})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>` : '';
+    return `
+      <div class="drawer-row">
+        <div class="drawer-item ${activeCategory===cat?'active':''}" onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')" style="flex:1; border-bottom:none;">${translateCategory(cat)}</div>
+        ${chevron}
+      </div>
+      ${info ? `<div class="drawer-info" id="drawer-info-${i}">${info}</div>` : ''}
+      <div style="border-bottom:1px solid var(--line);"></div>
+    `;
+  }).join('');
   html += `<div class="drawer-item" onclick="toggleDrawer(); showScreen('settings');" style="margin-top:20px; border-top:2px solid var(--line); padding-top:20px;">⚙️ Настройки</div>`;
   wrap.innerHTML = html;
+}
+function toggleDrawerInfo(i){
+  const el = document.getElementById(`drawer-info-${i}`);
+  el.classList.toggle('open');
 }
 function translateCategory(cat){
   if (cat === 'Все') return t('allCat');
@@ -829,6 +972,10 @@ function drawerSelect(cat){
   toggleDrawer();
   showScreen('home');
 }
+
+const HEART_PLUS_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.479 19.374-.971.939a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5a5.2 5.2 0 0 1-.219 1.49"/><path d="M15 15h6"/><path d="M18 12v6"/></svg>`;
+const HEART_FULL_SVG = `<svg viewBox="0 0 24 24" fill="#490100" stroke="#490100" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>`;
+function heartIcon(isFav){ return isFav ? HEART_FULL_SVG : HEART_PLUS_SVG; }
 
 /* ---------- favorites ---------- */
 let favorites = [];
@@ -847,7 +994,7 @@ function toggleCurrentFavorite(){ if (currentProduct) toggleFavorite(currentProd
 function updateDetailFavIcon(){
   const btn = document.getElementById('detailFavBtn');
   if (!currentProduct) return;
-  btn.classList.toggle('active', isFavorite(currentProduct.id));
+  btn.innerHTML = heartIcon(isFavorite(currentProduct.id));
 }
 
 /* ---------- state ---------- */
@@ -865,10 +1012,9 @@ const favGrid = document.getElementById('favGrid');
 function productCardHTML(p){
   const imgStyle = p.image ? `style="background-image:url('${p.image}')"` : '';
   const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
-  const favActive = isFavorite(p.id) ? ' active' : '';
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${p.image ? '' : (p.emoji || '👟')}
-      <div class="heart-btn${favActive}" data-fav="${p.id}"><svg viewBox="0 0 24 24"><path d="M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09 C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5 c0,3.78-3.4,6.86-8.55,11.54L12,21.35z"/></svg></div>
+      <div class="heart-btn" data-fav="${p.id}">${heartIcon(isFavorite(p.id))}</div>
     </div>
     <div class="info">
       <div class="name">${p.name}</div>
@@ -937,15 +1083,17 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   paymentPaymeInfo = data.paymentPaymeInfo || '';
   paymentClickInfo = data.paymentClickInfo || '';
   btsBranches = data.btsBranches || [];
-  if (data.faqItems && data.faqItems.length){ faqItems = data.faqItems; renderFaq(); }
-  if (data.policyItems && data.policyItems.length){ policyItems = data.policyItems; }
+  if (data.faqItems && data.faqItems.length){ faqItems = data.faqItems; faqCustomized = true; renderFaq(); }
+  if (data.policyItems && data.policyItems.length){ policyItems = data.policyItems; policyCustomized = true; }
   socialLinks = data.socialLinks || {};
   renderSocialIcons();
   if (data.heroImage) document.getElementById('heroPhoto').style.backgroundImage = `url('${data.heroImage}')`;
   if (data.shippingText) document.getElementById('shippingStrip').textContent = data.shippingText;
   categoryImages = data.categoryImages || {};
   categoryTranslations = data.categoryTranslations || {};
+  categoryInfo = data.categoryInfo || {};
   if (data.categoryChipColor) document.documentElement.style.setProperty('--catcolor', data.categoryChipColor);
+  if (data.orangeColor) document.documentElement.style.setProperty('--orange', data.orangeColor);
   if (data.categoryFont) document.documentElement.style.setProperty('--catfont', `'${data.categoryFont}',sans-serif`);
   renderCollectionsGrid();
   shopContacts = data.shopContacts || '';
@@ -962,8 +1110,37 @@ function showScreen(name){
   if (name === 'cart') renderCart();
   if (name === 'favorites') renderFavGrid();
   if (name === 'profile') renderOrders();
+  document.getElementById('supportFab').style.display = (name === 'profile') ? 'flex' : 'none';
   window.scrollTo(0,0);
 }
+
+let fabScrollTimer = null;
+window.addEventListener('scroll', () => {
+  const fab = document.getElementById('supportFab');
+  if (fab.style.display === 'none') return;
+  fab.classList.add('hidden');
+  clearTimeout(fabScrollTimer);
+  fabScrollTimer = setTimeout(() => fab.classList.remove('hidden'), 400);
+}, { passive: true });
+
+/* ---------- edge swipe back (like iOS) ---------- */
+let edgeStartX = null, edgeStartY = null;
+document.addEventListener('touchstart', (e) => {
+  edgeStartX = e.touches[0].clientX;
+  edgeStartY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (edgeStartX !== null && edgeStartX < 25){
+    const dx = e.changedTouches[0].clientX - edgeStartX;
+    const dy = Math.abs(e.changedTouches[0].clientY - edgeStartY);
+    if (dx > 70 && dy < 60){
+      const activeScreen = document.querySelector('.screen.active');
+      const backBtn = activeScreen && activeScreen.querySelector('.back-circle');
+      if (backBtn) backBtn.click();
+    }
+  }
+  edgeStartX = null; edgeStartY = null;
+});
 
 /* ---------- support chat ---------- */
 function setupSupportListener(){
@@ -1000,14 +1177,14 @@ function getTranslatedDesc(p){
 
 function updateReviewsSummary(){
   const approved = reviews.filter(r => r.productId === currentProduct.id && r.approved);
-  document.getElementById('reviewsLink').textContent = `${approved.length} отзывов`;
+  document.getElementById('reviewsLink').textContent = `${approved.length} ${t('reviewsWord')}`;
   const rated = approved.filter(r => typeof r.rating === 'number');
   const ratingLine = document.getElementById('ratingLine');
   if (rated.length === 0){
-    ratingLine.innerHTML = `${t('noRating')} · <span class="rlink" id="reviewsLink" onclick="openReviews()">${approved.length} отзывов</span>`;
+    ratingLine.innerHTML = `${t('noRating')} · <span class="rlink" id="reviewsLink" onclick="openReviews()">${approved.length} ${t('reviewsWord')}</span>`;
   } else {
     const avg = (rated.reduce((s,r)=>s+r.rating,0) / rated.length).toFixed(1);
-    ratingLine.innerHTML = `★ ${avg} · <span class="rlink" id="reviewsLink" onclick="openReviews()">${approved.length} отзывов</span>`;
+    ratingLine.innerHTML = `★ ${avg} · <span class="rlink" id="reviewsLink" onclick="openReviews()">${approved.length} ${t('reviewsWord')}</span>`;
   }
 }
 
@@ -1189,7 +1366,7 @@ function renderCart(){
         <div class="thumb" ${thumbStyle}>${item.image ? '' : item.emoji}</div>
         <div class="meta">
           <div class="name">${item.name}</div>
-          <div class="opts">Размер ${item.size} · ${item.colorName} · ${item.qty} шт</div>
+          <div class="opts">Размер ${item.size} · ${item.colorName} · ${item.qty} ${t('pcsWord')}</div>
           <div class="price">${fmt(item.price * item.qty)}</div>
         </div>
         <div class="remove" onclick="removeFromCart(${idx})">Убрать</div>
@@ -1311,7 +1488,10 @@ function closePaymentModal(){
 }
 
 /* ---------- profile / orders / reviews ---------- */
-const STATUS_LABELS = { 'Проверяется оплата':'Проверяется оплата', 'Собирается':'Собирается', 'В пути':'В пути', 'Доставлен':'Доставлен' };
+function translateStatus(status){
+  const map = { 'Проверяется оплата':'statusPaying', 'Собирается':'statusPacking', 'В пути':'statusShipping', 'Доставлен':'statusDelivered' };
+  return map[status] ? t(map[status]) : status;
+}
 
 function renderOrders(){
   const wrap = document.getElementById('ordersList');
@@ -1323,10 +1503,10 @@ function renderOrders(){
     orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     wrap.innerHTML = orders.map((order) => `
       <div class="order-card">
-        <div class="odate">${new Date(order.createdAt).toLocaleDateString('ru-RU')} · <strong>${STATUS_LABELS[order.status] || order.status}</strong></div>
+        <div class="odate">${new Date(order.createdAt).toLocaleDateString('ru-RU')} · <strong>${translateStatus(order.status)}</strong></div>
         ${order.btsBranch ? `<div class="odate">📍 ${order.btsBranch}</div>` : ''}
         ${order.items.map((it, ii) => `
-          <div class="order-line"><span>${it.name} (${it.size}, ${it.colorName}) × ${it.qty}</span><span>${fmt(it.price*it.qty)}</span></div>
+          <div class="order-line"><span>${it.name} (${it.size}, ${it.colorName}) × ${it.qty} ${t('pcsWord')}</span><span>${fmt(it.price*it.qty)}</span></div>
           ${order.status === 'Доставлен' ? `
             <div class="review-btn" onclick="toggleReviewForm('${order.id}',${ii})">Оставить отзыв</div>
             <div class="review-form" id="rf-${order.id}-${ii}">
