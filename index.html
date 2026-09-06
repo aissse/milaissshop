@@ -154,6 +154,17 @@
 
   .reviews-list{ padding:0 20px 20px; }
   .review-item{ border-bottom:1px solid var(--line); padding:10px 0; font-size:13px; line-height:1.5; }
+
+  .pay-field{ margin:0 20px; }
+  .pay-field input[type=text], .pay-field input[type=file]{ width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:14px; background:var(--bg); }
+  .pay-field select{ width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:13px; background:var(--bg); }
+  .pay-note{ font-size:11px; color:var(--muted); margin-top:5px; }
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{ background:#fff; border-radius:18px; padding:24px; max-width:340px; text-align:center; }
+  .modal-box p{ font-size:13px; line-height:1.6; margin-bottom:18px; color:#444; }
+  .modal-box button{ background:var(--ink); color:#fff; border:none; border-radius:12px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; width:100%; }
   .review-item .rhead{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:4px; }
   .review-item .rauthor{ font-weight:700; color:var(--ink); }
   .review-item .rphoto{ width:100%; max-width:200px; border-radius:10px; margin-top:8px; display:block; }
@@ -250,6 +261,34 @@
     <div id="cartContent"></div>
   </div>
 
+  <div class="screen" id="checkoutFlow">
+    <div class="detail-top">
+      <div class="back-circle" onclick="showScreen('cart')">←</div>
+      <div></div>
+    </div>
+    <div class="cart-title"><h2 class="display">Оплата и доставка</h2></div>
+    <div class="pay-field" id="paymentInfoBox" style="background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:14px; font-size:13px; line-height:1.6; margin-bottom:18px;"></div>
+
+    <div class="pay-field" style="background:#fff3e9; border:1px solid var(--orange); border-radius:14px; padding:14px; margin-bottom:18px; text-align:center;">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Код вашего заказа</div>
+      <div id="orderCodeDisplay" style="font-family:'Space Grotesk'; font-size:24px; font-weight:700; color:var(--orange);">#0000</div>
+      <div class="pay-note" style="margin-top:6px;">После перевода нажмите кнопку ниже — откроется чат в Telegram, куда нужно прикрепить скриншот перевода вместе с этим кодом.</div>
+    </div>
+
+    <div class="pay-field" style="margin-bottom:16px;">
+      <label class="block-label" style="margin-top:0;">Ваш номер телефона</label>
+      <input type="text" id="phoneInput" placeholder="+998 90 123 45 67">
+      <div class="pay-note">Нужен, чтобы почта могла прислать вам уведомление о посылке.</div>
+    </div>
+
+    <div class="pay-field" style="margin-bottom:16px;">
+      <label class="block-label" style="margin-top:0;">Ближайший пункт БТС</label>
+      <select id="btsSelectFlow"></select>
+    </div>
+
+    <button class="checkout-btn" onclick="confirmPayment()" id="confirmPaymentBtn">Перевод совершён</button>
+  </div>
+
   <div class="screen" id="favorites">
     <div class="topbar"><div class="logo">milaisss</div></div>
     <div class="cart-title"><h2 class="display" data-i18n="favTitle">Избранное</h2></div>
@@ -313,6 +352,13 @@
   <div class="lightbox-carousel" id="lightboxCarousel"></div>
 </div>
 
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal-box">
+    <p>Откроется чат в Telegram — прикрепите там скриншот перевода с указанным кодом заказа. Если оплата не будет обнаружена, товар отправлен не будет. По всем вопросам обращайтесь в поддержку в вашем профиле.</p>
+    <button onclick="closePaymentModal()">Понятно</button>
+  </div>
+</div>
+
 <script>
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if (tg) { tg.ready(); tg.expand(); }
@@ -321,8 +367,9 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
-const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
+const NOTIFY_BOT_TOKEN = "bot8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
+const ADMIN_CHAT_ID = "6620851909";
+const NOTIFY_BOT_USERNAME = "MilaisssOthers_bot";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -806,10 +853,6 @@ function renderCart(){
       </div>`;
   }).join('');
 
-  const branchOptions = btsBranches.length
-    ? `<option value="">— выберите пункт —</option>` + btsBranches.map(b => `<option value="${b}">${b}</option>`).join('')
-    : `<option value="">Пункты пока не добавлены</option>`;
-
   content.innerHTML = `
     <div class="cart-list">${itemsHtml}</div>
     <div class="cart-summary">
@@ -817,29 +860,41 @@ function renderCart(){
       <div class="sum-row"><span>${t('deliveryLabel')}</span><span>По согласованию</span></div>
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
-
-    ${paymentCardInfo ? `
-    <div class="hint" style="padding:0 20px; margin-bottom:14px;">
-      <div style="background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:14px; color:var(--ink); font-size:13px; line-height:1.6;">
-        💳 <strong>Оплата переводом</strong><br>${paymentCardInfo}<br><br>
-        После перевода оформите заказ — продавец подтвердит поступление и начнёт сборку.
-      </div>
-    </div>` : ''}
-
-    <div style="padding:0 20px 14px;">
-      <label class="block-label" style="margin:0 0 8px;">Ближайший пункт БТС</label>
-      <select id="btsSelect" style="width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:13px; background:var(--bg);">
-        ${branchOptions}
-      </select>
-    </div>
-
-    <button class="checkout-btn" onclick="checkout()">${t('checkoutBtn')}</button>
-    <div class="hint">Продавец получит детали заказа автоматически. Вопросы — через поддержку в профиле.</div>
+    <button class="checkout-btn" onclick="goToCheckoutFlow()">${t('checkoutBtn')}</button>
+    <div class="hint">На следующем шаге — реквизиты для оплаты и подтверждение перевода.</div>
   `;
 }
 
-function checkout(){
+function goToCheckoutFlow(){
   if (cart.length === 0) return;
+  document.getElementById('paymentInfoBox').innerHTML = paymentCardInfo
+    ? `💳 <strong>Переведите сумму на:</strong><br>${paymentCardInfo}`
+    : 'Реквизиты для оплаты пока не добавлены продавцом — напишите в поддержку.';
+
+  const sel = document.getElementById('btsSelectFlow');
+  sel.innerHTML = btsBranches.length
+    ? '<option value="">— выберите пункт —</option>' + btsBranches.map(b => `<option value="${b}">${b}</option>`).join('')
+    : '<option value="">Пункты пока не добавлены</option>';
+
+  currentOrderCode = String(Math.floor(1000 + Math.random() * 9000));
+  document.getElementById('orderCodeDisplay').textContent = '#' + currentOrderCode;
+
+  showScreen('checkoutFlow');
+}
+
+let currentOrderCode = '';
+
+function confirmPayment(){
+  const phone = document.getElementById('phoneInput').value.trim();
+  const branch = document.getElementById('btsSelectFlow').value;
+
+  if (!phone){ showToast('Укажите номер телефона'); return; }
+  if (!branch){ showToast('Выберите пункт БТС'); return; }
+
+  finalizeOrder(phone, branch);
+}
+
+function finalizeOrder(phone, branch){
   let total = 0;
   let text = "Здравствуйте! Хочу оформить заказ:\n\n";
   const orderItems = [];
@@ -848,29 +903,37 @@ function checkout(){
     text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
     orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price });
   });
-  text += `\nИтого: ${fmt(total)}`;
-
-  const btsSelect = document.getElementById('btsSelect');
-  const btsBranch = btsSelect ? btsSelect.value : '';
-  if (btsBranch) text += `\n\n📍 Пункт БТС: ${btsBranch}`;
+  text += `\nИтого: ${fmt(total)}\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n🔑 Код заказа: #${currentOrderCode}\n(чек оплаты покупатель пришлёт отдельным сообщением с этим кодом)`;
 
   const customerId = getCustomerId();
   const customerName = getCustomerName();
 
   db.collection('orders').add({
-    customerId, customerName, items: orderItems, total, btsBranch: btsBranch || '',
-    status: 'Ожидает оплаты', createdAt: Date.now()
+    customerId, customerName, items: orderItems, total,
+    btsBranch: branch, phone, orderCode: currentOrderCode,
+    status: 'Проверяется оплата', createdAt: Date.now()
   });
 
-  let notifyText = `🛍️ Новый заказ от ${customerName}\n\n` + text;
-  notifyAdmin(notifyText);
+  notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text);
 
-  showToast('Заказ оформлен! Продавец уже получил детали ✓');
-  cart = []; updateCartBadge(); renderCart();
+  cart = []; updateCartBadge();
+  document.getElementById('phoneInput').value = '';
+
+  if (NOTIFY_BOT_USERNAME && !NOTIFY_BOT_USERNAME.startsWith('ВСТАВЬ')){
+    const chatUrl = `https://t.me/${NOTIFY_BOT_USERNAME}?text=${encodeURIComponent('Чек по заказу #' + currentOrderCode)}`;
+    if (tg && tg.openTelegramLink){ tg.openTelegramLink(chatUrl); } else { window.open(chatUrl, '_blank'); }
+  }
+
+  document.getElementById('paymentModal').classList.add('open');
+}
+
+function closePaymentModal(){
+  document.getElementById('paymentModal').classList.remove('open');
+  showScreen('home');
 }
 
 /* ---------- profile / orders / reviews ---------- */
-const STATUS_LABELS = { 'Ожидает оплаты':'Ожидает оплаты', 'Собирается':'Собирается', 'Отправляется':'Отправляется', 'В пути':'В пути', 'Доставлено':'Доставлено' };
+const STATUS_LABELS = { 'Проверяется оплата':'Проверяется оплата', 'Собирается':'Собирается', 'В пути':'В пути', 'Доставлен':'Доставлен' };
 
 function renderOrders(){
   const wrap = document.getElementById('ordersList');
@@ -886,7 +949,7 @@ function renderOrders(){
         ${order.btsBranch ? `<div class="odate">📍 ${order.btsBranch}</div>` : ''}
         ${order.items.map((it, ii) => `
           <div class="order-line"><span>${it.name} (${it.size}, ${it.colorName}) × ${it.qty}</span><span>${fmt(it.price*it.qty)}</span></div>
-          ${order.status === 'Доставлено' ? `
+          ${order.status === 'Доставлен' ? `
             <div class="review-btn" onclick="toggleReviewForm('${order.id}',${ii})">Оставить отзыв</div>
             <div class="review-form" id="rf-${order.id}-${ii}">
               <div class="stars" id="stars-${order.id}-${ii}">
