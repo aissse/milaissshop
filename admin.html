@@ -78,6 +78,9 @@
   .chat-bubble.customer{ align-self:flex-start; background:#fdf6f7; color:var(--maroon-dark); }
   .cat-tag{ display:inline-flex; align-items:center; gap:6px; background:var(--pink); border-radius:100px; padding:6px 12px; font-size:12px; font-weight:600; margin:0 6px 6px 0; }
   .cat-tag .x{ cursor:pointer; color:#a83232; font-weight:700; }
+  .faq-row{ border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; }
+  .faq-row input{ margin-bottom:6px; }
+  .faq-row .rm{ float:right; color:#a83232; font-size:12px; cursor:pointer; font-weight:600; }
 </style>
 </head>
 <body>
@@ -189,10 +192,18 @@
 
     <div class="tab-panel" id="tab-finance">
       <div class="card">
-        <h1>Карты для приёма оплаты</h1>
-        <label>Реквизиты для перевода (карта, имя получателя)</label>
+        <h1>Реквизиты для приёма оплаты</h1>
+
+        <label>Payme — номер для перевода</label>
+        <input type="text" id="f_paymePhone" placeholder="+998 90 123 45 67" onchange="saveSetting('paymentPaymeInfo', this.value)">
+
+        <label>Click — номер для перевода</label>
+        <input type="text" id="f_clickPhone" placeholder="+998 90 123 45 67" onchange="saveSetting('paymentClickInfo', this.value)">
+
+        <label>Банковская карта</label>
         <textarea id="f_paymentInfo" placeholder="Например: Uzcard 8600 1234 5678 9012, Aziz Isroilov" rows="3" onchange="saveSetting('paymentCardInfo', this.value)"></textarea>
-        <div class="hint">Покупатель увидит это в корзине перед оформлением заказа. После перевода заказ получает статус "Ожидает оплаты" — как только увидишь поступление, смени статус в разделе "Доставка".</div>
+
+        <div class="hint">Покупатель выберет способ оплаты в корзине и увидит соответствующие реквизиты. После перевода заказ получает статус "Проверяется оплата" — как только увидишь поступление в своём приложении Payme/Click/банке, смени статус в разделе "Доставка".</div>
       </div>
     </div>
 
@@ -227,6 +238,18 @@
       </div>
 
       <div class="card">
+        <h1>Главный баннер и витрина</h1>
+        <label>Фото для большого баннера на главной</label>
+        <input type="url" id="f_heroImage" placeholder="https://..." onchange="saveSetting('heroImage', this.value)">
+
+        <label>Текст о доставке (полоска под баннером)</label>
+        <input type="text" id="f_shippingText" placeholder="Бесплатная доставка от 500 000 сум" onchange="saveSetting('shippingText', this.value)">
+
+        <label>Контакты для футера сайта (email, адрес — по одному на строке)</label>
+        <textarea id="f_shopContacts" rows="3" placeholder="hello@milaisss.uz&#10;Ташкент, Чиланзар" onchange="saveSetting('shopContacts', this.value)"></textarea>
+      </div>
+
+      <div class="card">
         <h1>Категории в магазине</h1>
         <div id="catTags"></div>
         <div class="row" style="margin-top:10px;">
@@ -249,6 +272,31 @@
         <textarea id="bulkBtsInput" rows="6" placeholder="Ташкент, Яккасарайский р-н — YAKKASAROY, ул. Бобур 22&#10;Самарканд — SAGDIANA, ул. Абу Бакр Розий&#10;..."></textarea>
         <button class="btn" onclick="bulkImportBts()">Импортировать список</button>
         <div class="hint">Вставь сразу весь список — каждая строка станет отдельным пунктом.</div>
+      </div>
+
+      <div class="card">
+        <h1>Частые вопросы (FAQ)</h1>
+        <div id="faqRows"></div>
+        <button class="btn secondary" onclick="addFaqRow()">+ Добавить вопрос</button>
+        <button class="btn" onclick="saveFaq()">Сохранить FAQ</button>
+        <div class="hint">Показывается на главной странице магазина под каталогом.</div>
+      </div>
+
+      <div class="card">
+        <h1>Политики в карточке товара</h1>
+        <div id="policyRows"></div>
+        <button class="btn secondary" onclick="addPolicyRow()">+ Добавить пункт</button>
+        <button class="btn" onclick="savePolicy()">Сохранить</button>
+        <div class="hint">Аккордеон "Возврат / Доставка / Уход" на странице товара.</div>
+      </div>
+
+      <div class="card">
+        <h1>Соцсети</h1>
+        <label>Instagram (ссылка)</label>
+        <input type="url" id="f_instagram" placeholder="https://instagram.com/..." onchange="saveSocialLink('instagram', this.value)">
+        <label>TikTok (ссылка)</label>
+        <input type="url" id="f_tiktok" placeholder="https://tiktok.com/@..." onchange="saveSocialLink('tiktok', this.value)">
+        <div class="hint">Иконки появятся внизу главной страницы магазина.</div>
       </div>
     </div>
 
@@ -460,10 +508,22 @@ function loadSettings(){
       loadGoogleFont(data.fontFamily);
       setTimeout(() => { document.getElementById('fontPreview').style.fontFamily = `'${data.fontFamily}', serif`; }, 300);
     }
+    if (data.heroImage) document.getElementById('f_heroImage').value = data.heroImage;
+    if (data.shippingText) document.getElementById('f_shippingText').value = data.shippingText;
+    if (data.shopContacts) document.getElementById('f_shopContacts').value = data.shopContacts;
+    categoryImages = data.categoryImages || {};
     categories = data.categories || ["Тренды","Oversize","Минимализм","Лимитки"];
     renderCategoryTags();
     renderCategorySelect();
     if (data.paymentCardInfo) document.getElementById('f_paymentInfo').value = data.paymentCardInfo;
+    if (data.paymentPaymeInfo) document.getElementById('f_paymePhone').value = data.paymentPaymeInfo;
+    if (data.paymentClickInfo) document.getElementById('f_clickPhone').value = data.paymentClickInfo;
+    faqItems = data.faqItems || [];
+    loadFaqRows(faqItems);
+    loadPolicyRows(data.policyItems || []);
+    socialLinks = data.socialLinks || {};
+    if (socialLinks.instagram) document.getElementById('f_instagram').value = socialLinks.instagram;
+    if (socialLinks.tiktok) document.getElementById('f_tiktok').value = socialLinks.tiktok;
     btsBranches = data.btsBranches || [];
     renderBtsTags();
   });
@@ -473,9 +533,21 @@ function saveSetting(key, value){
   db.collection('settings').doc('shop').set({ [key]: value }, { merge: true });
 }
 
+let categoryImages = {};
+
 function renderCategoryTags(){
   const wrap = document.getElementById('catTags');
-  wrap.innerHTML = categories.map((c,i) => `<span class="cat-tag">${c} <span class="x" onclick="removeCategory(${i})">✕</span></span>`).join('');
+  wrap.innerHTML = categories.map((c,i) => `
+    <div class="color-row">
+      <span class="cat-tag" style="flex-shrink:0;">${c} <span class="x" onclick="removeCategory(${i})">✕</span></span>
+      <input type="url" placeholder="Фото для плитки (необязательно)" value="${(categoryImages[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryImage('${c.replace(/'/g,"\\'")}', this.value)">
+    </div>
+  `).join('');
+}
+
+function setCategoryImage(cat, url){
+  categoryImages[cat] = url;
+  saveSetting('categoryImages', categoryImages);
 }
 
 function renderCategorySelect(){
@@ -544,6 +616,69 @@ function bulkImportBts(){
   alert(`Добавлено пунктов: ${added}`);
 }
 
+let faqItems = [];
+function addFaqRow(data){
+  data = data || { q: '', a: '' };
+  const row = document.createElement('div');
+  row.className = 'faq-row';
+  row.innerHTML = `
+    <span class="rm" onclick="this.parentElement.remove()">✕ удалить</span>
+    <input type="text" class="faq-q-input" placeholder="Вопрос" value="${(data.q||'').replace(/"/g,'&quot;')}">
+    <textarea class="faq-a-input" rows="2" placeholder="Ответ">${data.a||''}</textarea>
+  `;
+  document.getElementById('faqRows').appendChild(row);
+}
+function loadFaqRows(items){
+  document.getElementById('faqRows').innerHTML = '';
+  (items && items.length ? items : []).forEach(f => addFaqRow(f));
+  if (!items || !items.length) addFaqRow();
+}
+function saveFaq(){
+  const rows = document.querySelectorAll('#faqRows .faq-row');
+  const items = [];
+  rows.forEach(row => {
+    const q = row.querySelector('.faq-q-input').value.trim();
+    const a = row.querySelector('.faq-a-input').value.trim();
+    if (q && a) items.push({ q, a });
+  });
+  saveSetting('faqItems', items);
+  alert('FAQ сохранён');
+}
+
+function addPolicyRow(data){
+  data = data || { q: '', a: '' };
+  const row = document.createElement('div');
+  row.className = 'faq-row';
+  row.innerHTML = `
+    <span class="rm" onclick="this.parentElement.remove()">✕ удалить</span>
+    <input type="text" class="policy-q-input" placeholder="Заголовок (например Доставка)" value="${(data.q||'').replace(/"/g,'&quot;')}">
+    <textarea class="policy-a-input" rows="2" placeholder="Текст">${data.a||''}</textarea>
+  `;
+  document.getElementById('policyRows').appendChild(row);
+}
+function loadPolicyRows(items){
+  document.getElementById('policyRows').innerHTML = '';
+  (items && items.length ? items : []).forEach(p => addPolicyRow(p));
+  if (!items || !items.length) addPolicyRow();
+}
+function savePolicy(){
+  const rows = document.querySelectorAll('#policyRows .faq-row');
+  const items = [];
+  rows.forEach(row => {
+    const q = row.querySelector('.policy-q-input').value.trim();
+    const a = row.querySelector('.policy-a-input').value.trim();
+    if (q && a) items.push({ q, a });
+  });
+  saveSetting('policyItems', items);
+  alert('Сохранено');
+}
+
+let socialLinks = {};
+function saveSocialLink(key, value){
+  socialLinks[key] = value;
+  saveSetting('socialLinks', socialLinks);
+}
+
 const STATUS_OPTIONS = ['Проверяется оплата','Собирается','В пути','Доставлен'];
 let allOrders = [];
 
@@ -593,13 +728,13 @@ function filterAndRenderOrders(){
     const card = document.createElement('div');
     card.className = 'order-admin-card';
     card.innerHTML = `
-      <div class="who">${o.customerName || 'Покупатель'} ${o.orderCode ? `<span style="color:var(--maroon); font-weight:700;">· #${o.orderCode}</span>` : ''}</div>
+      <div class="who">${o.customerName || 'Покупатель'}</div>
       <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
       ${o.items.map(it => `<div class="oline">${it.name} (${it.size}, ${it.colorName}) × ${it.qty} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
       <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
       ${o.phone ? `<div class="oline">📞 ${o.phone}</div>` : ''}
       ${o.btsBranch ? `<div class="oline">📍 ${o.btsBranch}</div>` : ''}
-      ${o.orderCode ? `<div class="oline" style="color:var(--muted); font-size:11px;">чек в чате бота ищи по коду #${o.orderCode}</div>` : ''}
+      ${o.paymentMethod ? `<div class="oline" style="font-weight:700;">💰 Способ оплаты: ${o.paymentMethod}</div>` : ''}
       <select class="status-select">
         ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
       </select>
