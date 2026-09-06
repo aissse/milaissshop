@@ -138,6 +138,13 @@
         <label>Описание</label>
         <textarea id="f_desc" placeholder="Короткое описание товара"></textarea>
 
+        <label>Переводы описания (необязательно)</label>
+        <textarea id="f_desc_en" rows="2" placeholder="English description"></textarea>
+        <textarea id="f_desc_uz" rows="2" placeholder="O'zbekcha tavsif" style="margin-top:6px;"></textarea>
+        <textarea id="f_desc_tr" rows="2" placeholder="Türkçe açıklama" style="margin-top:6px;"></textarea>
+        <textarea id="f_desc_az" rows="2" placeholder="Azərbaycan təsviri" style="margin-top:6px;"></textarea>
+        <div class="hint">Оставь пустым, если перевод не нужен — покупатель увидит основное описание.</div>
+
         <button class="btn" onclick="saveProduct()" id="saveBtn">Добавить товар</button>
         <button class="btn secondary" onclick="resetForm()" id="cancelBtn" style="display:none;">Отменить редактирование</button>
       </div>
@@ -210,6 +217,17 @@
     <div class="tab-panel" id="tab-design">
       <div class="card">
         <h1>Панель меню и фон</h1>
+        <label>Цвет активного пункта категории в меню</label>
+        <input type="color" id="f_catChipColor" value="#ff5a1f" onchange="saveSetting('categoryChipColor', this.value)">
+
+        <label>Шрифт пунктов категорий в меню</label>
+        <select id="f_catFont" onchange="saveSetting('categoryFont', this.value)">
+          <option value="">Как основной текст сайта</option>
+          <option value="Space Grotesk">Space Grotesk</option>
+          <option value="Inter">Inter</option>
+          <option value="Cormorant Garamond">Cormorant Garamond</option>
+        </select>
+
         <label>Цвет нижней панели (Главная / Избранное / Корзина / Профиль)</label>
         <input type="color" id="f_navcolor" value="#141414" onchange="saveSetting('navColor', this.value)">
 
@@ -384,10 +402,15 @@ function saveProduct(){
   const stock = colors.reduce((sum, c) => sum + (c.stock || 0), 0);
   const cardColor = document.getElementById('f_cardcolor').value;
   const desc = document.getElementById('f_desc').value.trim();
+  const descTranslations = {};
+  ['en','uz','tr','az'].forEach(l => {
+    const v = document.getElementById(`f_desc_${l}`).value.trim();
+    if (v) descTranslations[l] = v;
+  });
 
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
-  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc };
+  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations };
   if (editingId){ db.collection('products').doc(editingId).update(data).then(resetForm); }
   else { db.collection('products').add(data).then(resetForm); }
 }
@@ -403,6 +426,7 @@ function resetForm(){
   clearColorRows(); addColorRow();
   document.getElementById('f_cardcolor').value = '#f4f1ec';
   document.getElementById('f_desc').value = '';
+  ['en','uz','tr','az'].forEach(l => document.getElementById(`f_desc_${l}`).value = '');
   document.getElementById('saveBtn').textContent = 'Добавить товар';
   document.getElementById('cancelBtn').style.display = 'none';
 }
@@ -419,6 +443,8 @@ function editProduct(id, p){
   if (p.colors && p.colors.length){ p.colors.forEach(c => addColorRow(c)); } else { addColorRow(); }
   document.getElementById('f_cardcolor').value = p.cardColor || '#f4f1ec';
   document.getElementById('f_desc').value = p.desc || '';
+  const dt = p.descTranslations || {};
+  ['en','uz','tr','az'].forEach(l => document.getElementById(`f_desc_${l}`).value = dt[l] || '');
   document.getElementById('saveBtn').textContent = 'Сохранить изменения';
   document.getElementById('cancelBtn').style.display = 'block';
   switchTab('products');
@@ -501,6 +527,8 @@ function loadSettings(){
   db.collection('settings').doc('shop').onSnapshot(doc => {
     const data = doc.exists ? doc.data() : {};
     if (data.navColor) document.getElementById('f_navcolor').value = data.navColor;
+    if (data.categoryChipColor) document.getElementById('f_catChipColor').value = data.categoryChipColor;
+    if (data.categoryFont) document.getElementById('f_catFont').value = data.categoryFont;
     if (data.bgColor) document.getElementById('f_bgcolor').value = data.bgColor;
     if (data.colorBorder) document.getElementById('f_borderColor').value = data.colorBorder;
     if (data.fontFamily){
@@ -512,6 +540,7 @@ function loadSettings(){
     if (data.shippingText) document.getElementById('f_shippingText').value = data.shippingText;
     if (data.shopContacts) document.getElementById('f_shopContacts').value = data.shopContacts;
     categoryImages = data.categoryImages || {};
+    categoryTranslations = data.categoryTranslations || {};
     categories = data.categories || ["Тренды","Oversize","Минимализм","Лимитки"];
     renderCategoryTags();
     renderCategorySelect();
@@ -534,20 +563,39 @@ function saveSetting(key, value){
 }
 
 let categoryImages = {};
+let categoryTranslations = {};
 
 function renderCategoryTags(){
   const wrap = document.getElementById('catTags');
-  wrap.innerHTML = categories.map((c,i) => `
-    <div class="color-row">
+  wrap.innerHTML = categories.map((c,i) => {
+    const tr = categoryTranslations[c] || {};
+    const trStr = ['en','uz','tr','az'].map(l => tr[l] ? `${l}:${tr[l]}` : '').filter(Boolean).join(', ');
+    return `
+    <div class="color-row" style="flex-wrap:wrap;">
       <span class="cat-tag" style="flex-shrink:0;">${c} <span class="x" onclick="removeCategory(${i})">✕</span></span>
       <input type="url" placeholder="Фото для плитки (необязательно)" value="${(categoryImages[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryImage('${c.replace(/'/g,"\\'")}', this.value)">
     </div>
-  `).join('');
+    <input type="text" style="margin-bottom:10px;" placeholder="Переводы: en:Trends, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}" onchange="setCategoryTranslation('${c.replace(/'/g,"\\'")}', this.value)">
+  `;
+  }).join('');
 }
 
 function setCategoryImage(cat, url){
   categoryImages[cat] = url;
   saveSetting('categoryImages', categoryImages);
+}
+
+function setCategoryTranslation(cat, str){
+  const obj = {};
+  str.split(',').forEach(pair => {
+    const idx = pair.indexOf(':');
+    if (idx === -1) return;
+    const lang = pair.slice(0, idx).trim();
+    const val = pair.slice(idx+1).trim();
+    if (lang && val) obj[lang] = val;
+  });
+  categoryTranslations[cat] = obj;
+  saveSetting('categoryTranslations', categoryTranslations);
 }
 
 function renderCategorySelect(){
