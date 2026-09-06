@@ -9,6 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{ --bg:#ffffff; --pink:#fbe4e8; --maroon:#5c1a24; --maroon-dark:#42121a; --line:#ecd3d7; --muted:#9c7b80; }
+  :root.dark{ --bg:#1c1416; --pink:#241a1d; --maroon:#c94f63; --maroon-dark:#f2dfe3; --line:#3a2a2e; --muted:#8a7378; }
+  .theme-toggle{ position:fixed; top:16px; right:16px; z-index:200; width:40px; height:40px; border-radius:50%; background:var(--maroon); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  body.dark{ --bg:#1c1418; --pink:#2a1c22; --maroon:#e8748a; --maroon-dark:#f4b8c4; --line:#3a2830; --muted:#a58a91; }
+  body.dark input, body.dark select, body.dark textarea{ background:#2a1c22 !important; color:#f4e8ea !important; }
+  body.dark .card{ background:#241820; }
+  body.dark .prod-row .ph{ background:#2a1c22; }
+  .theme-toggle{ position:fixed; top:16px; right:16px; z-index:100; width:40px; height:40px; border-radius:50%; background:var(--bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.1); }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{ font-family:'Inter',sans-serif; background:var(--pink); color:var(--maroon-dark); padding-bottom:60px; }
   .logo{ font-family:'Cormorant Garamond',serif; font-weight:700; }
@@ -85,6 +92,11 @@
 </head>
 <body>
 
+<div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</div>
+
+
+<div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</div>
+
 <div id="lockScreen" class="lock-screen">
   <div class="logo">milaisss</div>
   <p class="sub">Введите пароль владельца</p>
@@ -144,6 +156,15 @@
         <textarea id="f_desc_tr" rows="2" placeholder="Türkçe açıklama" style="margin-top:6px;"></textarea>
         <textarea id="f_desc_az" rows="2" placeholder="Azərbaycan təsviri" style="margin-top:6px;"></textarea>
         <div class="hint">Оставь пустым, если перевод не нужен — покупатель увидит основное описание.</div>
+
+        <label>Возврат (для этого товара; пусто = общий текст из "Оформление")</label>
+        <textarea id="f_returnPolicy" rows="2" placeholder="Например: этот товар не подлежит возврату"></textarea>
+
+        <label>Доставка (для этого товара; пусто = общий текст)</label>
+        <textarea id="f_deliveryPolicy" rows="2" placeholder="Особые условия доставки этого товара"></textarea>
+
+        <label>Уход за товаром (для этого товара; пусто = общий текст)</label>
+        <textarea id="f_careInstructions" rows="2" placeholder="Как ухаживать именно за этим товаром"></textarea>
 
         <button class="btn" onclick="saveProduct()" id="saveBtn">Добавить товар</button>
         <button class="btn secondary" onclick="resetForm()" id="cancelBtn" style="display:none;">Отменить редактирование</button>
@@ -216,9 +237,12 @@
 
     <div class="tab-panel" id="tab-design">
       <div class="card">
-        <h1>Панель меню и фон</h1>
+        <h1>Цвета кнопок и элементов</h1>
+        <label>Основной цвет кнопок (Добавить в корзину, Оформить заказ)</label>
+        <div class="color-row"><input type="color" id="f_orangeColor" value="#ff5a1f" onchange="syncHexInput('orangeColor', this.value)"><input type="text" id="f_orangeColorHex" placeholder="#ff5a1f" onchange="saveHexColor('orangeColor', this.value)"></div>
+
         <label>Цвет активного пункта категории в меню</label>
-        <input type="color" id="f_catChipColor" value="#ff5a1f" onchange="saveSetting('categoryChipColor', this.value)">
+        <div class="color-row"><input type="color" id="f_catChipColor" value="#ff5a1f" onchange="syncHexInput('catChipColor', this.value)"><input type="text" id="f_catChipColorHex" placeholder="#ff5a1f" onchange="saveHexColor('catChipColor', this.value)"></div>
 
         <label>Шрифт пунктов категорий в меню</label>
         <select id="f_catFont" onchange="saveSetting('categoryFont', this.value)">
@@ -229,10 +253,10 @@
         </select>
 
         <label>Цвет нижней панели (Главная / Избранное / Корзина / Профиль)</label>
-        <input type="color" id="f_navcolor" value="#141414" onchange="saveSetting('navColor', this.value)">
+        <div class="color-row"><input type="color" id="f_navcolor" value="#141414" onchange="syncHexInput('navColor', this.value)"><input type="text" id="f_navcolorHex" placeholder="#141414" onchange="saveHexColor('navColor', this.value)"></div>
 
         <label>Цвет фона магазина</label>
-        <input type="color" id="f_bgcolor" value="#f4f1ec" onchange="saveSetting('bgColor', this.value)">
+        <div class="color-row"><input type="color" id="f_bgcolor" value="#f4f1ec" onchange="syncHexInput('bgColor', this.value)"><input type="text" id="f_bgcolorHex" placeholder="#f4f1ec" onchange="saveHexColor('bgColor', this.value)"></div>
 
         <label>Цвет рамки вокруг выбранного цвета товара</label>
         <input type="color" id="f_borderColor" value="#141414" onchange="saveSetting('colorBorder', this.value)">
@@ -324,6 +348,19 @@
 <script>
 const ADMIN_PASSWORD = "milaisss2026"; // смени на свой пароль
 
+function toggleTheme(){
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('milaisss_admin_theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+}
+(function initTheme(){
+  const saved = localStorage.getItem('milaisss_admin_theme');
+  if (saved === 'dark'){
+    document.documentElement.classList.add('dark');
+    document.addEventListener('DOMContentLoaded', () => { document.getElementById('themeToggle').textContent = '☀️'; });
+  }
+})();
+
 const firebaseConfig = {
   apiKey: "AIzaSyAPg6nCQ4I9vTKX5AXlmHM5gwYAsrNvW40",
   authDomain: "milaisss.firebaseapp.com",
@@ -407,10 +444,13 @@ function saveProduct(){
     const v = document.getElementById(`f_desc_${l}`).value.trim();
     if (v) descTranslations[l] = v;
   });
+  const returnPolicy = document.getElementById('f_returnPolicy').value.trim();
+  const deliveryPolicy = document.getElementById('f_deliveryPolicy').value.trim();
+  const careInstructions = document.getElementById('f_careInstructions').value.trim();
 
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
-  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations };
+  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions };
   if (editingId){ db.collection('products').doc(editingId).update(data).then(resetForm); }
   else { db.collection('products').add(data).then(resetForm); }
 }
@@ -427,6 +467,9 @@ function resetForm(){
   document.getElementById('f_cardcolor').value = '#f4f1ec';
   document.getElementById('f_desc').value = '';
   ['en','uz','tr','az'].forEach(l => document.getElementById(`f_desc_${l}`).value = '');
+  document.getElementById('f_returnPolicy').value = '';
+  document.getElementById('f_deliveryPolicy').value = '';
+  document.getElementById('f_careInstructions').value = '';
   document.getElementById('saveBtn').textContent = 'Добавить товар';
   document.getElementById('cancelBtn').style.display = 'none';
 }
@@ -445,6 +488,9 @@ function editProduct(id, p){
   document.getElementById('f_desc').value = p.desc || '';
   const dt = p.descTranslations || {};
   ['en','uz','tr','az'].forEach(l => document.getElementById(`f_desc_${l}`).value = dt[l] || '');
+  document.getElementById('f_returnPolicy').value = p.returnPolicy || '';
+  document.getElementById('f_deliveryPolicy').value = p.deliveryPolicy || '';
+  document.getElementById('f_careInstructions').value = p.careInstructions || '';
   document.getElementById('saveBtn').textContent = 'Сохранить изменения';
   document.getElementById('cancelBtn').style.display = 'block';
   switchTab('products');
@@ -526,10 +572,11 @@ function loadReviews(){
 function loadSettings(){
   db.collection('settings').doc('shop').onSnapshot(doc => {
     const data = doc.exists ? doc.data() : {};
-    if (data.navColor) document.getElementById('f_navcolor').value = data.navColor;
-    if (data.categoryChipColor) document.getElementById('f_catChipColor').value = data.categoryChipColor;
+    if (data.navColor){ document.getElementById('f_navcolor').value = data.navColor; document.getElementById('f_navcolorHex').value = data.navColor; }
+    if (data.categoryChipColor){ document.getElementById('f_catChipColor').value = data.categoryChipColor; document.getElementById('f_catChipColorHex').value = data.categoryChipColor; }
     if (data.categoryFont) document.getElementById('f_catFont').value = data.categoryFont;
-    if (data.bgColor) document.getElementById('f_bgcolor').value = data.bgColor;
+    if (data.bgColor){ document.getElementById('f_bgcolor').value = data.bgColor; document.getElementById('f_bgcolorHex').value = data.bgColor; }
+    if (data.orangeColor){ document.getElementById('f_orangeColor').value = data.orangeColor; document.getElementById('f_orangeColorHex').value = data.orangeColor; }
     if (data.colorBorder) document.getElementById('f_borderColor').value = data.colorBorder;
     if (data.fontFamily){
       document.getElementById('customFontInput').value = data.fontFamily;
@@ -541,6 +588,7 @@ function loadSettings(){
     if (data.shopContacts) document.getElementById('f_shopContacts').value = data.shopContacts;
     categoryImages = data.categoryImages || {};
     categoryTranslations = data.categoryTranslations || {};
+    categoryInfo = data.categoryInfo || {};
     categories = data.categories || ["Тренды","Oversize","Минимализм","Лимитки"];
     renderCategoryTags();
     renderCategorySelect();
@@ -562,8 +610,26 @@ function saveSetting(key, value){
   db.collection('settings').doc('shop').set({ [key]: value }, { merge: true });
 }
 
+const COLOR_SETTING_MAP = { orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor' };
+
+function syncHexInput(id, colorVal){
+  document.getElementById(`f_${id}Hex`).value = colorVal;
+  saveSetting(COLOR_SETTING_MAP[id], colorVal);
+}
+
+function saveHexColor(id, hexVal){
+  hexVal = hexVal.trim();
+  if (!/^#[0-9a-fA-F]{6}$/.test(hexVal)){
+    alert('Введите цвет в формате #ffffff (6 символов после #)');
+    return;
+  }
+  document.getElementById(`f_${id}`).value = hexVal;
+  saveSetting(COLOR_SETTING_MAP[id], hexVal);
+}
+
 let categoryImages = {};
 let categoryTranslations = {};
+let categoryInfo = {};
 
 function renderCategoryTags(){
   const wrap = document.getElementById('catTags');
@@ -575,7 +641,8 @@ function renderCategoryTags(){
       <span class="cat-tag" style="flex-shrink:0;">${c} <span class="x" onclick="removeCategory(${i})">✕</span></span>
       <input type="url" placeholder="Фото для плитки (необязательно)" value="${(categoryImages[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryImage('${c.replace(/'/g,"\\'")}', this.value)">
     </div>
-    <input type="text" style="margin-bottom:10px;" placeholder="Переводы: en:Trends, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}" onchange="setCategoryTranslation('${c.replace(/'/g,"\\'")}', this.value)">
+    <input type="text" style="margin-bottom:6px;" placeholder="Переводы: en:Trends, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}" onchange="setCategoryTranslation('${c.replace(/'/g,"\\'")}', this.value)">
+    <input type="text" style="margin-bottom:10px;" placeholder="Доп. инфо (необязательно, мелким шрифтом в меню)" value="${(categoryInfo[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryInfo('${c.replace(/'/g,"\\'")}', this.value)">
   `;
   }).join('');
 }
@@ -583,6 +650,11 @@ function renderCategoryTags(){
 function setCategoryImage(cat, url){
   categoryImages[cat] = url;
   saveSetting('categoryImages', categoryImages);
+}
+
+function setCategoryInfo(cat, text){
+  categoryInfo[cat] = text;
+  saveSetting('categoryInfo', categoryInfo);
 }
 
 function setCategoryTranslation(cat, str){
