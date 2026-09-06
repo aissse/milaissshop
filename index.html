@@ -740,6 +740,7 @@ let btsBranches = [];
 let categoryImages = {};
 let categoryTranslations = {};
 let categoryInfo = {};
+let infoItems = [];
 let shopContacts = '';
 let gridView = 'grid';
 function setGridView(v){
@@ -943,21 +944,39 @@ function renderDrawer(){
   const items = ['Все', ...CATEGORIES, 'До 500 000'];
   let html = items.map((cat, i) => {
     const info = categoryInfo[cat];
-    const chevron = info ? `<span class="drawer-chevron" onclick="event.stopPropagation(); toggleDrawerInfo(${i})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>` : '';
+    const chevron = info ? `<span class="drawer-chevron" onclick="event.stopPropagation(); toggleDrawerInfo('cat-${i}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>` : '';
     return `
       <div class="drawer-row">
         <div class="drawer-item ${activeCategory===cat?'active':''}" onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')" style="flex:1; border-bottom:none;">${translateCategory(cat)}</div>
         ${chevron}
       </div>
-      ${info ? `<div class="drawer-info" id="drawer-info-${i}">${info}</div>` : ''}
+      ${info ? `<div class="drawer-info" id="drawer-info-cat-${i}">${info}</div>` : ''}
       <div style="border-bottom:1px solid var(--line);"></div>
     `;
   }).join('');
+
+  if (infoItems.length){
+    html += `<div style="margin-top:16px;"></div>`;
+    html += infoItems.map((item, i) => {
+      const title = (item.titleTranslations && item.titleTranslations[lang]) ? item.titleTranslations[lang] : item.title;
+      const body = (item.bodyTranslations && item.bodyTranslations[lang]) ? item.bodyTranslations[lang] : item.body;
+      const chevron = body ? `<span class="drawer-chevron" onclick="event.stopPropagation(); toggleDrawerInfo('info-${i}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>` : '';
+      return `
+        <div class="drawer-row">
+          <div class="drawer-item" style="flex:1; border-bottom:none; cursor:${body?'pointer':'default'};" ${body?`onclick="toggleDrawerInfo('info-${i}')"`:''}>${title}</div>
+          ${chevron}
+        </div>
+        ${body ? `<div class="drawer-info" id="drawer-info-info-${i}">${body}</div>` : ''}
+        <div style="border-bottom:1px solid var(--line);"></div>
+      `;
+    }).join('');
+  }
+
   html += `<div class="drawer-item" onclick="toggleDrawer(); showScreen('settings');" style="margin-top:20px; border-top:2px solid var(--line); padding-top:20px;">⚙️ Настройки</div>`;
   wrap.innerHTML = html;
 }
-function toggleDrawerInfo(i){
-  const el = document.getElementById(`drawer-info-${i}`);
+function toggleDrawerInfo(id){
+  const el = document.getElementById(`drawer-info-${id}`);
   el.classList.toggle('open');
 }
 function translateCategory(cat){
@@ -1092,6 +1111,8 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   categoryImages = data.categoryImages || {};
   categoryTranslations = data.categoryTranslations || {};
   categoryInfo = data.categoryInfo || {};
+  infoItems = data.infoItems || [];
+  renderDrawer();
   if (data.categoryChipColor) document.documentElement.style.setProperty('--catcolor', data.categoryChipColor);
   if (data.orangeColor) document.documentElement.style.setProperty('--orange', data.orangeColor);
   if (data.categoryFont) document.documentElement.style.setProperty('--catfont', `'${data.categoryFont}',sans-serif`);
