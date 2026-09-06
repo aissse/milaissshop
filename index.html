@@ -17,6 +17,19 @@
   *{box-sizing:border-box; margin:0; padding:0;}
   body{ font-family:'Inter',sans-serif; background:var(--stone); color:var(--ink); -webkit-font-smoothing:antialiased; }
   .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; overflow-x:hidden; padding-bottom:84px; }
+
+  @media (min-width:768px){
+    body{ padding:20px 0; }
+    .app{ max-width:720px; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,.12); min-height:auto; }
+    .grid{ grid-template-columns:repeat(3,1fr); }
+    .collections-grid{ grid-template-columns:repeat(3,1fr); }
+  }
+  @media (min-width:1100px){
+    .app{ max-width:1040px; }
+    .grid{ grid-template-columns:repeat(4,1fr); }
+    .collections-grid{ grid-template-columns:repeat(4,1fr); }
+    .hero-photo{ aspect-ratio:21/9; }
+  }
   .display{ font-family:'Space Grotesk',sans-serif; }
   .logo{ font-family:var(--logofont); font-size:32px; font-weight:600; text-align:center; color:var(--ink); letter-spacing:.02em; }
 
@@ -31,8 +44,11 @@
   .lang-menu div:hover{ background:var(--stone); }
 
   .search-row{ display:flex; gap:8px; padding:8px 20px 16px; }
-  .search-box{ flex:1; display:flex; align-items:center; gap:8px; background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:11px 14px; }
-  .search-box input{ border:none; background:transparent; outline:none; font-size:14px; width:100%; font-family:'Inter'; }
+  .search-box{ flex:1; display:flex; align-items:center; gap:10px; background:transparent; border:none; border-bottom:1.5px solid var(--line); padding:10px 2px; }
+  .search-box svg{ width:18px; height:18px; color:var(--muted); flex-shrink:0; }
+  .search-box input{ border:none; background:transparent; outline:none; font-size:15px; width:100%; font-family:'Inter'; }
+  .search-box .clear-x{ color:var(--muted); cursor:pointer; font-size:16px; display:none; }
+  .search-box .clear-x.show{ display:block; }
 
   .cats{ display:flex; gap:8px; padding:0 20px 18px; overflow-x:auto; scrollbar-width:none; }
   .cats::-webkit-scrollbar{ display:none; }
@@ -176,18 +192,27 @@
   .bts-result-item{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px; margin-bottom:6px; cursor:pointer; background:var(--bg); }
   .bts-result-item:active{ background:var(--stone); }
   .pay-methods{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-  .pay-method-card{ border:2px solid var(--line); border-radius:14px; padding:12px 8px; text-align:center; cursor:pointer; font-size:11px; font-weight:600; }
-  .pay-method-card.selected{ border-color:var(--orange); background:#fff3e9; }
-  .pay-method-card.soon{ opacity:.55; }
   .pmc-icon{ width:32px; height:32px; border-radius:8px; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px; }
+
+  .pay-methods-list{ border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+  .pmr{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .pmr:last-child{ border-bottom:none; }
+  .pmr.selected{ background:var(--stone); }
+  .pmr.soon{ opacity:.5; }
+  .pmr-radio{ width:18px; height:18px; border-radius:50%; border:2px solid var(--line); flex-shrink:0; position:relative; }
+  .pmr.selected .pmr-radio{ border-color:var(--ink); }
+  .pmr.selected .pmr-radio::after{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--ink); }
+  .pmr-label{ flex:1; font-weight:700; font-size:14px; }
+  .pmr-badge{ padding:6px 10px; border-radius:8px; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px; }
+  .card-badge{ background:var(--stone); color:var(--ink); border:1px solid var(--line); }
 
   .drawer-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:150; display:none; }
   .drawer-overlay.open{ display:block; }
   .drawer-panel{ position:fixed; top:0; left:0; bottom:0; width:78%; max-width:300px; background:#fff; z-index:151; transform:translateX(-100%); transition:transform .25s ease; padding:24px 20px; overflow-y:auto; }
   .drawer-panel.open{ transform:translateX(0); }
   .drawer-panel .logo{ text-align:left; margin-bottom:20px; }
-  .drawer-item{ padding:14px 4px; font-size:15px; font-weight:600; border-bottom:1px solid var(--line); cursor:pointer; }
-  .drawer-item.active{ color:var(--orange); }
+  .drawer-item{ padding:14px 4px; font-size:15px; font-weight:600; border-bottom:1px solid var(--line); cursor:pointer; font-family:var(--catfont, inherit); }
+  .drawer-item.active{ color:var(--catcolor, var(--orange)); }
 
   .faq-section{ padding:10px 20px 30px; }
   .faq-item{ border-bottom:1px solid var(--line); }
@@ -227,7 +252,8 @@
   .footer-copy{ font-size:11px; color:var(--muted); }
   .social-follow{ padding:10px 20px 30px; }
   .social-icons{ display:flex; justify-content:center; gap:14px; }
-  .social-icons a{ width:44px; height:44px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; text-decoration:none; }
+  .social-icons a{ width:52px; height:52px; border-radius:16px; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; text-decoration:none; }
+  .social-icons a svg{ width:26px; height:26px; }
 
   .policy-accordion{ margin-top:10px; border-top:1px solid var(--line); }
   .policy-item{ border-bottom:1px solid var(--line); }
@@ -264,7 +290,7 @@
       <div class="icon-btn" style="width:38px;" onclick="toggleDrawer()">☰</div>
       <div class="logo">milaisss</div>
       <div class="icon-btn" id="langBtn" onclick="toggleLangMenu(event)">
-        <span id="langFlag">🇷🇺</span><span style="font-size:10px;">⌄</span>
+        <span id="langFlag" style="font-size:16px; line-height:1; display:inline-flex; align-items:center;">🇬🇧</span><span style="font-size:10px; line-height:1; display:inline-flex; align-items:center;">⌄</span>
         <div class="lang-menu" id="langMenu">
           <div onclick="setLang('ru')">🇷🇺 Русский</div>
           <div onclick="setLang('uz')">🇺🇿 Oʻzbek</div>
@@ -275,10 +301,12 @@
       </div>
     </div>
     <div class="search-row">
-      <div class="search-box"><span>🔍</span><input type="text" id="searchInput" data-i18n-ph="search" placeholder="Найти кроссовки"></div>
-      <div class="icon-btn" style="width:38px;" onclick="showScreen('settings')">⚙️</div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" data-i18n-ph="search" placeholder="Найти" oninput="onSearchInput(this.value)">
+        <span class="clear-x" id="searchClear" onclick="clearSearch()">✕</span>
+      </div>
     </div>
-    <div class="cats" id="catRow"></div>
 
     <div class="hero-photo" id="heroPhoto">
       <div class="hero-photo-text">
@@ -387,21 +415,30 @@
 
     <div class="pay-field" style="margin-bottom:14px;">
       <label class="block-label" style="margin-top:0;">Способ оплаты</label>
-      <div class="pay-methods" id="payMethods">
-        <div class="pay-method-card" data-method="payme" onclick="selectPayMethod('payme')">
-          <div class="pmc-icon" style="background:#00c9a7;">P</div><span>Payme</span>
+      <div class="pay-methods-list" id="payMethods">
+        <div class="pmr" data-method="payme" onclick="selectPayMethod('payme')">
+          <span class="pmr-radio"></span><span class="pmr-label">Payme</span>
+          <span class="pmr-badge" style="background:#00c9a7;">Payme</span>
         </div>
-        <div class="pay-method-card" data-method="click" onclick="selectPayMethod('click')">
-          <div class="pmc-icon" style="background:#1877f2;">C</div><span>Click</span>
+        <div class="pmr" data-method="click" onclick="selectPayMethod('click')">
+          <span class="pmr-radio"></span><span class="pmr-label">Click</span>
+          <span class="pmr-badge" style="background:#1877f2;">Click</span>
         </div>
-        <div class="pay-method-card" data-method="card" onclick="selectPayMethod('card')">
-          <div class="pmc-icon" style="background:#141414;">💳</div><span>Карта</span>
+        <div class="pmr" data-method="card" onclick="selectPayMethod('card')">
+          <span class="pmr-radio"></span><span class="pmr-label">Карта</span>
+          <span class="pmr-badge card-badge">💳 Card</span>
         </div>
-        <div class="pay-method-card soon" onclick="showSoonPopup()">
-          <div class="pmc-icon" style="background:#000;"></div><span>Apple Pay</span>
+        <div class="pmr soon" onclick="showSoonPopup()">
+          <span class="pmr-radio"></span><span class="pmr-label">Apple Pay</span>
+          <span class="pmr-badge" style="background:#000;">
+            <svg viewBox="0 0 24 24" fill="#fff" width="14" height="14"><path d="M16.5 2c-1.1.1-2.4.8-3.1 1.7-.6.8-1.2 2-1 3.2 1.2.1 2.4-.6 3.2-1.5.7-.9 1.2-2.1 0.9-3.4zM19.7 8.3c-1.7-.1-3.1.9-3.9.9-.8 0-2.1-.9-3.4-.9-1.8 0-3.4 1-4.3 2.6-1.9 3.2-.5 8 1.3 10.6.9 1.3 1.9 2.7 3.3 2.6 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.2-2.6.6-.9 1-1.7 1.3-2.7-2.9-1.1-3.4-5.5-.5-7-1-1.6-2.5-2.4-3.8-2.5z"/></svg> Pay
+          </span>
         </div>
-        <div class="pay-method-card soon" onclick="showSoonPopup()">
-          <div class="pmc-icon" style="background:#4285F4;">G</div><span>Google Pay</span>
+        <div class="pmr soon" onclick="showSoonPopup()">
+          <span class="pmr-radio"></span><span class="pmr-label">Google Pay</span>
+          <span class="pmr-badge" style="background:#fff; border:1px solid var(--line); color:#333;">
+            <span style="color:#4285F4;">G</span><span style="color:#EA4335;">o</span><span style="color:#FBBC05;">o</span><span style="color:#4285F4;">g</span><span style="color:#34A853;">l</span><span style="color:#EA4335;">e</span> Pay
+          </span>
         </div>
       </div>
     </div>
@@ -510,7 +547,7 @@ const ADMIN_USERNAME = "isssroilov";
 // Как получить — см. инструкцию после обновления файла.
 const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
 const ADMIN_CHAT_ID = "6620851909";
-const NOTIFY_BOT_USERNAME = "MilaisssOthers";
+const NOTIFY_BOT_USERNAME = "MilaisssOthers_bot";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -549,35 +586,35 @@ function fmt(n){ return Number(n||0).toLocaleString('ru-RU') + " сум"; }
 /* ---------- i18n ---------- */
 const FLAGS = { ru:"🇷🇺", uz:"🇺🇿", tr:"🇹🇷", az:"🇦🇿", en:"🇬🇧" };
 const STR = {
-  ru: { search:"Найти кроссовки", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
+  ru: { search:"Найти", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
         addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
         sizeLabel:"Размер", descLabel:"Описание", colorLabelWord:"Цвет", allCat:"Все", outOfStock:"Товар закончился",
         empty:"Корзина пуста", heroTag:"НОВАЯ КОЛЛЕКЦИЯ", heroTitle:"Скидка 20% на первый дроп", heroBtn:"Смотреть",
         goodsLabel:"Товары", deliveryLabel:"Доставка", totalLabel:"Итого", checkoutBtn:"Оформить заказ",
         allProducts:"Все товары", noProductsYet:"Товары скоро появятся 👟", noFav:"Пока нет избранных товаров 🤍",
         noOrders:"Заказов пока нет", noRating:"Нет оценок", stockRemain:"Осталось", inStockWord:"В наличии" },
-  uz: { search:"Krossovka qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
+  uz: { search:"Qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
         addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
         sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
         empty:"Savat bo‘sh", heroTag:"YANGI KOLLEKSIYA", heroTitle:"Birinchi tashlashga 20% chegirma", heroBtn:"Ko‘rish",
         goodsLabel:"Mahsulotlar", deliveryLabel:"Yetkazib berish", totalLabel:"Jami", checkoutBtn:"Buyurtma berish",
         allProducts:"Barcha mahsulotlar", noProductsYet:"Mahsulotlar tez orada 👟", noFav:"Sevimlilar hali yo‘q 🤍",
         noOrders:"Buyurtmalar yo‘q", noRating:"Baho yo‘q", stockRemain:"Qoldi", inStockWord:"Mavjud" },
-  tr: { search:"Spor ayakkabı ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
+  tr: { search:"Ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
         addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
         sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
         empty:"Sepet boş", heroTag:"YENİ KOLEKSİYON", heroTitle:"İlk drop'ta %20 indirim", heroBtn:"İncele",
         goodsLabel:"Ürünler", deliveryLabel:"Teslimat", totalLabel:"Toplam", checkoutBtn:"Sipariş ver",
         allProducts:"Tüm ürünler", noProductsYet:"Ürünler yakında 👟", noFav:"Favori yok 🤍",
         noOrders:"Sipariş yok", noRating:"Puan yok", stockRemain:"Kaldı", inStockWord:"Stokta" },
-  az: { search:"Krossovka axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
+  az: { search:"Axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
         addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
         sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
         empty:"Səbət boşdur", heroTag:"YENİ KOLLEKSİYA", heroTitle:"İlk drop-a 20% endirim", heroBtn:"Bax",
         goodsLabel:"Mallar", deliveryLabel:"Çatdırılma", totalLabel:"Cəmi", checkoutBtn:"Sifariş et",
         allProducts:"Bütün mallar", noProductsYet:"Mallar tezliklə 👟", noFav:"Seçilmiş yoxdur 🤍",
         noOrders:"Sifariş yoxdur", noRating:"Reytinq yoxdur", stockRemain:"Qalıb", inStockWord:"Mövcuddur" },
-  en: { search:"Search sneakers", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
+  en: { search:"Search", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
         addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
         sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
         empty:"Cart is empty", heroTag:"NEW COLLECTION", heroTitle:"20% off the first drop", heroBtn:"Shop now",
@@ -585,7 +622,7 @@ const STR = {
         allProducts:"All products", noProductsYet:"Products coming soon 👟", noFav:"No favorites yet 🤍",
         noOrders:"No orders yet", noRating:"No ratings", stockRemain:"Left", inStockWord:"In stock" }
 };
-let lang = localStorage.getItem('milaisss_lang') || 'ru';
+let lang = localStorage.getItem('milaisss_lang') || 'en';
 function t(key){ return (STR[lang] && STR[lang][key]) || STR.ru[key] || key; }
 
 function applyLang(){
@@ -595,6 +632,10 @@ function applyLang(){
   renderCategoryChips();
   renderGrid();
   renderFavGrid();
+  renderCollectionsGrid();
+  if (currentProduct){
+    document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
+  }
 }
 function toggleLangMenu(event){ if (event) event.stopPropagation(); document.getElementById('langMenu').classList.toggle('open'); }
 document.addEventListener('click', () => document.getElementById('langMenu').classList.remove('open'));
@@ -641,6 +682,7 @@ let paymentPaymeInfo = '';
 let paymentClickInfo = '';
 let btsBranches = [];
 let categoryImages = {};
+let categoryTranslations = {};
 let shopContacts = '';
 let gridView = 'grid';
 function setGridView(v){
@@ -654,7 +696,7 @@ function renderCollectionsGrid(){
   wrap.innerHTML = CATEGORIES.map(cat => {
     const img = categoryImages[cat];
     const style = img ? `style="background-image:url('${img}')"` : '';
-    return `<div class="collection-tile" ${style} onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')"><span>${cat}</span></div>`;
+    return `<div class="collection-tile" ${style} onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')"><span>${translateCategory(cat)}</span></div>`;
   }).join('');
 }
 
@@ -708,11 +750,14 @@ function renderPolicyAccordion(){
 }
 function togglePolicy(i){ document.getElementById(`policy-${i}`).classList.toggle('open'); }
 
+const IG_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`;
+const TT_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82c-1.02-.9-1.6-2.19-1.6-3.62h-3.2v13.6a2.6 2.6 0 1 1-1.86-2.49v-3.28a5.8 5.8 0 1 0 5.06 5.77V9.4a7.6 7.6 0 0 0 4.4 1.4V7.6c-1.02 0-1.98-.34-2.8-.98z"/></svg>`;
+
 function renderSocialIcons(){
   const wrap = document.getElementById('socialIcons');
   let html = '';
-  if (socialLinks.instagram) html += `<a href="${socialLinks.instagram}" target="_blank">📷</a>`;
-  if (socialLinks.tiktok) html += `<a href="${socialLinks.tiktok}" target="_blank">🎵</a>`;
+  if (socialLinks.instagram) html += `<a href="${socialLinks.instagram}" target="_blank">${IG_SVG}</a>`;
+  if (socialLinks.tiktok) html += `<a href="${socialLinks.tiktok}" target="_blank">${TT_SVG}</a>`;
   wrap.innerHTML = html || '<span class="hint">Ссылки на соцсети скоро появятся</span>';
 }
 
@@ -731,31 +776,31 @@ function toggleFaq(i){
 renderFaq();
 
 function renderCategoryChips(){
-  const row = document.getElementById('catRow');
-  row.innerHTML = '';
-  const all = document.createElement('div');
-  all.className = 'chip' + (activeCategory === 'Все' ? ' active' : '');
-  all.textContent = t('allCat');
-  all.onclick = () => { activeCategory = 'Все'; renderCategoryChips(); renderGrid(); };
-  row.appendChild(all);
-  CATEGORIES.forEach(cat => {
-    const chip = document.createElement('div');
-    chip.className = 'chip' + (activeCategory === cat ? ' active' : '');
-    chip.textContent = cat;
-    chip.onclick = () => { activeCategory = cat; renderCategoryChips(); renderGrid(); };
-    row.appendChild(chip);
-  });
-  const budget = document.createElement('div');
-  budget.className = 'chip' + (activeCategory === 'До 500 000' ? ' active' : '');
-  budget.textContent = 'До 500 000';
-  budget.onclick = () => { activeCategory = 'До 500 000'; renderCategoryChips(); renderGrid(); };
-  row.appendChild(budget);
+  // категории больше не показываются на главном экране — только в боковом меню (renderDrawer)
 }
 
 function filteredProducts(){
-  if (activeCategory === 'Все') return products;
-  if (activeCategory === 'До 500 000') return products.filter(p => Number(p.price||0) <= 500000);
-  return products.filter(p => p.category === activeCategory);
+  let list = products;
+  if (activeCategory === 'До 500 000') list = list.filter(p => Number(p.price||0) <= 500000);
+  else if (activeCategory !== 'Все') list = list.filter(p => p.category === activeCategory);
+  if (searchQuery.trim()){
+    const q = searchQuery.trim().toLowerCase();
+    list = list.filter(p => (p.name||'').toLowerCase().includes(q) || (p.sub||'').toLowerCase().includes(q));
+  }
+  return list;
+}
+
+let searchQuery = '';
+function onSearchInput(v){
+  searchQuery = v;
+  document.getElementById('searchClear').classList.toggle('show', v.length > 0);
+  renderGrid();
+}
+function clearSearch(){
+  searchQuery = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').classList.remove('show');
+  renderGrid();
 }
 
 /* ---------- side drawer catalog ---------- */
@@ -767,7 +812,14 @@ function toggleDrawer(){
 function renderDrawer(){
   const wrap = document.getElementById('drawerItems');
   const items = ['Все', ...CATEGORIES, 'До 500 000'];
-  wrap.innerHTML = items.map(cat => `<div class="drawer-item ${activeCategory===cat?'active':''}" onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')">${cat === 'Все' ? t('allCat') : cat}</div>`).join('');
+  let html = items.map(cat => `<div class="drawer-item ${activeCategory===cat?'active':''}" onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')">${translateCategory(cat)}</div>`).join('');
+  html += `<div class="drawer-item" onclick="toggleDrawer(); showScreen('settings');" style="margin-top:20px; border-top:2px solid var(--line); padding-top:20px;">⚙️ Настройки</div>`;
+  wrap.innerHTML = html;
+}
+function translateCategory(cat){
+  if (cat === 'Все') return t('allCat');
+  if (cat === 'До 500 000') return categoryTranslations['До 500 000'] && categoryTranslations['До 500 000'][lang] ? categoryTranslations['До 500 000'][lang] : cat;
+  return (categoryTranslations[cat] && categoryTranslations[cat][lang]) ? categoryTranslations[cat][lang] : cat;
 }
 function drawerSelect(cat){
   activeCategory = cat;
@@ -826,7 +878,7 @@ function productCardHTML(p){
 
 function renderGrid(){
   const list = filteredProducts();
-  document.getElementById('sectionTitle').textContent = activeCategory === 'Все' ? t('allProducts') : activeCategory;
+  document.getElementById('sectionTitle').textContent = activeCategory === 'Все' ? t('allProducts') : translateCategory(activeCategory);
   grid.className = 'grid' + (gridView === 'list' ? ' list-view' : '');
   grid.innerHTML = '';
   if (list.length === 0){ grid.innerHTML = `<div class="empty-state">${t('noProductsYet')}</div>`; return; }
@@ -891,6 +943,9 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   if (data.heroImage) document.getElementById('heroPhoto').style.backgroundImage = `url('${data.heroImage}')`;
   if (data.shippingText) document.getElementById('shippingStrip').textContent = data.shippingText;
   categoryImages = data.categoryImages || {};
+  categoryTranslations = data.categoryTranslations || {};
+  if (data.categoryChipColor) document.documentElement.style.setProperty('--catcolor', data.categoryChipColor);
+  if (data.categoryFont) document.documentElement.style.setProperty('--catfont', `'${data.categoryFont}',sans-serif`);
   renderCollectionsGrid();
   shopContacts = data.shopContacts || '';
   renderFooterContacts();
@@ -937,6 +992,11 @@ function sendSupportMessage(){
 }
 
 /* ---------- product detail ---------- */
+function getTranslatedDesc(p){
+  if (p.descTranslations && p.descTranslations[lang]) return p.descTranslations[lang];
+  return p.desc || '';
+}
+
 function updateReviewsSummary(){
   const approved = reviews.filter(r => r.productId === currentProduct.id && r.approved);
   document.getElementById('reviewsLink').textContent = `${approved.length} отзывов`;
@@ -1013,7 +1073,7 @@ function openProduct(id){
 
   document.getElementById('detailName').textContent = currentProduct.name;
   document.getElementById('detailPrice').textContent = fmt(currentProduct.price);
-  document.getElementById('detailDesc').textContent = currentProduct.desc || '';
+  document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
 
   const stockNote = document.getElementById('stockNote');
   const addBtn = document.getElementById('addBtn');
@@ -1150,7 +1210,7 @@ function renderCart(){
 function goToCheckoutFlow(){
   if (cart.length === 0) return;
   selectedPayMethod = '';
-  document.querySelectorAll('.pay-method-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.pmr').forEach(c => c.classList.remove('selected'));
   document.getElementById('paymentInfoBox').style.display = 'none';
   document.getElementById('paymentInfoBox').innerHTML = '';
 
@@ -1171,7 +1231,7 @@ function showSoonPopup(){
 
 function selectPayMethod(method){
   selectedPayMethod = method;
-  document.querySelectorAll('.pay-method-card').forEach(c => c.classList.toggle('selected', c.dataset.method === method));
+  document.querySelectorAll('.pmr').forEach(c => c.classList.toggle('selected', c.dataset.method === method));
 
   const box = document.getElementById('paymentInfoBox');
   box.style.display = 'block';
