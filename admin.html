@@ -782,9 +782,11 @@ function addInfoRow(data){
   row.innerHTML = `
     <span class="rm" onclick="this.parentElement.remove()">✕ удалить</span>
     <input type="text" class="info-title-input" placeholder="Заголовок (например О нас)" value="${(data.title||'').replace(/"/g,'&quot;')}">
-    <textarea class="info-body-input" rows="2" placeholder="Текст под заголовком">${data.body||''}</textarea>
-    <input type="text" class="info-title-tr-input" style="margin-top:6px;" placeholder="Перевод заголовка: en:About us, uz:..., tr:..., az:..." value="${(data.titleTr||'').replace(/"/g,'&quot;')}">
-    <input type="text" class="info-body-tr-input" style="margin-top:6px;" placeholder="Перевод текста: en:..., uz:..., tr:..., az:..." value="${(data.bodyTr||'').replace(/"/g,'&quot;')}">
+    <textarea class="info-body-input" rows="3" placeholder="Текст под заголовком">${data.body||''}</textarea>
+    <label style="margin:10px 0 4px;">Перевод заголовка (en:..., uz:..., tr:..., az:...)</label>
+    <textarea class="info-title-tr-input" rows="2" style="width:100%;" placeholder="en:About us, uz:Biz haqimizda, tr:..., az:...">${(data.titleTr||'')}</textarea>
+    <label style="margin:10px 0 4px;">Перевод текста (en:..., uz:..., tr:..., az:...)</label>
+    <textarea class="info-body-tr-input" rows="5" style="width:100%;" placeholder="en:..., uz:..., tr:..., az:...">${(data.bodyTr||'')}</textarea>
   `;
   document.getElementById('infoRows').appendChild(row);
 }
@@ -900,11 +902,18 @@ function loadOrders(){
   });
 }
 
+function toLocalISODate(date){
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function setDateRange(preset){
   const now = new Date();
   let day = new Date(now);
   if (preset === 'yesterday') day.setDate(day.getDate() - 1);
-  const iso = day.toISOString().slice(0,10);
+  const iso = toLocalISODate(day);
   document.getElementById('dateFrom').value = iso;
   document.getElementById('dateTo').value = iso;
   filterAndRenderOrders();
