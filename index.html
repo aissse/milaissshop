@@ -23,17 +23,19 @@
     --logofont:'Cormorant Garamond',serif; --colordot-border:#141414;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{ font-family:'Inter',sans-serif; background:var(--stone); color:var(--ink); -webkit-font-smoothing:antialiased; }
-  .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; overflow-x:hidden; padding-bottom:84px; }
+  body{ font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; }
+  .app{ width:100%; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; overflow-x:hidden; padding-bottom:84px; transition:opacity .35s ease; }
+
+  .app-loader{ position:fixed; inset:0; background:var(--bg); z-index:500; display:flex; align-items:center; justify-content:center; }
+  .app-loader-logo{ font-family:var(--logofont); font-size:34px; font-weight:600; color:var(--ink); animation:pulseLogo 1.4s ease-in-out infinite; }
+  @keyframes pulseLogo{ 0%,100%{ opacity:.35; } 50%{ opacity:1; } }
 
   @media (min-width:768px){
-    body{ padding:20px 0; }
-    .app{ max-width:720px; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,.12); min-height:auto; }
     .grid{ grid-template-columns:repeat(3,1fr); }
     .collections-grid{ grid-template-columns:repeat(3,1fr); }
   }
   @media (min-width:1100px){
-    .app{ max-width:1040px; }
+    .app{ max-width:1400px; }
     .grid{ grid-template-columns:repeat(4,1fr); }
     .collections-grid{ grid-template-columns:repeat(4,1fr); }
     .hero-photo{ aspect-ratio:21/9; }
@@ -314,7 +316,11 @@
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app-loader" id="appLoader">
+  <div class="app-loader-logo">milaisss</div>
+</div>
+
+<div class="app" id="appRoot" style="opacity:0;">
 
   <div class="screen active" id="home">
     <div class="topbar">
@@ -621,7 +627,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-1";
+  const CURRENT_VERSION = "20260908-2";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1230,10 +1236,26 @@ function renderFavGrid(){
   });
 }
 
+let loaderFlags = { products: false, settings: false };
+function markLoaded(key){
+  loaderFlags[key] = true;
+  if (loaderFlags.products && loaderFlags.settings) revealApp();
+}
+function revealApp(){
+  const loader = document.getElementById('appLoader');
+  const root = document.getElementById('appRoot');
+  if (!loader || loader.dataset.hidden) return;
+  loader.dataset.hidden = '1';
+  root.style.opacity = '1';
+  setTimeout(() => { loader.style.display = 'none'; }, 350);
+}
+setTimeout(revealApp, 2500); // страховка на случай медленной сети
+
 db.collection('products').onSnapshot(snap => {
   products = [];
   snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
   renderGrid(); renderFavGrid();
+  markLoaded('products');
 });
 
 db.collection('reviews').onSnapshot(snap => {
@@ -1244,7 +1266,7 @@ db.collection('reviews').onSnapshot(snap => {
 });
 
 db.collection('settings').doc('shop').onSnapshot(doc => {
-  if (!doc.exists) return;
+  if (!doc.exists){ markLoaded('settings'); return; }
   const data = doc.data();
   if (data.navColor) document.getElementById('bottomNav').style.background = data.navColor;
   if (data.bgColor) document.documentElement.style.setProperty('--stone', data.bgColor);
@@ -1298,6 +1320,7 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   renderCollectionsGrid();
   shopContacts = data.shopContacts || '';
   renderFooterContacts();
+  markLoaded('settings');
 });
 
 /* ---------- screens ---------- */
