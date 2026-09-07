@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>milaisss — кроссовки</title>
+<title>milaisss shop — интернет-магазин кроссовок</title>
+<meta name="description" content="milaisss shop — интернет-магазин кроссовок и обуви. Доставка по всему Узбекистану, оплата Payme, Click или картой.">
+<meta name="keywords" content="milaisss, milaisss shop, магазин кроссовок, кроссовки Ташкент, купить кроссовки Узбекистан">
+<link rel="canonical" href="https://aissse.github.io/milaissshop/">
+<meta property="og:title" content="milaisss shop — интернет-магазин кроссовок">
+<meta property="og:description" content="Кроссовки и обувь с доставкой по Узбекистану. Оплата Payme, Click, картой.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://aissse.github.io/milaissshop/">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -618,10 +625,9 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN ="8923014509:AAFy-Hc8gVllm0nV88YwH32PsRClRIKp0-MY";
-const ADMIN_CHAT_ID ="6620851909";
-const NOTIFY_BOT_USERNAME ="@MilaisssOthers_bot";
-
+const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
+const ADMIN_CHAT_ID = "6620851909";
+const NOTIFY_BOT_USERNAME = "@MilaisssOthers_bot";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
