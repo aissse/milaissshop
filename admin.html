@@ -134,7 +134,8 @@
         <input type="text" id="f_sub" placeholder="Best collection">
 
         <label>Категория (для фильтров на сайте)</label>
-        <select id="f_category"><option value="">Без категории</option></select>
+        <select id="f_category"><option value="Все">Все (по умолчанию)</option></select>
+        <div class="hint">Если не выбрать категорию, товар автоматически попадёт в категорию «Все».</div>
 
         <label>Цена (сум)</label>
         <input type="number" id="f_price" placeholder="250000">
@@ -355,14 +356,14 @@
       </div>
 
       <div class="card collapsible" id="card-categories">
-        <div class="card-header" onclick="toggleCard('card-categories')"><h1>Категории в магазине</h1><span class="card-chevron">▲</span></div>
+        <div class="card-header" onclick="toggleCard('card-categories')"><h1>Категории в главном меню</h1><span class="card-chevron">▲</span></div>
         <div class="card-body">
         <div id="catTags"></div>
         <div class="row" style="margin-top:10px;">
           <input type="text" id="newCatInput" placeholder="Название категории">
         </div>
         <button class="btn secondary" onclick="addCategory()">+ Добавить категорию</button>
-        <div class="hint">Эти категории отображаются кнопками-фильтрами на главной странице магазина. Это только товарные категории — для информационных кнопок вроде "О нас" используй раздел ниже.</div>
+        <div class="hint">Эти категории отображаются кнопками-иконками на главной странице магазина: при нажатии кнопка раскрывается и показывает название категории, а под кнопками появляются её товары. Иконку можно задать эмодзи (например 🔥, 🎁, 👜, 🎒). Это только товарные категории — для информационных кнопок вроде "О нас" используй раздел ниже.</div>
         </div>
       </div>
 
@@ -523,7 +524,7 @@ function clearColorRows(){ document.getElementById('colorRows').innerHTML = ''; 
 function saveProduct(){
   const name = document.getElementById('f_name').value.trim();
   const sub = document.getElementById('f_sub').value.trim();
-  const category = document.getElementById('f_category').value;
+  const category = document.getElementById('f_category').value || 'Все';
   const price = Number(document.getElementById('f_price').value) || 0;
   const image = document.getElementById('f_image').value.trim();
   const sizesRaw = document.getElementById('f_sizes').value.trim();
@@ -552,7 +553,7 @@ function resetForm(){
   editingId = null;
   document.getElementById('f_name').value = '';
   document.getElementById('f_sub').value = '';
-  document.getElementById('f_category').value = '';
+  document.getElementById('f_category').value = 'Все';
   document.getElementById('f_price').value = '';
   document.getElementById('f_image').value = '';
   document.getElementById('f_sizes').value = '';
@@ -571,7 +572,7 @@ function editProduct(id, p){
   editingId = id;
   document.getElementById('f_name').value = p.name || '';
   document.getElementById('f_sub').value = p.sub || '';
-  document.getElementById('f_category').value = p.category || '';
+  document.getElementById('f_category').value = p.category || 'Все';
   document.getElementById('f_price').value = p.price || '';
   document.getElementById('f_image').value = p.image || '';
   document.getElementById('f_sizes').value = (p.sizes || []).join(', ');
@@ -688,6 +689,7 @@ function loadSettings(){
     if (data.heroBtnText) document.getElementById('f_heroBtnText').value = data.heroBtnText;
     if (data.shopContacts) document.getElementById('f_shopContacts').value = data.shopContacts;
     categoryImages = data.categoryImages || {};
+    categoryIcons = data.categoryIcons || {};
     categoryTranslations = data.categoryTranslations || {};
     categoryInfo = data.categoryInfo || {};
     categories = data.categories || ["Тренды","Oversize","Минимализм","Лимитки"];
@@ -735,6 +737,7 @@ function saveHexColor(id, hexVal){
 }
 
 let categoryImages = {};
+let categoryIcons = {};
 let categoryTranslations = {};
 let categoryInfo = {};
 
@@ -746,6 +749,7 @@ function renderCategoryTags(){
     return `
     <div class="color-row" style="flex-wrap:wrap;">
       <span class="cat-tag" style="flex-shrink:0;">${c} <span class="x" onclick="removeCategory(${i})">✕</span></span>
+      <input type="text" placeholder="Иконка (эмодзи, напр. 🔥)" value="${(categoryIcons[c]||'').replace(/"/g,'&quot;')}" style="max-width:120px;" onchange="setCategoryIcon('${c.replace(/'/g,"\\'")}', this.value)">
       <input type="url" placeholder="Фото для плитки (необязательно)" value="${(categoryImages[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryImage('${c.replace(/'/g,"\\'")}', this.value)">
     </div>
     <input type="text" style="margin-bottom:6px;" placeholder="Переводы: en:Trends, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}" onchange="setCategoryTranslation('${c.replace(/'/g,"\\'")}', this.value)">
@@ -757,6 +761,11 @@ function renderCategoryTags(){
 function setCategoryImage(cat, url){
   categoryImages[cat] = url;
   saveSetting('categoryImages', categoryImages);
+}
+
+function setCategoryIcon(cat, icon){
+  categoryIcons[cat] = icon;
+  saveSetting('categoryIcons', categoryIcons);
 }
 
 function setCategoryInfo(cat, text){
@@ -780,8 +789,8 @@ function setCategoryTranslation(cat, str){
 function renderCategorySelect(){
   const sel = document.getElementById('f_category');
   const current = sel.value;
-  sel.innerHTML = '<option value="">Без категории</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
-  sel.value = current;
+  sel.innerHTML = '<option value="Все">Все (по умолчанию)</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+  sel.value = current || 'Все';
 }
 
 function addCategory(){
