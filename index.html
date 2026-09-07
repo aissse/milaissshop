@@ -156,6 +156,7 @@
   .block-label{ font-size:12px; font-weight:700; margin:20px 0 10px; color:var(--muted); }
   .sizes{ display:flex; gap:8px; flex-wrap:wrap; }
   .size-pill{ width:44px; height:40px; border-radius:12px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; cursor:pointer; background:var(--bg); }
+  .size-pill.oos{ opacity:.4; text-decoration:line-through; cursor:not-allowed; }
   .size-pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
 
   .colors{ display:flex; gap:10px; }
@@ -733,7 +734,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-13";
+  const CURRENT_VERSION = "20260908-14";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1344,6 +1345,7 @@ let reviews = [];
 let cart = [];
 let currentProduct = null;
 let selectedSize = "";
+let selectedSizeStock = null;
 let selectedColorIdx = 0;
 let currentColors = [];
 
@@ -1625,10 +1627,12 @@ function openProduct(id){
   currentProduct = products.find(p => p.id === id);
   if (!currentProduct) return;
   renderPolicyAccordion();
-  const sizes = (currentProduct.sizes && currentProduct.sizes.length) ? currentProduct.sizes : ["38","39","40","41","42","43"];
+  const rawSizes = (currentProduct.sizes && currentProduct.sizes.length) ? currentProduct.sizes : ["38","39","40","41","42","43"];
+  const sizeItems = rawSizes.map(s => (s && typeof s === 'object') ? s : { size: s, stock: null });
   const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", hex:"#f4f1ec", stock: currentProduct.stock || 0}];
   currentColors = colors;
-  selectedSize = sizes[0];
+  selectedSize = sizeItems[0] ? sizeItems[0].size : '';
+  selectedSizeStock = sizeItems[0] ? sizeItems[0].stock : null;
   selectedColorIdx = 0;
 
   const carousel = document.getElementById('detailCarousel');
@@ -1680,8 +1684,13 @@ function openProduct(id){
   const stockNote = document.getElementById('stockNote');
   const addBtn = document.getElementById('addBtn');
 
+  function getEffectiveStock(idx){
+    if (selectedSizeStock !== null) return selectedSizeStock;
+    return (colors[idx] && typeof colors[idx].stock === 'number') ? colors[idx].stock : Number(currentProduct.stock || 0);
+  }
+
   function refreshStockUI(idx){
-    const colorStock = (colors[idx] && typeof colors[idx].stock === 'number') ? colors[idx].stock : Number(currentProduct.stock || 0);
+    const colorStock = getEffectiveStock(idx);
     if (colorStock <= 0){
       stockNote.textContent = `${t('outOfStock')} (${getTranslatedColorName(colors[idx])})`;
       stockNote.className = 'stock-note out';
@@ -1722,11 +1731,20 @@ function openProduct(id){
 
   const sizeRow = document.getElementById('sizeRow');
   sizeRow.innerHTML = '';
-  sizes.forEach((s, idx) => {
+  sizeItems.forEach((item, idx) => {
     const el = document.createElement('div');
-    el.className = 'size-pill' + (idx===0 ? ' active' : '');
-    el.textContent = s;
-    el.onclick = () => { selectedSize = s; document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
+    const oos = item.stock !== null && item.stock <= 0;
+    el.className = 'size-pill' + (idx===0 ? ' active' : '') + (oos ? ' oos' : '');
+    el.textContent = item.size;
+    if (!oos){
+      el.onclick = () => {
+        selectedSize = item.size;
+        selectedSizeStock = item.stock;
+        document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active'));
+        el.classList.add('active');
+        refreshStockUI(selectedColorIdx);
+      };
+    }
     sizeRow.appendChild(el);
   });
 
@@ -1751,7 +1769,7 @@ function addToCart(){
   if (!currentProduct) return;
   const chosen = currentColors[selectedColorIdx];
   if (!chosen) return;
-  const stockLimit = typeof chosen.stock === 'number' ? chosen.stock : Number(currentProduct.stock||0);
+  const stockLimit = selectedSizeStock !== null ? selectedSizeStock : (typeof chosen.stock === 'number' ? chosen.stock : Number(currentProduct.stock||0));
   if (stockLimit <= 0) return;
   const colorName = chosen.name;
   const existing = cart.find(c => c.productId === currentProduct.id && c.size === selectedSize && c.colorName === colorName);
