@@ -667,7 +667,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-5";
+  const CURRENT_VERSION = "20260908-6";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -991,17 +991,19 @@ function renderFooterContacts(){
   document.getElementById('footerContacts').innerHTML = shopContacts ? shopContacts.replace(/\n/g,'<br>') : '';
 }
 
+let blackDownItems = [];
+
 function renderLegalFooter(){
   const wrap = document.getElementById('legalFooter');
-  if (!infoItems.length){ wrap.innerHTML = ''; return; }
-  wrap.innerHTML = infoItems.map((item, i) => {
+  if (!blackDownItems.length){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = blackDownItems.map((item, i) => {
     const title = (item.titleTranslations && item.titleTranslations[lang]) ? item.titleTranslations[lang] : item.title;
     return `<a onclick="openInfoDetail(${i})">${title}</a>`;
   }).join('');
 }
 
 function openInfoDetail(i){
-  const item = infoItems[i];
+  const item = blackDownItems[i];
   if (!item) return;
   const title = (item.titleTranslations && item.titleTranslations[lang]) ? item.titleTranslations[lang] : item.title;
   const body = (item.bodyTranslations && item.bodyTranslations[lang]) ? item.bodyTranslations[lang] : item.body;
@@ -1369,9 +1371,10 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   categoryTranslations = data.categoryTranslations || {};
   categoryInfo = data.categoryInfo || {};
   infoItems = data.infoItems || [];
+  blackDownItems = data.blackDownItems || [];
   renderLegalFooter();
-  if (data.legalFooterColor) document.documentElement.style.setProperty('--legalfooter-color', data.legalFooterColor);
-  if (data.legalFooterFont) document.documentElement.style.setProperty('--legalfooter-font', `'${data.legalFooterFont}',sans-serif`);
+  if (data.blackDownColor) document.documentElement.style.setProperty('--legalfooter-color', data.blackDownColor);
+  if (data.blackDownFont) document.documentElement.style.setProperty('--legalfooter-font', `'${data.blackDownFont}',sans-serif`);
   avatarOptions = data.avatarOptions || [];
   renderDrawer();
   if (data.categoryChipColor) document.documentElement.style.setProperty('--catcolor', data.categoryChipColor);
