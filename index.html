@@ -104,15 +104,21 @@
 
   .cat-pills-row{ display:flex; align-items:center; gap:10px; padding:0 20px 20px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row::-webkit-scrollbar{ display:none; }
-  .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; transition:background .45s ease, border-color .45s ease, padding .55s cubic-bezier(.22,1,.36,1); }
+  .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; animation: cardFadeIn .4s ease both; transition:background .45s ease, border-color .45s ease, padding .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; }
   .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); padding:0 18px 0 14px; }
   .cat-pill.active .label{ max-width:140px; opacity:1; margin-left:8px; transition-delay:.15s; }
+  .cat-pills-row .cat-pill:nth-child(1){ animation-delay:0s; }
+  .cat-pills-row .cat-pill:nth-child(2){ animation-delay:.05s; }
+  .cat-pills-row .cat-pill:nth-child(3){ animation-delay:.1s; }
+  .cat-pills-row .cat-pill:nth-child(4){ animation-delay:.15s; }
+  .cat-pills-row .cat-pill:nth-child(5){ animation-delay:.2s; }
+  .cat-pills-row .cat-pill:nth-child(n+6){ animation-delay:.25s; }
 
   .cat-pills-row-mini{ display:flex; align-items:center; gap:8px; padding:0 20px 14px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row-mini::-webkit-scrollbar{ display:none; }
-  .cat-pill-mini{ flex:0 0 auto; height:34px; border-radius:100px; display:flex; align-items:center; gap:6px; padding:0 13px; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; }
+  .cat-pill-mini{ flex:0 0 auto; height:34px; border-radius:100px; display:flex; align-items:center; gap:6px; padding:0 13px; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; animation: cardFadeIn .4s ease both; transition:background .3s ease, border-color .3s ease; }
   .cat-pill-mini .icon{ font-size:14px; line-height:1; }
   .cat-pill-mini.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
 
@@ -682,7 +688,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-11";
+  const CURRENT_VERSION = "20260908-12";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
