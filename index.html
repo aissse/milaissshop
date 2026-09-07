@@ -36,6 +36,8 @@
   .topbar{ display:flex; align-items:center; gap:8px; padding:18px 20px 8px; }
   .topbar .logo{ flex:1; }
   .icon-btn{ height:38px; border-radius:12px; background:var(--stone); display:flex; align-items:center; justify-content:center; border:1px solid var(--line); cursor:pointer; flex-shrink:0; position:relative; padding:0 10px; gap:4px; }
+  #langBtn{ background:var(--langbtn-bg, var(--stone)); }
+  #menuBtn{ background:var(--menubtn-bg, var(--stone)); }
   .icon-btn svg{ width:18px; height:18px; }
 
   .lang-menu{ position:absolute; top:44px; right:0; background:var(--bg); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); overflow:hidden; z-index:80; display:none; min-width:140px; }
@@ -90,7 +92,8 @@
   .navitem{ display:flex; flex-direction:column; align-items:center; gap:3px; color:#8a8a8a; font-size:10px; cursor:pointer; position:relative; }
   .navitem svg{ width:20px; height:20px; }
   .navitem.active{ color:#fff; }
-  .cart-badge{ position:absolute; top:-6px; right:6px; background:var(--orange); color:#fff; font-size:9px; font-weight:700; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .cart-badge{ position:absolute; top:-5px; right:6px; background:var(--orange); color:#fff; font-size:8px; font-weight:700; width:12px; height:12px; border-radius:50%; display:none; align-items:center; justify-content:center; }
+  .cart-badge.show{ display:flex; }
 
   .screen{ display:none; }
   .screen.active{ display:block; }
@@ -198,13 +201,13 @@
   .pay-methods-list{ border:1px solid var(--line); border-radius:16px; overflow:hidden; }
   .pmr{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); cursor:pointer; }
   .pmr:last-child{ border-bottom:none; }
-  .pmr.selected{ background:var(--stone); }
+  .pmr.selected{ background:var(--pmr-selected-bg, var(--stone)); }
   .pmr.soon{ opacity:.5; }
   .pmr-radio{ width:18px; height:18px; border-radius:50%; border:2px solid var(--line); flex-shrink:0; position:relative; }
   .pmr.selected .pmr-radio{ border-color:var(--ink); }
   .pmr.selected .pmr-radio::after{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--ink); }
   .pmr-label{ flex:1; font-weight:700; font-size:14px; }
-  .pmr-badge{ padding:6px 10px; border-radius:8px; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px; }
+  .pmr-badge{ padding:6px 10px; border-radius:8px; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px; border:1px solid var(--icon-border-color, transparent); }
   .card-badge{ background:var(--stone); color:var(--ink); border:1px solid var(--line); }
   .pmr-cards{ display:flex; gap:6px; align-items:center; }
   .pmr-cards svg{ border-radius:4px; }
@@ -276,6 +279,14 @@
   .modal-box{ background:#fff; border-radius:18px; padding:24px; max-width:340px; text-align:center; }
   .modal-box p{ font-size:13px; line-height:1.6; margin-bottom:18px; color:#444; }
   .modal-box button{ background:var(--ink); color:#fff; border:none; border-radius:12px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; width:100%; }
+  .reg-input{ width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 14px; font-size:14px; margin-bottom:6px; }
+  .avatar-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:8px; }
+  .avatar-opt{ aspect-ratio:1/1; border-radius:50%; background-size:cover; background-position:center; border:3px solid transparent; cursor:pointer; }
+  .avatar-opt.selected{ border-color:var(--orange); }
+  .profile-header-card{ display:flex; align-items:center; gap:14px; padding:16px 20px; }
+  .profile-avatar{ width:56px; height:56px; border-radius:50%; background-size:cover; background-position:center; background-color:var(--stone); cursor:pointer; flex-shrink:0; }
+  .profile-name{ font-weight:700; font-size:15px; }
+  .profile-phone{ font-size:12px; color:var(--muted); margin-top:2px; }
   .review-item .rhead{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:4px; }
   .review-item .rauthor{ font-weight:700; color:var(--ink); }
   .review-item .rphoto{ width:100%; max-width:200px; border-radius:10px; margin-top:8px; display:block; }
@@ -298,7 +309,7 @@
 
   <div class="screen active" id="home">
     <div class="topbar">
-      <div class="icon-btn" style="width:38px;" onclick="toggleDrawer()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></div>
+      <div class="icon-btn" id="menuBtn" style="width:38px;" onclick="toggleDrawer()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></div>
       <div class="logo">milaisss</div>
       <div class="icon-btn" id="langBtn" onclick="toggleLangMenu(event)">
         <span id="langFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;"></span><span style="font-size:10px; line-height:1; display:inline-flex; align-items:center;">⌄</span>
@@ -320,14 +331,14 @@
     </div>
 
     <div class="hero-photo" id="heroPhoto">
+      <video id="heroVideo" autoplay muted loop playsinline style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;"></video>
       <div class="hero-photo-text">
-        <div class="tag" data-i18n="heroTag">НОВАЯ КОЛЛЕКЦИЯ</div>
-        <h2 class="display" data-i18n="heroTitle">Скидка 20% на первый дроп</h2>
-        <button class="hero-btn" data-i18n="heroBtn" onclick="openShopAll()">Смотреть</button>
+        <div class="tag" id="heroTagText" data-i18n="heroTag">НОВАЯ КОЛЛЕКЦИЯ</div>
+        <h2 class="display" id="heroTitleText" data-i18n="heroTitle">Скидка 20% на первый дроп</h2>
+        <button class="hero-btn" id="heroBtnText" data-i18n="heroBtn" onclick="openShopAll()">Смотреть</button>
       </div>
     </div>
 
-    <div class="shipping-strip" id="shippingStrip">Бесплатная доставка от 500 000 сум</div>
 
     <div class="section-head"><h3 class="display">Коллекции</h3></div>
     <div class="collections-grid" id="collectionsGrid"></div>
@@ -504,6 +515,7 @@
 
   <div class="screen" id="profile">
     <div class="topbar"><div class="logo">milaisss</div></div>
+    <div id="profileHeader"></div>
     <div class="cart-title"><h2 class="display" data-i18n="profileTitle">Мои заказы</h2></div>
     <div id="ordersList"></div>
   </div>
@@ -569,6 +581,27 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="registerModal">
+  <div class="modal-box" style="text-align:left; max-width:360px;">
+    <h3 class="display" style="text-align:center; margin-bottom:4px;">Регистрация</h3>
+    <p style="text-align:center; font-size:12px; color:#777; margin-bottom:16px;">Нужна, чтобы оформить заказ и получать уведомления о доставке</p>
+
+    <label class="block-label" style="margin-top:0;">Имя</label>
+    <input type="text" id="regFirstName" class="reg-input" placeholder="Имя">
+
+    <label class="block-label">Фамилия</label>
+    <input type="text" id="regLastName" class="reg-input" placeholder="Фамилия">
+
+    <label class="block-label">Номер телефона</label>
+    <input type="text" id="regPhone" class="reg-input" placeholder="+998 90 123 45 67">
+
+    <label class="block-label">Выберите аватар</label>
+    <div class="avatar-grid" id="avatarGrid"></div>
+
+    <button class="checkout-btn" style="margin:16px 0 0;" onclick="submitRegistration()">Зарегистрироваться</button>
+  </div>
+</div>
+
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
 <div class="drawer-panel" id="drawerPanel">
   <div class="logo">milaisss</div>
@@ -583,7 +616,7 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
+const NOTIFY_BOT_TOKEN = "8923014509:AAFy-Hc8gVllm0nV88YwH32PsRClRIKp0-MY";
 const ADMIN_CHAT_ID = "6620851909";
 const NOTIFY_BOT_USERNAME = "@MilaisssOthers_bot";
 
@@ -598,7 +631,93 @@ function getCustomerName(){
     const u = tg.initDataUnsafe.user;
     return (u.first_name||'') + (u.last_name ? (' '+u.last_name) : '') + (u.username ? (' (@'+u.username+')') : '');
   }
+  if (customerProfile && customerProfile.firstName) return customerProfile.firstName + (customerProfile.lastName ? (' '+customerProfile.lastName) : '');
   return 'Гость (браузер)';
+}
+
+/* ---------- registration gate (guest/browser users) ---------- */
+function isTelegramUser(){
+  return !!(tg && tg.initDataUnsafe && tg.initDataUnsafe.user);
+}
+let customerProfile = null;
+let avatarOptions = [];
+let selectedAvatarUrl = '';
+let pendingAfterRegister = null;
+
+function isRegistered(){
+  return isTelegramUser() || !!customerProfile;
+}
+
+function loadCustomerProfile(){
+  if (isTelegramUser()) return;
+  db.collection('customers').doc(getCustomerId()).get().then(doc => {
+    if (doc.exists){
+      customerProfile = doc.data();
+      renderProfileHeader();
+    }
+  });
+}
+
+function requireRegistration(action){
+  if (isRegistered()){ action(); return; }
+  pendingAfterRegister = action;
+  openRegisterModal();
+}
+
+function openRegisterModal(){
+  document.getElementById('regFirstName').value = customerProfile ? (customerProfile.firstName||'') : '';
+  document.getElementById('regLastName').value = customerProfile ? (customerProfile.lastName||'') : '';
+  document.getElementById('regPhone').value = customerProfile ? (customerProfile.phone||'') : '';
+  selectedAvatarUrl = customerProfile ? (customerProfile.avatarUrl||'') : '';
+  renderAvatarGrid();
+  document.getElementById('registerModal').classList.add('open');
+}
+function closeRegisterModal(){
+  document.getElementById('registerModal').classList.remove('open');
+  pendingAfterRegister = null;
+}
+function renderAvatarGrid(){
+  const wrap = document.getElementById('avatarGrid');
+  if (avatarOptions.length === 0){ wrap.innerHTML = '<p class="hint">Аватары ещё не добавлены продавцом</p>'; return; }
+  wrap.innerHTML = avatarOptions.map(url => `<div class="avatar-opt ${url===selectedAvatarUrl?'selected':''}" style="background-image:url('${url}')" onclick="selectAvatar('${url.replace(/'/g,"\\'")}')"></div>`).join('');
+}
+function selectAvatar(url){
+  selectedAvatarUrl = url;
+  renderAvatarGrid();
+}
+function submitRegistration(){
+  const firstName = document.getElementById('regFirstName').value.trim();
+  const lastName = document.getElementById('regLastName').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  if (!firstName){ showToast('Укажите имя'); return; }
+  if (!lastName){ showToast('Укажите фамилию'); return; }
+  if (!phone){ showToast('Укажите номер телефона'); return; }
+  if (!selectedAvatarUrl){ showToast('Выберите аватар'); return; }
+
+  const profile = { firstName, lastName, phone, avatarUrl: selectedAvatarUrl, registeredAt: Date.now() };
+  db.collection('customers').doc(getCustomerId()).set(profile, { merge: true }).then(() => {
+    customerProfile = profile;
+    closeRegisterModalOnly();
+    renderProfileHeader();
+    if (pendingAfterRegister){ const fn = pendingAfterRegister; pendingAfterRegister = null; fn(); }
+  });
+}
+function closeRegisterModalOnly(){
+  document.getElementById('registerModal').classList.remove('open');
+}
+function renderProfileHeader(){
+  const el = document.getElementById('profileHeader');
+  if (!el) return;
+  if (isTelegramUser() || !customerProfile){ el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="profile-header-card">
+      <div class="profile-avatar" style="background-image:url('${customerProfile.avatarUrl||''}')" onclick="openRegisterModal()"></div>
+      <div>
+        <div class="profile-name">${customerProfile.firstName} ${customerProfile.lastName}</div>
+        <div class="profile-phone">${customerProfile.phone}</div>
+      </div>
+    </div>
+  `;
 }
 function notifyAdmin(text){
   if (!NOTIFY_BOT_TOKEN || NOTIFY_BOT_TOKEN.startsWith('ВСТАВЬ')) return Promise.resolve();
@@ -694,6 +813,9 @@ function applyLang(){
   renderCollectionsGrid();
   if (!faqCustomized){ faqItems = defaultFaqItems(); renderFaq(); }
   if (!policyCustomized){ policyItems = defaultPolicyItems(); if (currentProduct) renderPolicyAccordion(); }
+  if (customHero.tag) document.getElementById('heroTagText').textContent = customHero.tag;
+  if (customHero.title) document.getElementById('heroTitleText').textContent = customHero.title;
+  if (customHero.btn) document.getElementById('heroBtnText').textContent = customHero.btn;
   if (currentProduct){
     document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
     updateReviewsSummary();
@@ -744,6 +866,7 @@ let paymentPaymeInfo = '';
 let paymentClickInfo = '';
 let btsBranches = [];
 let categoryImages = {};
+let customHero = {};
 let categoryTranslations = {};
 let categoryInfo = {};
 let infoItems = [];
@@ -947,7 +1070,7 @@ function toggleDrawer(){
 }
 function renderDrawer(){
   const wrap = document.getElementById('drawerItems');
-  const items = ['Все', ...CATEGORIES, 'До 500 000'];
+  const items = ['Все', ...CATEGORIES];
   let html = items.map((cat, i) => {
     const info = categoryInfo[cat];
     const chevron = info ? `<span class="drawer-chevron" onclick="event.stopPropagation(); toggleDrawerInfo('cat-${i}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>` : '';
@@ -967,18 +1090,18 @@ function renderDrawer(){
       const title = (item.titleTranslations && item.titleTranslations[lang]) ? item.titleTranslations[lang] : item.title;
       const body = (item.bodyTranslations && item.bodyTranslations[lang]) ? item.bodyTranslations[lang] : item.body;
       const chevron = body ? `<span class="drawer-chevron" onclick="event.stopPropagation(); toggleDrawerInfo('info-${i}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>` : '';
+      const isLast = i === infoItems.length - 1;
       return `
         <div class="drawer-row">
           <div class="drawer-item" style="flex:1; border-bottom:none; cursor:${body?'pointer':'default'};" ${body?`onclick="toggleDrawerInfo('info-${i}')"`:''}>${title}</div>
           ${chevron}
         </div>
         ${body ? `<div class="drawer-info" id="drawer-info-info-${i}">${body}</div>` : ''}
-        <div style="border-bottom:1px solid var(--line);"></div>
+        ${isLast ? '' : '<div style="border-bottom:1px solid var(--line);"></div>'}
       `;
     }).join('');
   }
 
-  html += `<div class="drawer-item" onclick="toggleDrawer(); showScreen('settings');" style="margin-top:20px; border-top:2px solid var(--line); padding-top:20px;">⚙️ Настройки</div>`;
   wrap.innerHTML = html;
 }
 function toggleDrawerInfo(id){
@@ -1112,15 +1235,36 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   if (data.policyItems && data.policyItems.length){ policyItems = data.policyItems; policyCustomized = true; }
   socialLinks = data.socialLinks || {};
   renderSocialIcons();
-  if (data.heroImage) document.getElementById('heroPhoto').style.backgroundImage = `url('${data.heroImage}')`;
-  if (data.shippingText) document.getElementById('shippingStrip').textContent = data.shippingText;
+  if (data.heroImage){
+    const isVideo = /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(data.heroImage);
+    const heroPhoto = document.getElementById('heroPhoto');
+    const heroVideo = document.getElementById('heroVideo');
+    if (isVideo){
+      heroVideo.src = data.heroImage;
+      heroVideo.style.display = 'block';
+      heroPhoto.style.backgroundImage = '';
+    } else {
+      heroVideo.style.display = 'none';
+      heroVideo.removeAttribute('src');
+      heroPhoto.style.backgroundImage = `url('${data.heroImage}')`;
+    }
+  }
+  if (data.heroTag) document.getElementById('heroTagText').textContent = data.heroTag;
+  if (data.heroTitle) document.getElementById('heroTitleText').textContent = data.heroTitle;
+  if (data.heroBtnText) document.getElementById('heroBtnText').textContent = data.heroBtnText;
+  customHero = { tag: data.heroTag || '', title: data.heroTitle || '', btn: data.heroBtnText || '' };
   categoryImages = data.categoryImages || {};
   categoryTranslations = data.categoryTranslations || {};
   categoryInfo = data.categoryInfo || {};
   infoItems = data.infoItems || [];
+  avatarOptions = data.avatarOptions || [];
   renderDrawer();
   if (data.categoryChipColor) document.documentElement.style.setProperty('--catcolor', data.categoryChipColor);
   if (data.orangeColor) document.documentElement.style.setProperty('--orange', data.orangeColor);
+  if (data.pmrSelectedBg) document.documentElement.style.setProperty('--pmr-selected-bg', data.pmrSelectedBg);
+  if (data.iconBorderColor) document.documentElement.style.setProperty('--icon-border-color', data.iconBorderColor);
+  if (data.langBtnBg) document.documentElement.style.setProperty('--langbtn-bg', data.langBtnBg);
+  if (data.menuBtnBg) document.documentElement.style.setProperty('--menubtn-bg', data.menuBtnBg);
   if (data.categoryFont) document.documentElement.style.setProperty('--catfont', `'${data.categoryFont}',sans-serif`);
   renderCollectionsGrid();
   shopContacts = data.shopContacts || '';
@@ -1374,7 +1518,9 @@ function addToCart(){
 
 function updateCartBadge(){
   const count = cart.reduce((a,c) => a + c.qty, 0);
-  document.getElementById('cartCount').textContent = count;
+  const badge = document.getElementById('cartCount');
+  badge.textContent = count;
+  badge.classList.toggle('show', count > 0);
 }
 function removeFromCart(idx){ cart.splice(idx, 1); updateCartBadge(); renderCart(); }
 
@@ -1407,7 +1553,7 @@ function renderCart(){
       <div class="sum-row"><span>${t('deliveryLabel')}</span><span>По согласованию</span></div>
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
-    <button class="checkout-btn" onclick="goToCheckoutFlow()">${t('checkoutBtn')}</button>
+    <button class="checkout-btn" onclick="requireRegistration(goToCheckoutFlow)">${t('checkoutBtn')}</button>
     <div class="hint">На следующем шаге — реквизиты для оплаты и подтверждение перевода.</div>
   `;
 }
@@ -1584,6 +1730,7 @@ function submitReview(orderId, ii, productId, productName, colorName){
 /* ---------- init ---------- */
 applyLang();
 setupSupportListener();
+loadCustomerProfile();
 renderCollectionsGrid();
 renderRatingSummary();
 </script>
