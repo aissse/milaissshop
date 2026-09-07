@@ -357,7 +357,18 @@
         <div id="infoRows"></div>
         <button class="btn secondary" onclick="addInfoRow()">+ Добавить пункт</button>
         <button class="btn" onclick="saveInfoItems()">Сохранить</button>
-        <div class="hint">Эти пункты (например "О нас", "Контакты") показываются только в боковом меню сайта — отдельно от категорий товаров, и никак не влияют на каталог.</div>
+        <div class="hint">Эти пункты (например "О нас", "Контакты") показываются в боковом меню сайта, а также ссылками внизу сайта в чёрном блоке (Privacy Policy, Terms of Service и т.п.) — открывают полный текст. Не влияют на каталог товаров.</div>
+
+        <label style="margin-top:16px;">Цвет ссылок в чёрном блоке внизу сайта</label>
+        <div class="color-row"><input type="color" id="f_legalFooterColor" value="#ffffff" onchange="syncHexInput('legalFooterColor', this.value)"><input type="text" id="f_legalFooterColorHex" placeholder="#ffffff" onchange="saveHexColor('legalFooterColor', this.value)"></div>
+
+        <label>Шрифт ссылок в чёрном блоке внизу сайта</label>
+        <select id="f_legalFooterFont" onchange="saveSetting('legalFooterFont', this.value)">
+          <option value="">Как основной текст сайта</option>
+          <option value="Space Grotesk">Space Grotesk</option>
+          <option value="Inter">Inter</option>
+          <option value="Cormorant Garamond">Cormorant Garamond</option>
+        </select>
         </div>
       </div>
 
@@ -649,6 +660,8 @@ function loadSettings(){
     if (data.menuBtnBg){ document.getElementById('f_menuBtnBg').value = data.menuBtnBg; document.getElementById('f_menuBtnBgHex').value = data.menuBtnBg; }
     if (data.pmrSelectedBg){ document.getElementById('f_pmrSelectedBg').value = data.pmrSelectedBg; document.getElementById('f_pmrSelectedBgHex').value = data.pmrSelectedBg; }
     if (data.iconBorderColor){ document.getElementById('f_iconBorderColor').value = data.iconBorderColor; document.getElementById('f_iconBorderColorHex').value = data.iconBorderColor; }
+    if (data.legalFooterColor){ document.getElementById('f_legalFooterColor').value = data.legalFooterColor; document.getElementById('f_legalFooterColorHex').value = data.legalFooterColor; }
+    if (data.legalFooterFont) document.getElementById('f_legalFooterFont').value = data.legalFooterFont;
     if (data.colorBorder) document.getElementById('f_borderColor').value = data.colorBorder;
     if (data.fontFamily){
       document.getElementById('customFontInput').value = data.fontFamily;
@@ -688,7 +701,7 @@ function saveSetting(key, value){
   db.collection('settings').doc('shop').set({ [key]: value }, { merge: true });
 }
 
-const COLOR_SETTING_MAP = { orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor' };
+const COLOR_SETTING_MAP = { orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor', legalFooterColor: 'legalFooterColor' };
 
 function syncHexInput(id, colorVal){
   document.getElementById(`f_${id}Hex`).value = colorVal;
