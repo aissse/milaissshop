@@ -88,8 +88,6 @@
   .grid.list-view .card .info{ flex:1; display:flex; flex-direction:column; justify-content:center; }
 
   .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:0 20px 26px; }
-  #categorySections > div{ margin-bottom:8px; }
-  #categorySections > div > h3{ padding:0 20px; margin-bottom:12px; font-size:16px; }
   .card{ background:var(--bg); border:1px solid var(--line); border-radius:18px; overflow:hidden; cursor:pointer; position:relative; }
   .card .imgwrap{ background:var(--stone); aspect-ratio:1/0.9; display:flex; align-items:center; justify-content:center; font-size:44px; position:relative; background-size:cover; background-position:center; }
   .card .imgwrap.oos::before{ content:attr(data-oos-label); position:absolute; inset:0; background:rgba(255,255,255,.8); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#c0392b; text-align:center; padding:10px; }
@@ -100,7 +98,15 @@
   .card .sub{ font-size:11px; color:var(--muted); margin-bottom:8px; }
   .card .price{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; }
 
-  .bottomnav{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; max-width:440px; width:calc(100% - 40px); background:var(--navbg); border-radius:100px; display:flex; justify-content:space-around; padding:12px 10px; box-shadow:0 12px 30px rgba(0,0,0,.25); z-index:50; }
+  .cat-pills-row{ display:flex; align-items:center; gap:10px; padding:0 20px 20px; overflow-x:auto; scrollbar-width:none; }
+  .cat-pills-row::-webkit-scrollbar{ display:none; }
+  .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; gap:8px; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:13px; cursor:pointer; transition:all .25s ease; white-space:nowrap; overflow:hidden; }
+  .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; }
+  .cat-pill .label{ display:none; }
+  .cat-pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); padding:0 20px 0 16px; }
+  .cat-pill.active .label{ display:inline; font-family:var(--catfont, inherit); }
+
+  .bottomnav{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; max-width:440px; width:calc(100% - 40px); background:var(--navbg); border-radius:100px; display:flex; justify-content:space-around; padding:12px 10px; z-index:50; }
   .navitem{ display:flex; flex-direction:column; align-items:center; gap:3px; color:#8a8a8a; font-size:10px; cursor:pointer; position:relative; }
   .navitem svg{ width:20px; height:20px; }
   .navitem.active{ color:#fff; }
@@ -366,18 +372,15 @@
       </div>
     </div>
 
-
-    <div class="section-head"><h3 class="display" data-i18n="collectionsHeader">Коллекции</h3></div>
-    <div class="collections-grid" id="collectionsGrid"></div>
-
-    <div class="section-head">
+    <div class="section-head" style="margin-top:20px;">
       <h3 class="display" data-i18n="allProducts">Все товары</h3>
       <div class="view-toggle">
         <span class="vt-btn active" data-view="grid" onclick="setGridView('grid')">▦</span>
         <span class="vt-btn" data-view="list" onclick="setGridView('list')">☰</span>
       </div>
     </div>
-    <div id="categorySections"></div>
+    <div class="cat-pills-row" id="catPillsRow"></div>
+    <div class="grid" id="mainGrid"></div>
 
     <div class="rating-summary" id="ratingSummary"></div>
 
@@ -669,7 +672,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-8";
+  const CURRENT_VERSION = "20260908-9";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -884,10 +887,9 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.getAttribute('data-i18n')));
   document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.getAttribute('data-i18n-ph')));
   document.getElementById('langFlag').innerHTML = flagImg(lang);
-  renderCategoryChips();
-  renderGrid();
+  renderCatPills();
+  renderMainGrid();
   renderFavGrid();
-  renderCollectionsGrid();
   renderLegalFooter();
   if (!faqCustomized){ faqItems = defaultFaqItems(); renderFaq(); }
   if (!policyCustomized){ policyItems = defaultPolicyItems(); if (currentProduct) renderPolicyAccordion(); }
@@ -944,6 +946,8 @@ let paymentPaymeInfo = '';
 let paymentClickInfo = '';
 let btsBranches = [];
 let categoryImages = {};
+let categoryIcons = {};
+const DEFAULT_CAT_ICONS = ['🔥','🎁','👜','🎒','✨','🛍️','⭐','💎'];
 let customHero = {};
 let categoryTranslations = {};
 let categoryInfo = {};
@@ -953,16 +957,31 @@ let gridView = 'grid';
 function setGridView(v){
   gridView = v;
   document.querySelectorAll('.vt-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
-  renderGrid();
+  renderMainGrid();
 }
 
-function renderCollectionsGrid(){
-  const wrap = document.getElementById('collectionsGrid');
-  wrap.innerHTML = CATEGORIES.map((cat, i) => {
-    const img = categoryImages[cat];
-    const style = img ? `style="background-image:url('${img}')"` : '';
-    return `<div class="collection-tile" ${style} onclick="scrollToCategorySection(${i})"><span>${translateCategory(cat)}</span></div>`;
-  }).join('');
+function catIconFor(key, idx){
+  if (key === 'Все') return categoryIcons['Все'] || '🔥';
+  return categoryIcons[key] || DEFAULT_CAT_ICONS[idx % DEFAULT_CAT_ICONS.length];
+}
+
+/* ---------- category pill buttons (home screen) ---------- */
+function renderCatPills(){
+  const wrap = document.getElementById('catPillsRow');
+  if (!wrap) return;
+  const items = [{ key: 'Все' }, ...CATEGORIES.map(c => ({ key: c }))];
+  wrap.innerHTML = items.map((it, i) => `
+    <div class="cat-pill ${activeCategory===it.key?'active':''}" onclick="selectMainCategory('${it.key.replace(/'/g,"\\'")}')">
+      <span class="icon">${catIconFor(it.key, i)}</span>
+      <span class="label">${translateCategory(it.key)}</span>
+    </div>
+  `).join('');
+}
+
+function selectMainCategory(cat){
+  activeCategory = cat;
+  renderCatPills();
+  renderMainGrid();
 }
 
 function renderRatingSummary(){
@@ -1079,10 +1098,6 @@ function toggleFaq(i){
 }
 renderFaq();
 
-function renderCategoryChips(){
-  // категории больше не показываются на главном экране — только в боковом меню (renderDrawer)
-}
-
 function filteredProducts(){
   let list = products;
   if (activeCategory === 'До 500 000') list = list.filter(p => Number(p.price||0) <= 500000);
@@ -1098,13 +1113,13 @@ let searchQuery = '';
 function onSearchInput(v){
   searchQuery = v;
   document.getElementById('searchClear').classList.toggle('show', v.length > 0);
-  renderGrid();
+  renderMainGrid();
 }
 function clearSearch(){
   searchQuery = '';
   document.getElementById('searchInput').value = '';
   document.getElementById('searchClear').classList.remove('show');
-  renderGrid();
+  renderMainGrid();
 }
 
 /* ---------- shop all screen (from hero button) ---------- */
@@ -1215,12 +1230,10 @@ function translateCategory(cat){
 }
 function drawerSelect(cat){
   toggleDrawer();
-  shopAllCategory = cat;
-  priceMin = null; priceMax = null;
-  document.getElementById('filterPanel').classList.remove('open');
-  renderShopAllCats();
-  renderShopAllGrid();
-  showScreen('shopAll');
+  activeCategory = cat;
+  renderCatPills();
+  renderMainGrid();
+  showScreen('home');
 }
 
 const HEART_PLUS_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.479 19.374-.971.939a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5a5.2 5.2 0 0 1-.219 1.49"/><path d="M15 15h6"/><path d="M18 12v6"/></svg>`;
@@ -1237,7 +1250,7 @@ function toggleFavorite(id, event){
   const i = favorites.indexOf(id);
   if (i === -1) favorites.push(id); else favorites.splice(i, 1);
   saveFavorites();
-  renderGrid(); renderFavGrid();
+  renderMainGrid(); renderFavGrid();
   if (currentProduct && currentProduct.id === id) updateDetailFavIcon();
 }
 function toggleCurrentFavorite(){ if (currentProduct) toggleFavorite(currentProduct.id); }
@@ -1286,47 +1299,10 @@ function fillGridEl(gridEl, list){
   });
 }
 
-function renderGrid(){
-  const wrap = document.getElementById('categorySections');
-  wrap.innerHTML = '';
-
-  if (searchQuery.trim()){
-    const q = searchQuery.trim().toLowerCase();
-    const results = products.filter(p => (p.name||'').toLowerCase().includes(q) || (p.sub||'').toLowerCase().includes(q));
-    const grid = document.createElement('div');
-    fillGridEl(grid, results);
-    wrap.appendChild(grid);
-    return;
-  }
-
-  CATEGORIES.forEach((cat, i) => {
-    const section = document.createElement('div');
-    section.id = `cat-section-${i}`;
-    const catProducts = products.filter(p => p.category === cat);
-    section.innerHTML = `<h3 class="display" style="margin:0 0 12px;">${translateCategory(cat)}</h3>`;
-    const grid = document.createElement('div');
-    fillGridEl(grid, catProducts);
-    section.appendChild(grid);
-    wrap.appendChild(section);
-  });
-
-  const uncategorized = products.filter(p => !p.category || !CATEGORIES.includes(p.category));
-  if (uncategorized.length){
-    const section = document.createElement('div');
-    section.innerHTML = `<h3 class="display" style="margin:0 0 12px;">${t('allProducts')}</h3>`;
-    const grid = document.createElement('div');
-    fillGridEl(grid, uncategorized);
-    section.appendChild(grid);
-    wrap.appendChild(section);
-  }
-}
-
-function scrollToCategorySection(catIndex){
-  if (!document.getElementById('home').classList.contains('active')) showScreen('home');
-  setTimeout(() => {
-    const el = document.getElementById(`cat-section-${catIndex}`);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 50);
+function renderMainGrid(){
+  const wrap = document.getElementById('mainGrid');
+  if (!wrap) return;
+  fillGridEl(wrap, filteredProducts());
 }
 
 function renderFavGrid(){
@@ -1361,7 +1337,7 @@ setTimeout(revealApp, 2500); // страховка на случай медле�
 db.collection('products').onSnapshot(snap => {
   products = [];
   snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
-  renderGrid(); renderFavGrid();
+  renderMainGrid(); renderFavGrid();
   markLoaded('products');
 });
 
@@ -1384,7 +1360,10 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
     if (!link){ link = document.createElement('link'); link.id = 'dynamicFontLink'; link.rel = 'stylesheet'; document.head.appendChild(link); }
     link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(data.fontFamily).replace(/%20/g,'+')}:wght@600;700&display=swap`;
   }
-  if (data.categories && data.categories.length){ CATEGORIES = data.categories; renderCategoryChips(); renderCollectionsGrid(); }
+  if (data.categories && data.categories.length){ CATEGORIES = data.categories; }
+  categoryIcons = data.categoryIcons || {};
+  renderCatPills();
+  renderMainGrid();
   paymentCardInfo = data.paymentCardInfo || '';
   paymentPaymeInfo = data.paymentPaymeInfo || '';
   paymentClickInfo = data.paymentClickInfo || '';
@@ -1433,7 +1412,6 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   if (data.langBtnBg) document.documentElement.style.setProperty('--langbtn-bg', data.langBtnBg);
   if (data.menuBtnBg) document.documentElement.style.setProperty('--menubtn-bg', data.menuBtnBg);
   if (data.categoryFont) document.documentElement.style.setProperty('--catfont', `'${data.categoryFont}',sans-serif`);
-  renderCollectionsGrid();
   shopContacts = data.shopContacts || '';
   renderFooterContacts();
   markLoaded('settings');
@@ -1906,7 +1884,6 @@ function submitReview(orderId, ii, productId, productName, colorName){
 applyLang();
 setupSupportListener();
 loadCustomerProfile();
-renderCollectionsGrid();
 renderRatingSummary();
 </script>
 </body>
