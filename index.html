@@ -278,6 +278,9 @@
   .shop-footer{ text-align:center; padding:30px 20px 40px; border-top:1px solid var(--line); }
   .footer-contacts{ font-size:12px; color:var(--muted); line-height:1.8; margin:12px 0; }
   .footer-copy{ font-size:11px; color:var(--muted); }
+  .legal-footer{ background:#111; padding:20px 20px 40px; display:flex; flex-wrap:wrap; gap:14px 20px; justify-content:center; }
+  .legal-footer a{ color:var(--legalfooter-color, #fff); font-family:var(--legalfooter-font, inherit); font-size:12px; text-decoration:underline; cursor:pointer; }
+  .info-detail-body{ padding:0 20px 40px; font-size:14px; line-height:1.7; color:#444; white-space:pre-wrap; }
   .social-follow{ padding:10px 20px 30px; }
   .social-icons{ display:flex; justify-content:center; gap:14px; }
   .social-icons a{ width:52px; height:52px; border-radius:16px; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; text-decoration:none; }
@@ -398,6 +401,17 @@
       <div class="footer-contacts" id="footerContacts"></div>
       <div class="footer-copy">© 2026 milaisss</div>
     </div>
+
+    <div class="legal-footer" id="legalFooter"></div>
+  </div>
+
+  <div class="screen" id="infoDetail">
+    <div class="detail-top">
+      <div class="back-circle" onclick="showScreen('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div></div>
+    </div>
+    <div class="cart-title"><h2 class="display" id="infoDetailTitle"></h2></div>
+    <p class="info-detail-body" id="infoDetailBody"></p>
   </div>
 
   <div class="screen" id="detail">
@@ -653,7 +667,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-4";
+  const CURRENT_VERSION = "20260908-5";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -872,6 +886,7 @@ function applyLang(){
   renderGrid();
   renderFavGrid();
   renderCollectionsGrid();
+  renderLegalFooter();
   if (!faqCustomized){ faqItems = defaultFaqItems(); renderFaq(); }
   if (!policyCustomized){ policyItems = defaultPolicyItems(); if (currentProduct) renderPolicyAccordion(); }
   if (customHero.tag) document.getElementById('heroTagText').textContent = customHero.tag;
@@ -975,6 +990,26 @@ function submitNewsletter(){
 function renderFooterContacts(){
   document.getElementById('footerContacts').innerHTML = shopContacts ? shopContacts.replace(/\n/g,'<br>') : '';
 }
+
+function renderLegalFooter(){
+  const wrap = document.getElementById('legalFooter');
+  if (!infoItems.length){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = infoItems.map((item, i) => {
+    const title = (item.titleTranslations && item.titleTranslations[lang]) ? item.titleTranslations[lang] : item.title;
+    return `<a onclick="openInfoDetail(${i})">${title}</a>`;
+  }).join('');
+}
+
+function openInfoDetail(i){
+  const item = infoItems[i];
+  if (!item) return;
+  const title = (item.titleTranslations && item.titleTranslations[lang]) ? item.titleTranslations[lang] : item.title;
+  const body = (item.bodyTranslations && item.bodyTranslations[lang]) ? item.bodyTranslations[lang] : item.body;
+  document.getElementById('infoDetailTitle').textContent = title;
+  document.getElementById('infoDetailBody').textContent = body;
+  showScreen('infoDetail');
+}
+
 let faqCustomized = false;
 let policyCustomized = false;
 function defaultFaqItems(){
@@ -1334,6 +1369,9 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   categoryTranslations = data.categoryTranslations || {};
   categoryInfo = data.categoryInfo || {};
   infoItems = data.infoItems || [];
+  renderLegalFooter();
+  if (data.legalFooterColor) document.documentElement.style.setProperty('--legalfooter-color', data.legalFooterColor);
+  if (data.legalFooterFont) document.documentElement.style.setProperty('--legalfooter-font', `'${data.legalFooterFont}',sans-serif`);
   avatarOptions = data.avatarOptions || [];
   renderDrawer();
   if (data.categoryChipColor) document.documentElement.style.setProperty('--catcolor', data.categoryChipColor);
