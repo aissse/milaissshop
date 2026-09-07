@@ -283,6 +283,7 @@
   .avatar-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:8px; }
   .avatar-opt{ aspect-ratio:1/1; border-radius:50%; background-size:cover; background-position:center; border:3px solid transparent; cursor:pointer; }
   .avatar-opt.selected{ border-color:var(--orange); }
+  .modal-close-x{ position:absolute; top:0; right:0; color:var(--muted); cursor:pointer; padding:4px; }
   .profile-header-card{ display:flex; align-items:center; gap:14px; padding:16px 20px; }
   .profile-avatar{ width:56px; height:56px; border-radius:50%; background-size:cover; background-position:center; background-color:var(--stone); cursor:pointer; flex-shrink:0; }
   .profile-name{ font-weight:700; font-size:15px; }
@@ -582,7 +583,8 @@
 </div>
 
 <div class="modal-overlay" id="registerModal">
-  <div class="modal-box" style="text-align:left; max-width:360px;">
+  <div class="modal-box" style="text-align:left; max-width:360px; position:relative;">
+    <span class="modal-close-x" onclick="closeRegisterModal()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
     <h3 class="display" style="text-align:center; margin-bottom:4px;">Регистрация</h3>
     <p style="text-align:center; font-size:12px; color:#777; margin-bottom:16px;">Нужна, чтобы оформить заказ и получать уведомления о доставке</p>
 
@@ -619,6 +621,7 @@ const ADMIN_USERNAME = "isssroilov";
 const NOTIFY_BOT_TOKEN = "8923014509:AAFy-Hc8gVllm0nV88YwH32PsRClRIKp0-MY";
 const ADMIN_CHAT_ID = "6620851909";
 const NOTIFY_BOT_USERNAME = "@MilaisssOthers_bot";
+
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
