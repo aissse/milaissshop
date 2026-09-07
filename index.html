@@ -88,6 +88,8 @@
   .grid.list-view .card .info{ flex:1; display:flex; flex-direction:column; justify-content:center; }
 
   .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:0 20px 26px; }
+  #categorySections > div{ margin-bottom:8px; }
+  #categorySections > div > h3{ padding:0 20px; margin-bottom:12px; font-size:16px; }
   .card{ background:var(--bg); border:1px solid var(--line); border-radius:18px; overflow:hidden; cursor:pointer; position:relative; }
   .card .imgwrap{ background:var(--stone); aspect-ratio:1/0.9; display:flex; align-items:center; justify-content:center; font-size:44px; position:relative; background-size:cover; background-position:center; }
   .card .imgwrap.oos::before{ content:attr(data-oos-label); position:absolute; inset:0; background:rgba(255,255,255,.8); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#c0392b; text-align:center; padding:10px; }
@@ -369,13 +371,13 @@
     <div class="collections-grid" id="collectionsGrid"></div>
 
     <div class="section-head">
-      <h3 class="display" id="sectionTitle">Все товары</h3>
+      <h3 class="display" data-i18n="allProducts">Все товары</h3>
       <div class="view-toggle">
         <span class="vt-btn active" data-view="grid" onclick="setGridView('grid')">▦</span>
         <span class="vt-btn" data-view="list" onclick="setGridView('list')">☰</span>
       </div>
     </div>
-    <div class="grid" id="productGrid"></div>
+    <div id="categorySections"></div>
 
     <div class="rating-summary" id="ratingSummary"></div>
 
@@ -544,7 +546,7 @@
 
   <div class="screen" id="shopAll">
     <div class="detail-top">
-      <div class="back-circle" onclick="showScreen('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="back-circle" onclick="showScreen('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></div>
       <div class="back-circle" onclick="toggleFilterPanel()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg>
       </div>
@@ -667,7 +669,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-7";
+  const CURRENT_VERSION = "20260908-8";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -956,10 +958,10 @@ function setGridView(v){
 
 function renderCollectionsGrid(){
   const wrap = document.getElementById('collectionsGrid');
-  wrap.innerHTML = CATEGORIES.map(cat => {
+  wrap.innerHTML = CATEGORIES.map((cat, i) => {
     const img = categoryImages[cat];
     const style = img ? `style="background-image:url('${img}')"` : '';
-    return `<div class="collection-tile" ${style} onclick="drawerSelect('${cat.replace(/'/g,"\\'")}')"><span>${translateCategory(cat)}</span></div>`;
+    return `<div class="collection-tile" ${style} onclick="scrollToCategorySection(${i})"><span>${translateCategory(cat)}</span></div>`;
   }).join('');
 }
 
@@ -1212,11 +1214,13 @@ function translateCategory(cat){
   return (categoryTranslations[cat] && categoryTranslations[cat][lang]) ? categoryTranslations[cat][lang] : cat;
 }
 function drawerSelect(cat){
-  activeCategory = cat;
-  renderCategoryChips();
-  renderGrid();
   toggleDrawer();
-  showScreen('home');
+  shopAllCategory = cat;
+  priceMin = null; priceMax = null;
+  document.getElementById('filterPanel').classList.remove('open');
+  renderShopAllCats();
+  renderShopAllGrid();
+  showScreen('shopAll');
 }
 
 const HEART_PLUS_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.479 19.374-.971.939a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5a5.2 5.2 0 0 1-.219 1.49"/><path d="M15 15h6"/><path d="M18 12v6"/></svg>`;
@@ -1252,7 +1256,6 @@ let selectedSize = "";
 let selectedColorIdx = 0;
 let currentColors = [];
 
-const grid = document.getElementById('productGrid');
 const favGrid = document.getElementById('favGrid');
 
 function productCardHTML(p){
@@ -1269,20 +1272,61 @@ function productCardHTML(p){
     </div>`;
 }
 
-function renderGrid(){
-  const list = filteredProducts();
-  document.getElementById('sectionTitle').textContent = activeCategory === 'Все' ? t('allProducts') : translateCategory(activeCategory);
-  grid.className = 'grid' + (gridView === 'list' ? ' list-view' : '');
-  grid.innerHTML = '';
-  if (list.length === 0){ grid.innerHTML = `<div class="empty-state">${t('noProductsYet')}</div>`; return; }
+function fillGridEl(gridEl, list){
+  gridEl.className = 'grid' + (gridView === 'list' ? ' list-view' : '');
+  gridEl.innerHTML = '';
+  if (list.length === 0){ gridEl.innerHTML = `<div class="empty-state">${t('noProductsYet')}</div>`; return; }
   list.forEach((p) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.onclick = () => openProduct(p.id);
     card.innerHTML = productCardHTML(p);
     card.querySelector('[data-fav]').onclick = (e) => toggleFavorite(p.id, e);
-    grid.appendChild(card);
+    gridEl.appendChild(card);
   });
+}
+
+function renderGrid(){
+  const wrap = document.getElementById('categorySections');
+  wrap.innerHTML = '';
+
+  if (searchQuery.trim()){
+    const q = searchQuery.trim().toLowerCase();
+    const results = products.filter(p => (p.name||'').toLowerCase().includes(q) || (p.sub||'').toLowerCase().includes(q));
+    const grid = document.createElement('div');
+    fillGridEl(grid, results);
+    wrap.appendChild(grid);
+    return;
+  }
+
+  CATEGORIES.forEach((cat, i) => {
+    const section = document.createElement('div');
+    section.id = `cat-section-${i}`;
+    const catProducts = products.filter(p => p.category === cat);
+    section.innerHTML = `<h3 class="display" style="margin:0 0 12px;">${translateCategory(cat)}</h3>`;
+    const grid = document.createElement('div');
+    fillGridEl(grid, catProducts);
+    section.appendChild(grid);
+    wrap.appendChild(section);
+  });
+
+  const uncategorized = products.filter(p => !p.category || !CATEGORIES.includes(p.category));
+  if (uncategorized.length){
+    const section = document.createElement('div');
+    section.innerHTML = `<h3 class="display" style="margin:0 0 12px;">${t('allProducts')}</h3>`;
+    const grid = document.createElement('div');
+    fillGridEl(grid, uncategorized);
+    section.appendChild(grid);
+    wrap.appendChild(section);
+  }
+}
+
+function scrollToCategorySection(catIndex){
+  if (!document.getElementById('home').classList.contains('active')) showScreen('home');
+  setTimeout(() => {
+    const el = document.getElementById(`cat-section-${catIndex}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
 }
 
 function renderFavGrid(){
