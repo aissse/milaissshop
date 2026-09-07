@@ -63,6 +63,11 @@
   .color-row input[type=text]{ flex:1; }
   .color-row input[type=color]{ flex-shrink:0; }
   .color-row .rm{ flex-shrink:0; color:#a83232; font-size:18px; cursor:pointer; padding:0 4px; font-weight:700; }
+  .color-row-block{ margin-bottom:14px; padding-bottom:12px; border-bottom:1px dashed var(--line); }
+  .color-row-block:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0; }
+  .size-check-group{ display:flex; gap:8px; flex-wrap:wrap; }
+  .size-check-opt{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--maroon-dark); background:var(--pink); padding:9px 14px; border-radius:10px; cursor:pointer; margin:0; }
+  .size-check-opt input{ width:auto; accent-color:var(--maroon); }
   .review-row{ border-bottom:1px solid var(--line); padding:10px 0; }
   .review-row:last-child{ border-bottom:none; }
   .review-row .rtext{ font-size:13px; margin-bottom:6px; line-height:1.5; }
@@ -77,7 +82,8 @@
   .tab{ flex:0 0 auto; padding:8px 14px; border-radius:100px; font-size:12px; font-weight:700; background:#fff; border:1px solid var(--line); color:var(--maroon-dark); cursor:pointer; white-space:nowrap; }
   .tab.active{ background:var(--maroon); color:#fff; border-color:var(--maroon); }
   .tab-panel{ display:none; }
-  .tab-panel.active{ display:block; }
+  .tab-panel.active{ display:block; animation: adminTabFade .32s ease; }
+  @keyframes adminTabFade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
   .placeholder-box{ text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
   .stock-item{ display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-bottom:1px dashed var(--line); }
   .stock-item.zero{ color:#a83232; font-weight:700; }
@@ -126,57 +132,7 @@
   <div class="wrap">
 
     <div class="tab-panel active" id="tab-products">
-      <div class="card">
-        <label>Название товара</label>
-        <input type="text" id="f_name" placeholder="Nike Dunk Low Panda">
-
-        <label>Подзаголовок (необязательно)</label>
-        <input type="text" id="f_sub" placeholder="Best collection">
-
-        <label>Категория (для фильтров на сайте)</label>
-        <select id="f_category"><option value="Все">Все (по умолчанию)</option></select>
-        <div class="hint">Если не выбрать категорию, товар автоматически попадёт в категорию «Все».</div>
-
-        <label>Цена (сум)</label>
-        <input type="number" id="f_price" placeholder="250000">
-
-        <label>Ссылка на фото товара (общее, если у цвета нет своего)</label>
-        <input type="url" id="f_image" placeholder="https://...">
-        <div class="hint">Загрузи фото в любой хостинг картинок (например imgur.com) и вставь сюда ссылку.</div>
-
-        <label>Размеры (через запятую)</label>
-        <input type="text" id="f_sizes" placeholder="38, 39, 40, 41, 42, 43">
-
-        <label>Цвета, фото и наличие по каждому</label>
-        <div id="colorRows"></div>
-        <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow()">+ Добавить цвет</button>
-        <div class="hint">Наличие указывается по каждому цвету отдельно — покупатель видит остаток именно по выбранному цвету.</div>
-
-        <label>Цвет карточки товара (фон, если нет фото)</label>
-        <input type="color" id="f_cardcolor" value="#f4f1ec">
-
-        <label>Описание</label>
-        <textarea id="f_desc" placeholder="Короткое описание товара"></textarea>
-
-        <label>Переводы описания (необязательно)</label>
-        <textarea id="f_desc_en" rows="2" placeholder="English description"></textarea>
-        <textarea id="f_desc_uz" rows="2" placeholder="O'zbekcha tavsif" style="margin-top:6px;"></textarea>
-        <textarea id="f_desc_tr" rows="2" placeholder="Türkçe açıklama" style="margin-top:6px;"></textarea>
-        <textarea id="f_desc_az" rows="2" placeholder="Azərbaycan təsviri" style="margin-top:6px;"></textarea>
-        <div class="hint">Оставь пустым, если перевод не нужен — покупатель увидит основное описание.</div>
-
-        <label>Возврат (для этого товара; пусто = общий текст из "Оформление")</label>
-        <textarea id="f_returnPolicy" rows="2" placeholder="Например: этот товар не подлежит возврату"></textarea>
-
-        <label>Доставка (для этого товара; пусто = общий текст)</label>
-        <textarea id="f_deliveryPolicy" rows="2" placeholder="Особые условия доставки этого товара"></textarea>
-
-        <label>Уход за товаром (для этого товара; пусто = общий текст)</label>
-        <textarea id="f_careInstructions" rows="2" placeholder="Как ухаживать именно за этим товаром"></textarea>
-
-        <button class="btn" onclick="saveProduct()" id="saveBtn">Добавить товар</button>
-        <button class="btn secondary" onclick="resetForm()" id="cancelBtn" style="display:none;">Отменить редактирование</button>
-      </div>
+      <div id="productFormCards"></div>
 
       <div class="card">
         <h1>Список товаров</h1>
@@ -476,7 +432,7 @@ function checkPassword(){
     loadReviews();
     loadOrders();
     loadSupport();
-    addColorRow();
+    PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`));
   } else {
     alert('Неверный пароль');
   }
@@ -488,106 +444,231 @@ function switchTab(name){
 }
 
 let editingId = null;
+let editingType = null;
 let categories = [];
 
-function addColorRow(data){
-  data = data || { name: '', hex: '#8a8479', image: '', stock: 0 };
-  const row = document.createElement('div');
-  row.className = 'color-row';
-  row.innerHTML = `
-    <input type="color" class="c-hex" value="${data.hex || '#8a8479'}">
-    <input type="text" class="c-name" placeholder="Название" value="${(data.name||'').replace(/"/g,'&quot;')}" style="max-width:90px;">
-    <input type="number" class="c-stock" placeholder="Кол-во" value="${data.stock || 0}" style="max-width:70px;">
-    <input type="url" class="c-image" placeholder="Ссылка на фото (необязательно)" value="${(data.image||'').replace(/"/g,'&quot;')}">
-    <span class="rm" onclick="this.parentElement.remove()">✕</span>
+const PRODUCT_TYPES = [
+  { key: 'top', title: 'Товары: Верх', sizeMode: 'select' },
+  { key: 'shoes', title: 'Обувь', sizeMode: 'free' },
+  { key: 'bottom', title: 'Товары: Низ', sizeMode: 'select' }
+];
+const TYPE_LABELS = { top: 'Верх', shoes: 'Обувь', bottom: 'Низ' };
+const SIZE_OPTIONS = ['S','M','L','XL','XXL'];
+
+function sizeFieldHTML(suf, mode){
+  if (mode === 'free'){
+    return `
+      <label>Размеры (через запятую)</label>
+      <input type="text" id="f_sizes_${suf}" placeholder="38, 39, 40, 41, 42, 43">
+    `;
+  }
+  return `
+    <label>Размеры</label>
+    <div class="size-check-group" id="sizeCheck_${suf}">
+      ${SIZE_OPTIONS.map(s => `<label class="size-check-opt"><input type="checkbox" class="size-check" value="${s}"> ${s}</label>`).join('')}
+    </div>
   `;
-  document.getElementById('colorRows').appendChild(row);
 }
 
-function collectColors(){
-  const rows = document.querySelectorAll('#colorRows .color-row');
+function productFormCardHTML(type){
+  const suf = type.key;
+  return `
+  <div class="card collapsible ${suf==='top' ? 'open' : ''}" id="card-prodtype-${suf}">
+    <div class="card-header" onclick="toggleCard('card-prodtype-${suf}')"><h1>${type.title}</h1><span class="card-chevron">▲</span></div>
+    <div class="card-body">
+      <label>Название товара</label>
+      <input type="text" id="f_name_${suf}" placeholder="Название товара">
+
+      <label>Подзаголовок / бейдж (необязательно)</label>
+      <input type="text" id="f_sub_${suf}" placeholder="Например: New Arrival">
+
+      <label>Категория (для фильтров на сайте)</label>
+      <select id="f_category_${suf}"><option value="Все">Все (по умолчанию)</option></select>
+      <div class="hint">Если не выбрать категорию, товар автоматически попадёт в категорию «Все».</div>
+
+      <label>Цена (сум)</label>
+      <input type="number" id="f_price_${suf}" placeholder="250000">
+
+      <label>Ссылка на фото товара (общее, если у цвета нет своего)</label>
+      <input type="url" id="f_image_${suf}" placeholder="https://...">
+      <div class="hint">Загрузи фото в любой хостинг картинок (например imgur.com) и вставь сюда ссылку.</div>
+
+      ${sizeFieldHTML(suf, type.sizeMode)}
+
+      <label>Цвета, фото, наличие и перевод названия по каждому</label>
+      <div id="colorRows_${suf}"></div>
+      <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow('colorRows_${suf}')">+ Добавить цвет</button>
+      <div class="hint">Наличие указывается по каждому цвету отдельно. В строке переводов впиши: en:Gray, uz:..., tr:..., az:... — иначе на других языках покупатель увидит русское название цвета.</div>
+
+      <label>Цвет карточки товара (фон, если нет фото)</label>
+      <input type="color" id="f_cardcolor_${suf}" value="#f4f1ec">
+
+      <label>Описание</label>
+      <textarea id="f_desc_${suf}" placeholder="Короткое описание товара"></textarea>
+
+      <label>Переводы описания (необязательно)</label>
+      <textarea id="f_desc_en_${suf}" rows="2" placeholder="English description"></textarea>
+      <textarea id="f_desc_uz_${suf}" rows="2" placeholder="O'zbekcha tavsif" style="margin-top:6px;"></textarea>
+      <textarea id="f_desc_tr_${suf}" rows="2" placeholder="Türkçe açıklama" style="margin-top:6px;"></textarea>
+      <textarea id="f_desc_az_${suf}" rows="2" placeholder="Azərbaycan təsviri" style="margin-top:6px;"></textarea>
+      <div class="hint">Оставь пустым, если перевод не нужен — покупатель увидит основное описание.</div>
+
+      <label>Возврат (для этого товара; пусто = общий текст из "Оформление")</label>
+      <textarea id="f_returnPolicy_${suf}" rows="2" placeholder="Например: этот товар не подлежит возврату"></textarea>
+
+      <label>Доставка (для этого товара; пусто = общий текст)</label>
+      <textarea id="f_deliveryPolicy_${suf}" rows="2" placeholder="Особые условия доставки этого товара"></textarea>
+
+      <label>Уход за товаром (для этого товара; пусто = общий текст)</label>
+      <textarea id="f_careInstructions_${suf}" rows="2" placeholder="Как ухаживать именно за этим товаром"></textarea>
+
+      <button class="btn" onclick="saveProduct('${suf}')" id="saveBtn_${suf}">Добавить товар</button>
+      <button class="btn secondary" onclick="resetForm('${suf}')" id="cancelBtn_${suf}" style="display:none;">Отменить редактирование</button>
+    </div>
+  </div>`;
+}
+
+function initProductFormCards(){
+  document.getElementById('productFormCards').innerHTML = PRODUCT_TYPES.map(productFormCardHTML).join('');
+}
+initProductFormCards();
+
+function addColorRow(containerId, data){
+  data = data || { name: '', hex: '#8a8479', image: '', stock: 0, nameTranslations: {} };
+  const tr = data.nameTranslations || {};
+  const trStr = ['en','uz','tr','az'].map(l => tr[l] ? `${l}:${tr[l]}` : '').filter(Boolean).join(', ');
+  const row = document.createElement('div');
+  row.className = 'color-row-block';
+  row.innerHTML = `
+    <div class="color-row">
+      <input type="color" class="c-hex" value="${data.hex || '#8a8479'}">
+      <input type="text" class="c-name" placeholder="Название (рус)" value="${(data.name||'').replace(/"/g,'&quot;')}" style="max-width:100px;">
+      <input type="number" class="c-stock" placeholder="Кол-во" value="${data.stock || 0}" style="max-width:64px;">
+      <input type="url" class="c-image" placeholder="Фото цвета (необязательно)" value="${(data.image||'').replace(/"/g,'&quot;')}">
+      <span class="rm" onclick="this.closest('.color-row-block').remove()">✕</span>
+    </div>
+    <input type="text" class="c-name-tr" placeholder="Переводы: en:Gray, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}">
+  `;
+  document.getElementById(containerId).appendChild(row);
+}
+
+function collectColors(containerId){
+  const rows = document.querySelectorAll(`#${containerId} .color-row-block`);
   const colors = [];
   rows.forEach(row => {
     const name = row.querySelector('.c-name').value.trim();
     const hex = row.querySelector('.c-hex').value;
     const image = row.querySelector('.c-image').value.trim();
     const stock = Number(row.querySelector('.c-stock').value) || 0;
+    const trRaw = row.querySelector('.c-name-tr').value.trim();
     if (!name) return;
     const obj = { name, hex, stock };
     if (image) obj.image = image;
+    if (trRaw){
+      const nameTranslations = {};
+      trRaw.split(',').forEach(pair => {
+        const idx = pair.indexOf(':');
+        if (idx === -1) return;
+        const l = pair.slice(0, idx).trim();
+        const v = pair.slice(idx+1).trim();
+        if (l && v) nameTranslations[l] = v;
+      });
+      if (Object.keys(nameTranslations).length) obj.nameTranslations = nameTranslations;
+    }
     colors.push(obj);
   });
   return colors;
 }
-function clearColorRows(){ document.getElementById('colorRows').innerHTML = ''; }
+function clearColorRows(containerId){ document.getElementById(containerId).innerHTML = ''; }
 
-function saveProduct(){
-  const name = document.getElementById('f_name').value.trim();
-  const sub = document.getElementById('f_sub').value.trim();
-  const category = document.getElementById('f_category').value || 'Все';
-  const price = Number(document.getElementById('f_price').value) || 0;
-  const image = document.getElementById('f_image').value.trim();
-  const sizesRaw = document.getElementById('f_sizes').value.trim();
-  const sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-  const colors = collectColors();
+function saveProduct(type){
+  const suf = type;
+  const typeConfig = PRODUCT_TYPES.find(t => t.key === suf);
+  const name = document.getElementById(`f_name_${suf}`).value.trim();
+  const sub = document.getElementById(`f_sub_${suf}`).value.trim();
+  const category = document.getElementById(`f_category_${suf}`).value || 'Все';
+  const price = Number(document.getElementById(`f_price_${suf}`).value) || 0;
+  const image = document.getElementById(`f_image_${suf}`).value.trim();
+
+  let sizes;
+  if (typeConfig.sizeMode === 'free'){
+    const sizesRaw = document.getElementById(`f_sizes_${suf}`).value.trim();
+    sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+  } else {
+    sizes = Array.from(document.querySelectorAll(`#sizeCheck_${suf} .size-check:checked`)).map(cb => cb.value);
+  }
+
+  const colors = collectColors(`colorRows_${suf}`);
   const stock = colors.reduce((sum, c) => sum + (c.stock || 0), 0);
-  const cardColor = document.getElementById('f_cardcolor').value;
-  const desc = document.getElementById('f_desc').value.trim();
+  const cardColor = document.getElementById(`f_cardcolor_${suf}`).value;
+  const desc = document.getElementById(`f_desc_${suf}`).value.trim();
   const descTranslations = {};
   ['en','uz','tr','az'].forEach(l => {
-    const v = document.getElementById(`f_desc_${l}`).value.trim();
+    const v = document.getElementById(`f_desc_${l}_${suf}`).value.trim();
     if (v) descTranslations[l] = v;
   });
-  const returnPolicy = document.getElementById('f_returnPolicy').value.trim();
-  const deliveryPolicy = document.getElementById('f_deliveryPolicy').value.trim();
-  const careInstructions = document.getElementById('f_careInstructions').value.trim();
+  const returnPolicy = document.getElementById(`f_returnPolicy_${suf}`).value.trim();
+  const deliveryPolicy = document.getElementById(`f_deliveryPolicy_${suf}`).value.trim();
+  const careInstructions = document.getElementById(`f_careInstructions_${suf}`).value.trim();
 
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
-  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions };
-  if (editingId){ db.collection('products').doc(editingId).update(data).then(resetForm); }
-  else { db.collection('products').add(data).then(resetForm); }
+  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, type: suf };
+  if (editingId && editingType === suf){ db.collection('products').doc(editingId).update(data).then(() => resetForm(suf)); }
+  else { db.collection('products').add(data).then(() => resetForm(suf)); }
 }
 
-function resetForm(){
-  editingId = null;
-  document.getElementById('f_name').value = '';
-  document.getElementById('f_sub').value = '';
-  document.getElementById('f_category').value = 'Все';
-  document.getElementById('f_price').value = '';
-  document.getElementById('f_image').value = '';
-  document.getElementById('f_sizes').value = '';
-  clearColorRows(); addColorRow();
-  document.getElementById('f_cardcolor').value = '#f4f1ec';
-  document.getElementById('f_desc').value = '';
-  ['en','uz','tr','az'].forEach(l => document.getElementById(`f_desc_${l}`).value = '');
-  document.getElementById('f_returnPolicy').value = '';
-  document.getElementById('f_deliveryPolicy').value = '';
-  document.getElementById('f_careInstructions').value = '';
-  document.getElementById('saveBtn').textContent = 'Добавить товар';
-  document.getElementById('cancelBtn').style.display = 'none';
+function resetForm(type){
+  const suf = type;
+  const typeConfig = PRODUCT_TYPES.find(t => t.key === suf);
+  if (editingType === suf){ editingId = null; editingType = null; }
+  document.getElementById(`f_name_${suf}`).value = '';
+  document.getElementById(`f_sub_${suf}`).value = '';
+  document.getElementById(`f_category_${suf}`).value = 'Все';
+  document.getElementById(`f_price_${suf}`).value = '';
+  document.getElementById(`f_image_${suf}`).value = '';
+  if (typeConfig.sizeMode === 'free'){ document.getElementById(`f_sizes_${suf}`).value = ''; }
+  else { document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => cb.checked = false); }
+  clearColorRows(`colorRows_${suf}`); addColorRow(`colorRows_${suf}`);
+  document.getElementById(`f_cardcolor_${suf}`).value = '#f4f1ec';
+  document.getElementById(`f_desc_${suf}`).value = '';
+  ['en','uz','tr','az'].forEach(l => document.getElementById(`f_desc_${l}_${suf}`).value = '');
+  document.getElementById(`f_returnPolicy_${suf}`).value = '';
+  document.getElementById(`f_deliveryPolicy_${suf}`).value = '';
+  document.getElementById(`f_careInstructions_${suf}`).value = '';
+  document.getElementById(`saveBtn_${suf}`).textContent = 'Добавить товар';
+  document.getElementById(`cancelBtn_${suf}`).style.display = 'none';
 }
 
 function editProduct(id, p){
+  const suf = (p.type && PRODUCT_TYPES.some(t => t.key === p.type)) ? p.type : 'shoes';
+  const typeConfig = PRODUCT_TYPES.find(t => t.key === suf);
   editingId = id;
-  document.getElementById('f_name').value = p.name || '';
-  document.getElementById('f_sub').value = p.sub || '';
-  document.getElementById('f_category').value = p.category || 'Все';
-  document.getElementById('f_price').value = p.price || '';
-  document.getElementById('f_image').value = p.image || '';
-  document.getElementById('f_sizes').value = (p.sizes || []).join(', ');
-  clearColorRows();
-  if (p.colors && p.colors.length){ p.colors.forEach(c => addColorRow(c)); } else { addColorRow(); }
-  document.getElementById('f_cardcolor').value = p.cardColor || '#f4f1ec';
-  document.getElementById('f_desc').value = p.desc || '';
+  editingType = suf;
+  document.getElementById(`f_name_${suf}`).value = p.name || '';
+  document.getElementById(`f_sub_${suf}`).value = p.sub || '';
+  document.getElementById(`f_category_${suf}`).value = p.category || 'Все';
+  document.getElementById(`f_price_${suf}`).value = p.price || '';
+  document.getElementById(`f_image_${suf}`).value = p.image || '';
+  if (typeConfig.sizeMode === 'free'){
+    document.getElementById(`f_sizes_${suf}`).value = (p.sizes || []).join(', ');
+  } else {
+    document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => { cb.checked = (p.sizes||[]).includes(cb.value); });
+  }
+  clearColorRows(`colorRows_${suf}`);
+  if (p.colors && p.colors.length){ p.colors.forEach(c => addColorRow(`colorRows_${suf}`, c)); } else { addColorRow(`colorRows_${suf}`); }
+  document.getElementById(`f_cardcolor_${suf}`).value = p.cardColor || '#f4f1ec';
+  document.getElementById(`f_desc_${suf}`).value = p.desc || '';
   const dt = p.descTranslations || {};
-  ['en','uz','tr','az'].forEach(l => document.getElementById(`f_desc_${l}`).value = dt[l] || '');
-  document.getElementById('f_returnPolicy').value = p.returnPolicy || '';
-  document.getElementById('f_deliveryPolicy').value = p.deliveryPolicy || '';
-  document.getElementById('f_careInstructions').value = p.careInstructions || '';
-  document.getElementById('saveBtn').textContent = 'Сохранить изменения';
-  document.getElementById('cancelBtn').style.display = 'block';
+  ['en','uz','tr','az'].forEach(l => document.getElementById(`f_desc_${l}_${suf}`).value = dt[l] || '');
+  document.getElementById(`f_returnPolicy_${suf}`).value = p.returnPolicy || '';
+  document.getElementById(`f_deliveryPolicy_${suf}`).value = p.deliveryPolicy || '';
+  document.getElementById(`f_careInstructions_${suf}`).value = p.careInstructions || '';
+  document.getElementById(`saveBtn_${suf}`).textContent = 'Сохранить изменения';
+  document.getElementById(`cancelBtn_${suf}`).style.display = 'block';
   switchTab('products');
+  document.querySelectorAll('#productFormCards .card.collapsible').forEach(c => c.classList.remove('open'));
+  document.getElementById(`card-prodtype-${suf}`).classList.add('open');
   window.scrollTo(0,0);
 }
 
@@ -613,7 +694,7 @@ function loadProducts(){
         ${thumb}
         <div class="meta">
           <div class="name">${p.name}</div>
-          <div class="info">${Number(p.price||0).toLocaleString('ru-RU')} сум · в наличии: ${p.stock||0}</div>
+          <div class="info">${TYPE_LABELS[p.type] || 'Обувь'} · ${Number(p.price||0).toLocaleString('ru-RU')} сум · в наличии: ${p.stock||0}</div>
         </div>
         <div class="acts">
           <span class="edit" data-id="${doc.id}">Изм.</span>
@@ -787,10 +868,13 @@ function setCategoryTranslation(cat, str){
 }
 
 function renderCategorySelect(){
-  const sel = document.getElementById('f_category');
-  const current = sel.value;
-  sel.innerHTML = '<option value="Все">Все (по умолчанию)</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
-  sel.value = current || 'Все';
+  PRODUCT_TYPES.forEach(t => {
+    const sel = document.getElementById(`f_category_${t.key}`);
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="Все">Все (по умолчанию)</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    sel.value = current || 'Все';
+  });
 }
 
 function addCategory(){
