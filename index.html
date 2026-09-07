@@ -279,7 +279,7 @@
   .footer-contacts{ font-size:12px; color:var(--muted); line-height:1.8; margin:12px 0; }
   .footer-copy{ font-size:11px; color:var(--muted); }
   .legal-footer{ background:#111; padding:20px 20px 40px; display:flex; flex-wrap:wrap; gap:14px 20px; justify-content:center; }
-  .legal-footer a{ color:var(--legalfooter-color, #fff); font-family:var(--legalfooter-font, inherit); font-size:12px; text-decoration:underline; cursor:pointer; }
+  .legal-footer a{ color:var(--legalfooter-color, #fff); font-family:var(--legalfooter-font, inherit); font-size:12px; text-decoration:none; cursor:pointer; }
   .info-detail-body{ padding:0 20px 40px; font-size:14px; line-height:1.7; color:#444; white-space:pre-wrap; }
   .social-follow{ padding:10px 20px 30px; }
   .social-icons{ display:flex; justify-content:center; gap:14px; }
@@ -667,7 +667,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-6";
+  const CURRENT_VERSION = "20260908-7";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1374,7 +1374,12 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   blackDownItems = data.blackDownItems || [];
   renderLegalFooter();
   if (data.blackDownColor) document.documentElement.style.setProperty('--legalfooter-color', data.blackDownColor);
-  if (data.blackDownFont) document.documentElement.style.setProperty('--legalfooter-font', `'${data.blackDownFont}',sans-serif`);
+  if (data.blackDownFont){
+    document.documentElement.style.setProperty('--legalfooter-font', `'${data.blackDownFont}',sans-serif`);
+    let bdFontLink = document.getElementById('blackDownFontLink');
+    if (!bdFontLink){ bdFontLink = document.createElement('link'); bdFontLink.id = 'blackDownFontLink'; bdFontLink.rel = 'stylesheet'; document.head.appendChild(bdFontLink); }
+    bdFontLink.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(data.blackDownFont).replace(/%20/g,'+')}:wght@400;500;700&display=swap`;
+  }
   avatarOptions = data.avatarOptions || [];
   renderDrawer();
   if (data.categoryChipColor) document.documentElement.style.setProperty('--catcolor', data.categoryChipColor);
