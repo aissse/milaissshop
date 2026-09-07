@@ -306,14 +306,18 @@
         <label>Цвет ссылок BlackDown (чёрный блок внизу сайта)</label>
         <div class="color-row"><input type="color" id="f_blackDownColor" value="#ffffff" onchange="syncHexInput('blackDownColor', this.value)"><input type="text" id="f_blackDownColorHex" placeholder="#ffffff" onchange="saveHexColor('blackDownColor', this.value)"></div>
 
-        <label>Шрифт ссылок BlackDown</label>
-        <select id="f_blackDownFont" onchange="saveSetting('blackDownFont', this.value)">
+        <label>Шрифт ссылок BlackDown — быстрый выбор</label>
+        <select id="f_blackDownFont" onchange="document.getElementById('customBlackDownFontInput').value = this.value; saveSetting('blackDownFont', this.value);">
           <option value="">Как основной текст сайта</option>
           <option value="Space Grotesk">Space Grotesk</option>
           <option value="Inter">Inter</option>
           <option value="Cormorant Garamond">Cormorant Garamond</option>
         </select>
-        <div class="hint">Меняются сразу на сайте магазина.</div>
+
+        <label>Или любой другой шрифт с fonts.google.com</label>
+        <input type="text" id="customBlackDownFontInput" placeholder="Например: Bebas Neue, Marck Script, Cinzel...">
+        <button type="button" class="btn" style="margin-top:8px;" onclick="saveCustomBlackDownFont()">Сохранить этот шрифт</button>
+        <div class="hint">Открой fonts.google.com, найди понравившийся шрифт и впиши его точное название сюда. Меняется сразу на сайте магазина.</div>
         </div>
       </div>
 
@@ -671,7 +675,7 @@ function loadSettings(){
     if (data.pmrSelectedBg){ document.getElementById('f_pmrSelectedBg').value = data.pmrSelectedBg; document.getElementById('f_pmrSelectedBgHex').value = data.pmrSelectedBg; }
     if (data.iconBorderColor){ document.getElementById('f_iconBorderColor').value = data.iconBorderColor; document.getElementById('f_iconBorderColorHex').value = data.iconBorderColor; }
     if (data.blackDownColor){ document.getElementById('f_blackDownColor').value = data.blackDownColor; document.getElementById('f_blackDownColorHex').value = data.blackDownColor; }
-    if (data.blackDownFont) document.getElementById('f_blackDownFont').value = data.blackDownFont;
+    if (data.blackDownFont){ document.getElementById('f_blackDownFont').value = data.blackDownFont; document.getElementById('customBlackDownFontInput').value = data.blackDownFont; }
     if (data.colorBorder) document.getElementById('f_borderColor').value = data.colorBorder;
     if (data.fontFamily){
       document.getElementById('customFontInput').value = data.fontFamily;
@@ -1215,6 +1219,14 @@ function applyPresetFont(name){
   document.getElementById('customFontInput').value = name;
   previewFont();
   saveSetting('fontFamily', name);
+}
+
+function saveCustomBlackDownFont(){
+  const name = document.getElementById('customBlackDownFontInput').value.trim();
+  if (!name) { alert('Сначала впиши название шрифта'); return; }
+  document.getElementById('f_blackDownFont').value = '';
+  saveSetting('blackDownFont', name);
+  showAdminToast('Шрифт BlackDown сохранён — открой магазин, чтобы проверить');
 }
 
 function showAdminToast(msg){ alert(msg); }
