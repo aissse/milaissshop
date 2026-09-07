@@ -22,7 +22,8 @@
     --orange:#ff5a1f; --orange-dark:#e14e17; --muted:#8a8479; --navbg:#141414;
     --logofont:'Cormorant Garamond',serif; --colordot-border:#141414;
   }
-  *{box-sizing:border-box; margin:0; padding:0;}
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html, body{ -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; }
   body{ font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; }
   .app{ width:100%; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; overflow-x:hidden; padding-bottom:84px; transition:opacity .35s ease; }
 
@@ -103,11 +104,11 @@
 
   .cat-pills-row{ display:flex; align-items:center; gap:10px; padding:0 20px 20px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row::-webkit-scrollbar{ display:none; }
-  .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; transition:background .3s ease, border-color .3s ease, padding .35s cubic-bezier(.4,0,.2,1); }
+  .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; transition:background .45s ease, border-color .45s ease, padding .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; }
-  .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .35s cubic-bezier(.4,0,.2,1), opacity .25s ease, margin-left .35s ease; }
+  .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); padding:0 18px 0 14px; }
-  .cat-pill.active .label{ max-width:140px; opacity:1; margin-left:8px; transition-delay:.08s; }
+  .cat-pill.active .label{ max-width:140px; opacity:1; margin-left:8px; transition-delay:.15s; }
 
   .cat-pills-row-mini{ display:flex; align-items:center; gap:8px; padding:0 20px 14px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row-mini::-webkit-scrollbar{ display:none; }
@@ -681,7 +682,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-10";
+  const CURRENT_VERSION = "20260908-11";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1193,8 +1194,9 @@ function renderShopAllGrid(){
 
 /* ---------- side drawer catalog ---------- */
 function toggleDrawer(){
-  document.getElementById('drawerOverlay').classList.toggle('open');
-  document.getElementById('drawerPanel').classList.toggle('open');
+  const isOpen = document.getElementById('drawerOverlay').classList.toggle('open');
+  document.getElementById('drawerPanel').classList.toggle('open', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
   renderDrawer();
 }
 function renderDrawer(){
