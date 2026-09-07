@@ -302,6 +302,17 @@
 
         <label>Цвет обводки иконок оплаты (Payme/Click/Apple/Google)</label>
         <div class="color-row"><input type="color" id="f_iconBorderColor" value="#e7e2d9" onchange="syncHexInput('iconBorderColor', this.value)"><input type="text" id="f_iconBorderColorHex" placeholder="#e7e2d9" onchange="saveHexColor('iconBorderColor', this.value)"></div>
+
+        <label>Цвет ссылок BlackDown (чёрный блок внизу сайта)</label>
+        <div class="color-row"><input type="color" id="f_blackDownColor" value="#ffffff" onchange="syncHexInput('blackDownColor', this.value)"><input type="text" id="f_blackDownColorHex" placeholder="#ffffff" onchange="saveHexColor('blackDownColor', this.value)"></div>
+
+        <label>Шрифт ссылок BlackDown</label>
+        <select id="f_blackDownFont" onchange="saveSetting('blackDownFont', this.value)">
+          <option value="">Как основной текст сайта</option>
+          <option value="Space Grotesk">Space Grotesk</option>
+          <option value="Inter">Inter</option>
+          <option value="Cormorant Garamond">Cormorant Garamond</option>
+        </select>
         <div class="hint">Меняются сразу на сайте магазина.</div>
         </div>
       </div>
@@ -357,18 +368,17 @@
         <div id="infoRows"></div>
         <button class="btn secondary" onclick="addInfoRow()">+ Добавить пункт</button>
         <button class="btn" onclick="saveInfoItems()">Сохранить</button>
-        <div class="hint">Эти пункты (например "О нас", "Контакты") показываются в боковом меню сайта, а также ссылками внизу сайта в чёрном блоке (Privacy Policy, Terms of Service и т.п.) — открывают полный текст. Не влияют на каталог товаров.</div>
+        <div class="hint">Эти пункты (например "О нас", "Контакты") показываются только в боковом меню сайта (☰) — отдельно от категорий товаров, и никак не влияют на каталог.</div>
+        </div>
+      </div>
 
-        <label style="margin-top:16px;">Цвет ссылок в чёрном блоке внизу сайта</label>
-        <div class="color-row"><input type="color" id="f_legalFooterColor" value="#ffffff" onchange="syncHexInput('legalFooterColor', this.value)"><input type="text" id="f_legalFooterColorHex" placeholder="#ffffff" onchange="saveHexColor('legalFooterColor', this.value)"></div>
-
-        <label>Шрифт ссылок в чёрном блоке внизу сайта</label>
-        <select id="f_legalFooterFont" onchange="saveSetting('legalFooterFont', this.value)">
-          <option value="">Как основной текст сайта</option>
-          <option value="Space Grotesk">Space Grotesk</option>
-          <option value="Inter">Inter</option>
-          <option value="Cormorant Garamond">Cormorant Garamond</option>
-        </select>
+      <div class="card collapsible" id="card-blackdown">
+        <div class="card-header" onclick="toggleCard('card-blackdown')"><h1>BlackDown</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
+        <div id="blackDownRows"></div>
+        <button class="btn secondary" onclick="addBlackDownRow()">+ Добавить пункт</button>
+        <button class="btn" onclick="saveBlackDownItems()">Сохранить</button>
+        <div class="hint">Эти пункты показываются ссылками в чёрном блоке внизу сайта (например Privacy Policy, Terms of Service). Название кнопки и текст можно написать на разных языках — переключатся вместе с языком сайта.</div>
         </div>
       </div>
 
@@ -660,8 +670,8 @@ function loadSettings(){
     if (data.menuBtnBg){ document.getElementById('f_menuBtnBg').value = data.menuBtnBg; document.getElementById('f_menuBtnBgHex').value = data.menuBtnBg; }
     if (data.pmrSelectedBg){ document.getElementById('f_pmrSelectedBg').value = data.pmrSelectedBg; document.getElementById('f_pmrSelectedBgHex').value = data.pmrSelectedBg; }
     if (data.iconBorderColor){ document.getElementById('f_iconBorderColor').value = data.iconBorderColor; document.getElementById('f_iconBorderColorHex').value = data.iconBorderColor; }
-    if (data.legalFooterColor){ document.getElementById('f_legalFooterColor').value = data.legalFooterColor; document.getElementById('f_legalFooterColorHex').value = data.legalFooterColor; }
-    if (data.legalFooterFont) document.getElementById('f_legalFooterFont').value = data.legalFooterFont;
+    if (data.blackDownColor){ document.getElementById('f_blackDownColor').value = data.blackDownColor; document.getElementById('f_blackDownColorHex').value = data.blackDownColor; }
+    if (data.blackDownFont) document.getElementById('f_blackDownFont').value = data.blackDownFont;
     if (data.colorBorder) document.getElementById('f_borderColor').value = data.colorBorder;
     if (data.fontFamily){
       document.getElementById('customFontInput').value = data.fontFamily;
@@ -687,6 +697,8 @@ function loadSettings(){
     loadPolicyRows(data.policyItems || []);
     infoItems = data.infoItems || [];
     loadInfoRows(infoItems);
+    blackDownItems = data.blackDownItems || [];
+    loadBlackDownRows(blackDownItems);
     socialLinks = data.socialLinks || {};
     if (socialLinks.instagram) document.getElementById('f_instagram').value = socialLinks.instagram;
     if (socialLinks.tiktok) document.getElementById('f_tiktok').value = socialLinks.tiktok;
@@ -701,7 +713,7 @@ function saveSetting(key, value){
   db.collection('settings').doc('shop').set({ [key]: value }, { merge: true });
 }
 
-const COLOR_SETTING_MAP = { orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor', legalFooterColor: 'legalFooterColor' };
+const COLOR_SETTING_MAP = { orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor', blackDownColor: 'blackDownColor' };
 
 function syncHexInput(id, colorVal){
   document.getElementById(`f_${id}Hex`).value = colorVal;
@@ -918,6 +930,60 @@ function saveInfoItems(){
     items.push(item);
   });
   saveSetting('infoItems', items);
+  alert('Сохранено');
+}
+
+let blackDownItems = [];
+function addBlackDownRow(data){
+  data = data || {};
+  const row = document.createElement('div');
+  row.className = 'faq-row';
+  const langFields = INFO_LANGS.map(l => `
+    <label style="margin:10px 0 4px;">${l.label} — название кнопки</label>
+    <input type="text" class="bd-title-${l.code}" placeholder="Например Privacy Policy" value="${((data[`title_${l.code}`])||'').replace(/"/g,'&quot;')}">
+    <label style="margin:6px 0 4px;">${l.label} — текст документа</label>
+    <textarea class="bd-body-${l.code}" rows="6" style="width:100%;" placeholder="Полный текст документа — без ограничений по длине">${(data[`body_${l.code}`])||''}</textarea>
+  `).join('<div style="border-top:1px dashed var(--line); margin:12px 0;"></div>');
+  row.innerHTML = `
+    <span class="rm" onclick="this.parentElement.remove()">✕ удалить весь пункт</span>
+    ${langFields}
+  `;
+  document.getElementById('blackDownRows').appendChild(row);
+}
+function loadBlackDownRows(items){
+  document.getElementById('blackDownRows').innerHTML = '';
+  (items && items.length ? items : []).forEach(it => {
+    const data = { title_ru: it.title, body_ru: it.body };
+    INFO_LANGS.forEach(l => {
+      if (l.code === 'ru') return;
+      data[`title_${l.code}`] = (it.titleTranslations && it.titleTranslations[l.code]) || '';
+      data[`body_${l.code}`] = (it.bodyTranslations && it.bodyTranslations[l.code]) || '';
+    });
+    addBlackDownRow(data);
+  });
+  if (!items || !items.length) addBlackDownRow();
+}
+function saveBlackDownItems(){
+  const rows = document.querySelectorAll('#blackDownRows .faq-row');
+  const items = [];
+  rows.forEach(row => {
+    const title = row.querySelector('.bd-title-ru').value.trim();
+    const body = row.querySelector('.bd-body-ru').value.trim();
+    if (!title) return;
+    const item = { title, body };
+    const titleTranslations = {}, bodyTranslations = {};
+    INFO_LANGS.forEach(l => {
+      if (l.code === 'ru') return;
+      const tv = row.querySelector(`.bd-title-${l.code}`).value.trim();
+      const bv = row.querySelector(`.bd-body-${l.code}`).value.trim();
+      if (tv) titleTranslations[l.code] = tv;
+      if (bv) bodyTranslations[l.code] = bv;
+    });
+    if (Object.keys(titleTranslations).length) item.titleTranslations = titleTranslations;
+    if (Object.keys(bodyTranslations).length) item.bodyTranslations = bodyTranslations;
+    items.push(item);
+  });
+  saveSetting('blackDownItems', items);
   alert('Сохранено');
 }
 
