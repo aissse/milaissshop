@@ -288,14 +288,51 @@
         </div>
       </div>
 
+      <div class="card collapsible" id="card-elementcolors">
+        <div class="card-header" onclick="toggleCard('card-elementcolors')"><h1>Цвета отдельных кнопок и иконок</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
+        <label>Фон кнопки выбора языка (флаг)</label>
+        <div class="color-row"><input type="color" id="f_langBtnBg" value="#f4f1ec" onchange="syncHexInput('langBtnBg', this.value)"><input type="text" id="f_langBtnBgHex" placeholder="#f4f1ec" onchange="saveHexColor('langBtnBg', this.value)"></div>
+
+        <label>Фон кнопки бокового меню (три полоски)</label>
+        <div class="color-row"><input type="color" id="f_menuBtnBg" value="#f4f1ec" onchange="syncHexInput('menuBtnBg', this.value)"><input type="text" id="f_menuBtnBgHex" placeholder="#f4f1ec" onchange="saveHexColor('menuBtnBg', this.value)"></div>
+
+        <label>Фон выбранного способа оплаты (в корзине)</label>
+        <div class="color-row"><input type="color" id="f_pmrSelectedBg" value="#f4f1ec" onchange="syncHexInput('pmrSelectedBg', this.value)"><input type="text" id="f_pmrSelectedBgHex" placeholder="#f4f1ec" onchange="saveHexColor('pmrSelectedBg', this.value)"></div>
+
+        <label>Цвет обводки иконок оплаты (Payme/Click/Apple/Google)</label>
+        <div class="color-row"><input type="color" id="f_iconBorderColor" value="#e7e2d9" onchange="syncHexInput('iconBorderColor', this.value)"><input type="text" id="f_iconBorderColorHex" placeholder="#e7e2d9" onchange="saveHexColor('iconBorderColor', this.value)"></div>
+        <div class="hint">Меняются сразу на сайте магазина.</div>
+        </div>
+      </div>
+
+      <div class="card collapsible" id="card-avatars">
+        <div class="card-header" onclick="toggleCard('card-avatars')"><h1>Аватары для профиля покупателей</h1><span class="card-chevron">▲</span></div>
+        <div class="card-body">
+        <div id="avatarTags"></div>
+        <div class="row" style="margin-top:10px;">
+          <input type="url" id="newAvatarInput" placeholder="Ссылка на картинку аватара">
+        </div>
+        <button class="btn secondary" onclick="addAvatarOption()">+ Добавить аватар</button>
+        <div class="hint">Покупатели без Telegram (зашедшие через браузер) выберут аватар из этого списка при регистрации.</div>
+        </div>
+      </div>
+
       <div class="card collapsible" id="card-hero">
         <div class="card-header" onclick="toggleCard('card-hero')"><h1>Главный баннер и витрина</h1><span class="card-chevron">▲</span></div>
         <div class="card-body">
-        <label>Фото для большого баннера на главной</label>
-        <input type="url" id="f_heroImage" placeholder="https://..." onchange="saveSetting('heroImage', this.value)">
+        <label>Ссылка на фото ИЛИ видео для баннера</label>
+        <input type="url" id="f_heroImage" placeholder="https://... (.mp4/.webm = видео, иначе фото)" onchange="saveSetting('heroImage', this.value)">
+        <div class="hint">Если ссылка ведёт на видеофайл (.mp4, .webm, .mov) — на баннере будет проигрываться видео. Иначе — обычное фото.</div>
 
-        <label>Текст о доставке (полоска под баннером)</label>
-        <input type="text" id="f_shippingText" placeholder="Бесплатная доставка от 500 000 сум" onchange="saveSetting('shippingText', this.value)">
+        <label>Метка над заголовком (например "НОВАЯ КОЛЛЕКЦИЯ")</label>
+        <input type="text" id="f_heroTag" placeholder="НОВАЯ КОЛЛЕКЦИЯ" onchange="saveSetting('heroTag', this.value)">
+
+        <label>Заголовок баннера</label>
+        <input type="text" id="f_heroTitle" placeholder="Скидка 20% на первую покупку" onchange="saveSetting('heroTitle', this.value)">
+
+        <label>Текст на кнопке баннера</label>
+        <input type="text" id="f_heroBtnText" placeholder="Смотреть" onchange="saveSetting('heroBtnText', this.value)">
 
         <label>Контакты для футера сайта (email, адрес — по одному на строке)</label>
         <textarea id="f_shopContacts" rows="3" placeholder="hello@milaisss.uz&#10;Ташкент, Чиланзар" onchange="saveSetting('shopContacts', this.value)"></textarea>
@@ -608,6 +645,10 @@ function loadSettings(){
     if (data.categoryFont) document.getElementById('f_catFont').value = data.categoryFont;
     if (data.bgColor){ document.getElementById('f_bgcolor').value = data.bgColor; document.getElementById('f_bgcolorHex').value = data.bgColor; }
     if (data.orangeColor){ document.getElementById('f_orangeColor').value = data.orangeColor; document.getElementById('f_orangeColorHex').value = data.orangeColor; }
+    if (data.langBtnBg){ document.getElementById('f_langBtnBg').value = data.langBtnBg; document.getElementById('f_langBtnBgHex').value = data.langBtnBg; }
+    if (data.menuBtnBg){ document.getElementById('f_menuBtnBg').value = data.menuBtnBg; document.getElementById('f_menuBtnBgHex').value = data.menuBtnBg; }
+    if (data.pmrSelectedBg){ document.getElementById('f_pmrSelectedBg').value = data.pmrSelectedBg; document.getElementById('f_pmrSelectedBgHex').value = data.pmrSelectedBg; }
+    if (data.iconBorderColor){ document.getElementById('f_iconBorderColor').value = data.iconBorderColor; document.getElementById('f_iconBorderColorHex').value = data.iconBorderColor; }
     if (data.colorBorder) document.getElementById('f_borderColor').value = data.colorBorder;
     if (data.fontFamily){
       document.getElementById('customFontInput').value = data.fontFamily;
@@ -615,7 +656,9 @@ function loadSettings(){
       setTimeout(() => { document.getElementById('fontPreview').style.fontFamily = `'${data.fontFamily}', serif`; }, 300);
     }
     if (data.heroImage) document.getElementById('f_heroImage').value = data.heroImage;
-    if (data.shippingText) document.getElementById('f_shippingText').value = data.shippingText;
+    if (data.heroTag) document.getElementById('f_heroTag').value = data.heroTag;
+    if (data.heroTitle) document.getElementById('f_heroTitle').value = data.heroTitle;
+    if (data.heroBtnText) document.getElementById('f_heroBtnText').value = data.heroBtnText;
     if (data.shopContacts) document.getElementById('f_shopContacts').value = data.shopContacts;
     categoryImages = data.categoryImages || {};
     categoryTranslations = data.categoryTranslations || {};
@@ -635,6 +678,8 @@ function loadSettings(){
     if (socialLinks.instagram) document.getElementById('f_instagram').value = socialLinks.instagram;
     if (socialLinks.tiktok) document.getElementById('f_tiktok').value = socialLinks.tiktok;
     btsBranches = data.btsBranches || [];
+    avatarOptions = data.avatarOptions || [];
+    renderAvatarTags();
     renderBtsTags();
   });
 }
@@ -643,7 +688,7 @@ function saveSetting(key, value){
   db.collection('settings').doc('shop').set({ [key]: value }, { merge: true });
 }
 
-const COLOR_SETTING_MAP = { orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor' };
+const COLOR_SETTING_MAP = { orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor' };
 
 function syncHexInput(id, colorVal){
   document.getElementById(`f_${id}Hex`).value = colorVal;
@@ -722,6 +767,31 @@ function addCategory(){
 function removeCategory(i){
   categories.splice(i, 1);
   saveSetting('categories', categories);
+}
+
+let avatarOptions = [];
+function renderAvatarTags(){
+  const wrap = document.getElementById('avatarTags');
+  if (avatarOptions.length === 0){ wrap.innerHTML = '<p class="hint">Аватары ещё не добавлены</p>'; return; }
+  wrap.innerHTML = avatarOptions.map((url,i) => `
+    <div class="prod-row">
+      <img src="${url}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+      <div class="meta" style="font-size:11px; word-break:break-all;">${url}</div>
+      <span class="rdel" onclick="removeAvatarOption(${i})">Удалить</span>
+    </div>
+  `).join('');
+}
+function addAvatarOption(){
+  const input = document.getElementById('newAvatarInput');
+  const val = input.value.trim();
+  if (!val) return;
+  avatarOptions.push(val);
+  saveSetting('avatarOptions', avatarOptions);
+  input.value = '';
+}
+function removeAvatarOption(i){
+  avatarOptions.splice(i, 1);
+  saveSetting('avatarOptions', avatarOptions);
 }
 
 let btsBranches = [];
