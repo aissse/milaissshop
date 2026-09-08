@@ -105,7 +105,7 @@
   .cat-pills-row{ display:flex; align-items:center; gap:10px; padding:0 20px 20px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row::-webkit-scrollbar{ display:none; }
   .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; animation: cardFadeIn .4s ease both; transition:background .45s ease, border-color .45s ease, padding .55s cubic-bezier(.22,1,.36,1); }
-  .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; }
+  .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; height:100%; position:relative; top:1px; }
   .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); padding:0 18px 0 14px; }
   .cat-pill.active .label{ max-width:140px; opacity:1; margin-left:8px; transition-delay:.15s; }
@@ -119,7 +119,7 @@
   .cat-pills-row-mini{ display:flex; align-items:center; gap:8px; padding:0 20px 14px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row-mini::-webkit-scrollbar{ display:none; }
   .cat-pill-mini{ flex:0 0 auto; height:34px; border-radius:100px; display:flex; align-items:center; gap:6px; padding:0 13px; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; animation: cardFadeIn .4s ease both; transition:background .3s ease, border-color .3s ease; }
-  .cat-pill-mini .icon{ font-size:14px; line-height:1; }
+  .cat-pill-mini .icon{ font-size:14px; line-height:1; display:inline-flex; align-items:center; justify-content:center; position:relative; top:1px; }
   .cat-pill-mini.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
 
   .bottomnav{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; max-width:440px; width:calc(100% - 40px); background:var(--navbg); border-radius:100px; display:flex; justify-content:space-around; padding:12px 10px; z-index:50; }
@@ -734,7 +734,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-19";
+  const CURRENT_VERSION = "20260908-20";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
