@@ -65,13 +65,13 @@
   .color-row .rm{ flex-shrink:0; color:#a83232; font-size:18px; cursor:pointer; padding:0 4px; font-weight:700; }
   .color-row-block{ margin-bottom:14px; padding-bottom:12px; border-bottom:1px dashed var(--line); }
   .color-row-block:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0; }
-  .size-check-group{ display:flex; gap:8px; flex-wrap:wrap; }
-  .size-check-group{ display:flex; flex-direction:column; gap:8px; }
-  .size-stock-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--pink); padding:9px 12px; border-radius:10px; }
-  .size-check-opt{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--maroon-dark); margin:0; cursor:pointer; }
+  .size-check-group-flat{ display:flex; gap:8px; flex-wrap:wrap; }
+  .size-check-opt{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--maroon-dark); background:var(--pink); padding:9px 14px; border-radius:10px; cursor:pointer; margin:0; }
   .size-check-opt input{ width:auto; accent-color:var(--maroon); }
-  .size-stock-row .size-stock{ width:84px; flex-shrink:0; padding:7px 8px; }
-  .size-stock-row .size-stock:disabled{ opacity:.45; }
+  .color-size-stocks{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+  .color-size-stocks .size-stock-row{ display:flex; align-items:center; gap:6px; background:var(--pink); padding:6px 8px 6px 12px; border-radius:10px; }
+  .color-size-stocks .size-stock-label{ font-weight:700; font-size:12px; min-width:22px; }
+  .color-size-stocks .cs-stock{ width:58px; padding:5px 6px; font-size:12px; }
   .review-row{ border-bottom:1px solid var(--line); padding:10px 0; }
   .review-row:last-child{ border-bottom:none; }
   .review-row .rtext{ font-size:13px; margin-bottom:6px; line-height:1.5; }
@@ -463,20 +463,16 @@ function sizeFieldHTML(suf, mode){
   if (mode === 'free'){
     return `
       <label>Размеры (через запятую)</label>
-      <input type="text" id="f_sizes_${suf}" placeholder="38, 39, 40, 41, 42, 43">
+      <input type="text" id="f_sizes_${suf}" placeholder="38, 39, 40, 41, 42, 43" oninput="syncColorSizeFields('${suf}')">
+      <div class="hint">Наличие по каждому размеру указывается отдельно для каждого цвета ниже.</div>
     `;
   }
   return `
-    <label>Размеры и наличие по каждому</label>
-    <div class="size-check-group" id="sizeCheck_${suf}">
-      ${SIZE_OPTIONS.map(s => `
-        <div class="size-stock-row" data-size="${s}">
-          <label class="size-check-opt"><input type="checkbox" class="size-check" value="${s}" onchange="toggleSizeStockInput(this)"> ${s}</label>
-          <input type="number" class="size-stock" min="0" placeholder="Кол-во" value="0" disabled>
-        </div>
-      `).join('')}
+    <label>Размеры</label>
+    <div class="size-check-group-flat" id="sizeCheck_${suf}">
+      ${SIZE_OPTIONS.map(s => `<label class="size-check-opt"><input type="checkbox" class="size-check" value="${s}" onchange="syncColorSizeFields('${suf}')"> ${s}</label>`).join('')}
     </div>
-    <div class="hint">Отметь размеры, которые есть у товара, и укажи количество в наличии по каждому отдельно.</div>
+    <div class="hint">Отметь размеры, которые есть у товара. Наличие по каждому размеру указывается отдельно для каждого цвета ниже.</div>
   `;
 }
 
@@ -505,7 +501,7 @@ function productFormCardHTML(type){
 
       ${sizeFieldHTML(suf, type.sizeMode)}
 
-      <label>Цвета, фото, наличие и перевод названия по каждому</label>
+      <label>Цвета: фото, перевод названия и наличие по размерам</label>
       <div id="colorRows_${suf}"></div>
       <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow('colorRows_${suf}', null, '${suf}')">+ Добавить цвет</button>
       <div class="hint">Наличие указывается по каждому цвету отдельно. В строке переводов впиши: en:Gray, uz:..., tr:..., az:... — иначе на других языках покупатель увидит русское название цвета.</div>
@@ -543,45 +539,60 @@ function initProductFormCards(){
 }
 initProductFormCards();
 
-function toggleSizeStockInput(cb){
-  const row = cb.closest('.size-stock-row');
-  const input = row.querySelector('.size-stock');
-  input.disabled = !cb.checked;
-  input.value = cb.checked ? (Number(input.value) || 0) : 0;
+function getCurrentSizeLabels(suf){
+  const typeConfig = PRODUCT_TYPES.find(t => t.key === suf);
+  if (!typeConfig) return [];
+  if (typeConfig.sizeMode === 'free'){
+    const raw = (document.getElementById(`f_sizes_${suf}`) || {}).value || '';
+    return raw.trim() ? raw.trim().split(',').map(s => s.trim()).filter(Boolean) : [];
+  }
+  return Array.from(document.querySelectorAll(`#sizeCheck_${suf} .size-check:checked`)).map(cb => cb.value);
 }
 
-function collectSizeData(suf){
-  const rows = document.querySelectorAll(`#sizeCheck_${suf} .size-stock-row`);
-  const sizes = [];
-  rows.forEach(row => {
-    const cb = row.querySelector('.size-check');
-    if (!cb.checked) return;
-    const stock = Number(row.querySelector('.size-stock').value) || 0;
-    sizes.push({ size: cb.value, stock });
+function colorSizeStocksHTML(labels, existing){
+  existing = existing || {};
+  if (!labels.length) return '<div class="hint" style="margin:4px 0 0;">Сначала укажи размеры товара выше — тогда здесь появится наличие по каждому.</div>';
+  return `<div class="color-size-stocks">
+    ${labels.map(lbl => `
+      <div class="size-stock-row" data-size="${lbl}">
+        <span class="size-stock-label">${lbl}</span>
+        <input type="number" class="cs-stock" min="0" placeholder="0" value="${existing[lbl] != null ? existing[lbl] : 0}">
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function syncColorSizeFields(suf){
+  const labels = getCurrentSizeLabels(suf);
+  document.querySelectorAll(`#colorRows_${suf} .color-row-block`).forEach(row => {
+    const existing = {};
+    row.querySelectorAll('.color-size-stocks .size-stock-row').forEach(sr => {
+      existing[sr.dataset.size] = Number(sr.querySelector('.cs-stock').value) || 0;
+    });
+    const wrap = row.querySelector('.color-size-stocks-wrap');
+    if (wrap) wrap.innerHTML = colorSizeStocksHTML(labels, existing);
   });
-  return sizes;
 }
 
 function addColorRow(containerId, data, suf){
-  data = data || { name: '', hex: '#8a8479', images: [], stock: 0, nameTranslations: {} };
+  data = data || { name: '', hex: '#8a8479', images: [], nameTranslations: {}, sizeStocks: {} };
   const tr = data.nameTranslations || {};
   const trStr = ['en','uz','tr','az'].map(l => tr[l] ? `${l}:${tr[l]}` : '').filter(Boolean).join(', ');
-  const typeConfig = suf ? PRODUCT_TYPES.find(t => t.key === suf) : null;
-  const hideStock = !!(typeConfig && typeConfig.sizeMode === 'select');
   const existingImages = (data.images && data.images.length) ? data.images : (data.image ? [data.image] : []);
+  const labels = suf ? getCurrentSizeLabels(suf) : [];
   const row = document.createElement('div');
   row.className = 'color-row-block';
   row.innerHTML = `
     <div class="color-row">
       <input type="color" class="c-hex" value="${data.hex || '#8a8479'}">
-      <input type="text" class="c-name" placeholder="Название (рус)" value="${(data.name||'').replace(/"/g,'&quot;')}" style="max-width:100px;">
-      ${hideStock ? '' : `<input type="number" class="c-stock" placeholder="Кол-во" value="${data.stock || 0}" style="max-width:64px;">`}
+      <input type="text" class="c-name" placeholder="Название (рус)" value="${(data.name||'').replace(/"/g,'&quot;')}" style="max-width:140px;">
       <span class="rm" onclick="this.closest('.color-row-block').remove()">✕</span>
     </div>
     <label style="margin:6px 0 4px;">Фото этого цвета (по одной ссылке на строке — можно несколько)</label>
     <textarea class="c-images" rows="3" placeholder="https://...&#10;https://...">${existingImages.join('\n')}</textarea>
     <input type="text" class="c-name-tr" placeholder="Переводы: en:Gray, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}" style="margin-top:6px;">
-    ${hideStock ? '<div class="hint" style="margin:2px 0 0;">Наличие для этого товара указывается по размерам выше.</div>' : ''}
+    <label style="margin:10px 0 4px;">Наличие по размерам (для этого цвета)</label>
+    <div class="color-size-stocks-wrap">${colorSizeStocksHTML(labels, data.sizeStocks)}</div>
   `;
   document.getElementById(containerId).appendChild(row);
 }
@@ -593,11 +604,15 @@ function collectColors(containerId){
     const name = row.querySelector('.c-name').value.trim();
     const hex = row.querySelector('.c-hex').value;
     const images = row.querySelector('.c-images').value.split('\n').map(s => s.trim()).filter(Boolean);
-    const stockInput = row.querySelector('.c-stock');
-    const stock = stockInput ? (Number(stockInput.value) || 0) : 0;
     const trRaw = row.querySelector('.c-name-tr').value.trim();
     if (!name) return;
+    const sizeStocks = {};
+    row.querySelectorAll('.color-size-stocks .size-stock-row').forEach(sr => {
+      sizeStocks[sr.dataset.size] = Number(sr.querySelector('.cs-stock').value) || 0;
+    });
+    const stock = Object.values(sizeStocks).reduce((a,b) => a+b, 0);
     const obj = { name, hex, stock };
+    if (Object.keys(sizeStocks).length) obj.sizeStocks = sizeStocks;
     if (images.length){ obj.images = images; obj.image = images[0]; }
     if (trRaw){
       const nameTranslations = {};
@@ -625,19 +640,10 @@ function saveProduct(type){
   const price = Number(document.getElementById(`f_price_${suf}`).value) || 0;
   const image = document.getElementById(`f_image_${suf}`).value.trim();
 
-  let sizes;
-  let sizeBasedStock = null;
-  if (typeConfig.sizeMode === 'free'){
-    const sizesRaw = document.getElementById(`f_sizes_${suf}`).value.trim();
-    sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-  } else {
-    sizes = collectSizeData(suf);
-    sizeBasedStock = sizes.reduce((sum, s) => sum + (s.stock || 0), 0);
-  }
+  const sizes = getCurrentSizeLabels(suf);
 
   const colors = collectColors(`colorRows_${suf}`);
-  const colorStock = colors.reduce((sum, c) => sum + (c.stock || 0), 0);
-  const stock = sizeBasedStock !== null ? sizeBasedStock : colorStock;
+  const stock = colors.reduce((sum, c) => sum + (c.stock || 0), 0);
   const cardColor = document.getElementById(`f_cardcolor_${suf}`).value;
   const desc = document.getElementById(`f_desc_${suf}`).value.trim();
   const descTranslations = {};
@@ -666,14 +672,7 @@ function resetForm(type){
   document.getElementById(`f_price_${suf}`).value = '';
   document.getElementById(`f_image_${suf}`).value = '';
   if (typeConfig.sizeMode === 'free'){ document.getElementById(`f_sizes_${suf}`).value = ''; }
-  else {
-    document.querySelectorAll(`#sizeCheck_${suf} .size-stock-row`).forEach(row => {
-      row.querySelector('.size-check').checked = false;
-      const stockInput = row.querySelector('.size-stock');
-      stockInput.value = 0;
-      stockInput.disabled = true;
-    });
-  }
+  else { document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => cb.checked = false); }
   clearColorRows(`colorRows_${suf}`); addColorRow(`colorRows_${suf}`, null, suf);
   document.getElementById(`f_cardcolor_${suf}`).value = '#f4f1ec';
   document.getElementById(`f_desc_${suf}`).value = '';
@@ -695,31 +694,31 @@ function editProduct(id, p){
   document.getElementById(`f_category_${suf}`).value = p.category || 'Все';
   document.getElementById(`f_price_${suf}`).value = p.price || '';
   document.getElementById(`f_image_${suf}`).value = p.image || '';
+
+  // поддержка старого формата sizes (массив объектов {size, stock}) — переносим как общий ориентир для новых цветов
+  const legacySizeStocks = {};
+  const labelList = [];
+  (p.sizes || []).forEach(s => {
+    if (s && typeof s === 'object'){ labelList.push(s.size); legacySizeStocks[s.size] = s.stock || 0; }
+    else { labelList.push(s); }
+  });
+
   if (typeConfig.sizeMode === 'free'){
-    document.getElementById(`f_sizes_${suf}`).value = (p.sizes || []).join(', ');
+    document.getElementById(`f_sizes_${suf}`).value = labelList.join(', ');
   } else {
-    const sizeMap = {};
-    (p.sizes || []).forEach(s => {
-      if (typeof s === 'string') sizeMap[s] = 0;
-      else if (s && s.size) sizeMap[s.size] = s.stock || 0;
-    });
-    document.querySelectorAll(`#sizeCheck_${suf} .size-stock-row`).forEach(row => {
-      const sizeVal = row.dataset.size;
-      const cb = row.querySelector('.size-check');
-      const stockInput = row.querySelector('.size-stock');
-      if (Object.prototype.hasOwnProperty.call(sizeMap, sizeVal)){
-        cb.checked = true;
-        stockInput.disabled = false;
-        stockInput.value = sizeMap[sizeVal];
-      } else {
-        cb.checked = false;
-        stockInput.disabled = true;
-        stockInput.value = 0;
-      }
-    });
+    document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => { cb.checked = labelList.includes(cb.value); });
   }
+
   clearColorRows(`colorRows_${suf}`);
-  if (p.colors && p.colors.length){ p.colors.forEach(c => addColorRow(`colorRows_${suf}`, c, suf)); } else { addColorRow(`colorRows_${suf}`, null, suf); }
+  if (p.colors && p.colors.length){
+    p.colors.forEach(c => {
+      const cData = Object.assign({}, c);
+      if (!cData.sizeStocks && Object.keys(legacySizeStocks).length) cData.sizeStocks = legacySizeStocks;
+      addColorRow(`colorRows_${suf}`, cData, suf);
+    });
+  } else {
+    addColorRow(`colorRows_${suf}`, null, suf);
+  }
   document.getElementById(`f_cardcolor_${suf}`).value = p.cardColor || '#f4f1ec';
   document.getElementById(`f_desc_${suf}`).value = p.desc || '';
   const dt = p.descTranslations || {};
@@ -775,13 +774,13 @@ function renderStockList(){
   const wrap = document.getElementById('stockList');
   if (allProducts.length === 0){ wrap.innerHTML = '<p class="hint">Пока нет товаров</p>'; return; }
   wrap.innerHTML = allProducts.map(p => {
-    let breakdownHTML;
-    if ((p.type === 'top' || p.type === 'bottom') && p.sizes && p.sizes.length && typeof p.sizes[0] === 'object'){
-      breakdownHTML = p.sizes.map(s => `<div class="stock-item ${Number(s.stock||0)<=0?'zero':''}"><span>${s.size}</span><span>${s.stock||0} шт</span></div>`).join('');
-    } else {
-      const colors = (p.colors && p.colors.length) ? p.colors : [{name:'Стандарт', stock:p.stock||0}];
-      breakdownHTML = colors.map(c => `<div class="stock-item ${Number(c.stock||0)<=0?'zero':''}"><span>${c.name}</span><span>${c.stock||0} шт</span></div>`).join('');
-    }
+    const colors = (p.colors && p.colors.length) ? p.colors : [{name:'Стандарт', stock:p.stock||0}];
+    const breakdownHTML = colors.map(c => {
+      if (c.sizeStocks && Object.keys(c.sizeStocks).length){
+        return Object.entries(c.sizeStocks).map(([size, stock]) => `<div class="stock-item ${Number(stock||0)<=0?'zero':''}"><span>${c.name} · ${size}</span><span>${stock||0} шт</span></div>`).join('');
+      }
+      return `<div class="stock-item ${Number(c.stock||0)<=0?'zero':''}"><span>${c.name}</span><span>${c.stock||0} шт</span></div>`;
+    }).join('');
     return `<div style="margin-bottom:10px;">
       <div style="font-weight:700; font-size:13px; margin-bottom:4px;">${p.name}</div>
       ${breakdownHTML}
