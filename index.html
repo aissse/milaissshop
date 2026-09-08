@@ -734,7 +734,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-14";
+  const CURRENT_VERSION = "20260908-15";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -758,9 +758,9 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
-const ADMIN_CHAT_ID = "6620851909";
-const NOTIFY_BOT_USERNAME = "@MilaisssOthers_bot";
+const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
+const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
+const NOTIFY_BOT_USERNAME = "ВСТАВЬ_USERNAME_БОТА_БЕЗ_@";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -1637,20 +1637,56 @@ function openProduct(id){
 
   const carousel = document.getElementById('detailCarousel');
   const dotsWrap = document.getElementById('detailDots');
-  carousel.innerHTML = ''; dotsWrap.innerHTML = '';
-  const imagesList = colors.map(c => c.image || currentProduct.image || '');
-  colors.forEach((c, idx) => {
-    const img = imagesList[idx];
-    const slide = document.createElement('div');
-    slide.className = 'slide';
-    if (img){ slide.style.backgroundImage = `url('${img}')`; slide.onclick = () => openLightbox(imagesList, selectedColorIdx); }
-    else { slide.textContent = currentProduct.emoji || '👟'; }
-    carousel.appendChild(slide);
-    const dot = document.createElement('span');
-    if (idx === 0) dot.className = 'on';
-    dotsWrap.appendChild(dot);
-  });
-  carousel.scrollLeft = 0;
+  const thumbRail = document.getElementById('thumbRail');
+
+  function getColorImages(c){
+    if (c && c.images && c.images.length) return c.images;
+    if (c && c.image) return [c.image];
+    return currentProduct.image ? [currentProduct.image] : [];
+  }
+
+  function updateActivePhoto(photoIdx){
+    document.querySelectorAll('#detailDots span').forEach((el,i) => el.classList.toggle('on', i===photoIdx));
+    document.querySelectorAll('#thumbRail .thumb-item').forEach((el,i) => el.classList.toggle('active', i===photoIdx));
+  }
+
+  function scrollToPhoto(photoIdx){
+    carousel.scrollTo({ left: photoIdx * carousel.clientWidth, behavior: 'smooth' });
+    updateActivePhoto(photoIdx);
+  }
+
+  let currentGalleryImages = [];
+  function renderColorGallery(colorIdx){
+    const c = colors[colorIdx];
+    currentGalleryImages = getColorImages(c);
+    const list = currentGalleryImages.length ? currentGalleryImages : [''];
+    carousel.innerHTML = ''; dotsWrap.innerHTML = ''; thumbRail.innerHTML = '';
+    list.forEach((img, i) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+      if (img){ slide.style.backgroundImage = `url('${img}')`; slide.onclick = () => openLightbox(list, i); }
+      else { slide.textContent = currentProduct.emoji || '👟'; }
+      carousel.appendChild(slide);
+
+      const dot = document.createElement('span');
+      if (i === 0) dot.className = 'on';
+      dotsWrap.appendChild(dot);
+
+      const thumbItem = document.createElement('div');
+      thumbItem.className = 'thumb-item' + (i===0 ? ' active' : '');
+      if (img) thumbItem.style.backgroundImage = `url('${img}')`;
+      thumbItem.onclick = () => scrollToPhoto(i);
+      thumbRail.appendChild(thumbItem);
+    });
+    carousel.scrollLeft = 0;
+  }
+  carousel.onscroll = () => {
+    clearTimeout(carousel._t);
+    carousel._t = setTimeout(() => {
+      const i = Math.round(carousel.scrollLeft / carousel.clientWidth);
+      updateActivePhoto(i);
+    }, 80);
+  };
 
   const detailLayout = document.getElementById('detailLayout');
   const isTopLayout = currentProduct.type === 'top';
@@ -1663,16 +1699,6 @@ function openProduct(id){
   } else {
     detailBadge.style.display = 'none';
   }
-
-  const thumbRail = document.getElementById('thumbRail');
-  thumbRail.innerHTML = '';
-  imagesList.forEach((img, idx) => {
-    const item = document.createElement('div');
-    item.className = 'thumb-item' + (idx === 0 ? ' active' : '');
-    if (img) item.style.backgroundImage = `url('${img}')`;
-    item.onclick = () => scrollToSlide(idx);
-    thumbRail.appendChild(item);
-  });
 
   updateDetailFavIcon();
   updateReviewsSummary();
@@ -1706,27 +1732,15 @@ function openProduct(id){
     }
   }
 
-  function updateActiveColor(idx){
+  function selectColor(idx){
     selectedColorIdx = idx;
     document.querySelectorAll('.color-dot').forEach((el,i) => el.classList.toggle('active', i===idx));
-    document.querySelectorAll('#detailDots span').forEach((el,i) => el.classList.toggle('on', i===idx));
-    document.querySelectorAll('#thumbRail .thumb-item').forEach((el,i) => el.classList.toggle('active', i===idx));
     document.getElementById('colorLabel').textContent = getTranslatedColorName(colors[idx]);
+    renderColorGallery(idx);
     refreshStockUI(idx);
   }
 
-  function scrollToSlide(idx){
-    carousel.scrollTo({ left: idx * carousel.clientWidth, behavior: 'smooth' });
-    updateActiveColor(idx);
-  }
-  carousel.onscroll = () => {
-    clearTimeout(carousel._t);
-    carousel._t = setTimeout(() => {
-      const idx = Math.round(carousel.scrollLeft / carousel.clientWidth);
-      if (idx !== selectedColorIdx && colors[idx]) updateActiveColor(idx);
-    }, 80);
-  };
-
+  renderColorGallery(0);
   refreshStockUI(0);
 
   const sizeRow = document.getElementById('sizeRow');
@@ -1757,7 +1771,7 @@ function openProduct(id){
     el.className = 'color-dot' + (idx===0 ? ' active' : '') + (oos ? ' oos' : '');
     el.style.background = c.hex;
     el.title = getTranslatedColorName(c);
-    el.onclick = () => scrollToSlide(idx);
+    el.onclick = () => selectColor(idx);
     colorRow.appendChild(el);
   });
 
