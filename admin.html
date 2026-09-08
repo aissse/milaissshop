@@ -563,11 +563,12 @@ function collectSizeData(suf){
 }
 
 function addColorRow(containerId, data, suf){
-  data = data || { name: '', hex: '#8a8479', image: '', stock: 0, nameTranslations: {} };
+  data = data || { name: '', hex: '#8a8479', images: [], stock: 0, nameTranslations: {} };
   const tr = data.nameTranslations || {};
   const trStr = ['en','uz','tr','az'].map(l => tr[l] ? `${l}:${tr[l]}` : '').filter(Boolean).join(', ');
   const typeConfig = suf ? PRODUCT_TYPES.find(t => t.key === suf) : null;
   const hideStock = !!(typeConfig && typeConfig.sizeMode === 'select');
+  const existingImages = (data.images && data.images.length) ? data.images : (data.image ? [data.image] : []);
   const row = document.createElement('div');
   row.className = 'color-row-block';
   row.innerHTML = `
@@ -575,10 +576,11 @@ function addColorRow(containerId, data, suf){
       <input type="color" class="c-hex" value="${data.hex || '#8a8479'}">
       <input type="text" class="c-name" placeholder="Название (рус)" value="${(data.name||'').replace(/"/g,'&quot;')}" style="max-width:100px;">
       ${hideStock ? '' : `<input type="number" class="c-stock" placeholder="Кол-во" value="${data.stock || 0}" style="max-width:64px;">`}
-      <input type="url" class="c-image" placeholder="Фото цвета (необязательно)" value="${(data.image||'').replace(/"/g,'&quot;')}">
       <span class="rm" onclick="this.closest('.color-row-block').remove()">✕</span>
     </div>
-    <input type="text" class="c-name-tr" placeholder="Переводы: en:Gray, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}">
+    <label style="margin:6px 0 4px;">Фото этого цвета (по одной ссылке на строке — можно несколько)</label>
+    <textarea class="c-images" rows="3" placeholder="https://...&#10;https://...">${existingImages.join('\n')}</textarea>
+    <input type="text" class="c-name-tr" placeholder="Переводы: en:Gray, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}" style="margin-top:6px;">
     ${hideStock ? '<div class="hint" style="margin:2px 0 0;">Наличие для этого товара указывается по размерам выше.</div>' : ''}
   `;
   document.getElementById(containerId).appendChild(row);
@@ -590,13 +592,13 @@ function collectColors(containerId){
   rows.forEach(row => {
     const name = row.querySelector('.c-name').value.trim();
     const hex = row.querySelector('.c-hex').value;
-    const image = row.querySelector('.c-image').value.trim();
+    const images = row.querySelector('.c-images').value.split('\n').map(s => s.trim()).filter(Boolean);
     const stockInput = row.querySelector('.c-stock');
     const stock = stockInput ? (Number(stockInput.value) || 0) : 0;
     const trRaw = row.querySelector('.c-name-tr').value.trim();
     if (!name) return;
     const obj = { name, hex, stock };
-    if (image) obj.image = image;
+    if (images.length){ obj.images = images; obj.image = images[0]; }
     if (trRaw){
       const nameTranslations = {};
       trRaw.split(',').forEach(pair => {
