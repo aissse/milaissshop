@@ -734,7 +734,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-15";
+  const CURRENT_VERSION = "20260908-16";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1345,7 +1345,6 @@ let reviews = [];
 let cart = [];
 let currentProduct = null;
 let selectedSize = "";
-let selectedSizeStock = null;
 let selectedColorIdx = 0;
 let currentColors = [];
 
@@ -1578,6 +1577,13 @@ function getTranslatedColorName(c){
   return c.name || '';
 }
 
+function getSizeStock(product, color, sizeLabel){
+  if (!color) return Number((product && product.stock) || 0);
+  if (color.sizeStocks && Object.prototype.hasOwnProperty.call(color.sizeStocks, sizeLabel)) return color.sizeStocks[sizeLabel];
+  if (typeof color.stock === 'number') return color.stock;
+  return Number((product && product.stock) || 0);
+}
+
 function updateReviewsSummary(){
   const approved = reviews.filter(r => r.productId === currentProduct.id && r.approved);
   document.getElementById('reviewsLink').textContent = `${approved.length} ${t('reviewsWord')}`;
@@ -1628,12 +1634,19 @@ function openProduct(id){
   if (!currentProduct) return;
   renderPolicyAccordion();
   const rawSizes = (currentProduct.sizes && currentProduct.sizes.length) ? currentProduct.sizes : ["38","39","40","41","42","43"];
-  const sizeItems = rawSizes.map(s => (s && typeof s === 'object') ? s : { size: s, stock: null });
+  const sizeLabels = rawSizes.map(s => (s && typeof s === 'object') ? s.size : s);
   const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", hex:"#f4f1ec", stock: currentProduct.stock || 0}];
   currentColors = colors;
-  selectedSize = sizeItems[0] ? sizeItems[0].size : '';
-  selectedSizeStock = sizeItems[0] ? sizeItems[0].stock : null;
   selectedColorIdx = 0;
+
+  function getColorSizeStock(colorIdx, sizeLabel){
+    return getSizeStock(currentProduct, colors[colorIdx], sizeLabel);
+  }
+  function pickInitialSize(colorIdx){
+    const inStock = sizeLabels.find(l => getColorSizeStock(colorIdx, l) > 0);
+    return inStock !== undefined ? inStock : (sizeLabels[0] || '');
+  }
+  selectedSize = pickInitialSize(0);
 
   const carousel = document.getElementById('detailCarousel');
   const dotsWrap = document.getElementById('detailDots');
@@ -1710,13 +1723,8 @@ function openProduct(id){
   const stockNote = document.getElementById('stockNote');
   const addBtn = document.getElementById('addBtn');
 
-  function getEffectiveStock(idx){
-    if (selectedSizeStock !== null) return selectedSizeStock;
-    return (colors[idx] && typeof colors[idx].stock === 'number') ? colors[idx].stock : Number(currentProduct.stock || 0);
-  }
-
   function refreshStockUI(idx){
-    const colorStock = getEffectiveStock(idx);
+    const colorStock = getColorSizeStock(idx, selectedSize);
     if (colorStock <= 0){
       stockNote.textContent = `${t('outOfStock')} (${getTranslatedColorName(colors[idx])})`;
       stockNote.className = 'stock-note out';
@@ -1732,35 +1740,40 @@ function openProduct(id){
     }
   }
 
+  function renderSizeRow(idx){
+    const sizeRow = document.getElementById('sizeRow');
+    sizeRow.innerHTML = '';
+    sizeLabels.forEach(label => {
+      const el = document.createElement('div');
+      const stockForSize = getColorSizeStock(idx, label);
+      const oos = stockForSize <= 0;
+      el.className = 'size-pill' + (label === selectedSize ? ' active' : '') + (oos ? ' oos' : '');
+      el.textContent = label;
+      if (!oos){
+        el.onclick = () => {
+          selectedSize = label;
+          document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active'));
+          el.classList.add('active');
+          refreshStockUI(selectedColorIdx);
+        };
+      }
+      sizeRow.appendChild(el);
+    });
+  }
+
   function selectColor(idx){
     selectedColorIdx = idx;
     document.querySelectorAll('.color-dot').forEach((el,i) => el.classList.toggle('active', i===idx));
     document.getElementById('colorLabel').textContent = getTranslatedColorName(colors[idx]);
     renderColorGallery(idx);
+    if (getColorSizeStock(idx, selectedSize) <= 0) selectedSize = pickInitialSize(idx);
+    renderSizeRow(idx);
     refreshStockUI(idx);
   }
 
   renderColorGallery(0);
+  renderSizeRow(0);
   refreshStockUI(0);
-
-  const sizeRow = document.getElementById('sizeRow');
-  sizeRow.innerHTML = '';
-  sizeItems.forEach((item, idx) => {
-    const el = document.createElement('div');
-    const oos = item.stock !== null && item.stock <= 0;
-    el.className = 'size-pill' + (idx===0 ? ' active' : '') + (oos ? ' oos' : '');
-    el.textContent = item.size;
-    if (!oos){
-      el.onclick = () => {
-        selectedSize = item.size;
-        selectedSizeStock = item.stock;
-        document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active'));
-        el.classList.add('active');
-        refreshStockUI(selectedColorIdx);
-      };
-    }
-    sizeRow.appendChild(el);
-  });
 
   const colorRow = document.getElementById('colorRow');
   colorRow.innerHTML = '';
@@ -1783,7 +1796,7 @@ function addToCart(){
   if (!currentProduct) return;
   const chosen = currentColors[selectedColorIdx];
   if (!chosen) return;
-  const stockLimit = selectedSizeStock !== null ? selectedSizeStock : (typeof chosen.stock === 'number' ? chosen.stock : Number(currentProduct.stock||0));
+  const stockLimit = getSizeStock(currentProduct, chosen, selectedSize);
   if (stockLimit <= 0) return;
   const colorName = chosen.name;
   const existing = cart.find(c => c.productId === currentProduct.id && c.size === selectedSize && c.colorName === colorName);
