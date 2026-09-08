@@ -734,7 +734,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-18";
+  const CURRENT_VERSION = "20260908-19";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1038,12 +1038,17 @@ function renderCatPills(){
   const wrap = document.getElementById('catPillsRow');
   if (!wrap) return;
   const items = [{ key: 'Все' }, ...CATEGORIES.map(c => ({ key: c }))];
-  wrap.innerHTML = items.map((it, i) => `
-    <div class="cat-pill ${activeCategory===it.key?'active':''}" onclick="selectMainCategory('${it.key.replace(/'/g,"\\'")}')">
-      <span class="icon" style="${catIconColorFor(it.key) ? `color:${catIconColorFor(it.key)};` : ''}">${catIconFor(it.key, i)}</span>
+  wrap.innerHTML = items.map((it, i) => {
+    const iconColor = catIconColorFor(it.key);
+    const borderStyle = iconColor ? `border-color:${iconColor}; border-width:2px;` : '';
+    const glyphStyle = iconColor ? `color:${iconColor};` : '';
+    return `
+    <div class="cat-pill ${activeCategory===it.key?'active':''}" style="${borderStyle}" onclick="selectMainCategory('${it.key.replace(/'/g,"\\'")}')">
+      <span class="icon" style="${glyphStyle}">${catIconFor(it.key, i)}</span>
       <span class="label">${translateCategory(it.key)}</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function selectMainCategory(cat){
@@ -1230,12 +1235,18 @@ function applyPriceFilter(){
 function renderShopAllCats(){
   const wrap = document.getElementById('shopAllCats');
   const items = ['Все', ...CATEGORIES];
-  wrap.innerHTML = items.map((cat, i) => `
-    <div class="cat-pill-mini ${shopAllCategory===cat?'active':''}" onclick="selectShopAllCat('${cat.replace(/'/g,"\\'")}')">
-      ${catIconFor(cat, i) ? `<span class="icon" style="${catIconColorFor(cat) ? `color:${catIconColorFor(cat)};` : ''}">${catIconFor(cat, i)}</span>` : ''}
+  wrap.innerHTML = items.map((cat, i) => {
+    const iconColor = catIconColorFor(cat);
+    const borderStyle = iconColor ? `border-color:${iconColor}; border-width:2px;` : '';
+    const glyphStyle = iconColor ? `color:${iconColor};` : '';
+    const icon = catIconFor(cat, i);
+    return `
+    <div class="cat-pill-mini ${shopAllCategory===cat?'active':''}" style="${borderStyle}" onclick="selectShopAllCat('${cat.replace(/'/g,"\\'")}')">
+      ${icon ? `<span class="icon" style="${glyphStyle}">${icon}</span>` : ''}
       <span class="label">${translateCategory(cat)}</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 function selectShopAllCat(cat){
   shopAllCategory = cat;
