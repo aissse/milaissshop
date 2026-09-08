@@ -300,10 +300,10 @@
   .faq-section{ padding:10px 20px 30px; }
   .faq-item{ border-bottom:1px solid var(--line); }
   .faq-q{ display:flex; justify-content:space-between; align-items:center; padding:16px 0; cursor:pointer; font-size:14px; font-weight:600; }
-  .faq-q .chev{ transition:transform .2s; color:var(--muted); font-size:14px; }
+  .faq-q .chev{ transition:transform .35s cubic-bezier(.4,0,.2,1); color:var(--muted); font-size:14px; }
   .faq-item.open .faq-q .chev{ transform:rotate(180deg); }
-  .faq-a{ max-height:0; overflow:hidden; transition:max-height .25s ease; font-size:13px; color:#555; line-height:1.6; }
-  .faq-item.open .faq-a{ max-height:200px; padding-bottom:16px; }
+  .faq-a{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.4,0,.2,1), padding-bottom .45s cubic-bezier(.4,0,.2,1); font-size:13px; color:#555; line-height:1.6; padding-bottom:0; }
+  .faq-item.open .faq-a{ max-height:500px; padding-bottom:16px; }
 
   .hero-photo{ margin:0 20px 0; border-radius:20px; aspect-ratio:16/11; background:linear-gradient(135deg,#1a1a1a 0%,#2b2b2b 100%); background-size:cover; background-position:center; position:relative; display:flex; align-items:flex-end; overflow:hidden; }
   .hero-photo::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.55), transparent 60%); }
@@ -344,10 +344,10 @@
   .policy-accordion{ margin-top:10px; border-top:1px solid var(--line); }
   .policy-item{ border-bottom:1px solid var(--line); }
   .policy-q{ display:flex; justify-content:space-between; align-items:center; padding:14px 0; cursor:pointer; font-size:13px; font-weight:600; }
-  .policy-q .chev{ transition:transform .2s; color:var(--muted); }
+  .policy-q .chev{ transition:transform .35s cubic-bezier(.4,0,.2,1); color:var(--muted); }
   .policy-item.open .policy-q .chev{ transform:rotate(180deg); }
-  .policy-a{ max-height:0; overflow:hidden; transition:max-height .25s ease; font-size:12px; color:#555; line-height:1.6; }
-  .policy-item.open .policy-a{ max-height:300px; padding-bottom:14px; }
+  .policy-a{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.4,0,.2,1), padding-bottom .45s cubic-bezier(.4,0,.2,1); font-size:12px; color:#555; line-height:1.6; padding-bottom:0; }
+  .policy-item.open .policy-a{ max-height:500px; padding-bottom:14px; }
 
   .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
   .modal-overlay.open{ display:flex; }
@@ -734,7 +734,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-16";
+  const CURRENT_VERSION = "20260908-17";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -954,7 +954,8 @@ function applyLang(){
   renderFavGrid();
   renderLegalFooter();
   if (!faqCustomized){ faqItems = defaultFaqItems(); renderFaq(); }
-  if (!policyCustomized){ policyItems = defaultPolicyItems(); if (currentProduct) renderPolicyAccordion(); }
+  if (!policyCustomized){ policyItems = defaultPolicyItems(); }
+  if (currentProduct) renderPolicyAccordion();
   if (customHero.tag) document.getElementById('heroTagText').textContent = customHero.tag;
   if (customHero.title) document.getElementById('heroTitleText').textContent = customHero.title;
   if (customHero.btn) document.getElementById('heroBtnText').textContent = customHero.btn;
@@ -1107,23 +1108,35 @@ function defaultFaqItems(){
 }
 function defaultPolicyItems(){
   return [
-    { q: t('policyReturn'), a: t('policyReturnText') },
-    { q: t('policyDelivery'), a: t('policyDeliveryText') },
-    { q: t('policyCare'), a: t('policyCareText') }
+    { key: 'return', q: t('policyReturn'), a: t('policyReturnText') },
+    { key: 'delivery', q: t('policyDelivery'), a: t('policyDeliveryText') },
+    { key: 'care', q: t('policyCare'), a: t('policyCareText') }
   ];
 }
 let faqItems = defaultFaqItems();
 let policyItems = defaultPolicyItems();
 let socialLinks = {};
 
+function getTranslatedPolicyOverride(product, baseKey){
+  if (!product) return '';
+  const trField = product[baseKey + 'Translations'];
+  if (trField && trField[lang]) return trField[lang];
+  return product[baseKey] || '';
+}
+
 function renderPolicyAccordion(){
   const wrap = document.getElementById('policyAccordion');
-  const items = policyItems.map(p => {
+  const POLICY_KEY_ORDER = ['return','delivery','care'];
+  const POLICY_FIELD_MAP = { return: 'returnPolicy', delivery: 'deliveryPolicy', care: 'careInstructions' };
+  const items = policyItems.map((p, idx) => {
     const item = { q: p.q, a: p.a };
     if (currentProduct){
-      if (p.q === 'Возврат' && currentProduct.returnPolicy) item.a = currentProduct.returnPolicy;
-      if (p.q === 'Доставка' && currentProduct.deliveryPolicy) item.a = currentProduct.deliveryPolicy;
-      if (p.q === 'Уход за товаром' && currentProduct.careInstructions) item.a = currentProduct.careInstructions;
+      const key = p.key || POLICY_KEY_ORDER[idx];
+      const field = POLICY_FIELD_MAP[key];
+      if (field){
+        const override = getTranslatedPolicyOverride(currentProduct, field);
+        if (override) item.a = override;
+      }
     }
     return item;
   });
