@@ -734,7 +734,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-17";
+  const CURRENT_VERSION = "20260908-18";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1011,6 +1011,7 @@ let paymentClickInfo = '';
 let btsBranches = [];
 let categoryImages = {};
 let categoryIcons = {};
+let categoryIconColors = {};
 const DEFAULT_CAT_ICONS = ['🔥','🎁','👜','🎒','✨','🛍️','⭐','💎'];
 let customHero = {};
 let categoryTranslations = {};
@@ -1028,6 +1029,9 @@ function catIconFor(key, idx){
   if (key === 'Все') return categoryIcons['Все'] || '';
   return categoryIcons[key] || DEFAULT_CAT_ICONS[idx % DEFAULT_CAT_ICONS.length];
 }
+function catIconColorFor(key){
+  return categoryIconColors[key] || '';
+}
 
 /* ---------- category pill buttons (home screen) ---------- */
 function renderCatPills(){
@@ -1036,7 +1040,7 @@ function renderCatPills(){
   const items = [{ key: 'Все' }, ...CATEGORIES.map(c => ({ key: c }))];
   wrap.innerHTML = items.map((it, i) => `
     <div class="cat-pill ${activeCategory===it.key?'active':''}" onclick="selectMainCategory('${it.key.replace(/'/g,"\\'")}')">
-      <span class="icon">${catIconFor(it.key, i)}</span>
+      <span class="icon" style="${catIconColorFor(it.key) ? `color:${catIconColorFor(it.key)};` : ''}">${catIconFor(it.key, i)}</span>
       <span class="label">${translateCategory(it.key)}</span>
     </div>
   `).join('');
@@ -1228,7 +1232,7 @@ function renderShopAllCats(){
   const items = ['Все', ...CATEGORIES];
   wrap.innerHTML = items.map((cat, i) => `
     <div class="cat-pill-mini ${shopAllCategory===cat?'active':''}" onclick="selectShopAllCat('${cat.replace(/'/g,"\\'")}')">
-      ${catIconFor(cat, i) ? `<span class="icon">${catIconFor(cat, i)}</span>` : ''}
+      ${catIconFor(cat, i) ? `<span class="icon" style="${catIconColorFor(cat) ? `color:${catIconColorFor(cat)};` : ''}">${catIconFor(cat, i)}</span>` : ''}
       <span class="label">${translateCategory(cat)}</span>
     </div>
   `).join('');
@@ -1454,6 +1458,7 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   }
   if (data.categories && data.categories.length){ CATEGORIES = data.categories; }
   categoryIcons = data.categoryIcons || {};
+  categoryIconColors = data.categoryIconColors || {};
   renderCatPills();
   renderMainGrid();
   paymentCardInfo = data.paymentCardInfo || '';
