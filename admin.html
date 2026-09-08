@@ -521,12 +521,27 @@ function productFormCardHTML(type){
 
       <label>Возврат (для этого товара; пусто = общий текст из "Оформление")</label>
       <textarea id="f_returnPolicy_${suf}" rows="2" placeholder="Например: этот товар не подлежит возврату"></textarea>
+      <textarea id="f_returnPolicy_en_${suf}" rows="2" placeholder="English" style="margin-top:6px;"></textarea>
+      <textarea id="f_returnPolicy_uz_${suf}" rows="2" placeholder="Oʻzbekcha" style="margin-top:6px;"></textarea>
+      <textarea id="f_returnPolicy_tr_${suf}" rows="2" placeholder="Türkçe" style="margin-top:6px;"></textarea>
+      <textarea id="f_returnPolicy_az_${suf}" rows="2" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
+      <div class="hint">Переводы необязательны — без них покупатель на других языках увидит общий (переведённый) текст из "Оформление".</div>
 
       <label>Доставка (для этого товара; пусто = общий текст)</label>
       <textarea id="f_deliveryPolicy_${suf}" rows="2" placeholder="Особые условия доставки этого товара"></textarea>
+      <textarea id="f_deliveryPolicy_en_${suf}" rows="2" placeholder="English" style="margin-top:6px;"></textarea>
+      <textarea id="f_deliveryPolicy_uz_${suf}" rows="2" placeholder="Oʻzbekcha" style="margin-top:6px;"></textarea>
+      <textarea id="f_deliveryPolicy_tr_${suf}" rows="2" placeholder="Türkçe" style="margin-top:6px;"></textarea>
+      <textarea id="f_deliveryPolicy_az_${suf}" rows="2" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
+      <div class="hint">Переводы необязательны — без них покупатель на других языках увидит общий (переведённый) текст из "Оформление".</div>
 
       <label>Уход за товаром (для этого товара; пусто = общий текст)</label>
       <textarea id="f_careInstructions_${suf}" rows="2" placeholder="Как ухаживать именно за этим товаром"></textarea>
+      <textarea id="f_careInstructions_en_${suf}" rows="2" placeholder="English" style="margin-top:6px;"></textarea>
+      <textarea id="f_careInstructions_uz_${suf}" rows="2" placeholder="Oʻzbekcha" style="margin-top:6px;"></textarea>
+      <textarea id="f_careInstructions_tr_${suf}" rows="2" placeholder="Türkçe" style="margin-top:6px;"></textarea>
+      <textarea id="f_careInstructions_az_${suf}" rows="2" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
+      <div class="hint">Переводы необязательны — без них покупатель на других языках увидит общий (переведённый) текст из "Оформление".</div>
 
       <button class="btn" onclick="saveProduct('${suf}')" id="saveBtn_${suf}">Добавить товар</button>
       <button class="btn secondary" onclick="resetForm('${suf}')" id="cancelBtn_${suf}" style="display:none;">Отменить редактирование</button>
@@ -654,10 +669,21 @@ function saveProduct(type){
   const returnPolicy = document.getElementById(`f_returnPolicy_${suf}`).value.trim();
   const deliveryPolicy = document.getElementById(`f_deliveryPolicy_${suf}`).value.trim();
   const careInstructions = document.getElementById(`f_careInstructions_${suf}`).value.trim();
+  const returnPolicyTranslations = {};
+  const deliveryPolicyTranslations = {};
+  const careInstructionsTranslations = {};
+  ['en','uz','tr','az'].forEach(l => {
+    const rv = document.getElementById(`f_returnPolicy_${l}_${suf}`).value.trim();
+    if (rv) returnPolicyTranslations[l] = rv;
+    const dv = document.getElementById(`f_deliveryPolicy_${l}_${suf}`).value.trim();
+    if (dv) deliveryPolicyTranslations[l] = dv;
+    const cv = document.getElementById(`f_careInstructions_${l}_${suf}`).value.trim();
+    if (cv) careInstructionsTranslations[l] = cv;
+  });
 
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
-  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, type: suf };
+  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
   if (editingId && editingType === suf){ db.collection('products').doc(editingId).update(data).then(() => resetForm(suf)); }
   else { db.collection('products').add(data).then(() => resetForm(suf)); }
 }
@@ -680,6 +706,11 @@ function resetForm(type){
   document.getElementById(`f_returnPolicy_${suf}`).value = '';
   document.getElementById(`f_deliveryPolicy_${suf}`).value = '';
   document.getElementById(`f_careInstructions_${suf}`).value = '';
+  ['en','uz','tr','az'].forEach(l => {
+    document.getElementById(`f_returnPolicy_${l}_${suf}`).value = '';
+    document.getElementById(`f_deliveryPolicy_${l}_${suf}`).value = '';
+    document.getElementById(`f_careInstructions_${l}_${suf}`).value = '';
+  });
   document.getElementById(`saveBtn_${suf}`).textContent = 'Добавить товар';
   document.getElementById(`cancelBtn_${suf}`).style.display = 'none';
 }
@@ -726,6 +757,14 @@ function editProduct(id, p){
   document.getElementById(`f_returnPolicy_${suf}`).value = p.returnPolicy || '';
   document.getElementById(`f_deliveryPolicy_${suf}`).value = p.deliveryPolicy || '';
   document.getElementById(`f_careInstructions_${suf}`).value = p.careInstructions || '';
+  const rpt = p.returnPolicyTranslations || {};
+  const dpt = p.deliveryPolicyTranslations || {};
+  const cit = p.careInstructionsTranslations || {};
+  ['en','uz','tr','az'].forEach(l => {
+    document.getElementById(`f_returnPolicy_${l}_${suf}`).value = rpt[l] || '';
+    document.getElementById(`f_deliveryPolicy_${l}_${suf}`).value = dpt[l] || '';
+    document.getElementById(`f_careInstructions_${l}_${suf}`).value = cit[l] || '';
+  });
   document.getElementById(`saveBtn_${suf}`).textContent = 'Сохранить изменения';
   document.getElementById(`cancelBtn_${suf}`).style.display = 'block';
   switchTab('products');
