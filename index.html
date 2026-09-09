@@ -734,7 +734,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-20";
+  const CURRENT_VERSION = "20260908-23";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1961,6 +1961,55 @@ function confirmPayment(){
 
 const PAY_METHOD_LABELS = { payme:'Payme', click:'Click', card:'Карта' };
 
+function decrementStockForOrder(orderItems){
+  const productIds = [...new Set(orderItems.map(it => it.productId).filter(Boolean))];
+  if (!productIds.length) return Promise.resolve();
+  const refs = productIds.map(id => db.collection('products').doc(id));
+  return db.runTransaction(tx => {
+    return Promise.all(refs.map(ref => tx.get(ref))).then(docs => {
+      const dataById = {};
+      docs.forEach((doc, i) => { dataById[productIds[i]] = doc.exists ? JSON.parse(JSON.stringify(doc.data())) : null; });
+
+      const updates = {};
+      for (const productId of productIds){
+        const data = dataById[productId];
+        if (!data) continue;
+        const items = orderItems.filter(it => it.productId === productId);
+        const colors = data.colors || [];
+        if (colors.length){
+          items.forEach(it => {
+            const qty = it.qty || 0;
+            const color = colors.find(c => c.name === it.colorName);
+            if (!color) throw new Error('OUT_OF_STOCK');
+            if (color.sizeStocks && Object.prototype.hasOwnProperty.call(color.sizeStocks, it.size)){
+              const cur = Number(color.sizeStocks[it.size]) || 0;
+              if (cur < qty) throw new Error('OUT_OF_STOCK');
+              color.sizeStocks[it.size] = cur - qty;
+              color.stock = Object.values(color.sizeStocks).reduce((a,b) => a + (Number(b)||0), 0);
+            } else {
+              const cur = Number(color.stock) || 0;
+              if (cur < qty) throw new Error('OUT_OF_STOCK');
+              color.stock = cur - qty;
+            }
+          });
+          updates[productId] = { colors, stock: colors.reduce((s,c) => s + (Number(c.stock)||0), 0) };
+        } else {
+          let stock = Number(data.stock || 0);
+          items.forEach(it => {
+            const qty = it.qty || 0;
+            if (stock < qty) throw new Error('OUT_OF_STOCK');
+            stock -= qty;
+          });
+          updates[productId] = { stock };
+        }
+      }
+      productIds.forEach(id => {
+        if (updates[id]) tx.update(db.collection('products').doc(id), updates[id]);
+      });
+    });
+  });
+}
+
 function finalizeOrder(phone, branch){
   let total = 0;
   let text = "Здравствуйте! Хочу оформить заказ:\n\n";
@@ -1976,17 +2025,29 @@ function finalizeOrder(phone, branch){
   const customerId = getCustomerId();
   const customerName = getCustomerName();
 
-  db.collection('orders').add({
-    customerId, customerName, items: orderItems, total,
-    btsBranch: branch, phone, paymentMethod: methodLabel,
-    status: 'Проверяется оплата', createdAt: Date.now()
-  });
+  const confirmBtn = document.getElementById('confirmPaymentBtn');
+  if (confirmBtn) confirmBtn.disabled = true;
 
-  cart = []; updateCartBadge();
-  document.getElementById('phoneInput').value = '';
-
-  notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text).finally(() => {
-    document.getElementById('paymentModal').classList.add('open');
+  decrementStockForOrder(orderItems).then(() => {
+    return db.collection('orders').add({
+      customerId, customerName, items: orderItems, total,
+      btsBranch: branch, phone, paymentMethod: methodLabel,
+      status: 'Проверяется оплата', createdAt: Date.now()
+    });
+  }).then(() => {
+    cart = []; updateCartBadge();
+    document.getElementById('phoneInput').value = '';
+    notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text).finally(() => {
+      document.getElementById('paymentModal').classList.add('open');
+    });
+  }).catch(err => {
+    if (err && err.message === 'OUT_OF_STOCK'){
+      showToast('К сожалению, кто-то только что забрал последний товар. Обновите корзину.');
+    } else {
+      showToast('Не удалось оформить заказ, попробуйте ещё раз');
+    }
+  }).finally(() => {
+    if (confirmBtn) confirmBtn.disabled = false;
   });
 }
 
