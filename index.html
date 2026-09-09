@@ -275,13 +275,13 @@
   .pmr-label{ flex:1; font-weight:700; font-size:14px; }
   .pmr-badge{ padding:6px 10px; border-radius:8px; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px; border:1px solid var(--icon-border-color, transparent); }
   .card-badge{ background:var(--stone); color:var(--ink); border:1px solid var(--line); }
-  .pmr-details{ max-height:0; overflow:hidden; transition:max-height .3s ease; background:var(--stone); }
-  .pmr-wrap.open .pmr-details{ max-height:220px; padding:14px 16px; border-bottom:1px solid var(--line); font-size:13px; line-height:1.6; }
+  .pmr-details{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.4,0,.2,1), padding .45s cubic-bezier(.4,0,.2,1); background:var(--stone); padding:0 16px; }
+  .pmr-wrap.open .pmr-details{ max-height:260px; padding:14px 16px; border-bottom:1px solid var(--line); font-size:13px; line-height:1.6; }
   .pmr-details input{ width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 12px; font-size:13px; margin-bottom:8px; background:#fff; color:var(--muted); }
   .pmr-details input:disabled{ cursor:not-allowed; opacity:.7; }
   .pmr-soon-note{ font-size:11px; color:var(--muted); text-align:center; }
-  .pmr-note{ font-size:12px; padding:0 16px; color:var(--ink); max-height:0; overflow:hidden; }
-  .pmr-wrap.open .pmr-note{ max-height:80px; padding:10px 16px 14px; }
+  .pmr-note{ font-size:12px; padding:0 16px; color:var(--ink); max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.4,0,.2,1), padding .45s cubic-bezier(.4,0,.2,1); }
+  .pmr-wrap.open .pmr-note{ max-height:120px; padding:10px 16px 14px; }
   .pmr-cards{ display:flex; gap:6px; align-items:center; }
   .pmr-cards svg{ border-radius:4px; }
 
@@ -594,10 +594,10 @@
     </div>
 
 
-    <div class="pay-field" style="margin-bottom:16px;">
+    <div class="pay-field" id="phoneFieldBlock" style="margin-bottom:16px;">
       <label class="block-label" style="margin-top:0;">Ваш номер телефона</label>
       <input type="text" id="phoneInput" placeholder="+998 90 123 45 67">
-      <div class="pay-note">Нужен, чтобы почта могла прислать вам уведомление о посылке.</div>
+      <div class="pay-note">Нужен, чтобы курьер мог с вами связаться.</div>
     </div>
 
     <div class="pay-field" style="margin-bottom:16px;">
@@ -704,8 +704,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="registerModal">
-  <div class="modal-box" style="text-align:left; max-width:360px; position:relative;">
+<div class="modal-overlay" id="registerModal" onclick="closeRegisterModal()">
+  <div class="modal-box" style="text-align:left; max-width:360px; position:relative;" onclick="event.stopPropagation()">
     <span class="modal-close-x" onclick="closeRegisterModal()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
     <h3 class="display" style="text-align:center; margin-bottom:4px;">Регистрация</h3>
     <p style="text-align:center; font-size:12px; color:#777; margin-bottom:16px;">Нужна, чтобы оформить заказ и получать уведомления о доставке</p>
@@ -717,7 +717,21 @@
     <input type="text" id="regLastName" class="reg-input" placeholder="Фамилия">
 
     <label class="block-label">Номер телефона</label>
-    <input type="text" id="regPhone" class="reg-input" placeholder="+998 90 123 45 67">
+    <div style="display:flex; gap:8px; margin-bottom:6px;">
+      <div class="icon-btn" id="regCountryBtn" style="width:auto; padding:0 10px; gap:5px;" onclick="toggleRegCountryMenu(event)">
+        <span id="regCountryFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;"></span>
+        <span id="regCountryCodeLabel" style="font-size:13px; font-weight:700; white-space:nowrap;">+998</span>
+        <span style="font-size:10px; line-height:1;">⌄</span>
+        <div class="lang-menu" id="regCountryMenu">
+          <div onclick="setRegCountry('uz','998')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Oʻzbekiston +998</div>
+          <div onclick="setRegCountry('ru','7')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/ru.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Россия +7</div>
+          <div onclick="setRegCountry('tr','90')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/tr.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Türkiye +90</div>
+          <div onclick="setRegCountry('az','994')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/az.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Azərbaycan +994</div>
+          <div onclick="setRegCountry('gb','44')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> United Kingdom +44</div>
+        </div>
+      </div>
+      <input type="tel" inputmode="numeric" id="regPhone" class="reg-input" placeholder="90 123 45 67" style="flex:1; margin-bottom:0;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    </div>
 
     <label class="block-label">Выберите аватар</label>
     <div class="avatar-grid" id="avatarGrid"></div>
@@ -735,7 +749,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-25";
+  const CURRENT_VERSION = "20260908-27";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -807,10 +821,36 @@ function requireRegistration(action){
   openRegisterModal();
 }
 
+let regCountry = { code: 'uz', calling: '998' };
+function toggleRegCountryMenu(e){
+  if (e) e.stopPropagation();
+  document.getElementById('regCountryMenu').classList.toggle('open');
+}
+function setRegCountry(code, calling){
+  regCountry = { code, calling };
+  document.getElementById('regCountryFlag').innerHTML = `<img src="https://flagcdn.com/w40/${code}.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;">`;
+  document.getElementById('regCountryCodeLabel').textContent = '+' + calling;
+  document.getElementById('regCountryMenu').classList.remove('open');
+}
+document.addEventListener('click', () => {
+  const m = document.getElementById('regCountryMenu');
+  if (m) m.classList.remove('open');
+});
+
 function openRegisterModal(){
   document.getElementById('regFirstName').value = customerProfile ? (customerProfile.firstName||'') : '';
   document.getElementById('regLastName').value = customerProfile ? (customerProfile.lastName||'') : '';
-  document.getElementById('regPhone').value = customerProfile ? (customerProfile.phone||'') : '';
+  const existingPhone = (customerProfile && customerProfile.phone) ? customerProfile.phone : '';
+  const digitsOnly = existingPhone.replace(/\D/g, '');
+  const knownCodes = [['uz','998'],['az','994'],['tr','90'],['gb','44'],['ru','7']];
+  const matched = knownCodes.find(([, calling]) => digitsOnly.startsWith(calling));
+  if (matched){
+    setRegCountry(matched[0], matched[1]);
+    document.getElementById('regPhone').value = digitsOnly.slice(matched[1].length);
+  } else {
+    setRegCountry('uz', '998');
+    document.getElementById('regPhone').value = digitsOnly;
+  }
   selectedAvatarUrl = customerProfile ? (customerProfile.avatarUrl||'') : '';
   renderAvatarGrid();
   document.getElementById('registerModal').classList.add('open');
@@ -831,12 +871,13 @@ function selectAvatar(url){
 function submitRegistration(){
   const firstName = document.getElementById('regFirstName').value.trim();
   const lastName = document.getElementById('regLastName').value.trim();
-  const phone = document.getElementById('regPhone').value.trim();
+  const phoneDigits = document.getElementById('regPhone').value.trim().replace(/\D/g, '');
   if (!firstName){ showToast('Укажите имя'); return; }
   if (!lastName){ showToast('Укажите фамилию'); return; }
-  if (!phone){ showToast('Укажите номер телефона'); return; }
+  if (!phoneDigits){ showToast('Укажите номер телефона'); return; }
   if (!selectedAvatarUrl){ showToast('Выберите аватар'); return; }
 
+  const phone = '+' + regCountry.calling + ' ' + phoneDigits;
   const profile = { firstName, lastName, phone, avatarUrl: selectedAvatarUrl, registeredAt: Date.now() };
   db.collection('customers').doc(getCustomerId()).set(profile, { merge: true }).then(() => {
     customerProfile = profile;
@@ -855,7 +896,7 @@ function renderProfileHeader(){
   el.innerHTML = `
     <div class="profile-header-card">
       <div class="profile-avatar" style="background-image:url('${customerProfile.avatarUrl||''}')" onclick="openRegisterModal()"></div>
-      <div>
+      <div style="cursor:pointer;" onclick="openRegisterModal()">
         <div class="profile-name">${customerProfile.firstName} ${customerProfile.lastName}</div>
         <div class="profile-phone">${customerProfile.phone}</div>
       </div>
@@ -1896,6 +1937,15 @@ function goToCheckoutFlow(){
   document.getElementById('btsSearchInput').value = '';
   document.getElementById('btsSelectedDisplay').style.display = 'none';
   document.getElementById('btsResults').innerHTML = '';
+
+  const phoneBlock = document.getElementById('phoneFieldBlock');
+  if (customerProfile && customerProfile.phone){
+    phoneBlock.style.display = 'none';
+    document.getElementById('phoneInput').value = customerProfile.phone;
+  } else {
+    phoneBlock.style.display = 'block';
+    document.getElementById('phoneInput').value = '';
+  }
 
   showScreen('checkoutFlow');
 }
