@@ -57,6 +57,12 @@
   .lang-menu div{ padding:10px 14px; font-size:13px; cursor:pointer; }
   .lang-menu div:hover{ background:var(--stone); }
 
+  .country-menu{ position:absolute; top:44px; left:0; background:var(--bg); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:80; min-width:84px; max-height:0; opacity:0; overflow:hidden; transform:translateY(-6px); transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .3s ease, transform .3s ease; pointer-events:none; }
+  .country-menu.open{ max-height:260px; opacity:1; transform:translateY(0); overflow-y:auto; pointer-events:auto; }
+  .country-menu .country-opt{ display:flex; align-items:center; gap:8px; padding:9px 12px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .country-menu .country-opt:hover{ background:var(--stone); }
+  .country-menu .country-opt img{ width:20px; height:14px; object-fit:cover; border-radius:2px; flex-shrink:0; }
+
   .search-row{ display:flex; gap:8px; padding:8px 20px 16px; }
   .search-box{ flex:1; display:flex; align-items:center; gap:10px; background:transparent; border:none; border-bottom:1.5px solid var(--line); padding:10px 2px; }
   .search-box svg{ width:18px; height:18px; color:var(--muted); flex-shrink:0; }
@@ -357,7 +363,9 @@
   .modal-box button{ background:var(--ink); color:#fff; border:none; border-radius:12px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; width:100%; }
   .reg-input{ width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 14px; font-size:14px; margin-bottom:6px; }
   .avatar-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:8px; }
-  .avatar-opt{ aspect-ratio:1/1; border-radius:50%; background-size:cover; background-position:center; border:3px solid transparent; cursor:pointer; }
+  .avatar-opt{ aspect-ratio:1/1; border-radius:50%; border:3px solid transparent; cursor:pointer; overflow:hidden; background:var(--stone); position:relative; }
+  .avatar-opt img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .avatar-opt.avatar-broken::after{ content:"?"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--muted); font-weight:700; font-size:16px; }
   .avatar-opt.selected{ border-color:var(--orange); }
   .modal-close-x{ position:absolute; top:0; right:0; color:var(--muted); cursor:pointer; padding:4px; }
   .profile-header-card{ display:flex; align-items:center; gap:14px; padding:16px 20px; }
@@ -722,13 +730,7 @@
         <span id="regCountryFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;"></span>
         <span id="regCountryCodeLabel" style="font-size:13px; font-weight:700; white-space:nowrap;">+998</span>
         <span style="font-size:10px; line-height:1;">⌄</span>
-        <div class="lang-menu" id="regCountryMenu">
-          <div onclick="setRegCountry('uz','998')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Oʻzbekiston +998</div>
-          <div onclick="setRegCountry('ru','7')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/ru.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Россия +7</div>
-          <div onclick="setRegCountry('tr','90')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/tr.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Türkiye +90</div>
-          <div onclick="setRegCountry('az','994')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/az.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Azərbaycan +994</div>
-          <div onclick="setRegCountry('gb','44')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> United Kingdom +44</div>
-        </div>
+        <div class="country-menu" id="regCountryMenu"></div>
       </div>
       <input type="tel" inputmode="numeric" id="regPhone" class="reg-input" placeholder="90 123 45 67" style="flex:1; margin-bottom:0;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     </div>
@@ -749,7 +751,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-27";
+  const CURRENT_VERSION = "20260908-28";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -821,7 +823,32 @@ function requireRegistration(action){
   openRegisterModal();
 }
 
+const PHONE_COUNTRIES = [
+  ['uz','998'],['ru','7'],['tr','90'],['az','994'],['gb','44'],
+  ['kz','7'],['kg','996'],['tj','992'],['tm','993'],['ua','380'],
+  ['by','375'],['ge','995'],['am','374'],['us','1'],['ca','1'],
+  ['de','49'],['fr','33'],['it','39'],['es','34'],['pt','351'],
+  ['nl','31'],['be','32'],['ch','41'],['at','43'],['se','46'],
+  ['no','47'],['fi','358'],['dk','45'],['pl','48'],['cz','420'],
+  ['ro','40'],['hu','36'],['bg','359'],['gr','30'],['ie','353'],
+  ['cn','86'],['in','91'],['jp','81'],['kr','82'],['id','62'],
+  ['my','60'],['th','66'],['vn','84'],['ph','63'],['sg','65'],
+  ['ae','971'],['sa','966'],['qa','974'],['kw','965'],['om','968'],
+  ['il','972'],['jo','962'],['iq','964'],['ir','98'],['eg','20'],
+  ['pk','92'],['bd','880'],['af','93'],['mn','976'],['za','27'],
+  ['ng','234'],['ke','254'],['br','55'],['mx','52'],['ar','54'],
+  ['au','61'],['nz','64']
+];
+
 let regCountry = { code: 'uz', calling: '998' };
+function initRegCountryMenu(){
+  const wrap = document.getElementById('regCountryMenu');
+  if (!wrap) return;
+  wrap.innerHTML = PHONE_COUNTRIES.map(([code, calling]) => `
+    <div class="country-opt" onclick="setRegCountry('${code}','${calling}')"><img src="https://flagcdn.com/w40/${code}.png"> +${calling}</div>
+  `).join('');
+}
+initRegCountryMenu();
 function toggleRegCountryMenu(e){
   if (e) e.stopPropagation();
   document.getElementById('regCountryMenu').classList.toggle('open');
@@ -842,7 +869,7 @@ function openRegisterModal(){
   document.getElementById('regLastName').value = customerProfile ? (customerProfile.lastName||'') : '';
   const existingPhone = (customerProfile && customerProfile.phone) ? customerProfile.phone : '';
   const digitsOnly = existingPhone.replace(/\D/g, '');
-  const knownCodes = [['uz','998'],['az','994'],['tr','90'],['gb','44'],['ru','7']];
+  const knownCodes = [...PHONE_COUNTRIES].sort((a,b) => b[1].length - a[1].length);
   const matched = knownCodes.find(([, calling]) => digitsOnly.startsWith(calling));
   if (matched){
     setRegCountry(matched[0], matched[1]);
@@ -862,7 +889,11 @@ function closeRegisterModal(){
 function renderAvatarGrid(){
   const wrap = document.getElementById('avatarGrid');
   if (avatarOptions.length === 0){ wrap.innerHTML = '<p class="hint">Аватары ещё не добавлены продавцом</p>'; return; }
-  wrap.innerHTML = avatarOptions.map(url => `<div class="avatar-opt ${url===selectedAvatarUrl?'selected':''}" style="background-image:url('${url}')" onclick="selectAvatar('${url.replace(/'/g,"\\'")}')"></div>`).join('');
+  wrap.innerHTML = avatarOptions.map(url => `
+    <div class="avatar-opt ${url===selectedAvatarUrl?'selected':''}" onclick="selectAvatar('${url.replace(/'/g,"\\'")}')">
+      <img src="${url}" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.add('avatar-broken');">
+    </div>
+  `).join('');
 }
 function selectAvatar(url){
   selectedAvatarUrl = url;
