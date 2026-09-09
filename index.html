@@ -367,6 +367,9 @@
   .avatar-opt img{ width:100%; height:100%; object-fit:cover; display:block; }
   .avatar-opt.avatar-broken::after{ content:"?"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--muted); font-weight:700; font-size:16px; }
   .avatar-opt.selected{ border-color:var(--orange); }
+  .avatar-loader{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:var(--muted); }
+  .avatar-loader svg{ width:55%; height:55%; animation: avatarSpin .8s linear infinite; }
+  @keyframes avatarSpin{ to{ transform:rotate(360deg); } }
   .modal-close-x{ position:absolute; top:0; right:0; color:var(--muted); cursor:pointer; padding:4px; }
   .profile-header-card{ display:flex; align-items:center; gap:14px; padding:16px 20px; }
   .profile-avatar{ width:56px; height:56px; border-radius:50%; background-size:cover; background-position:center; background-color:var(--stone); cursor:pointer; flex-shrink:0; }
@@ -751,7 +754,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-29";
+  const CURRENT_VERSION = "20260908-30";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -891,7 +894,8 @@ function renderAvatarGrid(){
   if (avatarOptions.length === 0){ wrap.innerHTML = '<p class="hint">Аватары ещё не добавлены продавцом</p>'; return; }
   wrap.innerHTML = avatarOptions.map(url => `
     <div class="avatar-opt ${url===selectedAvatarUrl?'selected':''}" onclick="selectAvatar('${url.replace(/'/g,"\\'")}')">
-      <img src="${url}" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.add('avatar-broken');">
+      <div class="avatar-loader">${AVATAR_LOADER_SVG}</div>
+      <img src="${url}" loading="lazy" onload="this.previousElementSibling.style.display='none';" onerror="this.style.display='none'; this.previousElementSibling.style.display='none'; this.parentElement.classList.add('avatar-broken');">
     </div>
   `).join('');
 }
@@ -1408,6 +1412,7 @@ function drawerSelect(cat){
   showScreen('shopAll');
 }
 
+const AVATAR_LOADER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>`;
 const HEART_PLUS_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.479 19.374-.971.939a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5a5.2 5.2 0 0 1-.219 1.49"/><path d="M15 15h6"/><path d="M18 12v6"/></svg>`;
 const HEART_FULL_SVG = `<svg viewBox="0 0 24 24" fill="#490100" stroke="#490100" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>`;
 function heartIcon(isFav){ return isFav ? HEART_FULL_SVG : HEART_PLUS_SVG; }
