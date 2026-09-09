@@ -726,7 +726,7 @@
 
     <label class="block-label">Номер телефона</label>
     <div style="display:flex; gap:8px; margin-bottom:6px;">
-      <div class="icon-btn" id="regCountryBtn" style="width:auto; padding:0 10px; gap:5px;" onclick="toggleRegCountryMenu(event)">
+      <div class="icon-btn" id="regCountryBtn" style="width:auto; padding:0 10px; gap:5px; background:#fff; color:#141414;" onclick="toggleRegCountryMenu(event)">
         <span id="regCountryFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;"></span>
         <span id="regCountryCodeLabel" style="font-size:13px; font-weight:700; white-space:nowrap;">+998</span>
         <span style="font-size:10px; line-height:1;">⌄</span>
@@ -751,7 +751,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-28";
+  const CURRENT_VERSION = "20260908-29";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
