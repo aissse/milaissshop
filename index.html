@@ -201,7 +201,7 @@
     .detail-layout.top-layout{ grid-template-columns:1.3fr .7fr; padding:8px 60px 40px; }
   }
 
-  .back-circle{ width:38px; height:38px; border-radius:50%; background:var(--stone); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .back-circle{ width:38px; height:38px; border-radius:50%; background:#fff; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; cursor:pointer; color:#141414; }
 
   .cart-title{ padding:18px 20px 6px; }
   .cart-title h2{ font-family:'Space Grotesk'; font-size:21px; }
@@ -735,7 +735,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-24";
+  const CURRENT_VERSION = "20260908-25";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -759,9 +759,9 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
-const ADMIN_CHAT_ID = "6620851909";
-const NOTIFY_BOT_USERNAME = "@MilaisssOthers_bot";
+const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
+const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
+const NOTIFY_BOT_USERNAME = "ВСТАВЬ_USERNAME_БОТА_БЕЗ_@";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
