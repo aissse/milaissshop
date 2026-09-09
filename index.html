@@ -34,12 +34,13 @@
   @media (min-width:768px){
     .grid{ grid-template-columns:repeat(3,1fr); }
     .collections-grid{ grid-template-columns:repeat(3,1fr); }
+    .hero-photo{ aspect-ratio:3/1; }
   }
   @media (min-width:1100px){
     .app{ max-width:1400px; }
     .grid{ grid-template-columns:repeat(4,1fr); }
     .collections-grid{ grid-template-columns:repeat(4,1fr); }
-    .hero-photo{ aspect-ratio:21/9; }
+    .hero-photo{ aspect-ratio:3.6/1; max-height:380px; }
   }
   .display{ font-family:'Space Grotesk',sans-serif; }
   .logo{ font-family:var(--logofont); font-size:32px; font-weight:600; text-align:center; color:var(--ink); letter-spacing:.02em; }
@@ -734,7 +735,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-23";
+  const CURRENT_VERSION = "20260908-24";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -758,9 +759,9 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
-const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
-const NOTIFY_BOT_USERNAME = "ВСТАВЬ_USERNAME_БОТА_БЕЗ_@";
+const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
+const ADMIN_CHAT_ID = "6620851909";
+const NOTIFY_BOT_USERNAME = "@MilaisssOthers_bot";
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -1731,11 +1732,10 @@ function openProduct(id){
   };
 
   const detailLayout = document.getElementById('detailLayout');
-  const isTopLayout = currentProduct.type === 'top';
-  detailLayout.classList.toggle('top-layout', isTopLayout);
+  detailLayout.classList.add('top-layout');
 
   const detailBadge = document.getElementById('detailBadge');
-  if (isTopLayout && currentProduct.sub){
+  if (currentProduct.sub){
     detailBadge.textContent = currentProduct.sub;
     detailBadge.style.display = 'inline-block';
   } else {
