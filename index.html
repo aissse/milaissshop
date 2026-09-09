@@ -281,7 +281,7 @@
   .pmr-label{ flex:1; font-weight:700; font-size:14px; }
   .pmr-badge{ padding:6px 10px; border-radius:8px; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px; border:1px solid var(--icon-border-color, transparent); }
   .card-badge{ background:var(--stone); color:var(--ink); border:1px solid var(--line); }
-  .pmr-details{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.4,0,.2,1), padding .45s cubic-bezier(.4,0,.2,1); background:var(--stone); padding:0 16px; }
+  .pmr-details{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.4,0,.2,1), padding .45s cubic-bezier(.4,0,.2,1); background:#fff; padding:0 16px; }
   .pmr-wrap.open .pmr-details{ max-height:260px; padding:14px 16px; border-bottom:1px solid var(--line); font-size:13px; line-height:1.6; }
   .pmr-details input{ width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 12px; font-size:13px; margin-bottom:8px; background:#fff; color:var(--muted); }
   .pmr-details input:disabled{ cursor:not-allowed; opacity:.7; }
@@ -738,10 +738,14 @@
       <input type="tel" inputmode="numeric" id="regPhone" class="reg-input" placeholder="90 123 45 67" style="flex:1; margin-bottom:0;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     </div>
 
+    <label class="block-label">Telegram юзернейм (необязательно)</label>
+    <input type="text" id="regTelegram" class="reg-input" placeholder="@username" oninput="this.value=this.value.replace(/\s/g,'')">
+    <div style="font-size:11px; color:#999; line-height:1.4; margin:-6px 0 6px;">Если номер укажете с ошибкой, мы сможем найти вас в Telegram.</div>
+
     <label class="block-label">Выберите аватар</label>
     <div class="avatar-grid" id="avatarGrid"></div>
 
-    <button class="checkout-btn" style="margin:16px 0 0;" onclick="submitRegistration()">Зарегистрироваться</button>
+    <button class="checkout-btn" id="regSubmitBtn" style="margin:16px 0 0;" onclick="submitRegistration()">Зарегистрироваться</button>
   </div>
 </div>
 
@@ -754,7 +758,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-30";
+  const CURRENT_VERSION = "20260908-32";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -793,7 +797,9 @@ function getCustomerName(){
     const u = tg.initDataUnsafe.user;
     return (u.first_name||'') + (u.last_name ? (' '+u.last_name) : '') + (u.username ? (' (@'+u.username+')') : '');
   }
-  if (customerProfile && customerProfile.firstName) return customerProfile.firstName + (customerProfile.lastName ? (' '+customerProfile.lastName) : '');
+  if (customerProfile && customerProfile.firstName){
+    return customerProfile.firstName + (customerProfile.lastName ? (' '+customerProfile.lastName) : '') + (customerProfile.telegramUsername ? (' (@'+customerProfile.telegramUsername.replace(/^@/,'')+')') : '');
+  }
   return 'Гость (браузер)';
 }
 
@@ -868,8 +874,11 @@ document.addEventListener('click', () => {
 });
 
 function openRegisterModal(){
+  const btn = document.getElementById('regSubmitBtn');
+  if (btn){ btn.disabled = false; btn.textContent = 'Зарегистрироваться'; }
   document.getElementById('regFirstName').value = customerProfile ? (customerProfile.firstName||'') : '';
   document.getElementById('regLastName').value = customerProfile ? (customerProfile.lastName||'') : '';
+  document.getElementById('regTelegram').value = customerProfile ? (customerProfile.telegramUsername||'') : '';
   const existingPhone = (customerProfile && customerProfile.phone) ? customerProfile.phone : '';
   const digitsOnly = existingPhone.replace(/\D/g, '');
   const knownCodes = [...PHONE_COUNTRIES].sort((a,b) => b[1].length - a[1].length);
@@ -904,9 +913,13 @@ function selectAvatar(url){
   renderAvatarGrid();
 }
 function submitRegistration(){
+  const btn = document.getElementById('regSubmitBtn');
+  if (btn && btn.disabled) return;
+
   const firstName = document.getElementById('regFirstName').value.trim();
   const lastName = document.getElementById('regLastName').value.trim();
   const phoneDigits = document.getElementById('regPhone').value.trim().replace(/\D/g, '');
+  const telegramUsername = document.getElementById('regTelegram').value.trim().replace(/^@/, '');
   if (!firstName){ showToast('Укажите имя'); return; }
   if (!lastName){ showToast('Укажите фамилию'); return; }
   if (!phoneDigits){ showToast('Укажите номер телефона'); return; }
@@ -914,12 +927,23 @@ function submitRegistration(){
 
   const phone = '+' + regCountry.calling + ' ' + phoneDigits;
   const profile = { firstName, lastName, phone, avatarUrl: selectedAvatarUrl, registeredAt: Date.now() };
-  db.collection('customers').doc(getCustomerId()).set(profile, { merge: true }).then(() => {
-    customerProfile = profile;
-    closeRegisterModalOnly();
-    renderProfileHeader();
-    if (pendingAfterRegister){ const fn = pendingAfterRegister; pendingAfterRegister = null; fn(); }
-  });
+  if (telegramUsername) profile.telegramUsername = telegramUsername;
+
+  if (btn){ btn.disabled = true; btn.textContent = 'Сохраняем...'; }
+
+  // Обновляем интерфейс сразу, не дожидаясь ответа сервера — так регистрация ощущается мгновенной.
+  customerProfile = profile;
+  closeRegisterModalOnly();
+  renderProfileHeader();
+  const pending = pendingAfterRegister;
+  pendingAfterRegister = null;
+  if (pending) pending();
+
+  db.collection('customers').doc(getCustomerId()).set(profile, { merge: true })
+    .catch(() => { showToast('Не удалось сохранить профиль, проверьте интернет'); })
+    .finally(() => {
+      if (btn){ btn.disabled = false; btn.textContent = 'Зарегистрироваться'; }
+    });
 }
 function closeRegisterModalOnly(){
   document.getElementById('registerModal').classList.remove('open');
@@ -934,6 +958,7 @@ function renderProfileHeader(){
       <div style="cursor:pointer;" onclick="openRegisterModal()">
         <div class="profile-name">${customerProfile.firstName} ${customerProfile.lastName}</div>
         <div class="profile-phone">${customerProfile.phone}</div>
+        ${customerProfile.telegramUsername ? `<div class="profile-phone">@${customerProfile.telegramUsername}</div>` : ''}
       </div>
     </div>
   `;
