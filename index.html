@@ -15,7 +15,6 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -765,7 +764,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-33";
+  const CURRENT_VERSION = "20260908-34";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -803,6 +802,26 @@ const EMAILJS_PUBLIC_KEY = "ВСТАВЬ_PUBLIC_KEY_СЮДА";
 const EMAILJS_SERVICE_ID = "ВСТАВЬ_SERVICE_ID_СЮДА";
 const EMAILJS_TEMPLATE_ID = "ВСТАВЬ_TEMPLATE_ID_СЮДА";
 const ADMIN_EMAIL = "ВСТАВЬ_СВОЙ_EMAIL_СЮДА";
+
+// Настройка загрузки фото в отзывах (через imgbb.com — бесплатно, без карты, без биллинга).
+// 1) Зарегистрируйся на https://api.imgbb.com (или просто https://imgbb.com — раздел "About > API").
+// 2) Скопируй свой API-ключ и впиши его ниже вместо плейсхолдера.
+// Пока ключ не вписан — кнопка "Добавить фото" в отзывах работает, но фото не прикрепится (отзыв всё равно отправится, просто без фото).
+const IMGBB_API_KEY = "ВСТАВЬ_IMGBB_API_KEY_СЮДА";
+function isImgbbConfigured(){
+  return IMGBB_API_KEY && !IMGBB_API_KEY.startsWith('ВСТАВЬ');
+}
+function uploadReviewPhoto(file){
+  if (!isImgbbConfigured()) return Promise.reject(new Error('IMGBB_NOT_CONFIGURED'));
+  const formData = new FormData();
+  formData.append('image', file);
+  return fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.success && data.data && data.data.url) return data.data.url;
+      throw new Error('UPLOAD_FAILED');
+    });
+}
 
 function isEmailNotifyConfigured(){
   return EMAILJS_PUBLIC_KEY && !EMAILJS_PUBLIC_KEY.startsWith('ВСТАВЬ')
@@ -2303,9 +2322,12 @@ function submitReview(orderId, ii, productId, productName, colorName){
   };
 
   if (file){
-    const path = `reviews/${orderId}_${ii}_${Date.now()}_${file.name}`;
-    firebase.storage().ref().child(path).put(file)
-      .then(snap => snap.ref.getDownloadURL())
+    if (!isImgbbConfigured()){
+      showToast('Загрузка фото пока не настроена продавцом — отзыв отправлен без фото');
+      finish(null);
+      return;
+    }
+    uploadReviewPhoto(file)
       .then(url => finish(url))
       .catch(() => {
         showToast('Не удалось загрузить фото, попробуйте ещё раз');
