@@ -15,6 +15,8 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -250,6 +252,11 @@
   .review-form .stars span{ cursor:pointer; color:var(--line); }
   .review-form .stars span.on{ color:#f5a623; }
   .review-form button{ background:var(--ink); color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; cursor:pointer; }
+  .review-form button:disabled{ background:var(--muted); cursor:not-allowed; }
+  .review-photo-btn{ display:inline-flex; align-items:center; gap:6px; border:1px dashed var(--line); border-radius:10px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer; margin-bottom:6px; color:var(--ink); background:var(--stone); }
+  .review-photo-preview{ margin-bottom:6px; }
+  .review-photo-preview img{ max-width:110px; max-height:110px; border-radius:10px; display:block; object-fit:cover; }
+  .review-photo-preview .rp-remove{ font-size:11px; color:#c0392b; cursor:pointer; margin-top:4px; display:inline-block; }
 
   .reviews-list{ padding:0 20px 20px; }
   .review-item{ border-bottom:1px solid var(--line); padding:14px 0; font-size:13px; line-height:1.5; }
@@ -758,7 +765,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-32";
+  const CURRENT_VERSION = "20260908-33";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -785,6 +792,34 @@ const ADMIN_USERNAME = "isssroilov";
 const NOTIFY_BOT_TOKEN = "ВСТАВЬ_ТОКЕН_БОТА_СЮДА";
 const ADMIN_CHAT_ID = "ВСТАВЬ_СВОЙ_CHAT_ID_СЮДА";
 const NOTIFY_BOT_USERNAME = "ВСТАВЬ_USERNAME_БОТА_БЕЗ_@";
+
+// Настройки почтовых уведомлений (через emailjs.com — бесплатно, без своего сервера).
+// 1) Зарегистрируйся на https://www.emailjs.com, подключи свою почту как "Email Service" — получишь EMAILJS_SERVICE_ID.
+// 2) В разделе Email Templates создай шаблон с переменными {{to_email}}, {{subject}}, {{message}} — получишь EMAILJS_TEMPLATE_ID.
+// 3) В Account > General скопируй Public Key — это EMAILJS_PUBLIC_KEY.
+// 4) Впиши свой email ниже в ADMIN_EMAIL — именно туда будут приходить уведомления о новых заказах.
+// Пока эти поля не заполнены, почтовые уведомления просто не отправляются (сайт работает как раньше).
+const EMAILJS_PUBLIC_KEY = "ВСТАВЬ_PUBLIC_KEY_СЮДА";
+const EMAILJS_SERVICE_ID = "ВСТАВЬ_SERVICE_ID_СЮДА";
+const EMAILJS_TEMPLATE_ID = "ВСТАВЬ_TEMPLATE_ID_СЮДА";
+const ADMIN_EMAIL = "ВСТАВЬ_СВОЙ_EMAIL_СЮДА";
+
+function isEmailNotifyConfigured(){
+  return EMAILJS_PUBLIC_KEY && !EMAILJS_PUBLIC_KEY.startsWith('ВСТАВЬ')
+    && EMAILJS_SERVICE_ID && !EMAILJS_SERVICE_ID.startsWith('ВСТАВЬ')
+    && EMAILJS_TEMPLATE_ID && !EMAILJS_TEMPLATE_ID.startsWith('ВСТАВЬ');
+}
+let emailjsReady = false;
+function ensureEmailjsInit(){
+  if (emailjsReady || !isEmailNotifyConfigured() || typeof emailjs === 'undefined') return;
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  emailjsReady = true;
+}
+function sendNotifyEmail(toEmail, subject, message){
+  if (!isEmailNotifyConfigured() || typeof emailjs === 'undefined') return Promise.resolve();
+  ensureEmailjsInit();
+  return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: toEmail, subject, message }).catch(() => {});
+}
 
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
@@ -1179,6 +1214,7 @@ function submitNewsletter(){
   const email = input.value.trim();
   if (!email || !email.includes('@')){ showToast('Введите корректный email'); return; }
   db.collection('newsletter').add({ email, createdAt: Date.now() });
+  sendNotifyEmail(email, 'Подписка оформлена', 'Спасибо, что подписались на новости milaisss — теперь вы первыми узнаете о новых дропах и скидках.');
   input.value = '';
   showToast('Спасибо за подписку! ✓');
 }
@@ -2148,7 +2184,8 @@ function finalizeOrder(phone, branch){
   }).then(() => {
     cart = []; updateCartBadge();
     document.getElementById('phoneInput').value = '';
-    notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text).finally(() => {
+    notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text);
+    sendNotifyEmail(ADMIN_EMAIL, `Новый заказ от ${customerName}`, text).finally(() => {
       document.getElementById('paymentModal').classList.add('open');
     });
   }).catch(err => {
@@ -2194,11 +2231,13 @@ function renderOrders(){
                 ${[1,2,3,4,5].map(n => `<span data-n="${n}" onclick="setStar('${order.id}',${ii},${n})">★</span>`).join('')}
               </div>
               <textarea id="rt-${order.id}-${ii}" placeholder="Расскажите о товаре..." rows="2"></textarea>
-              <input type="url" id="rp-${order.id}-${ii}" placeholder="Ссылка на фото к отзыву (необязательно)" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:8px; font-size:12px; margin-bottom:6px;">
+              <label class="review-photo-btn" for="rp-${order.id}-${ii}">📷 <span id="rpLabel-${order.id}-${ii}">Добавить фото (необязательно)</span></label>
+              <input type="file" id="rp-${order.id}-${ii}" accept="image/*" onchange="previewReviewPhoto('${order.id}',${ii})" style="display:none;">
+              <div class="review-photo-preview" id="rpPreview-${order.id}-${ii}"></div>
               <label style="display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:8px;">
                 <input type="checkbox" id="ra-${order.id}-${ii}"> Оставить анонимно
               </label>
-              <button onclick="submitReview('${order.id}',${ii},'${it.productId}','${(it.name||'').replace(/'/g,"")}','${(it.colorName||'').replace(/'/g,"")}')">Отправить</button>
+              <button id="rsBtn-${order.id}-${ii}" onclick="submitReview('${order.id}',${ii},'${it.productId}','${(it.name||'').replace(/'/g,"")}','${(it.colorName||'').replace(/'/g,"")}')">Отправить</button>
             </div>` : ''}
         `).join('')}
         <div class="order-total">Итого: ${fmt(order.total)}</div>
@@ -2216,22 +2255,65 @@ function setStar(oi, ii, n){
 }
 function toggleReviewForm(oi, ii){ document.getElementById(`rf-${oi}-${ii}`).classList.toggle('open'); }
 
+function previewReviewPhoto(orderId, ii){
+  const input = document.getElementById(`rp-${orderId}-${ii}`);
+  const preview = document.getElementById(`rpPreview-${orderId}-${ii}`);
+  const label = document.getElementById(`rpLabel-${orderId}-${ii}`);
+  const file = input.files && input.files[0];
+  if (!file){ preview.innerHTML = ''; if (label) label.textContent = 'Добавить фото (необязательно)'; return; }
+  const url = URL.createObjectURL(file);
+  preview.innerHTML = `<img src="${url}"><span class="rp-remove" onclick="removeReviewPhoto('${orderId}',${ii})">Убрать фото</span>`;
+  if (label) label.textContent = 'Заменить фото';
+}
+function removeReviewPhoto(orderId, ii){
+  const input = document.getElementById(`rp-${orderId}-${ii}`);
+  input.value = '';
+  document.getElementById(`rpPreview-${orderId}-${ii}`).innerHTML = '';
+  const label = document.getElementById(`rpLabel-${orderId}-${ii}`);
+  if (label) label.textContent = 'Добавить фото (необязательно)';
+}
+
 function submitReview(orderId, ii, productId, productName, colorName){
   const text = document.getElementById(`rt-${orderId}-${ii}`).value.trim();
   const rating = reviewStars[`${orderId}-${ii}`] || null;
-  const photo = document.getElementById(`rp-${orderId}-${ii}`).value.trim();
+  const fileInput = document.getElementById(`rp-${orderId}-${ii}`);
+  const file = fileInput && fileInput.files && fileInput.files[0];
   const anonymous = document.getElementById(`ra-${orderId}-${ii}`).checked;
   if (!text) return;
-  const payload = {
-    productId, productName, colorName: colorName || '', text, approved: false, createdAt: Date.now(),
-    anonymous, authorName: anonymous ? '' : getCustomerName()
+
+  const btn = document.getElementById(`rsBtn-${orderId}-${ii}`);
+  if (btn && btn.disabled) return;
+  if (btn){ btn.disabled = true; btn.textContent = file ? 'Загружаем фото...' : 'Отправка...'; }
+
+  const finish = (photoUrl) => {
+    const payload = {
+      productId, productName, colorName: colorName || '', text, approved: false, createdAt: Date.now(),
+      anonymous, authorName: anonymous ? '' : getCustomerName()
+    };
+    if (rating) payload.rating = rating;
+    if (photoUrl) payload.photo = photoUrl;
+    db.collection('reviews').add(payload).then(() => {
+      showToast('Спасибо! Отзыв отправлен на проверку');
+      document.getElementById(`rf-${orderId}-${ii}`).classList.remove('open');
+    }).catch(() => {
+      showToast('Не удалось отправить отзыв, попробуйте ещё раз');
+    }).finally(() => {
+      if (btn){ btn.disabled = false; btn.textContent = 'Отправить'; }
+    });
   };
-  if (rating) payload.rating = rating;
-  if (photo) payload.photo = photo;
-  db.collection('reviews').add(payload).then(() => {
-    showToast('Спасибо! Отзыв отправлен на проверку');
-    document.getElementById(`rf-${orderId}-${ii}`).classList.remove('open');
-  });
+
+  if (file){
+    const path = `reviews/${orderId}_${ii}_${Date.now()}_${file.name}`;
+    firebase.storage().ref().child(path).put(file)
+      .then(snap => snap.ref.getDownloadURL())
+      .then(url => finish(url))
+      .catch(() => {
+        showToast('Не удалось загрузить фото, попробуйте ещё раз');
+        if (btn){ btn.disabled = false; btn.textContent = 'Отправить'; }
+      });
+  } else {
+    finish(null);
+  }
 }
 
 /* ---------- init ---------- */
