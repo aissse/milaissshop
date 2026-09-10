@@ -1313,6 +1313,10 @@ function saveSocialLink(key, value){
 const STATUS_OPTIONS = ['Проверяется оплата','Собирается','В пути','Доставлен'];
 let allOrders = [];
 
+function deleteSubscriber(id){
+  if (confirm('Удалить эту почту из подписчиков?')) db.collection('newsletter').doc(id).delete();
+}
+
 function loadSubscribers(){
   db.collection('newsletter').orderBy('createdAt', 'desc').onSnapshot(snap => {
     const wrap = document.getElementById('subscribersList');
@@ -1327,7 +1331,7 @@ function loadSubscribers(){
     wrap.innerHTML = snap.docs.map(doc => {
       const d = doc.data();
       const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ru-RU') : '';
-      return `<div class="prod-row"><div class="meta"><div class="name">${d.email || ''}</div><div class="info">${date}</div></div></div>`;
+      return `<div class="prod-row"><div class="meta"><div class="name">${d.email || ''}</div><div class="info">${date}</div></div><div class="acts"><span class="del" onclick="deleteSubscriber('${doc.id}')">Удал.</span></div></div>`;
     }).join('');
   }, () => {
     // Если orderBy требует индекс, который ещё не создан — покажем без сортировки.
@@ -1340,7 +1344,7 @@ function loadSubscribers(){
       wrap.innerHTML = snap.docs.map(doc => {
         const d = doc.data();
         const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ru-RU') : '';
-        return `<div class="prod-row"><div class="meta"><div class="name">${d.email || ''}</div><div class="info">${date}</div></div></div>`;
+        return `<div class="prod-row"><div class="meta"><div class="name">${d.email || ''}</div><div class="info">${date}</div></div><div class="acts"><span class="del" onclick="deleteSubscriber('${doc.id}')">Удал.</span></div></div>`;
       }).join('');
     });
   });
