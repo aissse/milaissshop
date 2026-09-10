@@ -35,13 +35,13 @@
   @media (min-width:768px){
     .grid{ grid-template-columns:repeat(3,1fr); }
     .collections-grid{ grid-template-columns:repeat(3,1fr); }
-    .hero-photo{ aspect-ratio:3/1; }
+    .hero-photo{ aspect-ratio:2.2/1; }
   }
   @media (min-width:1100px){
     .app{ max-width:1400px; }
     .grid{ grid-template-columns:repeat(4,1fr); }
     .collections-grid{ grid-template-columns:repeat(4,1fr); }
-    .hero-photo{ aspect-ratio:3.6/1; max-height:380px; }
+    .hero-photo{ aspect-ratio:2.6/1; max-height:460px; }
   }
   .display{ font-family:'Space Grotesk',sans-serif; }
   .logo{ font-family:var(--logofont); font-size:32px; font-weight:600; text-align:center; color:var(--ink); letter-spacing:.02em; }
@@ -324,7 +324,7 @@
   .faq-a{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.4,0,.2,1), padding-bottom .45s cubic-bezier(.4,0,.2,1); font-size:13px; color:#555; line-height:1.6; padding-bottom:0; }
   .faq-item.open .faq-a{ max-height:500px; padding-bottom:16px; }
 
-  .hero-photo{ margin:0 20px 0; border-radius:20px; aspect-ratio:16/11; background:linear-gradient(135deg,#1a1a1a 0%,#2b2b2b 100%); background-size:cover; background-position:center; position:relative; display:flex; align-items:flex-end; overflow:hidden; }
+  .hero-photo{ margin:0 20px 0; width:calc(100% - 40px); box-sizing:border-box; border-radius:20px; aspect-ratio:16/11; background:linear-gradient(135deg,#1a1a1a 0%,#2b2b2b 100%); background-size:cover; background-position:center; position:relative; display:flex; align-items:flex-end; overflow:hidden; }
   .hero-photo::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.55), transparent 60%); }
   .hero-photo-text{ position:relative; z-index:2; padding:22px; color:#fff; }
   .hero-photo-text .tag{ font-size:11px; color:var(--orange); font-weight:700; letter-spacing:.02em; }
@@ -775,7 +775,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-38";
+  const CURRENT_VERSION = "20260908-39";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1657,6 +1657,12 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
       heroVideo.src = data.heroImage;
       heroVideo.style.display = 'block';
       heroPhoto.style.backgroundImage = '';
+      // Если браузер не может проиграть это видео (например, старый .mov с iPhone) —
+      // прячем видео и показываем хотя бы тёмную подложку, чтобы баннер не был пустым.
+      heroVideo.onerror = () => {
+        heroVideo.style.display = 'none';
+        heroPhoto.style.backgroundImage = '';
+      };
     } else {
       heroVideo.style.display = 'none';
       heroVideo.removeAttribute('src');
