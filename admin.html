@@ -6,6 +6,7 @@
 <title>milaisss — админка</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{ --bg:#ffffff; --pink:#fbe4e8; --maroon:#5c1a24; --maroon-dark:#42121a; --line:#ecd3d7; --muted:#9c7b80; }
@@ -130,6 +131,7 @@
     <div class="tab" data-tab="delivery" onclick="switchTab('delivery')">Доставка</div>
     <div class="tab" data-tab="support" onclick="switchTab('support')">Чат с клиентами</div>
     <div class="tab" data-tab="finance" onclick="switchTab('finance')">Финансы</div>
+    <div class="tab" data-tab="subscribers" onclick="switchTab('subscribers')">Подписки</div>
     <div class="tab" data-tab="design" onclick="switchTab('design')">Оформление</div>
   </div>
 
@@ -200,6 +202,15 @@
         <textarea id="f_paymentInfo" placeholder="Например: Uzcard 8600 1234 5678 9012, Aziz Isroilov" rows="3" onchange="saveSetting('paymentCardInfo', this.value)"></textarea>
 
         <div class="hint">Покупатель выберет способ оплаты в корзине и увидит соответствующие реквизиты. После перевода заказ получает статус "Проверяется оплата" — как только увидишь поступление в своём приложении Payme/Click/банке, смени статус в разделе "Доставка".</div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-subscribers">
+      <div class="card">
+        <h1>Подписчики рассылки</h1>
+        <p class="hint" style="margin-top:0;">Почты тех, кто подписался через форму "Будьте в курсе" на сайте. Именно им уходит письмо о новых товарах.</p>
+        <div id="subscribersCount" style="font-weight:700; font-size:14px; margin-bottom:10px;"></div>
+        <div id="subscribersList"></div>
       </div>
     </div>
 
@@ -402,6 +413,38 @@
 <script>
 const ADMIN_PASSWORD = "milaisss2026"; // смени на свой пароль
 
+// Настройки почтовых уведомлений подписчикам о новых товарах (через emailjs.com — те же данные,
+// что ты уже вписал(а) в index.html. Впиши сюда точно такие же значения).
+const EMAILJS_PUBLIC_KEY = "Xt-d7Y57TX4fCJNjr";
+const EMAILJS_SERVICE_ID = "service_ttler58";
+const EMAILJS_TEMPLATE_ID = "template_9e32fyl";
+const SHOP_URL = "https://aissse.github.io/milaissshop/";
+
+function isEmailNotifyConfigured(){
+  return EMAILJS_PUBLIC_KEY && !EMAILJS_PUBLIC_KEY.startsWith('ВСТАВЬ')
+    && EMAILJS_SERVICE_ID && !EMAILJS_SERVICE_ID.startsWith('ВСТАВЬ')
+    && EMAILJS_TEMPLATE_ID && !EMAILJS_TEMPLATE_ID.startsWith('ВСТАВЬ');
+}
+let emailjsReady = false;
+function ensureEmailjsInit(){
+  if (emailjsReady || !isEmailNotifyConfigured() || typeof emailjs === 'undefined') return;
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  emailjsReady = true;
+}
+function notifySubscribersNewProduct(productName, price){
+  if (!isEmailNotifyConfigured() || typeof emailjs === 'undefined') return;
+  ensureEmailjsInit();
+  const subject = `Новинка в milaisss: ${productName}`;
+  const message = `В магазине milaisss появился новый товар — ${productName} (${Number(price||0).toLocaleString('ru-RU')} сум).\n\nСмотреть: ${SHOP_URL}`;
+  db.collection('newsletter').get().then(snap => {
+    snap.forEach(doc => {
+      const email = doc.data().email;
+      if (!email) return;
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: email, subject, message }).catch(() => {});
+    });
+  }).catch(() => {});
+}
+
 function toggleTheme(){
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('milaisss_admin_theme', isDark ? 'dark' : 'light');
@@ -436,6 +479,7 @@ function checkPassword(){
     loadReviews();
     loadOrders();
     loadSupport();
+    loadSubscribers();
     PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
   } else {
     alert('Неверный пароль');
@@ -685,7 +729,12 @@ function saveProduct(type){
 
   const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
   if (editingId && editingType === suf){ db.collection('products').doc(editingId).update(data).then(() => resetForm(suf)); }
-  else { db.collection('products').add(data).then(() => resetForm(suf)); }
+  else {
+    db.collection('products').add(data).then(() => {
+      resetForm(suf);
+      notifySubscribersNewProduct(name, price);
+    });
+  }
 }
 
 function resetForm(type){
@@ -1263,6 +1312,39 @@ function saveSocialLink(key, value){
 
 const STATUS_OPTIONS = ['Проверяется оплата','Собирается','В пути','Доставлен'];
 let allOrders = [];
+
+function loadSubscribers(){
+  db.collection('newsletter').orderBy('createdAt', 'desc').onSnapshot(snap => {
+    const wrap = document.getElementById('subscribersList');
+    const countEl = document.getElementById('subscribersCount');
+    if (!wrap || !countEl) return;
+    if (snap.empty){
+      countEl.textContent = 'Пока никто не подписался';
+      wrap.innerHTML = '';
+      return;
+    }
+    countEl.textContent = `Подписчиков: ${snap.size}`;
+    wrap.innerHTML = snap.docs.map(doc => {
+      const d = doc.data();
+      const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ru-RU') : '';
+      return `<div class="prod-row"><div class="meta"><div class="name">${d.email || ''}</div><div class="info">${date}</div></div></div>`;
+    }).join('');
+  }, () => {
+    // Если orderBy требует индекс, который ещё не создан — покажем без сортировки.
+    db.collection('newsletter').get().then(snap => {
+      const wrap = document.getElementById('subscribersList');
+      const countEl = document.getElementById('subscribersCount');
+      if (!wrap || !countEl) return;
+      if (snap.empty){ countEl.textContent = 'Пока никто не подписался'; wrap.innerHTML = ''; return; }
+      countEl.textContent = `Подписчиков: ${snap.size}`;
+      wrap.innerHTML = snap.docs.map(doc => {
+        const d = doc.data();
+        const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ru-RU') : '';
+        return `<div class="prod-row"><div class="meta"><div class="name">${d.email || ''}</div><div class="info">${date}</div></div></div>`;
+      }).join('');
+    });
+  });
+}
 
 function loadOrders(){
   db.collection('orders').onSnapshot(snap => {
