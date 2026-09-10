@@ -343,7 +343,7 @@
   .rating-summary .rs-count{ font-size:12px; color:var(--muted); margin-top:4px; }
 
   .newsletter-block{ background:var(--stone); margin:0 20px 30px; border-radius:18px; padding:26px 20px; text-align:center; }
-  .newsletter-block h3{ font-size:18px; margin-bottom:6px; }
+  .newsletter-block h3{ font-size:18px; margin-bottom:6px; color:#fff; }
   .newsletter-block p{ font-size:12px; color:var(--muted); margin-bottom:14px; }
   .newsletter-row{ display:flex; gap:8px; }
   .newsletter-row input{ flex:1; border:1px solid var(--line); border-radius:100px; padding:11px 16px; font-size:13px; background:var(--bg); }
@@ -775,7 +775,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-35";
+  const CURRENT_VERSION = "20260908-38";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -809,10 +809,10 @@ const NOTIFY_BOT_USERNAME = "@MilaisssOthers_bot";
 // 3) В Account > General скопируй Public Key — это EMAILJS_PUBLIC_KEY.
 // 4) Впиши свой email ниже в ADMIN_EMAIL — именно туда будут приходить уведомления о новых заказах.
 // Пока эти поля не заполнены, почтовые уведомления просто не отправляются (сайт работает как раньше).
-const EMAILJS_PUBLIC_KEY = "ВСТАВЬ_PUBLIC_KEY_СЮДА";
-const EMAILJS_SERVICE_ID = "ВСТАВЬ_SERVICE_ID_СЮДА";
-const EMAILJS_TEMPLATE_ID = "ВСТАВЬ_TEMPLATE_ID_СЮДА";
-const ADMIN_EMAIL = "ВСТАВЬ_СВОЙ_EMAIL_СЮДА";
+const EMAILJS_PUBLIC_KEY = "Xt-d7Y57TX4fCJNjr";
+const EMAILJS_SERVICE_ID = "service_ttler58";
+const EMAILJS_TEMPLATE_ID = "template_9e32fyl";
+const ADMIN_EMAIL = "aissse.issse@gmail.com";
 
 // Настройка загрузки фото в отзывах (через imgbb.com — бесплатно, без карты, без биллинга).
 // 1) Зарегистрируйся на https://api.imgbb.com (или просто https://imgbb.com — раздел "About > API").
