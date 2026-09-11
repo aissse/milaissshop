@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="100%" height="100%">
+  <!-- Background -->
+  <rect width="400" height="120" fill="transparent"/>
+  
+  <!-- Click Logo -->
+  <g transform="translate(10, 10)">
+    <!-- Icon/Badge: Rounded Square -->
+    <rect width="100" height="100" rx="25" fill="#0056C6"/>
+    <!-- The characteristic 'C' or click cursor element inside -->
+    <circle cx="50" cy="50" r="25" stroke="#FFFFFF" stroke-width="12" fill="none" stroke-dasharray="120 40" transform="rotate(-45 50 50)"/>
+    <circle cx="50" cy="50" r="8" fill="#00DF89"/>
+    
+    <!-- Typography "click" -->
+    <text x="125" y="68" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="52" fill="#0056C6">click</text>
+    <text x="240" y="45" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="20" fill="#00DF89">uz</text>
+  </g>
+</svg>
