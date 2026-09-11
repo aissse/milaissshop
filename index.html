@@ -288,7 +288,7 @@
   .pay-card.selected{ border-color:#000; border-width:2px; background:var(--pmr-selected-bg, var(--stone)); }
   .pay-card:active{ border-color:#000; }
   .pay-card.soon{ opacity:.7; }
-  .pay-card-logo{ width:44px; height:44px; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--line); border-radius:10px; padding:6px; box-sizing:border-box; }
+  .pay-card-logo{ width:64px; height:36px; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--line); border-radius:8px; padding:5px 8px; box-sizing:border-box; }
   .pay-card-logo img, .pay-card-logo svg{ max-width:100%; max-height:100%; object-fit:contain; }
   .pay-card-name{ font-size:13px; font-weight:700; color:var(--ink); }
   .pmr-wrap:last-child .pmr{ border-bottom:none; }
@@ -772,7 +772,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-43";
+  const CURRENT_VERSION = "20260908-44";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
