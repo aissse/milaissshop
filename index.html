@@ -283,6 +283,11 @@
   .pmc-icon{ width:32px; height:32px; border-radius:8px; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px; }
 
   .pay-methods-list{ border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+  .pay-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pay-card{ border:1.5px solid var(--line); border-radius:14px; padding:20px 10px; display:flex; align-items:center; justify-content:center; cursor:pointer; min-height:60px; transition:border-color .2s ease, background .2s ease; }
+  .pay-card.selected{ border-color:var(--ink); background:var(--pmr-selected-bg, var(--stone)); }
+  .pay-card.soon{ opacity:.55; }
+  .pay-card-badge{ display:flex; align-items:center; justify-content:center; border-radius:8px; padding:8px 18px; color:#fff; font-weight:700; font-size:14px; }
   .pmr-wrap:last-child .pmr{ border-bottom:none; }
   .pmr{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); cursor:pointer; }
   .pmr.selected{ background:var(--pmr-selected-bg, var(--stone)); }
@@ -560,77 +565,62 @@
       <div class="back-circle" onclick="showScreen('cart')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
       <div></div>
     </div>
-    <div class="cart-title"><h2 class="display">Оплата и доставка</h2></div>
+    <div class="cart-title"><h2 class="display" data-i18n="checkoutTitle">Оплата и доставка</h2></div>
 
     <div class="pay-field" style="margin-bottom:14px;">
-      <label class="block-label" style="margin-top:0;">Способ оплаты</label>
-      <div class="pay-methods-list" id="payMethods">
-        <div class="pmr-wrap" id="pmrwrap-payme">
-          <div class="pmr" data-method="payme" onclick="selectPayMethod('payme')">
-            <span class="pmr-radio"></span><span class="pmr-label">Payme</span>
-            <span class="pmr-badge" style="background:#00c9a7;">Payme</span>
-          </div>
-          <div class="pmr-note" id="pmrnote-payme"></div>
+      <label class="block-label" data-i18n="paymentMethodLabel" style="margin-top:0;">Способ оплаты</label>
+      <div class="pay-grid">
+        <div class="pay-card soon" onclick="showSoonPopup()">
+          <span class="pay-card-badge" style="background:#00c9a7;">Payme</span>
         </div>
-        <div class="pmr-wrap" id="pmrwrap-click">
-          <div class="pmr" data-method="click" onclick="selectPayMethod('click')">
-            <span class="pmr-radio"></span><span class="pmr-label">Click</span>
-            <span class="pmr-badge" style="background:#1877f2;">Click</span>
-          </div>
-          <div class="pmr-note" id="pmrnote-click"></div>
+        <div class="pay-card soon" onclick="showSoonPopup()">
+          <span class="pay-card-badge" style="background:#1877f2;">Click</span>
         </div>
-        <div class="pmr-wrap" id="pmrwrap-card">
-          <div class="pmr" onclick="toggleCardPreview()">
-            <span class="pmr-radio"></span><span class="pmr-label">Карта</span>
-            <span class="pmr-cards">
-              <svg viewBox="0 0 750 471" width="34" height="21"><rect width="750" height="471" rx="40" fill="#1a1a6c"/><path d="M311 128h128v215H311z" fill="#ff5f00"/><path d="M319 235a137 137 0 0 1 52-108 137 137 0 1 0 0 216 137 137 0 0 1-52-108z" fill="#eb001b"/><path d="M593 235a137 137 0 0 1-222 108 137 137 0 0 0 0-216 137 137 0 0 1 222 108z" fill="#f79e1b"/></svg>
-              <svg viewBox="0 0 750 471" width="34" height="21"><rect width="750" height="471" rx="40" fill="#fff" stroke="#e2ddd3"/><text x="375" y="290" font-family="Arial,sans-serif" font-weight="700" font-style="italic" font-size="140" fill="#1a1f71" text-anchor="middle">VISA</text></svg>
-            </span>
-          </div>
-          <div class="pmr-details">
-            <input type="text" placeholder="Номер карты" disabled>
-            <div class="row" style="display:flex; gap:8px;">
-              <input type="text" placeholder="ММ/ГГ" disabled>
-              <input type="text" placeholder="Секретный код" disabled>
-            </div>
-            <div class="pmr-soon-note">Оплата картой онлайн в разработке — скоро будет доступна</div>
-          </div>
+        <div class="pay-card soon" onclick="showSoonPopup()">
+          <span class="pay-card-badge" style="background:#000; padding:8px 16px;">
+            <svg viewBox="0 0 165.5 106" width="42" height="18"><path fill="#fff" d="M45.2 35.6c1.4-1.8 2.4-4.2 2.1-6.6-2.1.1-4.6 1.4-6.1 3.1-1.3 1.5-2.5 4-2.2 6.3 2.4.3 4.7-1 6.2-2.8M47.3 39c-3.4-.2-6.3 1.9-7.9 1.9-1.6 0-4.1-1.8-6.8-1.8-3.5.1-6.7 2-8.5 5.2-3.6 6.3-1 15.6 2.6 20.7 1.7 2.5 3.8 5.3 6.5 5.2 2.6-.1 3.6-1.7 6.7-1.7s4 1.7 6.8 1.6c2.8-.1 4.6-2.5 6.3-5.1 2-2.9 2.8-5.7 2.8-5.8-.1-.1-5.5-2.1-5.5-8.3-.1-5.2 4.2-7.7 4.4-7.8-2.3-3.6-6.1-4-7.4-4.1"/><path fill="#fff" d="M76.7 31.9c7.4 0 12.5 5.1 12.5 12.4 0 7.4-5.2 12.5-12.7 12.5h-8.1v12.9h-5.9V31.9h14.2zm-8.3 20h6.7c5.1 0 8-2.8 8-7.5 0-4.8-2.9-7.5-8-7.5h-6.8v15zM90.7 62c0-4.8 3.7-7.8 10.3-8.2l7.6-.4v-2.1c0-3.1-2.1-4.9-5.5-4.9-3.3 0-5.3 1.6-5.8 4h-5.4c.3-5 4.6-8.7 11.4-8.7 6.7 0 11 3.5 11 9.1v19h-5.4v-4.5h-.1c-1.6 3.1-5.1 5-8.7 5-5.6 0-9.4-3.4-9.4-8.3zm17.9-2.5v-2.2l-6.8.4c-3.4.2-5.3 1.7-5.3 4.1 0 2.4 2 4 5 4 4 0 7.1-2.7 7.1-6.3zM119.3 80v-4.6c.4.1 1.4.1 1.8.1 2.6 0 4-1.1 4.9-3.9 0-.1.5-1.7.5-1.7l-10-27.6h6.1l7 22.5h.1l7-22.5h6l-10.3 29.1c-2.4 6.7-5.1 8.8-10.8 8.8-.4-.1-1.8-.1-2.3-.2z"/></svg>
+          </span>
         </div>
-        <div class="pmr-wrap">
-          <div class="pmr soon" onclick="showSoonPopup()">
-            <span class="pmr-radio"></span><span class="pmr-label">Apple Pay</span>
-            <span class="pmr-badge" style="background:#000; padding:6px 14px;">
-              <svg viewBox="0 0 165.5 106" width="42" height="18"><path fill="#fff" d="M45.2 35.6c1.4-1.8 2.4-4.2 2.1-6.6-2.1.1-4.6 1.4-6.1 3.1-1.3 1.5-2.5 4-2.2 6.3 2.4.3 4.7-1 6.2-2.8M47.3 39c-3.4-.2-6.3 1.9-7.9 1.9-1.6 0-4.1-1.8-6.8-1.8-3.5.1-6.7 2-8.5 5.2-3.6 6.3-1 15.6 2.6 20.7 1.7 2.5 3.8 5.3 6.5 5.2 2.6-.1 3.6-1.7 6.7-1.7s4 1.7 6.8 1.6c2.8-.1 4.6-2.5 6.3-5.1 2-2.9 2.8-5.7 2.8-5.8-.1-.1-5.5-2.1-5.5-8.3-.1-5.2 4.2-7.7 4.4-7.8-2.3-3.6-6.1-4-7.4-4.1"/><path fill="#fff" d="M76.7 31.9c7.4 0 12.5 5.1 12.5 12.4 0 7.4-5.2 12.5-12.7 12.5h-8.1v12.9h-5.9V31.9h14.2zm-8.3 20h6.7c5.1 0 8-2.8 8-7.5 0-4.8-2.9-7.5-8-7.5h-6.8v15zM90.7 62c0-4.8 3.7-7.8 10.3-8.2l7.6-.4v-2.1c0-3.1-2.1-4.9-5.5-4.9-3.3 0-5.3 1.6-5.8 4h-5.4c.3-5 4.6-8.7 11.4-8.7 6.7 0 11 3.5 11 9.1v19h-5.4v-4.5h-.1c-1.6 3.1-5.1 5-8.7 5-5.6 0-9.4-3.4-9.4-8.3zm17.9-2.5v-2.2l-6.8.4c-3.4.2-5.3 1.7-5.3 4.1 0 2.4 2 4 5 4 4 0 7.1-2.7 7.1-6.3zM119.3 80v-4.6c.4.1 1.4.1 1.8.1 2.6 0 4-1.1 4.9-3.9 0-.1.5-1.7.5-1.7l-10-27.6h6.1l7 22.5h.1l7-22.5h6l-10.3 29.1c-2.4 6.7-5.1 8.8-10.8 8.8-.4-.1-1.8-.1-2.3-.2z"/></svg>
-            </span>
-          </div>
-        </div>
-        <div class="pmr-wrap">
-          <div class="pmr soon" onclick="showSoonPopup()">
-            <span class="pmr-radio"></span><span class="pmr-label">Google Pay</span>
-            <span class="pmr-badge" style="background:#fff; border:1px solid var(--line); padding:4px 8px;">
-              <svg viewBox="0 -11 70 70" width="44" height="26"><path fill-rule="evenodd" clip-rule="evenodd" d="M33.0603 31.5161V25.4741H36.1786C37.4564 25.4741 38.535 25.046 39.4142 24.2015L39.6252 23.9875C41.2313 22.2391 41.1258 19.5155 39.4142 17.898C38.5584 17.0416 37.3861 16.5778 36.1786 16.6016H31.1729V31.5161H33.0603ZM33.0605 23.6425V18.4332H36.2262C36.9063 18.4332 37.5512 18.6948 38.0319 19.1706C39.052 20.1696 39.0754 21.8347 38.0905 22.8694C37.6098 23.3809 36.9297 23.6663 36.2262 23.6425H33.0605ZM48.4293 22.1083C47.6204 21.359 46.5185 20.9784 45.1234 20.9784C43.3298 20.9784 41.9816 21.6444 41.0906 22.9646L42.7553 24.0231C43.3649 23.1192 44.1973 22.6673 45.2524 22.6673C45.9206 22.6673 46.5653 22.9171 47.0694 23.369C47.5618 23.7972 47.8432 24.4156 47.8432 25.0698V25.5098C47.1163 25.1055 46.2019 24.8914 45.0765 24.8914C43.7635 24.8914 42.7084 25.2006 41.923 25.831C41.1375 26.4613 40.739 27.2939 40.739 28.3524C40.7155 29.3158 41.1258 30.2316 41.8527 30.85C42.5912 31.5161 43.5291 31.8491 44.631 31.8491C45.9323 31.8491 46.9639 31.2663 47.7494 30.1007H47.8314V31.5161H49.6368V25.2244C49.6368 23.9042 49.2382 22.8576 48.4293 22.1083ZM43.3066 29.6369C42.9197 29.3514 42.6852 28.8876 42.6852 28.3881C42.6852 27.8291 42.9432 27.3652 43.4473 26.9965C43.9632 26.6278 44.6081 26.4375 45.3702 26.4375C46.4255 26.4256 47.2462 26.6635 47.8325 27.1392C47.8325 27.948 47.5159 28.6497 46.8945 29.2444C46.3317 29.8153 45.5696 30.1364 44.7723 30.1364C44.2446 30.1483 43.7287 29.9699 43.3066 29.6369ZM53.693 35.9999L60.0001 21.3114H57.9485L55.0295 28.6378H54.9943L52.0049 21.3114H49.9534L54.0916 30.8619L51.747 35.9999H53.693Z" fill="#3C4043"/><path d="M26.544 24.1659C26.544 23.5831 26.4971 23.0003 26.4034 22.4294H18.4434V25.7239H23.0037C22.8161 26.7825 22.2065 27.734 21.3155 28.3286V30.4695H24.0353C25.6296 28.9828 26.544 26.7825 26.544 24.1659Z" fill="#4285F4"/><path d="M18.4442 32.539C20.7185 32.539 22.6411 31.7778 24.0361 30.4695L21.3164 28.3287C20.5544 28.852 19.5814 29.1493 18.4442 29.1493C16.2403 29.1493 14.3763 27.6388 13.7081 25.6169H10.9062V27.8291C12.3365 30.7193 15.2555 32.539 18.4442 32.539Z" fill="#34A853"/><path d="M13.708 25.6169C13.3563 24.5584 13.3563 23.4048 13.708 22.3343V20.134H10.9058C9.69808 22.5484 9.69808 25.4029 10.9058 27.8172L13.708 25.6169Z" fill="#FBBC04"/><path d="M18.4442 18.8019C19.6517 18.7781 20.8123 19.242 21.6798 20.0864L24.0948 17.6363C22.559 16.1853 20.5427 15.3885 18.4442 15.4123C15.2555 15.4123 12.3365 17.2439 10.9062 20.134L13.7081 22.3462C14.3763 20.3124 16.2403 18.8019 18.4442 18.8019Z" fill="#EA4335"/></svg>
-            </span>
-          </div>
+        <div class="pay-card soon" onclick="showSoonPopup()">
+          <span class="pay-card-badge" style="background:#fff; border:1px solid var(--line); padding:6px 10px;">
+            <svg viewBox="0 -11 70 70" width="44" height="26"><path fill-rule="evenodd" clip-rule="evenodd" d="M33.0603 31.5161V25.4741H36.1786C37.4564 25.4741 38.535 25.046 39.4142 24.2015L39.6252 23.9875C41.2313 22.2391 41.1258 19.5155 39.4142 17.898C38.5584 17.0416 37.3861 16.5778 36.1786 16.6016H31.1729V31.5161H33.0603ZM33.0605 23.6425V18.4332H36.2262C36.9063 18.4332 37.5512 18.6948 38.0319 19.1706C39.052 20.1696 39.0754 21.8347 38.0905 22.8694C37.6098 23.3809 36.9297 23.6663 36.2262 23.6425H33.0605ZM48.4293 22.1083C47.6204 21.359 46.5185 20.9784 45.1234 20.9784C43.3298 20.9784 41.9816 21.6444 41.0906 22.9646L42.7553 24.0231C43.3649 23.1192 44.1973 22.6673 45.2524 22.6673C45.9206 22.6673 46.5653 22.9171 47.0694 23.369C47.5618 23.7972 47.8432 24.4156 47.8432 25.0698V25.5098C47.1163 25.1055 46.2019 24.8914 45.0765 24.8914C43.7635 24.8914 42.7084 25.2006 41.923 25.831C41.1375 26.4613 40.739 27.2939 40.739 28.3524C40.7155 29.3158 41.1258 30.2316 41.8527 30.85C42.5912 31.5161 43.5291 31.8491 44.631 31.8491C45.9323 31.8491 46.9639 31.2663 47.7494 30.1007H47.8314V31.5161H49.6368V25.2244C49.6368 23.9042 49.2382 22.8576 48.4293 22.1083ZM43.3066 29.6369C42.9197 29.3514 42.6852 28.8876 42.6852 28.3881C42.6852 27.8291 42.9432 27.3652 43.4473 26.9965C43.9632 26.6278 44.6081 26.4375 45.3702 26.4375C46.4255 26.4256 47.2462 26.6635 47.8325 27.1392C47.8325 27.948 47.5159 28.6497 46.8945 29.2444C46.3317 29.8153 45.5696 30.1364 44.7723 30.1364C44.2446 30.1483 43.7287 29.9699 43.3066 29.6369ZM53.693 35.9999L60.0001 21.3114H57.9485L55.0295 28.6378H54.9943L52.0049 21.3114H49.9534L54.0916 30.8619L51.747 35.9999H53.693Z" fill="#3C4043"/><path d="M26.544 24.1659C26.544 23.5831 26.4971 23.0003 26.4034 22.4294H18.4434V25.7239H23.0037C22.8161 26.7825 22.2065 27.734 21.3155 28.3286V30.4695H24.0353C25.6296 28.9828 26.544 26.7825 26.544 24.1659Z" fill="#4285F4"/><path d="M18.4442 32.539C20.7185 32.539 22.6411 31.7778 24.0361 30.4695L21.3164 28.3287C20.5544 28.852 19.5814 29.1493 18.4442 29.1493C16.2403 29.1493 14.3763 27.6388 13.7081 25.6169H10.9062V27.8291C12.3365 30.7193 15.2555 32.539 18.4442 32.539Z" fill="#34A853"/><path d="M13.708 25.6169C13.3563 24.5584 13.3563 23.4048 13.708 22.3343V20.134H10.9058C9.69808 22.5484 9.69808 25.4029 10.9058 27.8172L13.708 25.6169Z" fill="#FBBC04"/><path d="M18.4442 18.8019C19.6517 18.7781 20.8123 19.242 21.6798 20.0864L24.0948 17.6363C22.559 16.1853 20.5427 15.3885 18.4442 15.4123C15.2555 15.4123 12.3365 17.2439 10.9062 20.134L13.7081 22.3462C14.3763 20.3124 16.2403 18.8019 18.4442 18.8019Z" fill="#EA4335"/></svg>
+          </span>
         </div>
       </div>
-      <div class="hint" style="padding:0; margin-top:6px;">Apple Pay и Google Pay скоро будут доступны</div>
+
+      <div class="pmr-wrap" id="pmrwrap-card" style="margin-top:12px; border:1px solid var(--line); border-radius:16px; overflow:hidden;">
+        <div class="pmr" onclick="toggleCardPreview()">
+          <span class="pmr-radio"></span><span class="pmr-label" data-i18n="cardLabel">Карта</span>
+          <span class="pmr-cards">
+            <svg viewBox="0 0 750 471" width="34" height="21"><rect width="750" height="471" rx="40" fill="#1a1a6c"/><path d="M311 128h128v215H311z" fill="#ff5f00"/><path d="M319 235a137 137 0 0 1 52-108 137 137 0 1 0 0 216 137 137 0 0 1-52-108z" fill="#eb001b"/><path d="M593 235a137 137 0 0 1-222 108 137 137 0 0 0 0-216 137 137 0 0 1 222 108z" fill="#f79e1b"/></svg>
+            <svg viewBox="0 0 750 471" width="34" height="21"><rect width="750" height="471" rx="40" fill="#fff" stroke="#e2ddd3"/><text x="375" y="290" font-family="Arial,sans-serif" font-weight="700" font-style="italic" font-size="140" fill="#1a1f71" text-anchor="middle">VISA</text></svg>
+          </span>
+        </div>
+        <div class="pmr-details">
+          <input type="text" placeholder="Номер карты" disabled>
+          <div class="row" style="display:flex; gap:8px;">
+            <input type="text" placeholder="ММ/ГГ" disabled>
+            <input type="text" placeholder="Секретный код" disabled>
+          </div>
+          <div class="pmr-soon-note" data-i18n="cardSoonNote">Оплата картой онлайн в разработке — скоро будет доступна</div>
+        </div>
+      </div>
     </div>
 
-
     <div class="pay-field" id="phoneFieldBlock" style="margin-bottom:16px;">
-      <label class="block-label" style="margin-top:0;">Ваш номер телефона</label>
+      <label class="block-label" data-i18n="phoneFieldLabel" style="margin-top:0;">Ваш номер телефона</label>
       <input type="text" id="phoneInput" placeholder="+998 90 123 45 67">
-      <div class="pay-note">Нужен, чтобы курьер мог с вами связаться.</div>
+      <div class="pay-note" data-i18n="phoneFieldNote">Нужен, чтобы курьер мог с вами связаться.</div>
     </div>
 
     <div class="pay-field" style="margin-bottom:16px;">
-      <label class="block-label" style="margin-top:0;">Ближайший пункт БТС</label>
-      <input type="text" id="btsSearchInput" placeholder="Начните вводить город или улицу..." oninput="filterBtsResults(this.value)">
+      <label class="block-label" data-i18n="btsLabel" style="margin-top:0;">Ближайший пункт БТС</label>
+      <input type="text" id="btsSearchInput" data-i18n-ph="btsPlaceholder" placeholder="Начните вводить город или улицу..." oninput="filterBtsResults(this.value)">
       <div id="btsSelectedDisplay" style="font-size:12px; font-weight:700; color:var(--orange); margin-top:6px; display:none;"></div>
       <div id="btsResults" style="max-height:180px; overflow-y:auto; margin-top:6px;"></div>
     </div>
 
-    <button class="checkout-btn" onclick="confirmPayment()" id="confirmPaymentBtn">Перевод совершён</button>
+    <button class="checkout-btn" onclick="confirmPayment()" id="confirmPaymentBtn" data-i18n="confirmTransferBtn">Перевод совершён</button>
   </div>
 
   <div class="screen" id="shopAll">
@@ -775,7 +765,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-39";
+  const CURRENT_VERSION = "20260908-41";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1063,7 +1053,7 @@ const STR = {
         reviewsWord:"отзывов", pcsWord:"шт", socialHeader:"Мы в соцсетях", newsletterTitle:"Будьте в курсе", newsletterSub:"Подпишись на новости о новых дропах и скидках", supportLabel:"Поддержка", faqHeader:"Частые вопросы",
         statusPaying:"Проверяется оплата", statusPacking:"Собирается", statusShipping:"В пути", statusDelivered:"Доставлен",
         faqQ1:"Как оформить заказ?", faqA1:"Добавьте товар в корзину, выберите способ оплаты и укажите ближайший пункт БТС для получения.", faqQ2:"Сколько идёт доставка?", faqA2:"Обычно 2–5 дней в зависимости от региона. Статус заказа виден в разделе «Профиль».", faqQ3:"Можно ли вернуть товар?", faqA3:"Да, если размер не подошёл — напишите в поддержку в течение 7 дней после получения.",
-        policyReturn:"Возврат", policyReturnText:"У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии.", policyDelivery:"Доставка", policyDeliveryText:"Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона.", policyCare:"Уход за товаром", policyCareText:"Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке.", collectionsHeader:"Коллекции", sizeGuide:"Гид по размерам", trustShippingTitle:"Бесплатная доставка", trustShippingSub:"от 300 000 сум", trustReturnTitle:"Лёгкий возврат", trustReturnSub:"14 дней на возврат", trustSecureTitle:"Безопасная оплата", trustSecureSub:"Payme, Click, карта" },
+        policyReturn:"Возврат", policyReturnText:"У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии.", policyDelivery:"Доставка", policyDeliveryText:"Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона.", policyCare:"Уход за товаром", policyCareText:"Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке.", collectionsHeader:"Коллекции", sizeGuide:"Гид по размерам", trustShippingTitle:"Бесплатная доставка", trustShippingSub:"от 300 000 сум", trustReturnTitle:"Лёгкий возврат", trustReturnSub:"14 дней на возврат", trustSecureTitle:"Безопасная оплата", trustSecureSub:"Payme, Click, карта", checkoutTitle:"Оплата и доставка", paymentMethodLabel:"Способ оплаты", cardLabel:"Карта", cardSoonNote:"Оплата картой онлайн в разработке — скоро будет доступна", cardSoonToast:"Оплата картой пока в разработке", soonMethodToast:"Скоро будет доступно — пока выберите Payme или карту", phoneFieldLabel:"Ваш номер телефона", phoneFieldNote:"Нужен, чтобы курьер мог с вами связаться.", btsLabel:"Ближайший пункт БТС", btsPlaceholder:"Начните вводить город или улицу...", btsNoResults:"Ничего не найдено, попробуйте другой запрос", confirmTransferBtn:"Перевод совершён", paymePrefix:"Переведите на номер Payme:", paymeNotSet:"Реквизиты Payme пока не добавлены продавцом." },
   uz: { search:"Qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
         addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
         sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
@@ -1074,7 +1064,7 @@ const STR = {
         reviewsWord:"sharh", pcsWord:"dona", socialHeader:"Ijtimoiy tarmoqlarda", newsletterTitle:"Yangiliklardan xabardor bo‘ling", newsletterSub:"Yangi kolleksiyalar va chegirmalar haqida bilib turing", supportLabel:"Qo‘llab-quvvatlash", faqHeader:"Ko‘p beriladigan savollar",
         statusPaying:"To‘lov tekshirilmoqda", statusPacking:"Yig‘ilmoqda", statusShipping:"Yo‘lda", statusDelivered:"Yetkazib berildi",
         faqQ1:"Buyurtmani qanday rasmiylashtirish mumkin?", faqA1:"Mahsulotni savatga qo‘shing, to‘lov usulini tanlang va yaqin BTS punktini ko‘rsating.", faqQ2:"Yetkazib berish qancha davom etadi?", faqA2:"Odatda hududga qarab 2–5 kun. Buyurtma holatini «Profil» bo‘limida ko‘rish mumkin.", faqQ3:"Mahsulotni qaytarish mumkinmi?", faqA3:"Ha, o‘lcham mos kelmasa — olgandan keyin 7 kun ichida qo‘llab-quvvatlashga yozing.",
-        policyReturn:"Qaytarish", policyReturnText:"Buyurtmani qaytarish uchun 14 kun vaqtingiz bor. Qaytarish xarajatlari xaridorga tegishli, mahsulot dastlabki holatida bo‘lishi kerak.", policyDelivery:"Yetkazib berish", policyDeliveryText:"Buyurtmani imkon qadar tez qayta ishlaymiz va yuboramiz. Odatda hududga qarab 2-5 kun.", policyCare:"Mahsulotga g‘amxo‘rlik", policyCareText:"Sovuq suvda yuving, mashinada quritmang, rasm/kashta ustiga to‘g‘ridan-to‘g‘ri dazmollamang.", collectionsHeader:"Kolleksiyalar", sizeGuide:"O'lcham gidi", trustShippingTitle:"Bepul yetkazib berish", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Oson qaytarish", trustReturnSub:"14 kun ichida qaytarish", trustSecureTitle:"Xavfsiz to'lov", trustSecureSub:"Payme, Click, karta" },
+        policyReturn:"Qaytarish", policyReturnText:"Buyurtmani qaytarish uchun 14 kun vaqtingiz bor. Qaytarish xarajatlari xaridorga tegishli, mahsulot dastlabki holatida bo‘lishi kerak.", policyDelivery:"Yetkazib berish", policyDeliveryText:"Buyurtmani imkon qadar tez qayta ishlaymiz va yuboramiz. Odatda hududga qarab 2-5 kun.", policyCare:"Mahsulotga g‘amxo‘rlik", policyCareText:"Sovuq suvda yuving, mashinada quritmang, rasm/kashta ustiga to‘g‘ridan-to‘g‘ri dazmollamang.", collectionsHeader:"Kolleksiyalar", sizeGuide:"O'lcham gidi", trustShippingTitle:"Bepul yetkazib berish", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Oson qaytarish", trustReturnSub:"14 kun ichida qaytarish", trustSecureTitle:"Xavfsiz to'lov", trustSecureSub:"Payme, Click, karta", checkoutTitle:"To'lov va yetkazib berish", paymentMethodLabel:"To'lov usuli", cardLabel:"Karta", cardSoonNote:"Karta orqali onlayn to'lov ishlab chiqilmoqda — tez orada mavjud bo'ladi", cardSoonToast:"Karta orqali to'lov hali ishlab chiqilmoqda", soonMethodToast:"Tez orada mavjud bo'ladi — hozircha Payme yoki kartani tanlang", phoneFieldLabel:"Telefon raqamingiz", phoneFieldNote:"Kuryer siz bilan bog'lanishi uchun kerak.", btsLabel:"Eng yaqin BTS punkti", btsPlaceholder:"Shahar yoki ko'chani kiriting...", btsNoResults:"Hech narsa topilmadi, boshqa so'rov kiriting", confirmTransferBtn:"O'tkazma amalga oshirildi", paymePrefix:"Payme raqamiga o'tkazing:", paymeNotSet:"Payme rekvizitlari hali sotuvchi tomonidan qo'shilmagan." },
   tr: { search:"Ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
         addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
         sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
@@ -1085,7 +1075,7 @@ const STR = {
         reviewsWord:"değerlendirme", pcsWord:"adet", socialHeader:"Bizi takip edin", newsletterTitle:"Haberdar olun", newsletterSub:"Yeni koleksiyonlar ve indirimlerden haberdar olun", supportLabel:"Destek", faqHeader:"Sık sorulan sorular",
         statusPaying:"Ödeme kontrol ediliyor", statusPacking:"Hazırlanıyor", statusShipping:"Yolda", statusDelivered:"Teslim edildi",
         faqQ1:"Nasıl sipariş verilir?", faqA1:"Ürünü sepete ekleyin, ödeme yöntemini seçin ve en yakın BTS noktasını belirtin.", faqQ2:"Teslimat ne kadar sürer?", faqA2:"Genellikle bölgeye göre 2-5 gün. Sipariş durumu «Profil» bölümünde görünür.", faqQ3:"Ürün iade edilebilir mi?", faqA3:"Evet, beden uymazsa — teslim alındıktan sonra 7 gün içinde desteğe yazın.",
-        policyReturn:"İade", policyReturnText:"Siparişi iade etmek için 14 gününüz var. İade kargo masrafları alıcıya aittir, ürün orijinal durumda olmalıdır.", policyDelivery:"Teslimat", policyDeliveryText:"Siparişi mümkün olan en kısa sürede hazırlayıp gönderiyoruz. Genellikle bölgeye göre 2-5 gün.", policyCare:"Ürün bakımı", policyCareText:"Soğuk suda yıkayın, makinede kurutmayın, baskı/nakış üzerine doğrudan ütü yapmayın.", collectionsHeader:"Koleksiyonlar", sizeGuide:"Beden rehberi", trustShippingTitle:"Ücretsiz kargo", trustShippingSub:"300.000 so'mdan itibaren", trustReturnTitle:"Kolay iade", trustReturnSub:"14 gün iade hakkı", trustSecureTitle:"Güvenli ödeme", trustSecureSub:"Payme, Click, kart" },
+        policyReturn:"İade", policyReturnText:"Siparişi iade etmek için 14 gününüz var. İade kargo masrafları alıcıya aittir, ürün orijinal durumda olmalıdır.", policyDelivery:"Teslimat", policyDeliveryText:"Siparişi mümkün olan en kısa sürede hazırlayıp gönderiyoruz. Genellikle bölgeye göre 2-5 gün.", policyCare:"Ürün bakımı", policyCareText:"Soğuk suda yıkayın, makinede kurutmayın, baskı/nakış üzerine doğrudan ütü yapmayın.", collectionsHeader:"Koleksiyonlar", sizeGuide:"Beden rehberi", trustShippingTitle:"Ücretsiz kargo", trustShippingSub:"300.000 so'mdan itibaren", trustReturnTitle:"Kolay iade", trustReturnSub:"14 gün iade hakkı", trustSecureTitle:"Güvenli ödeme", trustSecureSub:"Payme, Click, kart", checkoutTitle:"Ödeme ve teslimat", paymentMethodLabel:"Ödeme yöntemi", cardLabel:"Kart", cardSoonNote:"Kartla online ödeme geliştiriliyor — yakında kullanılabilir olacak", cardSoonToast:"Kartla ödeme henüz geliştirme aşamasında", soonMethodToast:"Yakında kullanılabilir olacak — şimdilik Payme veya kart seçin", phoneFieldLabel:"Telefon numaranız", phoneFieldNote:"Kuryerin sizinle iletişime geçebilmesi için gerekli.", btsLabel:"En yakın BTS noktası", btsPlaceholder:"Şehir veya sokak yazmaya başlayın...", btsNoResults:"Sonuç bulunamadı, başka bir arama deneyin", confirmTransferBtn:"Transfer tamamlandı", paymePrefix:"Payme numarasına gönderin:", paymeNotSet:"Payme bilgileri henüz satıcı tarafından eklenmedi." },
   az: { search:"Axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
         addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
         sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
@@ -1096,7 +1086,7 @@ const STR = {
         reviewsWord:"rəy", pcsWord:"ədəd", socialHeader:"Bizi izləyin", newsletterTitle:"Xəbərdar olun", newsletterSub:"Yeni kolleksiyalar və endirimlərdən xəbərdar olun", supportLabel:"Dəstək", faqHeader:"Tez-tez verilən suallar",
         statusPaying:"Ödəniş yoxlanılır", statusPacking:"Hazırlanır", statusShipping:"Yoldadır", statusDelivered:"Çatdırıldı",
         faqQ1:"Sifarişi necə vermək olar?", faqA1:"Məhsulu səbətə əlavə edin, ödəniş üsulunu seçin və ən yaxın BTS məntəqəsini göstərin.", faqQ2:"Çatdırılma nə qədər çəkir?", faqA2:"Adətən bölgəyə görə 2-5 gün. Sifariş statusu «Profil» bölməsində görünür.", faqQ3:"Məhsulu qaytarmaq olarmı?", faqA3:"Bəli, ölçü uyğun gəlmirsə — aldıqdan sonra 7 gün ərzində dəstəyə yazın.",
-        policyReturn:"Qaytarma", policyReturnText:"Sifarişi qaytarmaq üçün 14 gününüz var. Geri göndərmə xərcləri alıcıya aiddir, məhsul ilkin vəziyyətdə olmalıdır.", policyDelivery:"Çatdırılma", policyDeliveryText:"Sifarişi mümkün qədər tez hazırlayıb göndəririk. Adətən bölgəyə görə 2-5 gün.", policyCare:"Məhsula qulluq", policyCareText:"Soyuq suda yuyun, maşında qurutmayın, çap/naxış üzərinə birbaşa ütü etməyin.", collectionsHeader:"Kolleksiyalar", sizeGuide:"Ölçü bələdçisi", trustShippingTitle:"Pulsuz çatdırılma", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Asan qaytarma", trustReturnSub:"14 gün qaytarma hüququ", trustSecureTitle:"Təhlükəsiz ödəniş", trustSecureSub:"Payme, Click, kart" },
+        policyReturn:"Qaytarma", policyReturnText:"Sifarişi qaytarmaq üçün 14 gününüz var. Geri göndərmə xərcləri alıcıya aiddir, məhsul ilkin vəziyyətdə olmalıdır.", policyDelivery:"Çatdırılma", policyDeliveryText:"Sifarişi mümkün qədər tez hazırlayıb göndəririk. Adətən bölgəyə görə 2-5 gün.", policyCare:"Məhsula qulluq", policyCareText:"Soyuq suda yuyun, maşında qurutmayın, çap/naxış üzərinə birbaşa ütü etməyin.", collectionsHeader:"Kolleksiyalar", sizeGuide:"Ölçü bələdçisi", trustShippingTitle:"Pulsuz çatdırılma", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Asan qaytarma", trustReturnSub:"14 gün qaytarma hüququ", trustSecureTitle:"Təhlükəsiz ödəniş", trustSecureSub:"Payme, Click, kart", checkoutTitle:"Ödəniş və çatdırılma", paymentMethodLabel:"Ödəniş üsulu", cardLabel:"Kart", cardSoonNote:"Kartla onlayn ödəniş hazırlanır — tezliklə mövcud olacaq", cardSoonToast:"Kartla ödəniş hələ hazırlanma mərhələsindədir", soonMethodToast:"Tezliklə mövcud olacaq — hələlik Payme və ya kart seçin", phoneFieldLabel:"Telefon nömrəniz", phoneFieldNote:"Kuryerin sizinlə əlaqə saxlaması üçün lazımdır.", btsLabel:"Ən yaxın BTS məntəqəsi", btsPlaceholder:"Şəhər və ya küçə yazmağa başlayın...", btsNoResults:"Heç nə tapılmadı, başqa sorğu sınayın", confirmTransferBtn:"Köçürmə edildi", paymePrefix:"Payme nömrəsinə köçürün:", paymeNotSet:"Payme rekvizitləri hələ satıcı tərəfindən əlavə edilməyib." },
   en: { search:"Search", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
         addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
         sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
@@ -1107,7 +1097,7 @@ const STR = {
         reviewsWord:"reviews", pcsWord:"pcs", socialHeader:"Follow us", newsletterTitle:"Stay updated", newsletterSub:"Subscribe for news on new drops and discounts", supportLabel:"Support", faqHeader:"Frequently asked questions",
         statusPaying:"Payment being verified", statusPacking:"Packing", statusShipping:"On the way", statusDelivered:"Delivered",
         faqQ1:"How do I place an order?", faqA1:"Add an item to your cart, choose a payment method and select the nearest BTS pickup point.", faqQ2:"How long does delivery take?", faqA2:"Usually 2-5 days depending on the region. Order status is visible in the Profile section.", faqQ3:"Can I return an item?", faqA3:"Yes, if the size does not fit - contact support within 7 days of receiving it.",
-        policyReturn:"Returns", policyReturnText:"You have 14 days to return your order. Return shipping costs are covered by the buyer, and the item must be in its original condition.", policyDelivery:"Delivery", policyDeliveryText:"We process and ship orders as fast as possible. Usually 2-5 days depending on the region.", policyCare:"Care instructions", policyCareText:"Wash in cold water, do not tumble dry, do not iron directly on prints/embroidery.", collectionsHeader:"Collections", sizeGuide:"Size guide", trustShippingTitle:"Free shipping", trustShippingSub:"on orders over 300,000 UZS", trustReturnTitle:"Easy returns", trustReturnSub:"14-day return policy", trustSecureTitle:"Secure payment", trustSecureSub:"Payme, Click, card" }
+        policyReturn:"Returns", policyReturnText:"You have 14 days to return your order. Return shipping costs are covered by the buyer, and the item must be in its original condition.", policyDelivery:"Delivery", policyDeliveryText:"We process and ship orders as fast as possible. Usually 2-5 days depending on the region.", policyCare:"Care instructions", policyCareText:"Wash in cold water, do not tumble dry, do not iron directly on prints/embroidery.", collectionsHeader:"Collections", sizeGuide:"Size guide", trustShippingTitle:"Free shipping", trustShippingSub:"on orders over 300,000 UZS", trustReturnTitle:"Easy returns", trustReturnSub:"14-day return policy", trustSecureTitle:"Secure payment", trustSecureSub:"Payme, Click, card", checkoutTitle:"Payment & delivery", paymentMethodLabel:"Payment method", cardLabel:"Card", cardSoonNote:"Online card payment is in development — coming soon", cardSoonToast:"Card payment is still in development", soonMethodToast:"Coming soon — please choose Payme or card for now", phoneFieldLabel:"Your phone number", phoneFieldNote:"Needed so the courier can reach you.", btsLabel:"Nearest BTS pickup point", btsPlaceholder:"Start typing a city or street...", btsNoResults:"Nothing found, try a different search", confirmTransferBtn:"Transfer completed", paymePrefix:"Transfer to Payme number:", paymeNotSet:"Payme details haven't been added by the seller yet." }
 };
 let lang = localStorage.getItem('milaisss_lang') || 'en';
 function t(key){ return (STR[lang] && STR[lang][key]) || STR.ru[key] || key; }
@@ -2063,7 +2053,6 @@ function renderCart(){
 function goToCheckoutFlow(){
   if (cart.length === 0) return;
   selectedPayMethod = '';
-  document.querySelectorAll('.pmr').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('.pmr-wrap').forEach(w => w.classList.remove('open'));
 
   selectedBtsBranch = '';
@@ -2087,30 +2076,13 @@ let selectedBtsBranch = '';
 let selectedPayMethod = '';
 
 function showSoonPopup(){
-  showToast('Скоро будет доступно — пока выберите Payme, Click или карту');
-}
-
-function selectPayMethod(method){
-  selectedPayMethod = method;
-  document.querySelectorAll('.pmr[data-method]').forEach(c => c.classList.toggle('selected', c.dataset.method === method));
-  document.querySelectorAll('.pmr-wrap[id^="pmrwrap-payme"], .pmr-wrap[id^="pmrwrap-click"]').forEach(w => w.classList.remove('open'));
-
-  const wrap = document.getElementById(`pmrwrap-${method}`);
-  const note = document.getElementById(`pmrnote-${method}`);
-  if (!wrap || !note) return;
-  wrap.classList.add('open');
-
-  if (method === 'payme'){
-    note.innerHTML = paymentPaymeInfo ? `Переведите на номер Payme: <strong>${paymentPaymeInfo}</strong>` : 'Реквизиты Payme пока не добавлены продавцом.';
-  } else if (method === 'click'){
-    note.innerHTML = paymentClickInfo ? `Переведите на номер Click: <strong>${paymentClickInfo}</strong>` : 'Реквизиты Click пока не добавлены продавцом.';
-  }
+  showToast(t('soonMethodToast'));
 }
 
 function toggleCardPreview(){
   const wrap = document.getElementById('pmrwrap-card');
   wrap.classList.toggle('open');
-  showToast('Оплата картой пока в разработке');
+  showToast(t('cardSoonToast'));
 }
 
 function filterBtsResults(query){
@@ -2118,7 +2090,7 @@ function filterBtsResults(query){
   const q = query.trim().toLowerCase();
   if (!q){ wrap.innerHTML = ''; return; }
   const matches = btsBranches.filter(b => b.toLowerCase().includes(q)).slice(0, 20);
-  if (matches.length === 0){ wrap.innerHTML = '<p class="pay-note">Ничего не найдено, попробуйте другой запрос</p>'; return; }
+  if (matches.length === 0){ wrap.innerHTML = `<p class="pay-note">${t('btsNoResults')}</p>`; return; }
   wrap.innerHTML = matches.map(b => `<div class="bts-result-item" onclick="selectBtsBranch('${b.replace(/'/g,"\\'")}')">${b}</div>`).join('');
 }
 
@@ -2135,7 +2107,6 @@ function confirmPayment(){
   const phone = document.getElementById('phoneInput').value.trim();
   const branch = selectedBtsBranch;
 
-  if (!selectedPayMethod){ showToast('Выберите способ оплаты'); return; }
   if (!phone){ showToast('Укажите номер телефона'); return; }
   if (!branch){ showToast('Выберите пункт БТС'); return; }
 
@@ -2202,7 +2173,7 @@ function finalizeOrder(phone, branch){
     text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
     orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price });
   });
-  const methodLabel = PAY_METHOD_LABELS[selectedPayMethod] || selectedPayMethod;
+  const methodLabel = PAY_METHOD_LABELS[selectedPayMethod] || selectedPayMethod || 'Уточняется';
   text += `\nИтого: ${fmt(total)}\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n💰 Способ оплаты: ${methodLabel}`;
 
   const customerId = getCustomerId();
