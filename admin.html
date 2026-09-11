@@ -529,6 +529,11 @@ function productFormCardHTML(type){
     <div class="card-body">
       <label>Название товара</label>
       <input type="text" id="f_name_${suf}" placeholder="Название товара">
+      <textarea id="f_name_en_${suf}" rows="1" placeholder="English" style="margin-top:6px;"></textarea>
+      <textarea id="f_name_uz_${suf}" rows="1" placeholder="Oʻzbekcha" style="margin-top:6px;"></textarea>
+      <textarea id="f_name_tr_${suf}" rows="1" placeholder="Türkçe" style="margin-top:6px;"></textarea>
+      <textarea id="f_name_az_${suf}" rows="1" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
+      <div class="hint">Переводы необязательны — без них название будет одинаковым на всех языках.</div>
 
       <label>Подзаголовок / бейдж (необязательно)</label>
       <input type="text" id="f_sub_${suf}" placeholder="Например: New Arrival">
@@ -695,6 +700,11 @@ function saveProduct(type){
   const suf = type;
   const typeConfig = PRODUCT_TYPES.find(t => t.key === suf);
   const name = document.getElementById(`f_name_${suf}`).value.trim();
+  const nameTranslations = {};
+  ['en','uz','tr','az'].forEach(l => {
+    const nv = document.getElementById(`f_name_${l}_${suf}`).value.trim();
+    if (nv) nameTranslations[l] = nv;
+  });
   const sub = document.getElementById(`f_sub_${suf}`).value.trim();
   const category = document.getElementById(`f_category_${suf}`).value || 'Все';
   const price = Number(document.getElementById(`f_price_${suf}`).value) || 0;
@@ -728,7 +738,7 @@ function saveProduct(type){
 
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
-  const data = { name, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
+  const data = { name, nameTranslations, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
   if (editingId && editingType === suf){ db.collection('products').doc(editingId).update(data).then(() => resetForm(suf)); }
   else {
     db.collection('products').add(data).then(() => {
@@ -743,6 +753,7 @@ function resetForm(type){
   const typeConfig = PRODUCT_TYPES.find(t => t.key === suf);
   if (editingType === suf){ editingId = null; editingType = null; }
   document.getElementById(`f_name_${suf}`).value = '';
+  ['en','uz','tr','az'].forEach(l => document.getElementById(`f_name_${l}_${suf}`).value = '');
   document.getElementById(`f_sub_${suf}`).value = '';
   document.getElementById(`f_category_${suf}`).value = 'Все';
   document.getElementById(`f_price_${suf}`).value = '';
@@ -771,6 +782,8 @@ function editProduct(id, p){
   editingId = id;
   editingType = suf;
   document.getElementById(`f_name_${suf}`).value = p.name || '';
+  const nt = p.nameTranslations || {};
+  ['en','uz','tr','az'].forEach(l => document.getElementById(`f_name_${l}_${suf}`).value = nt[l] || '');
   document.getElementById(`f_sub_${suf}`).value = p.sub || '';
   document.getElementById(`f_category_${suf}`).value = p.category || 'Все';
   document.getElementById(`f_price_${suf}`).value = p.price || '';
