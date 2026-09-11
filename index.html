@@ -772,7 +772,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-44";
+  const CURRENT_VERSION = "20260908-45";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1124,6 +1124,7 @@ function applyLang(){
   if (customHero.title) document.getElementById('heroTitleText').textContent = customHero.title;
   if (customHero.btn) document.getElementById('heroBtnText').textContent = customHero.btn;
   if (currentProduct){
+    document.getElementById('detailName').textContent = getTranslatedProductName(currentProduct);
     document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
     if (currentColors[selectedColorIdx]) document.getElementById('colorLabel').textContent = getTranslatedColorName(currentColors[selectedColorIdx]);
     updateReviewsSummary();
@@ -1552,7 +1553,7 @@ function productCardHTML(p){
       <div class="heart-btn" data-fav="${p.id}">${heartIcon(isFavorite(p.id))}</div>
     </div>
     <div class="info">
-      <div class="name">${p.name}</div>
+      <div class="name">${getTranslatedProductName(p)}</div>
       <div class="sub">${p.sub || ''}</div>
       <div class="price">${fmt(p.price)}</div>
     </div>`;
@@ -1778,6 +1779,12 @@ function getTranslatedColorName(c){
   return c.name || '';
 }
 
+function getTranslatedProductName(p){
+  if (!p) return '';
+  if (p.nameTranslations && p.nameTranslations[lang]) return p.nameTranslations[lang];
+  return p.name || '';
+}
+
 function getSizeStock(product, color, sizeLabel){
   if (!color) return Number((product && product.stock) || 0);
   if (color.sizeStocks && Object.prototype.hasOwnProperty.call(color.sizeStocks, sizeLabel)) return color.sizeStocks[sizeLabel];
@@ -1916,7 +1923,7 @@ function openProduct(id){
   updateDetailFavIcon();
   updateReviewsSummary();
 
-  document.getElementById('detailName').textContent = currentProduct.name;
+  document.getElementById('detailName').textContent = getTranslatedProductName(currentProduct);
   document.getElementById('detailPrice').textContent = fmt(currentProduct.price);
   document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
 
@@ -2033,11 +2040,13 @@ function renderCart(){
   const itemsHtml = cart.map((item, idx) => {
     total += item.price * item.qty;
     const thumbStyle = item.image ? `style="background-image:url('${item.image}')"` : '';
+    const product = products.find(pr => pr.id === item.productId);
+    const displayName = product ? getTranslatedProductName(product) : item.name;
     return `
       <div class="cart-item">
         <div class="thumb" ${thumbStyle}>${item.image ? '' : item.emoji}</div>
         <div class="meta">
-          <div class="name">${item.name}</div>
+          <div class="name">${displayName}</div>
           <div class="opts">Размер ${item.size} · ${item.colorName} · ${item.qty} ${t('pcsWord')}</div>
           <div class="price">${fmt(item.price * item.qty)}</div>
         </div>
@@ -2241,8 +2250,11 @@ function renderOrders(){
       <div class="order-card">
         <div class="odate">${new Date(order.createdAt).toLocaleDateString('ru-RU')} · <strong>${translateStatus(order.status)}</strong></div>
         ${order.btsBranch ? `<div class="odate">📍 ${order.btsBranch}</div>` : ''}
-        ${order.items.map((it, ii) => `
-          <div class="order-line"><span>${it.name} (${it.size}, ${it.colorName}) × ${it.qty} ${t('pcsWord')}</span><span>${fmt(it.price*it.qty)}</span></div>
+        ${order.items.map((it, ii) => {
+          const itProduct = products.find(pr => pr.id === it.productId);
+          const itName = itProduct ? getTranslatedProductName(itProduct) : it.name;
+          return `
+          <div class="order-line"><span>${itName} (${it.size}, ${it.colorName}) × ${it.qty} ${t('pcsWord')}</span><span>${fmt(it.price*it.qty)}</span></div>
           ${order.status === 'Доставлен' ? `
             <div class="review-btn" onclick="toggleReviewForm('${order.id}',${ii})">Оставить отзыв</div>
             <div class="review-form" id="rf-${order.id}-${ii}">
@@ -2258,7 +2270,8 @@ function renderOrders(){
               </label>
               <button id="rsBtn-${order.id}-${ii}" onclick="submitReview('${order.id}',${ii},'${it.productId}','${(it.name||'').replace(/'/g,"")}','${(it.colorName||'').replace(/'/g,"")}')">Отправить</button>
             </div>` : ''}
-        `).join('')}
+        `;
+        }).join('')}
         <div class="order-total">Итого: ${fmt(order.total)}</div>
       </div>
     `).join('');
