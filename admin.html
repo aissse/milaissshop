@@ -355,7 +355,7 @@
           <input type="text" id="newCatInput" placeholder="Название категории">
         </div>
         <button class="btn secondary" onclick="addCategory()">+ Добавить категорию</button>
-        <div class="hint">Эти категории отображаются кнопками-иконками на главной странице магазина: при нажатии кнопка раскрывается и показывает название категории, а под кнопками появляются её товары. Иконку можно задать эмодзи (например 🔥, 🎁, 👜, 🎒), а рядом выбрать цвет — он окрашивает и сам символ (если это не цветной эмодзи), и обводку вокруг кнопки. Это только товарные категории — для информационных кнопок вроде "О нас" используй раздел ниже.</div>
+        <div class="hint">Эти категории отображаются кнопками-иконками на главной странице магазина: при нажатии кнопка раскрывается и показывает название категории, а под кнопками появляются её товары. Иконку можно задать эмодзи (например 🔥, 🎁, 👜, 🎒), а рядом выбрать цвет — он окрашивает и сам символ (если это не цветной эмодзи), и обводку вокруг кнопки. Если включить галочку "Автоматически: популярные" — товары в эту категорию попадут сами, без ручного выбора: те, что заказали больше 3 раз, а самые заказываемые будут показаны первыми. Это только товарные категории — для информационных кнопок вроде "О нас" используй раздел ниже.</div>
         </div>
       </div>
 
@@ -964,6 +964,7 @@ function loadSettings(){
     categoryImages = data.categoryImages || {};
     categoryIcons = data.categoryIcons || {};
     categoryIconColors = data.categoryIconColors || {};
+    categoryAutoPopular = data.categoryAutoPopular || {};
     categoryTranslations = data.categoryTranslations || {};
     categoryInfo = data.categoryInfo || {};
     categories = data.categories || ["Тренды","Oversize","Минимализм","Лимитки"];
@@ -1013,6 +1014,7 @@ function saveHexColor(id, hexVal){
 let categoryImages = {};
 let categoryIcons = {};
 let categoryIconColors = {};
+let categoryAutoPopular = {};
 let categoryTranslations = {};
 let categoryInfo = {};
 
@@ -1029,9 +1031,19 @@ function renderCategoryTags(){
       <input type="url" placeholder="Фото для плитки (необязательно)" value="${(categoryImages[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryImage('${c.replace(/'/g,"\\'")}', this.value)">
     </div>
     <input type="text" style="margin-bottom:6px;" placeholder="Переводы: en:Trends, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}" onchange="setCategoryTranslation('${c.replace(/'/g,"\\'")}', this.value)">
-    <input type="text" style="margin-bottom:10px;" placeholder="Доп. инфо (необязательно, мелким шрифтом в меню)" value="${(categoryInfo[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryInfo('${c.replace(/'/g,"\\'")}', this.value)">
+    <input type="text" style="margin-bottom:6px;" placeholder="Доп. инфо (необязательно, мелким шрифтом в меню)" value="${(categoryInfo[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryInfo('${c.replace(/'/g,"\\'")}', this.value)">
+    <label class="cat-tag" style="cursor:pointer; background:${categoryAutoPopular[c] ? 'var(--maroon)' : 'var(--pink)'}; color:${categoryAutoPopular[c] ? '#fff' : 'inherit'};">
+      <input type="checkbox" style="width:auto; margin:0;" ${categoryAutoPopular[c] ? 'checked' : ''} onchange="setCategoryAutoPopular('${c.replace(/'/g,"\\'")}', this.checked)">
+      Автоматически: популярные (по числу заказов)
+    </label>
+    <div style="margin-bottom:10px;"></div>
   `;
   }).join('');
+}
+
+function setCategoryAutoPopular(cat, isAuto){
+  categoryAutoPopular[cat] = isAuto;
+  saveSetting('categoryAutoPopular', categoryAutoPopular);
 }
 
 function setCategoryIconColor(cat, color){
