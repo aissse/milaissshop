@@ -132,6 +132,7 @@
     <div class="tab" data-tab="support" onclick="switchTab('support')">Чат с клиентами</div>
     <div class="tab" data-tab="finance" onclick="switchTab('finance')">Финансы</div>
     <div class="tab" data-tab="subscribers" onclick="switchTab('subscribers')">Подписки</div>
+    <div class="tab" data-tab="analytics" onclick="switchTab('analytics')">Аналитика</div>
     <div class="tab" data-tab="design" onclick="switchTab('design')">Оформление</div>
   </div>
 
@@ -211,6 +212,26 @@
         <p class="hint" style="margin-top:0;">Почты тех, кто подписался через форму "Будьте в курсе" на сайте. Именно им уходит письмо о новых товарах.</p>
         <div id="subscribersCount" style="font-weight:700; font-size:14px; margin-bottom:10px;"></div>
         <div id="subscribersList"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-analytics">
+      <div class="card">
+        <h1>Аналитика магазина</h1>
+        <p class="hint" style="margin-top:0;">Посещения считаются по одному разу за сеанс браузера у каждого посетителя.</p>
+        <div class="row" style="margin-bottom:10px;">
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setAnalyticsRange('today')">Сегодня</button>
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setAnalyticsRange('week')">7 дней</button>
+        </div>
+        <div class="row">
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setAnalyticsRange('month')">30 дней</button>
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setAnalyticsRange('all')">Всё время</button>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <div><label>От</label><input type="date" id="analyticsFrom" onchange="renderAnalytics()"></div>
+          <div><label>До</label><input type="date" id="analyticsTo" onchange="renderAnalytics()"></div>
+        </div>
+        <div id="analyticsStats" style="margin-top:16px;"></div>
       </div>
     </div>
 
@@ -480,6 +501,7 @@ function checkPassword(){
     loadOrders();
     loadSupport();
     loadSubscribers();
+    loadVisits();
     PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
   } else {
     alert('Неверный пароль');
@@ -1370,7 +1392,60 @@ function loadOrders(){
     snap.forEach(doc => allOrders.push({ id: doc.id, ...doc.data() }));
     allOrders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     filterAndRenderOrders();
+    renderAnalytics();
   });
+}
+
+let allVisits = [];
+function loadVisits(){
+  db.collection('analytics_visits').onSnapshot(snap => {
+    allVisits = [];
+    snap.forEach(doc => allVisits.push(doc.data()));
+    renderAnalytics();
+  });
+}
+
+function setAnalyticsRange(preset){
+  const now = new Date();
+  if (preset === 'all'){
+    document.getElementById('analyticsFrom').value = '';
+    document.getElementById('analyticsTo').value = '';
+    renderAnalytics();
+    return;
+  }
+  let from = new Date(now);
+  if (preset === 'week') from.setDate(from.getDate() - 6);
+  else if (preset === 'month') from.setDate(from.getDate() - 29);
+  document.getElementById('analyticsFrom').value = toLocalISODate(from);
+  document.getElementById('analyticsTo').value = toLocalISODate(now);
+  renderAnalytics();
+}
+
+function renderAnalytics(){
+  const statsEl = document.getElementById('analyticsStats');
+  if (!statsEl) return;
+  const fromVal = document.getElementById('analyticsFrom').value;
+  const toVal = document.getElementById('analyticsTo').value;
+  const fromTs = fromVal ? new Date(fromVal + 'T00:00:00').getTime() : null;
+  const toTs = toVal ? new Date(toVal + 'T23:59:59').getTime() : null;
+
+  let visits = allVisits;
+  if (fromTs) visits = visits.filter(v => (v.createdAt||0) >= fromTs);
+  if (toTs) visits = visits.filter(v => (v.createdAt||0) <= toTs);
+
+  let orders = allOrders;
+  if (fromTs) orders = orders.filter(o => (o.createdAt||0) >= fromTs);
+  if (toTs) orders = orders.filter(o => (o.createdAt||0) <= toTs);
+
+  const revenue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const uniqueBuyers = new Set(orders.map(o => o.customerId)).size;
+
+  statsEl.innerHTML = `
+    <div class="stock-item" style="font-size:15px; padding:12px 0;"><span>Посещений сайта</span><span style="font-weight:700;">${visits.length}</span></div>
+    <div class="stock-item" style="font-size:15px; padding:12px 0;"><span>Заказов оформлено</span><span style="font-weight:700;">${orders.length}</span></div>
+    <div class="stock-item" style="font-size:15px; padding:12px 0;"><span>Уникальных покупателей</span><span style="font-weight:700;">${uniqueBuyers}</span></div>
+    <div class="stock-item" style="font-size:15px; padding:12px 0;"><span>Доход за период</span><span style="font-weight:700;">${revenue.toLocaleString('ru-RU')} сум</span></div>
+  `;
 }
 
 function toLocalISODate(date){
