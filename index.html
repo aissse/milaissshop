@@ -772,7 +772,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-45";
+  const CURRENT_VERSION = "20260908-46";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1053,7 +1053,7 @@ const STR = {
   ru: { search:"Найти", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
         addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
         sizeLabel:"Размер", descLabel:"Описание", colorLabelWord:"Цвет", allCat:"Все", outOfStock:"Товар закончился",
-        empty:"Корзина пуста", heroTag:"НОВАЯ КОЛЛЕКЦИЯ", heroTitle:"Скидка 20% на первый дроп", heroBtn:"Смотреть",
+        empty:"Корзина пуста", emptyCatalogHint:"Загляни в каталог", heroTag:"НОВАЯ КОЛЛЕКЦИЯ", heroTitle:"Скидка 20% на первый дроп", heroBtn:"Смотреть",
         goodsLabel:"Товары", deliveryLabel:"Доставка", totalLabel:"Итого", checkoutBtn:"Оформить заказ",
         allProducts:"Все товары", noProductsYet:"Товары скоро появятся 👟", noFav:"Пока нет избранных товаров 🤍",
         noOrders:"Заказов пока нет", noRating:"Нет оценок", stockRemain:"Осталось", inStockWord:"В наличии",
@@ -1064,7 +1064,7 @@ const STR = {
   uz: { search:"Qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
         addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
         sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
-        empty:"Savat bo‘sh", heroTag:"YANGI KOLLEKSIYA", heroTitle:"Birinchi tashlashga 20% chegirma", heroBtn:"Ko‘rish",
+        empty:"Savat bo‘sh", emptyCatalogHint:"Katalogga nazar tashlang", heroTag:"YANGI KOLLEKSIYA", heroTitle:"Birinchi tashlashga 20% chegirma", heroBtn:"Ko‘rish",
         goodsLabel:"Mahsulotlar", deliveryLabel:"Yetkazib berish", totalLabel:"Jami", checkoutBtn:"Buyurtma berish",
         allProducts:"Barcha mahsulotlar", noProductsYet:"Mahsulotlar tez orada 👟", noFav:"Sevimlilar hali yo‘q 🤍",
         noOrders:"Buyurtmalar yo‘q", noRating:"Baho yo‘q", stockRemain:"Qoldi", inStockWord:"Mavjud",
@@ -1075,7 +1075,7 @@ const STR = {
   tr: { search:"Ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
         addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
         sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
-        empty:"Sepet boş", heroTag:"YENİ KOLEKSİYON", heroTitle:"İlk drop'ta %20 indirim", heroBtn:"İncele",
+        empty:"Sepet boş", emptyCatalogHint:"Kataloğa göz atın", heroTag:"YENİ KOLEKSİYON", heroTitle:"İlk drop'ta %20 indirim", heroBtn:"İncele",
         goodsLabel:"Ürünler", deliveryLabel:"Teslimat", totalLabel:"Toplam", checkoutBtn:"Sipariş ver",
         allProducts:"Tüm ürünler", noProductsYet:"Ürünler yakında 👟", noFav:"Favori yok 🤍",
         noOrders:"Sipariş yok", noRating:"Puan yok", stockRemain:"Kaldı", inStockWord:"Stokta",
@@ -1086,7 +1086,7 @@ const STR = {
   az: { search:"Axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
         addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
         sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
-        empty:"Səbət boşdur", heroTag:"YENİ KOLLEKSİYA", heroTitle:"İlk drop-a 20% endirim", heroBtn:"Bax",
+        empty:"Səbət boşdur", emptyCatalogHint:"Kataloqa nəzər salın", heroTag:"YENİ KOLLEKSİYA", heroTitle:"İlk drop-a 20% endirim", heroBtn:"Bax",
         goodsLabel:"Mallar", deliveryLabel:"Çatdırılma", totalLabel:"Cəmi", checkoutBtn:"Sifariş et",
         allProducts:"Bütün mallar", noProductsYet:"Mallar tezliklə 👟", noFav:"Seçilmiş yoxdur 🤍",
         noOrders:"Sifariş yoxdur", noRating:"Reytinq yoxdur", stockRemain:"Qalıb", inStockWord:"Mövcuddur",
@@ -1097,7 +1097,7 @@ const STR = {
   en: { search:"Search", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
         addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
         sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
-        empty:"Cart is empty", heroTag:"NEW COLLECTION", heroTitle:"20% off the first drop", heroBtn:"Shop now",
+        empty:"Cart is empty", emptyCatalogHint:"Take a look at the catalog", heroTag:"NEW COLLECTION", heroTitle:"20% off the first drop", heroBtn:"Shop now",
         goodsLabel:"Items", deliveryLabel:"Delivery", totalLabel:"Total", checkoutBtn:"Checkout",
         allProducts:"All products", noProductsYet:"Products coming soon 👟", noFav:"No favorites yet 🤍",
         noOrders:"No orders yet", noRating:"No ratings", stockRemain:"Left", inStockWord:"In stock",
@@ -2033,7 +2033,7 @@ function removeFromCart(idx){ cart.splice(idx, 1); updateCartBadge(); renderCart
 function renderCart(){
   const content = document.getElementById('cartContent');
   if (cart.length === 0){
-    content.innerHTML = `<div class="cart-empty">${t('empty')}<br>Загляни в каталог 👟</div>`;
+    content.innerHTML = `<div class="cart-empty">${t('empty')}<br>${t('emptyCatalogHint')} 👟</div>`;
     return;
   }
   let total = 0;
