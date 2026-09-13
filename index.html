@@ -772,7 +772,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-47";
+  const CURRENT_VERSION = "20260908-48";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1181,6 +1181,7 @@ let btsBranches = [];
 let categoryImages = {};
 let categoryIcons = {};
 let categoryIconColors = {};
+let categoryAutoPopular = {};
 const DEFAULT_CAT_ICONS = ['🔥','🎁','👜','🎒','✨','🛍️','⭐','💎'];
 let customHero = {};
 let categoryTranslations = {};
@@ -1356,6 +1357,9 @@ renderFaq();
 function filteredProducts(){
   let list = products;
   if (activeCategory === 'До 500 000') list = list.filter(p => Number(p.price||0) <= 500000);
+  else if (categoryAutoPopular[activeCategory]){
+    list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
+  }
   else if (activeCategory !== 'Все') list = list.filter(p => p.category === activeCategory);
   if (searchQuery.trim()){
     const q = searchQuery.trim().toLowerCase();
@@ -1426,7 +1430,9 @@ function selectShopAllCat(cat){
 
 function renderShopAllGrid(){
   let list = products;
-  if (shopAllCategory !== 'Все') list = list.filter(p => p.category === shopAllCategory);
+  if (categoryAutoPopular[shopAllCategory]){
+    list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
+  } else if (shopAllCategory !== 'Все') list = list.filter(p => p.category === shopAllCategory);
   if (priceMin !== null) list = list.filter(p => Number(p.price||0) >= priceMin);
   if (priceMax !== null) list = list.filter(p => Number(p.price||0) <= priceMax);
 
@@ -1641,6 +1647,7 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   if (data.categories && data.categories.length){ CATEGORIES = data.categories; }
   categoryIcons = data.categoryIcons || {};
   categoryIconColors = data.categoryIconColors || {};
+  categoryAutoPopular = data.categoryAutoPopular || {};
   renderCatPills();
   renderMainGrid();
   paymentCardInfo = data.paymentCardInfo || '';
@@ -2176,6 +2183,8 @@ function decrementStockForOrder(orderItems){
           });
           updates[productId] = { stock };
         }
+        const orderedQty = items.reduce((sum, it) => sum + (it.qty || 0), 0);
+        updates[productId].orderCount = Number(data.orderCount || 0) + orderedQty;
       }
       productIds.forEach(id => {
         if (updates[id]) tx.update(db.collection('products').doc(id), updates[id]);
