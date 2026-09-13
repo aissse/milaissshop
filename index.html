@@ -335,6 +335,7 @@
   .hero-photo{ margin:0 20px 0; width:calc(100% - 40px); box-sizing:border-box; border-radius:20px; aspect-ratio:16/11; background:linear-gradient(135deg,#1a1a1a 0%,#2b2b2b 100%); background-size:cover; background-position:center; position:relative; display:flex; align-items:flex-end; overflow:hidden; }
   .hero-photo::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.55), transparent 60%); }
   .hero-photo-text{ position:relative; z-index:2; padding:22px; color:#fff; }
+  .hero-sound-btn{ position:absolute; top:14px; right:14px; z-index:3; width:36px; height:36px; border-radius:50%; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; cursor:pointer; }
   .hero-photo-text .tag{ font-size:11px; color:var(--orange); font-weight:700; letter-spacing:.02em; }
   .hero-photo-text h2{ font-family:'Space Grotesk'; font-size:20px; margin:6px 0 12px; line-height:1.25; }
 
@@ -444,6 +445,9 @@
 
     <div class="hero-photo" id="heroPhoto">
       <video id="heroVideo" autoplay muted loop playsinline style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;"></video>
+      <div class="hero-sound-btn" id="heroSoundBtn" onclick="toggleHeroSound(event)" style="display:none;">
+        <svg id="heroSoundIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      </div>
       <div class="hero-photo-text">
         <div class="tag" id="heroTagText" data-i18n="heroTag">НОВАЯ КОЛЛЕКЦИЯ</div>
         <h2 class="display" id="heroTitleText" data-i18n="heroTitle">Скидка 20% на первый дроп</h2>
@@ -772,7 +776,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-48";
+  const CURRENT_VERSION = "20260908-49";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1130,6 +1134,23 @@ function applyLang(){
     updateReviewsSummary();
   }
 }
+const HERO_MUTED_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
+const HERO_UNMUTED_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
+function updateHeroSoundIcon(){
+  const video = document.getElementById('heroVideo');
+  const icon = document.getElementById('heroSoundIcon');
+  if (!video || !icon) return;
+  icon.outerHTML = video.muted ? HERO_MUTED_ICON.replace('<svg ', '<svg id="heroSoundIcon" ') : HERO_UNMUTED_ICON.replace('<svg ', '<svg id="heroSoundIcon" ');
+}
+function toggleHeroSound(event){
+  if (event) event.stopPropagation();
+  const video = document.getElementById('heroVideo');
+  if (!video) return;
+  video.muted = !video.muted;
+  if (!video.muted) video.play().catch(() => {});
+  updateHeroSoundIcon();
+}
+
 function toggleLangMenu(event){ if (event) event.stopPropagation(); document.getElementById('langMenu').classList.toggle('open'); }
 window.addEventListener('scroll', () => {
   const menu = document.getElementById('langMenu');
@@ -1662,20 +1683,26 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
     const isVideo = /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(data.heroImage);
     const heroPhoto = document.getElementById('heroPhoto');
     const heroVideo = document.getElementById('heroVideo');
+    const heroSoundBtn = document.getElementById('heroSoundBtn');
     if (isVideo){
       heroVideo.src = data.heroImage;
       heroVideo.style.display = 'block';
       heroPhoto.style.backgroundImage = '';
+      heroVideo.muted = true;
+      updateHeroSoundIcon();
+      heroSoundBtn.style.display = 'flex';
       // Если браузер не может проиграть это видео (например, старый .mov с iPhone) —
       // прячем видео и показываем хотя бы тёмную подложку, чтобы баннер не был пустым.
       heroVideo.onerror = () => {
         heroVideo.style.display = 'none';
         heroPhoto.style.backgroundImage = '';
+        heroSoundBtn.style.display = 'none';
       };
     } else {
       heroVideo.style.display = 'none';
       heroVideo.removeAttribute('src');
       heroPhoto.style.backgroundImage = `url('${data.heroImage}')`;
+      heroSoundBtn.style.display = 'none';
     }
   }
   if (data.heroTag) document.getElementById('heroTagText').textContent = data.heroTag;
