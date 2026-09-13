@@ -53,8 +53,8 @@
   #menuBtn{ background:var(--menubtn-bg, var(--stone)); }
   .icon-btn svg{ width:18px; height:18px; }
 
-  .lang-menu{ position:absolute; top:44px; right:0; background:var(--bg); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); overflow:hidden; z-index:80; display:none; min-width:140px; }
-  .lang-menu.open{ display:block; }
+  .lang-menu{ position:absolute; top:44px; right:0; background:var(--bg); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); overflow:hidden; z-index:80; min-width:140px; max-height:0; opacity:0; transform:translateY(-6px); pointer-events:none; transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .3s ease, transform .3s ease; }
+  .lang-menu.open{ max-height:300px; opacity:1; transform:translateY(0); pointer-events:auto; }
   .lang-menu div{ padding:10px 14px; font-size:13px; cursor:pointer; }
   .lang-menu div:hover{ background:var(--stone); }
 
@@ -772,7 +772,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-46";
+  const CURRENT_VERSION = "20260908-47";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1131,6 +1131,10 @@ function applyLang(){
   }
 }
 function toggleLangMenu(event){ if (event) event.stopPropagation(); document.getElementById('langMenu').classList.toggle('open'); }
+window.addEventListener('scroll', () => {
+  const menu = document.getElementById('langMenu');
+  if (menu) menu.classList.remove('open');
+}, { passive: true });
 document.addEventListener('click', () => document.getElementById('langMenu').classList.remove('open'));
 function setLang(l){
   lang = l; localStorage.setItem('milaisss_lang', l);
@@ -2351,11 +2355,23 @@ function submitReview(orderId, ii, productId, productName, colorName){
   }
 }
 
+/* ---------- analytics: log a visit once per browser session ---------- */
+function logVisit(){
+  try {
+    if (sessionStorage.getItem('milaisss_visit_logged')) return;
+    sessionStorage.setItem('milaisss_visit_logged', '1');
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0,10);
+    db.collection('analytics_visits').add({ date: dateStr, createdAt: Date.now(), customerId: getCustomerId() });
+  } catch(e) {}
+}
+
 /* ---------- init ---------- */
 applyLang();
 setupSupportListener();
 loadCustomerProfile();
 renderRatingSummary();
+logVisit();
 </script>
 </body>
 </html>
