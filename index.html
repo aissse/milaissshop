@@ -781,7 +781,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-50";
+  const CURRENT_VERSION = "20260908-51";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1141,6 +1141,47 @@ function applyLang(){
 }
 const HERO_MUTED_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
 const HERO_UNMUTED_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
+function getNextHeroIndex(count){
+  if (!count) return 0;
+  let idx = parseInt(localStorage.getItem('milaisss_hero_index') || '0', 10);
+  if (isNaN(idx) || idx < 0) idx = 0;
+  idx = idx % count;
+  localStorage.setItem('milaisss_hero_index', String((idx + 1) % count));
+  return idx;
+}
+
+function applyHeroBanner(banner){
+  const heroPhoto = document.getElementById('heroPhoto');
+  const heroVideo = document.getElementById('heroVideo');
+  const heroSoundBtn = document.getElementById('heroSoundBtn');
+  const media = banner.media || '';
+  const isVideo = /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(media);
+  if (media && isVideo){
+    heroVideo.src = media;
+    heroVideo.style.display = 'block';
+    heroPhoto.style.backgroundImage = '';
+    heroVideo.muted = true;
+    updateHeroSoundIcon();
+    heroSoundBtn.style.display = 'flex';
+    // Если браузер не может проиграть это видео (например, старый .mov с iPhone) —
+    // прячем видео и показываем хотя бы тёмную подложку, чтобы баннер не был пустым.
+    heroVideo.onerror = () => {
+      heroVideo.style.display = 'none';
+      heroPhoto.style.backgroundImage = '';
+      heroSoundBtn.style.display = 'none';
+    };
+  } else {
+    heroVideo.style.display = 'none';
+    heroVideo.removeAttribute('src');
+    heroSoundBtn.style.display = 'none';
+    if (media) heroPhoto.style.backgroundImage = `url('${media}')`;
+  }
+  document.getElementById('heroTagText').textContent = banner.tag || '';
+  document.getElementById('heroTitleText').textContent = banner.title || '';
+  document.getElementById('heroBtnText').textContent = banner.btnText || '';
+  customHero = { tag: banner.tag || '', title: banner.title || '', btn: banner.btnText || '' };
+}
+
 function updateHeroSoundIcon(){
   const video = document.getElementById('heroVideo');
   const icon = document.getElementById('heroSoundIcon');
@@ -1684,36 +1725,14 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   if (data.policyItems && data.policyItems.length){ policyItems = data.policyItems; policyCustomized = true; }
   socialLinks = data.socialLinks || {};
   renderSocialIcons();
-  if (data.heroImage){
-    const isVideo = /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(data.heroImage);
-    const heroPhoto = document.getElementById('heroPhoto');
-    const heroVideo = document.getElementById('heroVideo');
-    const heroSoundBtn = document.getElementById('heroSoundBtn');
-    if (isVideo){
-      heroVideo.src = data.heroImage;
-      heroVideo.style.display = 'block';
-      heroPhoto.style.backgroundImage = '';
-      heroVideo.muted = true;
-      updateHeroSoundIcon();
-      heroSoundBtn.style.display = 'flex';
-      // Если браузер не может проиграть это видео (например, старый .mov с iPhone) —
-      // прячем видео и показываем хотя бы тёмную подложку, чтобы баннер не был пустым.
-      heroVideo.onerror = () => {
-        heroVideo.style.display = 'none';
-        heroPhoto.style.backgroundImage = '';
-        heroSoundBtn.style.display = 'none';
-      };
-    } else {
-      heroVideo.style.display = 'none';
-      heroVideo.removeAttribute('src');
-      heroPhoto.style.backgroundImage = `url('${data.heroImage}')`;
-      heroSoundBtn.style.display = 'none';
-    }
+  let heroBanners = data.heroBanners || [];
+  if (!heroBanners.length && data.heroImage){
+    heroBanners = [{ media: data.heroImage, tag: data.heroTag || '', title: data.heroTitle || '', btnText: data.heroBtnText || '' }];
   }
-  if (data.heroTag) document.getElementById('heroTagText').textContent = data.heroTag;
-  if (data.heroTitle) document.getElementById('heroTitleText').textContent = data.heroTitle;
-  if (data.heroBtnText) document.getElementById('heroBtnText').textContent = data.heroBtnText;
-  customHero = { tag: data.heroTag || '', title: data.heroTitle || '', btn: data.heroBtnText || '' };
+  if (heroBanners.length){
+    const idx = getNextHeroIndex(heroBanners.length);
+    applyHeroBanner(heroBanners[idx]);
+  }
   categoryImages = data.categoryImages || {};
   categoryTranslations = data.categoryTranslations || {};
   categoryInfo = data.categoryInfo || {};
