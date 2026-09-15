@@ -331,20 +331,13 @@
       <div class="card collapsible" id="card-hero">
         <div class="card-header" onclick="toggleCard('card-hero')"><h1>Главный баннер и витрина</h1><span class="card-chevron">▲</span></div>
         <div class="card-body">
-        <label>Ссылка на фото ИЛИ видео для баннера</label>
-        <input type="url" id="f_heroImage" placeholder="https://... (.mp4/.webm = видео, иначе фото)" onchange="saveSetting('heroImage', this.value)">
-        <div class="hint">Если ссылка ведёт на видеофайл (.mp4, .webm, .mov) — на баннере будет проигрываться видео. Иначе — обычное фото.</div>
+        <label>Баннеры на главной (можно несколько — показываются по очереди при каждом новом заходе)</label>
+        <div id="heroBannerRows"></div>
+        <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addHeroBannerRow()">+ Добавить баннер</button>
+        <button class="btn" onclick="saveHeroBanners()">Сохранить баннеры</button>
+        <div class="hint">Если баннер один — показывается всегда он. Если несколько — первый посетитель увидит баннер №1, при следующем заходе (новая вкладка/сессия) — баннер №2, и так по кругу.</div>
 
-        <label>Метка над заголовком (например "НОВАЯ КОЛЛЕКЦИЯ")</label>
-        <input type="text" id="f_heroTag" placeholder="НОВАЯ КОЛЛЕКЦИЯ" onchange="saveSetting('heroTag', this.value)">
-
-        <label>Заголовок баннера</label>
-        <input type="text" id="f_heroTitle" placeholder="Скидка 20% на первую покупку" onchange="saveSetting('heroTitle', this.value)">
-
-        <label>Текст на кнопке баннера</label>
-        <input type="text" id="f_heroBtnText" placeholder="Смотреть" onchange="saveSetting('heroBtnText', this.value)">
-
-        <label>Контакты для футера сайта (email, адрес — по одному на строке)</label>
+        <label style="margin-top:20px;">Контакты для футера сайта (email, адрес — по одному на строке)</label>
         <textarea id="f_shopContacts" rows="3" placeholder="hello@milaisss.uz&#10;Ташкент, Чиланзар" onchange="saveSetting('shopContacts', this.value)"></textarea>
         </div>
       </div>
@@ -958,10 +951,12 @@ function loadSettings(){
       loadGoogleFont(data.fontFamily);
       setTimeout(() => { document.getElementById('fontPreview').style.fontFamily = `'${data.fontFamily}', serif`; }, 300);
     }
-    if (data.heroImage) document.getElementById('f_heroImage').value = data.heroImage;
-    if (data.heroTag) document.getElementById('f_heroTag').value = data.heroTag;
-    if (data.heroTitle) document.getElementById('f_heroTitle').value = data.heroTitle;
-    if (data.heroBtnText) document.getElementById('f_heroBtnText').value = data.heroBtnText;
+    let heroBanners = data.heroBanners || [];
+    if (!heroBanners.length && (data.heroImage || data.heroTag || data.heroTitle)){
+      // Миграция со старого формата (один баннер) на новый список.
+      heroBanners = [{ media: data.heroImage || '', tag: data.heroTag || '', title: data.heroTitle || '', btnText: data.heroBtnText || '' }];
+    }
+    loadHeroBannerRows(heroBanners);
     if (data.shopContacts) document.getElementById('f_shopContacts').value = data.shopContacts;
     categoryImages = data.categoryImages || {};
     categoryIcons = data.categoryIcons || {};
@@ -1296,6 +1291,42 @@ function saveBlackDownItems(){
   });
   saveSetting('blackDownItems', items);
   alert('Сохранено');
+}
+
+function addHeroBannerRow(data){
+  data = data || { media: '', tag: '', title: '', btnText: '' };
+  const row = document.createElement('div');
+  row.className = 'faq-row';
+  row.innerHTML = `
+    <span class="rm" onclick="this.parentElement.remove()">✕ удалить баннер</span>
+    <label style="margin-top:6px;">Ссылка на фото ИЛИ видео</label>
+    <input type="url" class="hb-media" placeholder="https://... (.mp4/.webm = видео, иначе фото)" value="${(data.media||'').replace(/"/g,'&quot;')}">
+    <label>Метка над заголовком</label>
+    <input type="text" class="hb-tag" placeholder="НОВАЯ КОЛЛЕКЦИЯ" value="${(data.tag||'').replace(/"/g,'&quot;')}">
+    <label>Заголовок баннера</label>
+    <input type="text" class="hb-title" placeholder="Скидка 20% на первую покупку" value="${(data.title||'').replace(/"/g,'&quot;')}">
+    <label>Текст на кнопке</label>
+    <input type="text" class="hb-btn" placeholder="Смотреть" value="${(data.btnText||'').replace(/"/g,'&quot;')}">
+  `;
+  document.getElementById('heroBannerRows').appendChild(row);
+}
+function loadHeroBannerRows(items){
+  document.getElementById('heroBannerRows').innerHTML = '';
+  (items && items.length ? items : []).forEach(b => addHeroBannerRow(b));
+  if (!items || !items.length) addHeroBannerRow();
+}
+function saveHeroBanners(){
+  const rows = document.querySelectorAll('#heroBannerRows .faq-row');
+  const banners = [];
+  rows.forEach(row => {
+    const media = row.querySelector('.hb-media').value.trim();
+    const tag = row.querySelector('.hb-tag').value.trim();
+    const title = row.querySelector('.hb-title').value.trim();
+    const btnText = row.querySelector('.hb-btn').value.trim();
+    if (media || tag || title || btnText) banners.push({ media, tag, title, btnText });
+  });
+  saveSetting('heroBanners', banners);
+  alert('Баннеры сохранены');
 }
 
 function addFaqRow(data){
