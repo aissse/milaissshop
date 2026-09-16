@@ -1019,7 +1019,6 @@ function renderCategoryTags(){
   const wrap = document.getElementById('catTags');
   wrap.innerHTML = categories.map((c,i) => {
     const tr = categoryTranslations[c] || {};
-    const trStr = ['en','uz','tr','az'].map(l => tr[l] ? `${l}:${tr[l]}` : '').filter(Boolean).join(', ');
     return `
     <div class="color-row" style="flex-wrap:wrap;">
       <span class="cat-tag" style="flex-shrink:0;">${c} <span class="x" onclick="removeCategory(${i})">✕</span></span>
@@ -1027,7 +1026,15 @@ function renderCategoryTags(){
       <input type="color" title="Цвет иконки" value="${categoryIconColors[c] || '#141414'}" style="width:40px; height:36px; padding:0; border:none; border-radius:8px; flex-shrink:0;" onchange="setCategoryIconColor('${c.replace(/'/g,"\\'")}', this.value)">
       <input type="url" placeholder="Фото для плитки (необязательно)" value="${(categoryImages[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryImage('${c.replace(/'/g,"\\'")}', this.value)">
     </div>
-    <input type="text" style="margin-bottom:6px;" placeholder="Переводы: en:Trends, uz:..., tr:..., az:..." value="${trStr.replace(/"/g,'&quot;')}" onchange="setCategoryTranslation('${c.replace(/'/g,"\\'")}', this.value)">
+    <label style="margin:6px 0 2px; font-size:11px; font-weight:700; color:var(--muted);">Переводы названия категории</label>
+    <div class="row" style="margin-bottom:4px;">
+      <input type="text" style="flex:1;" placeholder="English" value="${(tr.en||'').replace(/"/g,'&quot;')}" onchange="setCategoryTranslationLang('${c.replace(/'/g,"\\'")}', 'en', this.value)">
+      <input type="text" style="flex:1;" placeholder="Oʻzbekcha" value="${(tr.uz||'').replace(/"/g,'&quot;')}" onchange="setCategoryTranslationLang('${c.replace(/'/g,"\\'")}', 'uz', this.value)">
+    </div>
+    <div class="row" style="margin-bottom:6px;">
+      <input type="text" style="flex:1;" placeholder="Türkçe" value="${(tr.tr||'').replace(/"/g,'&quot;')}" onchange="setCategoryTranslationLang('${c.replace(/'/g,"\\'")}', 'tr', this.value)">
+      <input type="text" style="flex:1;" placeholder="Azərbaycan" value="${(tr.az||'').replace(/"/g,'&quot;')}" onchange="setCategoryTranslationLang('${c.replace(/'/g,"\\'")}', 'az', this.value)">
+    </div>
     <input type="text" style="margin-bottom:6px;" placeholder="Доп. инфо (необязательно, мелким шрифтом в меню)" value="${(categoryInfo[c]||'').replace(/"/g,'&quot;')}" onchange="setCategoryInfo('${c.replace(/'/g,"\\'")}', this.value)">
     <label class="cat-tag" style="cursor:pointer; background:${categoryAutoPopular[c] ? 'var(--maroon)' : 'var(--pink)'}; color:${categoryAutoPopular[c] ? '#fff' : 'inherit'};">
       <input type="checkbox" style="width:auto; margin:0;" ${categoryAutoPopular[c] ? 'checked' : ''} onchange="setCategoryAutoPopular('${c.replace(/'/g,"\\'")}', this.checked)">
@@ -1063,15 +1070,10 @@ function setCategoryInfo(cat, text){
   saveSetting('categoryInfo', categoryInfo);
 }
 
-function setCategoryTranslation(cat, str){
-  const obj = {};
-  str.split(',').forEach(pair => {
-    const idx = pair.indexOf(':');
-    if (idx === -1) return;
-    const lang = pair.slice(0, idx).trim();
-    const val = pair.slice(idx+1).trim();
-    if (lang && val) obj[lang] = val;
-  });
+function setCategoryTranslationLang(cat, lang, value){
+  const obj = Object.assign({}, categoryTranslations[cat] || {});
+  const v = value.trim();
+  if (v) obj[lang] = v; else delete obj[lang];
   categoryTranslations[cat] = obj;
   saveSetting('categoryTranslations', categoryTranslations);
 }
@@ -1293,20 +1295,39 @@ function saveBlackDownItems(){
   alert('Сохранено');
 }
 
+function heroTranslationRows(fieldKey, dataObj){
+  dataObj = dataObj || {};
+  return `
+    <div class="row" style="margin-top:4px;">
+      <input type="text" class="hb-${fieldKey}-en" style="flex:1;" placeholder="English" value="${(dataObj.en||'').replace(/"/g,'&quot;')}">
+      <input type="text" class="hb-${fieldKey}-uz" style="flex:1;" placeholder="Oʻzbekcha" value="${(dataObj.uz||'').replace(/"/g,'&quot;')}">
+    </div>
+    <div class="row" style="margin-bottom:8px;">
+      <input type="text" class="hb-${fieldKey}-tr" style="flex:1;" placeholder="Türkçe" value="${(dataObj.tr||'').replace(/"/g,'&quot;')}">
+      <input type="text" class="hb-${fieldKey}-az" style="flex:1;" placeholder="Azərbaycan" value="${(dataObj.az||'').replace(/"/g,'&quot;')}">
+    </div>
+  `;
+}
 function addHeroBannerRow(data){
-  data = data || { media: '', tag: '', title: '', btnText: '' };
+  data = data || { media: '', tag: '', title: '', btnText: '', tagTranslations: {}, titleTranslations: {}, btnTextTranslations: {} };
   const row = document.createElement('div');
   row.className = 'faq-row';
   row.innerHTML = `
     <span class="rm" onclick="this.parentElement.remove()">✕ удалить баннер</span>
     <label style="margin-top:6px;">Ссылка на фото ИЛИ видео</label>
     <input type="url" class="hb-media" placeholder="https://... (.mp4/.webm = видео, иначе фото)" value="${(data.media||'').replace(/"/g,'&quot;')}">
-    <label>Метка над заголовком</label>
+
+    <label>Метка над заголовком — рус.</label>
     <input type="text" class="hb-tag" placeholder="НОВАЯ КОЛЛЕКЦИЯ" value="${(data.tag||'').replace(/"/g,'&quot;')}">
-    <label>Заголовок баннера</label>
+    ${heroTranslationRows('tag', data.tagTranslations)}
+
+    <label>Заголовок баннера — рус.</label>
     <input type="text" class="hb-title" placeholder="Скидка 20% на первую покупку" value="${(data.title||'').replace(/"/g,'&quot;')}">
-    <label>Текст на кнопке</label>
+    ${heroTranslationRows('title', data.titleTranslations)}
+
+    <label>Текст на кнопке — рус.</label>
     <input type="text" class="hb-btn" placeholder="Смотреть" value="${(data.btnText||'').replace(/"/g,'&quot;')}">
+    ${heroTranslationRows('btn', data.btnTextTranslations)}
   `;
   document.getElementById('heroBannerRows').appendChild(row);
 }
@@ -1323,7 +1344,22 @@ function saveHeroBanners(){
     const tag = row.querySelector('.hb-tag').value.trim();
     const title = row.querySelector('.hb-title').value.trim();
     const btnText = row.querySelector('.hb-btn').value.trim();
-    if (media || tag || title || btnText) banners.push({ media, tag, title, btnText });
+    const tagTranslations = {}, titleTranslations = {}, btnTextTranslations = {};
+    ['en','uz','tr','az'].forEach(l => {
+      const tv = row.querySelector(`.hb-tag-${l}`).value.trim();
+      if (tv) tagTranslations[l] = tv;
+      const ttv = row.querySelector(`.hb-title-${l}`).value.trim();
+      if (ttv) titleTranslations[l] = ttv;
+      const bv = row.querySelector(`.hb-btn-${l}`).value.trim();
+      if (bv) btnTextTranslations[l] = bv;
+    });
+    if (media || tag || title || btnText){
+      const banner = { media, tag, title, btnText };
+      if (Object.keys(tagTranslations).length) banner.tagTranslations = tagTranslations;
+      if (Object.keys(titleTranslations).length) banner.titleTranslations = titleTranslations;
+      if (Object.keys(btnTextTranslations).length) banner.btnTextTranslations = btnTextTranslations;
+      banners.push(banner);
+    }
   });
   saveSetting('heroBanners', banners);
   alert('Баннеры сохранены');
