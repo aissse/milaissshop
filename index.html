@@ -781,7 +781,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-51";
+  const CURRENT_VERSION = "20260908-52";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1129,9 +1129,7 @@ function applyLang(){
   if (!faqCustomized){ faqItems = defaultFaqItems(); renderFaq(); }
   if (!policyCustomized){ policyItems = defaultPolicyItems(); }
   if (currentProduct) renderPolicyAccordion();
-  if (customHero.tag) document.getElementById('heroTagText').textContent = customHero.tag;
-  if (customHero.title) document.getElementById('heroTitleText').textContent = customHero.title;
-  if (customHero.btn) document.getElementById('heroBtnText').textContent = customHero.btn;
+  if (currentHeroBanner) applyHeroBannerText(currentHeroBanner);
   if (currentProduct){
     document.getElementById('detailName').textContent = getTranslatedProductName(currentProduct);
     document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
@@ -1150,7 +1148,26 @@ function getNextHeroIndex(count){
   return idx;
 }
 
+let currentHeroBanner = null;
+
+function getHeroBannerText(banner, field){
+  const trKey = field + 'Translations';
+  if (banner[trKey] && banner[trKey][lang]) return banner[trKey][lang];
+  return banner[field] || '';
+}
+
+function applyHeroBannerText(banner){
+  const tag = getHeroBannerText(banner, 'tag');
+  const title = getHeroBannerText(banner, 'title');
+  const btn = getHeroBannerText(banner, 'btnText');
+  document.getElementById('heroTagText').textContent = tag;
+  document.getElementById('heroTitleText').textContent = title;
+  document.getElementById('heroBtnText').textContent = btn;
+  customHero = { tag, title, btn };
+}
+
 function applyHeroBanner(banner){
+  currentHeroBanner = banner;
   const heroPhoto = document.getElementById('heroPhoto');
   const heroVideo = document.getElementById('heroVideo');
   const heroSoundBtn = document.getElementById('heroSoundBtn');
@@ -1176,10 +1193,7 @@ function applyHeroBanner(banner){
     heroSoundBtn.style.display = 'none';
     if (media) heroPhoto.style.backgroundImage = `url('${media}')`;
   }
-  document.getElementById('heroTagText').textContent = banner.tag || '';
-  document.getElementById('heroTitleText').textContent = banner.title || '';
-  document.getElementById('heroBtnText').textContent = banner.btnText || '';
-  customHero = { tag: banner.tag || '', title: banner.title || '', btn: banner.btnText || '' };
+  applyHeroBannerText(banner);
 }
 
 function updateHeroSoundIcon(){
