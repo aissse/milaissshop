@@ -781,7 +781,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-53";
+  const CURRENT_VERSION = "20260908-54";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1441,7 +1441,7 @@ function filteredProducts(){
   else if (categoryAutoPopular[activeCategory]){
     list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
   }
-  else if (activeCategory !== 'Все') list = list.filter(p => p.category === activeCategory);
+  else if (activeCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === activeCategory.trim().toLowerCase());
   if (searchQuery.trim()){
     const q = searchQuery.trim().toLowerCase();
     list = list.filter(p => (p.name||'').toLowerCase().includes(q) || (p.sub||'').toLowerCase().includes(q));
@@ -1513,7 +1513,7 @@ function renderShopAllGrid(){
   let list = products;
   if (categoryAutoPopular[shopAllCategory]){
     list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
-  } else if (shopAllCategory !== 'Все') list = list.filter(p => p.category === shopAllCategory);
+  } else if (shopAllCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === shopAllCategory.trim().toLowerCase());
   if (priceMin !== null) list = list.filter(p => Number(p.price||0) >= priceMin);
   if (priceMax !== null) list = list.filter(p => Number(p.price||0) <= priceMax);
 
