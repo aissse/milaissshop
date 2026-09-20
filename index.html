@@ -610,6 +610,8 @@
           <span class="pmr-cards">
             <svg viewBox="0 0 750 471" width="34" height="21"><rect width="750" height="471" rx="40" fill="#1a1a6c"/><path d="M311 128h128v215H311z" fill="#ff5f00"/><path d="M319 235a137 137 0 0 1 52-108 137 137 0 1 0 0 216 137 137 0 0 1-52-108z" fill="#eb001b"/><path d="M593 235a137 137 0 0 1-222 108 137 137 0 0 0 0-216 137 137 0 0 1 222 108z" fill="#f79e1b"/></svg>
             <svg viewBox="0 0 750 471" width="34" height="21"><rect width="750" height="471" rx="40" fill="#fff" stroke="#e2ddd3"/><text x="375" y="290" font-family="Arial,sans-serif" font-weight="700" font-style="italic" font-size="140" fill="#1a1f71" text-anchor="middle">VISA</text></svg>
+            <img src="Logo_white.png" alt="Uzcard" style="width:34px; height:21px; object-fit:contain; border-radius:4px; background:#1a1a6c; padding:2px; box-sizing:border-box;" onerror="this.style.display='none'">
+            <img src="humo-logo-more.png" alt="Humo" style="width:34px; height:21px; object-fit:contain; border-radius:4px;" onerror="this.style.display='none'">
           </span>
         </div>
         <div class="pmr-details">
@@ -781,7 +783,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-54";
+  const CURRENT_VERSION = "20260908-57";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1599,18 +1601,26 @@ function heartIcon(isFav){ return isFav ? HEART_FULL_SVG : HEART_PLUS_SVG; }
 
 /* ---------- favorites ---------- */
 let favorites = [];
-try { favorites = JSON.parse(localStorage.getItem('milaisss_favorites') || '[]'); } catch(e){ favorites = []; }
-function isFavorite(id){ return favorites.includes(id); }
+try {
+  const rawFav = JSON.parse(localStorage.getItem('milaisss_favorites') || '[]');
+  favorites = rawFav.map(item => typeof item === 'string' ? { productId: item, colorName: null, size: null } : item);
+} catch(e){ favorites = []; }
+function isFavorite(id){ return favorites.some(f => f.productId === id); }
 function saveFavorites(){ localStorage.setItem('milaisss_favorites', JSON.stringify(favorites)); }
-function toggleFavorite(id, event){
+function toggleFavorite(id, event, colorName, size){
   if (event) event.stopPropagation();
-  const i = favorites.indexOf(id);
-  if (i === -1) favorites.push(id); else favorites.splice(i, 1);
+  const i = favorites.findIndex(f => f.productId === id);
+  if (i !== -1) favorites.splice(i, 1);
+  else favorites.push({ productId: id, colorName: colorName || null, size: size || null });
   saveFavorites();
   renderMainGrid(); renderFavGrid();
   if (currentProduct && currentProduct.id === id) updateDetailFavIcon();
 }
-function toggleCurrentFavorite(){ if (currentProduct) toggleFavorite(currentProduct.id); }
+function toggleCurrentFavorite(){
+  if (!currentProduct) return;
+  const chosen = currentColors[selectedColorIdx];
+  toggleFavorite(currentProduct.id, null, chosen ? chosen.name : null, selectedSize || null);
+}
 function updateDetailFavIcon(){
   const btn = document.getElementById('detailFavBtn');
   const wishBtn = document.getElementById('wishBtnDesktop');
@@ -1670,16 +1680,45 @@ function renderMainGrid(){
   fillGridEl(wrap, filteredProducts());
 }
 
+function favoriteCardHTML(p, fav){
+  let displayImage = p.image;
+  let colorLine = '';
+  if (fav.colorName && p.colors && p.colors.length){
+    const c = p.colors.find(col => col.name === fav.colorName);
+    if (c){
+      if (c.images && c.images.length) displayImage = c.images[0];
+      else if (c.image) displayImage = c.image;
+      colorLine = getTranslatedColorName(c);
+    } else {
+      colorLine = fav.colorName;
+    }
+  }
+  if (fav.size) colorLine += (colorLine ? ' · ' : '') + fav.size;
+  const imgStyle = displayImage ? `style="background-image:url('${displayImage}')"` : '';
+  const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
+  return `
+    <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${displayImage ? '' : (p.emoji || '👟')}
+      <div class="heart-btn" data-fav="${p.id}">${heartIcon(true)}</div>
+    </div>
+    <div class="info">
+      <div class="name">${getTranslatedProductName(p)}</div>
+      <div class="sub">${colorLine || (p.sub || '')}</div>
+      <div class="price">${fmt(p.price)}</div>
+    </div>`;
+}
+
 function renderFavGrid(){
   favGrid.innerHTML = '';
-  const favProducts = products.filter(p => isFavorite(p.id));
-  if (favProducts.length === 0){ favGrid.innerHTML = `<div class="empty-state">${t('noFav')}</div>`; return; }
-  favProducts.forEach((p) => {
+  const favEntries = favorites
+    .map(f => ({ fav: f, product: products.find(p => p.id === f.productId) }))
+    .filter(x => x.product);
+  if (favEntries.length === 0){ favGrid.innerHTML = `<div class="empty-state">${t('noFav')}</div>`; return; }
+  favEntries.forEach(({ fav, product }) => {
     const card = document.createElement('div');
     card.className = 'card';
-    card.onclick = () => openProduct(p.id);
-    card.innerHTML = productCardHTML(p);
-    card.querySelector('[data-fav]').onclick = (e) => toggleFavorite(p.id, e);
+    card.onclick = () => openProduct(product.id);
+    card.innerHTML = favoriteCardHTML(product, fav);
+    card.querySelector('[data-fav]').onclick = (e) => toggleFavorite(product.id, e);
     favGrid.appendChild(card);
   });
 }
