@@ -783,7 +783,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-57";
+  const CURRENT_VERSION = "20260908-58";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1716,7 +1716,7 @@ function renderFavGrid(){
   favEntries.forEach(({ fav, product }) => {
     const card = document.createElement('div');
     card.className = 'card';
-    card.onclick = () => openProduct(product.id);
+    card.onclick = () => openProduct(product.id, fav.colorName, fav.size);
     card.innerHTML = favoriteCardHTML(product, fav);
     card.querySelector('[data-fav]').onclick = (e) => toggleFavorite(product.id, e);
     favGrid.appendChild(card);
@@ -1952,7 +1952,7 @@ function openReviews(){
   showScreen('reviewsScreen');
 }
 
-function openProduct(id){
+function openProduct(id, preferredColor, preferredSize){
   currentProduct = products.find(p => p.id === id);
   if (!currentProduct) return;
   renderPolicyAccordion();
@@ -2109,6 +2109,17 @@ function openProduct(id){
     el.onclick = () => selectColor(idx);
     colorRow.appendChild(el);
   });
+
+  // Если открываем из "Избранного" с сохранённым цветом/размером — применяем их.
+  if (preferredColor){
+    const idx = colors.findIndex(c => c.name === preferredColor);
+    if (idx > -1 && idx !== 0) selectColor(idx);
+  }
+  if (preferredSize && sizeLabels.includes(preferredSize) && getColorSizeStock(selectedColorIdx, preferredSize) > 0){
+    selectedSize = preferredSize;
+    renderSizeRow(selectedColorIdx);
+    refreshStockUI(selectedColorIdx);
+  }
 
   showScreen('detail');
 }
