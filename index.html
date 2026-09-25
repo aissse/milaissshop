@@ -236,7 +236,11 @@
   .cart-summary{ padding:16px 20px 4px; }
   .sum-row{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; color:#555; }
   .sum-row.total{ font-family:'Space Grotesk'; font-size:17px; font-weight:700; color:var(--ink); }
-  .checkout-btn{ width:calc(100% - 40px); margin:14px 20px 24px; background:var(--orange); color:#fff; border:none; border-radius:16px; padding:16px; font-weight:700; font-size:15px; cursor:pointer; }
+  .checkout-btn{ width:calc(100% - 40px); margin:14px 20px 24px; background:var(--orange); color:#fff; border:none; border-radius:16px; padding:16px; font-weight:700; font-size:15px; cursor:pointer; transition:transform .15s ease, opacity .15s ease; }
+  .checkout-btn:active{ transform:scale(0.97); opacity:.9; }
+  .checkout-btn:disabled{ opacity:.7; cursor:default; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .checkout-btn:disabled::before{ content:''; width:16px; height:16px; border:2px solid rgba(255,255,255,.5); border-top-color:#fff; border-radius:50%; animation:btn-spin .7s linear infinite; }
+  @keyframes btn-spin{ to{ transform:rotate(360deg); } }
   .hint{ padding:0 20px 20px; font-size:11px; color:var(--muted); line-height:1.5; }
   .empty-state{ padding:60px 20px; text-align:center; color:var(--muted); font-size:13px; grid-column:1/-1; }
 
@@ -670,6 +674,7 @@
   <div class="screen" id="profile">
     <div class="topbar"><div class="logo">milaisss</div></div>
     <div id="profileHeader"></div>
+    <div id="tgLoginWrap" style="padding:0 20px 16px;"></div>
     <div class="cart-title orders-toggle" onclick="toggleOrdersSection()">
       <h2 class="display" data-i18n="profileTitle">Мои заказы</h2>
       <span class="orders-chev" id="ordersChev">⌄</span>
@@ -783,7 +788,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-58";
+  const CURRENT_VERSION = "20260908-60";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -859,8 +864,11 @@ function sendNotifyEmail(toEmail, subject, message){
   return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: toEmail, subject, message }).catch(() => {});
 }
 
+function getLinkedTelegramId(){ return localStorage.getItem('milaisss_linked_tg_id') || ''; }
 function getCustomerId(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
+  const linkedId = getLinkedTelegramId();
+  if (linkedId) return linkedId;
   let gid = localStorage.getItem('milaisss_guest_id');
   if (!gid){ gid = 'guest_' + Date.now(); localStorage.setItem('milaisss_guest_id', gid); }
   return gid;
@@ -869,6 +877,11 @@ function getCustomerName(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user){
     const u = tg.initDataUnsafe.user;
     return (u.first_name||'') + (u.last_name ? (' '+u.last_name) : '') + (u.username ? (' (@'+u.username+')') : '');
+  }
+  if (getLinkedTelegramId()){
+    const n = localStorage.getItem('milaisss_linked_tg_name') || '';
+    const un = localStorage.getItem('milaisss_linked_tg_username') || '';
+    return n + (un ? (' (@'+un+')') : '');
   }
   if (customerProfile && customerProfile.firstName){
     return customerProfile.firstName + (customerProfile.lastName ? (' '+customerProfile.lastName) : '') + (customerProfile.telegramUsername ? (' (@'+customerProfile.telegramUsername.replace(/^@/,'')+')') : '');
@@ -886,7 +899,7 @@ let selectedAvatarUrl = '';
 let pendingAfterRegister = null;
 
 function isRegistered(){
-  return isTelegramUser() || !!customerProfile;
+  return isTelegramUser() || !!customerProfile || !!getLinkedTelegramId();
 }
 
 function loadCustomerProfile(){
@@ -895,6 +908,7 @@ function loadCustomerProfile(){
     if (doc.exists){
       customerProfile = doc.data();
       renderProfileHeader();
+      renderTelegramLoginWidget();
     }
   });
 }
@@ -1008,6 +1022,7 @@ function submitRegistration(){
   customerProfile = profile;
   closeRegisterModalOnly();
   renderProfileHeader();
+  renderTelegramLoginWidget();
   const pending = pendingAfterRegister;
   pendingAfterRegister = null;
   if (pending) pending();
@@ -1024,17 +1039,76 @@ function closeRegisterModalOnly(){
 function renderProfileHeader(){
   const el = document.getElementById('profileHeader');
   if (!el) return;
-  if (isTelegramUser() || !customerProfile){ el.innerHTML = ''; return; }
-  el.innerHTML = `
-    <div class="profile-header-card">
-      <div class="profile-avatar" style="background-image:url('${customerProfile.avatarUrl||''}')" onclick="openRegisterModal()"></div>
-      <div style="cursor:pointer;" onclick="openRegisterModal()">
-        <div class="profile-name">${customerProfile.firstName} ${customerProfile.lastName}</div>
-        <div class="profile-phone">${customerProfile.phone}</div>
-        ${customerProfile.telegramUsername ? `<div class="profile-phone">@${customerProfile.telegramUsername}</div>` : ''}
+  if (isTelegramUser()){ el.innerHTML = ''; return; }
+  if (customerProfile){
+    el.innerHTML = `
+      <div class="profile-header-card">
+        <div class="profile-avatar" style="background-image:url('${customerProfile.avatarUrl||''}')" onclick="openRegisterModal()"></div>
+        <div style="cursor:pointer;" onclick="openRegisterModal()">
+          <div class="profile-name">${customerProfile.firstName} ${customerProfile.lastName}</div>
+          <div class="profile-phone">${customerProfile.phone}</div>
+          ${customerProfile.telegramUsername ? `<div class="profile-phone">@${customerProfile.telegramUsername}</div>` : ''}
+        </div>
       </div>
-    </div>
-  `;
+    `;
+    return;
+  }
+  const linkedId = getLinkedTelegramId();
+  if (linkedId){
+    const n = localStorage.getItem('milaisss_linked_tg_name') || 'Telegram';
+    const un = localStorage.getItem('milaisss_linked_tg_username') || '';
+    el.innerHTML = `
+      <div class="profile-header-card">
+        <div class="profile-avatar" style="background:var(--stone); display:flex; align-items:center; justify-content:center; font-size:20px;">✈️</div>
+        <div>
+          <div class="profile-name">${n}</div>
+          ${un ? `<div class="profile-phone">@${un}</div>` : ''}
+          <div class="profile-phone" style="color:#c0392b; cursor:pointer;" onclick="logoutTelegram()">Выйти</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  el.innerHTML = '';
+}
+
+function renderTelegramLoginWidget(){
+  const wrap = document.getElementById('tgLoginWrap');
+  if (!wrap) return;
+  if (isTelegramUser() || getLinkedTelegramId()){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<div style="font-size:12px; font-weight:700; color:var(--muted); margin-bottom:8px;">Войти, чтобы видеть свои заказы на любом устройстве</div>';
+  const botUsername = (NOTIFY_BOT_USERNAME || '').replace(/^@/, '');
+  if (!botUsername) return;
+  const script = document.createElement('script');
+  script.src = 'https://telegram.org/js/telegram-widget.js?22';
+  script.setAttribute('data-telegram-login', botUsername);
+  script.setAttribute('data-size', 'large');
+  script.setAttribute('data-radius', '12');
+  script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+  script.setAttribute('data-request-access', 'write');
+  wrap.appendChild(script);
+}
+
+function onTelegramAuth(user){
+  localStorage.setItem('milaisss_linked_tg_id', String(user.id));
+  localStorage.setItem('milaisss_linked_tg_name', (user.first_name||'') + (user.last_name ? (' '+user.last_name) : ''));
+  if (user.username) localStorage.setItem('milaisss_linked_tg_username', user.username);
+  else localStorage.removeItem('milaisss_linked_tg_username');
+  showToast('Вход выполнен');
+  loadCustomerProfile();
+  renderProfileHeader();
+  renderTelegramLoginWidget();
+  renderOrders();
+}
+
+function logoutTelegram(){
+  localStorage.removeItem('milaisss_linked_tg_id');
+  localStorage.removeItem('milaisss_linked_tg_name');
+  localStorage.removeItem('milaisss_linked_tg_username');
+  customerProfile = null;
+  renderProfileHeader();
+  renderTelegramLoginWidget();
+  renderOrders();
 }
 function notifyAdmin(text){
   if (!NOTIFY_BOT_TOKEN || NOTIFY_BOT_TOKEN.startsWith('ВСТАВЬ')) return Promise.resolve();
@@ -1071,7 +1145,7 @@ const STR = {
         reviewsWord:"отзывов", pcsWord:"шт", socialHeader:"Мы в соцсетях", newsletterTitle:"Будьте в курсе", newsletterSub:"Подпишись на новости о новых дропах и скидках", supportLabel:"Поддержка", faqHeader:"Частые вопросы",
         statusPaying:"Проверяется оплата", statusPacking:"Собирается", statusShipping:"В пути", statusDelivered:"Доставлен",
         faqQ1:"Как оформить заказ?", faqA1:"Добавьте товар в корзину, выберите способ оплаты и укажите ближайший пункт БТС для получения.", faqQ2:"Сколько идёт доставка?", faqA2:"Обычно 2–5 дней в зависимости от региона. Статус заказа виден в разделе «Профиль».", faqQ3:"Можно ли вернуть товар?", faqA3:"Да, если размер не подошёл — напишите в поддержку в течение 7 дней после получения.",
-        policyReturn:"Возврат", policyReturnText:"У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии.", policyDelivery:"Доставка", policyDeliveryText:"Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона.", policyCare:"Уход за товаром", policyCareText:"Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке.", collectionsHeader:"Коллекции", sizeGuide:"Гид по размерам", trustShippingTitle:"Бесплатная доставка", trustShippingSub:"от 300 000 сум", trustReturnTitle:"Лёгкий возврат", trustReturnSub:"14 дней на возврат", trustSecureTitle:"Безопасная оплата", trustSecureSub:"Payme, Click, карта", checkoutTitle:"Оплата и доставка", paymentMethodLabel:"Способ оплаты", cardLabel:"Карта", cardSoonNote:"Оплата картой онлайн в разработке — скоро будет доступна", cardSoonToast:"Оплата картой пока в разработке", soonMethodToast:"Скоро будет доступно — пока выберите Payme или карту", phoneFieldLabel:"Ваш номер телефона", phoneFieldNote:"Нужен, чтобы курьер мог с вами связаться.", btsLabel:"Ближайший пункт БТС", btsPlaceholder:"Начните вводить город или улицу...", btsNoResults:"Ничего не найдено, попробуйте другой запрос", confirmTransferBtn:"Перевод совершён", paymePrefix:"Переведите на номер Payme:", paymeNotSet:"Реквизиты Payme пока не добавлены продавцом." },
+        policyReturn:"Возврат", policyReturnText:"У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии.", policyDelivery:"Доставка", policyDeliveryText:"Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона.", policyCare:"Уход за товаром", policyCareText:"Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке.", collectionsHeader:"Коллекции", sizeGuide:"Гид по размерам", trustShippingTitle:"Бесплатная доставка", trustShippingSub:"от 300 000 сум", trustReturnTitle:"Лёгкий возврат", trustReturnSub:"14 дней на возврат", trustSecureTitle:"Безопасная оплата", trustSecureSub:"Payme, Click, карта", checkoutTitle:"Оплата и доставка", paymentMethodLabel:"Способ оплаты", cardLabel:"Карта", cardSoonNote:"Оплата картой онлайн в разработке — скоро будет доступна", cardSoonToast:"Оплата картой пока в разработке", soonMethodToast:"Скоро будет доступно — пока выберите Payme или карту", phoneFieldLabel:"Ваш номер телефона", phoneFieldNote:"Нужен, чтобы курьер мог с вами связаться.", btsLabel:"Ближайший пункт БТС", btsPlaceholder:"Начните вводить город или улицу...", btsNoResults:"Ничего не найдено, попробуйте другой запрос", confirmTransferBtn:"Перевод совершён", paymePrefix:"Переведите на номер Payme:", paymeNotSet:"Реквизиты Payme пока не добавлены продавцом.", nextStepHint:"На следующем шаге — реквизиты для оплаты и подтверждение перевода.", confirmingText:"Оформляем заказ..." },
   uz: { search:"Qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
         addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
         sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
@@ -1082,7 +1156,7 @@ const STR = {
         reviewsWord:"sharh", pcsWord:"dona", socialHeader:"Ijtimoiy tarmoqlarda", newsletterTitle:"Yangiliklardan xabardor bo‘ling", newsletterSub:"Yangi kolleksiyalar va chegirmalar haqida bilib turing", supportLabel:"Qo‘llab-quvvatlash", faqHeader:"Ko‘p beriladigan savollar",
         statusPaying:"To‘lov tekshirilmoqda", statusPacking:"Yig‘ilmoqda", statusShipping:"Yo‘lda", statusDelivered:"Yetkazib berildi",
         faqQ1:"Buyurtmani qanday rasmiylashtirish mumkin?", faqA1:"Mahsulotni savatga qo‘shing, to‘lov usulini tanlang va yaqin BTS punktini ko‘rsating.", faqQ2:"Yetkazib berish qancha davom etadi?", faqA2:"Odatda hududga qarab 2–5 kun. Buyurtma holatini «Profil» bo‘limida ko‘rish mumkin.", faqQ3:"Mahsulotni qaytarish mumkinmi?", faqA3:"Ha, o‘lcham mos kelmasa — olgandan keyin 7 kun ichida qo‘llab-quvvatlashga yozing.",
-        policyReturn:"Qaytarish", policyReturnText:"Buyurtmani qaytarish uchun 14 kun vaqtingiz bor. Qaytarish xarajatlari xaridorga tegishli, mahsulot dastlabki holatida bo‘lishi kerak.", policyDelivery:"Yetkazib berish", policyDeliveryText:"Buyurtmani imkon qadar tez qayta ishlaymiz va yuboramiz. Odatda hududga qarab 2-5 kun.", policyCare:"Mahsulotga g‘amxo‘rlik", policyCareText:"Sovuq suvda yuving, mashinada quritmang, rasm/kashta ustiga to‘g‘ridan-to‘g‘ri dazmollamang.", collectionsHeader:"Kolleksiyalar", sizeGuide:"O'lcham gidi", trustShippingTitle:"Bepul yetkazib berish", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Oson qaytarish", trustReturnSub:"14 kun ichida qaytarish", trustSecureTitle:"Xavfsiz to'lov", trustSecureSub:"Payme, Click, karta", checkoutTitle:"To'lov va yetkazib berish", paymentMethodLabel:"To'lov usuli", cardLabel:"Karta", cardSoonNote:"Karta orqali onlayn to'lov ishlab chiqilmoqda — tez orada mavjud bo'ladi", cardSoonToast:"Karta orqali to'lov hali ishlab chiqilmoqda", soonMethodToast:"Tez orada mavjud bo'ladi — hozircha Payme yoki kartani tanlang", phoneFieldLabel:"Telefon raqamingiz", phoneFieldNote:"Kuryer siz bilan bog'lanishi uchun kerak.", btsLabel:"Eng yaqin BTS punkti", btsPlaceholder:"Shahar yoki ko'chani kiriting...", btsNoResults:"Hech narsa topilmadi, boshqa so'rov kiriting", confirmTransferBtn:"O'tkazma amalga oshirildi", paymePrefix:"Payme raqamiga o'tkazing:", paymeNotSet:"Payme rekvizitlari hali sotuvchi tomonidan qo'shilmagan." },
+        policyReturn:"Qaytarish", policyReturnText:"Buyurtmani qaytarish uchun 14 kun vaqtingiz bor. Qaytarish xarajatlari xaridorga tegishli, mahsulot dastlabki holatida bo‘lishi kerak.", policyDelivery:"Yetkazib berish", policyDeliveryText:"Buyurtmani imkon qadar tez qayta ishlaymiz va yuboramiz. Odatda hududga qarab 2-5 kun.", policyCare:"Mahsulotga g‘amxo‘rlik", policyCareText:"Sovuq suvda yuving, mashinada quritmang, rasm/kashta ustiga to‘g‘ridan-to‘g‘ri dazmollamang.", collectionsHeader:"Kolleksiyalar", sizeGuide:"O'lcham gidi", trustShippingTitle:"Bepul yetkazib berish", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Oson qaytarish", trustReturnSub:"14 kun ichida qaytarish", trustSecureTitle:"Xavfsiz to'lov", trustSecureSub:"Payme, Click, karta", checkoutTitle:"To'lov va yetkazib berish", paymentMethodLabel:"To'lov usuli", cardLabel:"Karta", cardSoonNote:"Karta orqali onlayn to'lov ishlab chiqilmoqda — tez orada mavjud bo'ladi", cardSoonToast:"Karta orqali to'lov hali ishlab chiqilmoqda", soonMethodToast:"Tez orada mavjud bo'ladi — hozircha Payme yoki kartani tanlang", phoneFieldLabel:"Telefon raqamingiz", phoneFieldNote:"Kuryer siz bilan bog'lanishi uchun kerak.", btsLabel:"Eng yaqin BTS punkti", btsPlaceholder:"Shahar yoki ko'chani kiriting...", btsNoResults:"Hech narsa topilmadi, boshqa so'rov kiriting", confirmTransferBtn:"O'tkazma amalga oshirildi", paymePrefix:"Payme raqamiga o'tkazing:", paymeNotSet:"Payme rekvizitlari hali sotuvchi tomonidan qo'shilmagan.", nextStepHint:"Keyingi bosqichda — to'lov rekvizitlari va o'tkazmani tasdiqlash.", confirmingText:"Buyurtma rasmiylashtirilmoqda..." },
   tr: { search:"Ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
         addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
         sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
@@ -1093,7 +1167,7 @@ const STR = {
         reviewsWord:"değerlendirme", pcsWord:"adet", socialHeader:"Bizi takip edin", newsletterTitle:"Haberdar olun", newsletterSub:"Yeni koleksiyonlar ve indirimlerden haberdar olun", supportLabel:"Destek", faqHeader:"Sık sorulan sorular",
         statusPaying:"Ödeme kontrol ediliyor", statusPacking:"Hazırlanıyor", statusShipping:"Yolda", statusDelivered:"Teslim edildi",
         faqQ1:"Nasıl sipariş verilir?", faqA1:"Ürünü sepete ekleyin, ödeme yöntemini seçin ve en yakın BTS noktasını belirtin.", faqQ2:"Teslimat ne kadar sürer?", faqA2:"Genellikle bölgeye göre 2-5 gün. Sipariş durumu «Profil» bölümünde görünür.", faqQ3:"Ürün iade edilebilir mi?", faqA3:"Evet, beden uymazsa — teslim alındıktan sonra 7 gün içinde desteğe yazın.",
-        policyReturn:"İade", policyReturnText:"Siparişi iade etmek için 14 gününüz var. İade kargo masrafları alıcıya aittir, ürün orijinal durumda olmalıdır.", policyDelivery:"Teslimat", policyDeliveryText:"Siparişi mümkün olan en kısa sürede hazırlayıp gönderiyoruz. Genellikle bölgeye göre 2-5 gün.", policyCare:"Ürün bakımı", policyCareText:"Soğuk suda yıkayın, makinede kurutmayın, baskı/nakış üzerine doğrudan ütü yapmayın.", collectionsHeader:"Koleksiyonlar", sizeGuide:"Beden rehberi", trustShippingTitle:"Ücretsiz kargo", trustShippingSub:"300.000 so'mdan itibaren", trustReturnTitle:"Kolay iade", trustReturnSub:"14 gün iade hakkı", trustSecureTitle:"Güvenli ödeme", trustSecureSub:"Payme, Click, kart", checkoutTitle:"Ödeme ve teslimat", paymentMethodLabel:"Ödeme yöntemi", cardLabel:"Kart", cardSoonNote:"Kartla online ödeme geliştiriliyor — yakında kullanılabilir olacak", cardSoonToast:"Kartla ödeme henüz geliştirme aşamasında", soonMethodToast:"Yakında kullanılabilir olacak — şimdilik Payme veya kart seçin", phoneFieldLabel:"Telefon numaranız", phoneFieldNote:"Kuryerin sizinle iletişime geçebilmesi için gerekli.", btsLabel:"En yakın BTS noktası", btsPlaceholder:"Şehir veya sokak yazmaya başlayın...", btsNoResults:"Sonuç bulunamadı, başka bir arama deneyin", confirmTransferBtn:"Transfer tamamlandı", paymePrefix:"Payme numarasına gönderin:", paymeNotSet:"Payme bilgileri henüz satıcı tarafından eklenmedi." },
+        policyReturn:"İade", policyReturnText:"Siparişi iade etmek için 14 gününüz var. İade kargo masrafları alıcıya aittir, ürün orijinal durumda olmalıdır.", policyDelivery:"Teslimat", policyDeliveryText:"Siparişi mümkün olan en kısa sürede hazırlayıp gönderiyoruz. Genellikle bölgeye göre 2-5 gün.", policyCare:"Ürün bakımı", policyCareText:"Soğuk suda yıkayın, makinede kurutmayın, baskı/nakış üzerine doğrudan ütü yapmayın.", collectionsHeader:"Koleksiyonlar", sizeGuide:"Beden rehberi", trustShippingTitle:"Ücretsiz kargo", trustShippingSub:"300.000 so'mdan itibaren", trustReturnTitle:"Kolay iade", trustReturnSub:"14 gün iade hakkı", trustSecureTitle:"Güvenli ödeme", trustSecureSub:"Payme, Click, kart", checkoutTitle:"Ödeme ve teslimat", paymentMethodLabel:"Ödeme yöntemi", cardLabel:"Kart", cardSoonNote:"Kartla online ödeme geliştiriliyor — yakında kullanılabilir olacak", cardSoonToast:"Kartla ödeme henüz geliştirme aşamasında", soonMethodToast:"Yakında kullanılabilir olacak — şimdilik Payme veya kart seçin", phoneFieldLabel:"Telefon numaranız", phoneFieldNote:"Kuryerin sizinle iletişime geçebilmesi için gerekli.", btsLabel:"En yakın BTS noktası", btsPlaceholder:"Şehir veya sokak yazmaya başlayın...", btsNoResults:"Sonuç bulunamadı, başka bir arama deneyin", confirmTransferBtn:"Transfer tamamlandı", paymePrefix:"Payme numarasına gönderin:", paymeNotSet:"Payme bilgileri henüz satıcı tarafından eklenmedi.", nextStepHint:"Bir sonraki adımda — ödeme bilgileri ve transfer onayı.", confirmingText:"Sipariş oluşturuluyor..." },
   az: { search:"Axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
         addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
         sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
@@ -1104,7 +1178,7 @@ const STR = {
         reviewsWord:"rəy", pcsWord:"ədəd", socialHeader:"Bizi izləyin", newsletterTitle:"Xəbərdar olun", newsletterSub:"Yeni kolleksiyalar və endirimlərdən xəbərdar olun", supportLabel:"Dəstək", faqHeader:"Tez-tez verilən suallar",
         statusPaying:"Ödəniş yoxlanılır", statusPacking:"Hazırlanır", statusShipping:"Yoldadır", statusDelivered:"Çatdırıldı",
         faqQ1:"Sifarişi necə vermək olar?", faqA1:"Məhsulu səbətə əlavə edin, ödəniş üsulunu seçin və ən yaxın BTS məntəqəsini göstərin.", faqQ2:"Çatdırılma nə qədər çəkir?", faqA2:"Adətən bölgəyə görə 2-5 gün. Sifariş statusu «Profil» bölməsində görünür.", faqQ3:"Məhsulu qaytarmaq olarmı?", faqA3:"Bəli, ölçü uyğun gəlmirsə — aldıqdan sonra 7 gün ərzində dəstəyə yazın.",
-        policyReturn:"Qaytarma", policyReturnText:"Sifarişi qaytarmaq üçün 14 gününüz var. Geri göndərmə xərcləri alıcıya aiddir, məhsul ilkin vəziyyətdə olmalıdır.", policyDelivery:"Çatdırılma", policyDeliveryText:"Sifarişi mümkün qədər tez hazırlayıb göndəririk. Adətən bölgəyə görə 2-5 gün.", policyCare:"Məhsula qulluq", policyCareText:"Soyuq suda yuyun, maşında qurutmayın, çap/naxış üzərinə birbaşa ütü etməyin.", collectionsHeader:"Kolleksiyalar", sizeGuide:"Ölçü bələdçisi", trustShippingTitle:"Pulsuz çatdırılma", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Asan qaytarma", trustReturnSub:"14 gün qaytarma hüququ", trustSecureTitle:"Təhlükəsiz ödəniş", trustSecureSub:"Payme, Click, kart", checkoutTitle:"Ödəniş və çatdırılma", paymentMethodLabel:"Ödəniş üsulu", cardLabel:"Kart", cardSoonNote:"Kartla onlayn ödəniş hazırlanır — tezliklə mövcud olacaq", cardSoonToast:"Kartla ödəniş hələ hazırlanma mərhələsindədir", soonMethodToast:"Tezliklə mövcud olacaq — hələlik Payme və ya kart seçin", phoneFieldLabel:"Telefon nömrəniz", phoneFieldNote:"Kuryerin sizinlə əlaqə saxlaması üçün lazımdır.", btsLabel:"Ən yaxın BTS məntəqəsi", btsPlaceholder:"Şəhər və ya küçə yazmağa başlayın...", btsNoResults:"Heç nə tapılmadı, başqa sorğu sınayın", confirmTransferBtn:"Köçürmə edildi", paymePrefix:"Payme nömrəsinə köçürün:", paymeNotSet:"Payme rekvizitləri hələ satıcı tərəfindən əlavə edilməyib." },
+        policyReturn:"Qaytarma", policyReturnText:"Sifarişi qaytarmaq üçün 14 gününüz var. Geri göndərmə xərcləri alıcıya aiddir, məhsul ilkin vəziyyətdə olmalıdır.", policyDelivery:"Çatdırılma", policyDeliveryText:"Sifarişi mümkün qədər tez hazırlayıb göndəririk. Adətən bölgəyə görə 2-5 gün.", policyCare:"Məhsula qulluq", policyCareText:"Soyuq suda yuyun, maşında qurutmayın, çap/naxış üzərinə birbaşa ütü etməyin.", collectionsHeader:"Kolleksiyalar", sizeGuide:"Ölçü bələdçisi", trustShippingTitle:"Pulsuz çatdırılma", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Asan qaytarma", trustReturnSub:"14 gün qaytarma hüququ", trustSecureTitle:"Təhlükəsiz ödəniş", trustSecureSub:"Payme, Click, kart", checkoutTitle:"Ödəniş və çatdırılma", paymentMethodLabel:"Ödəniş üsulu", cardLabel:"Kart", cardSoonNote:"Kartla onlayn ödəniş hazırlanır — tezliklə mövcud olacaq", cardSoonToast:"Kartla ödəniş hələ hazırlanma mərhələsindədir", soonMethodToast:"Tezliklə mövcud olacaq — hələlik Payme və ya kart seçin", phoneFieldLabel:"Telefon nömrəniz", phoneFieldNote:"Kuryerin sizinlə əlaqə saxlaması üçün lazımdır.", btsLabel:"Ən yaxın BTS məntəqəsi", btsPlaceholder:"Şəhər və ya küçə yazmağa başlayın...", btsNoResults:"Heç nə tapılmadı, başqa sorğu sınayın", confirmTransferBtn:"Köçürmə edildi", paymePrefix:"Payme nömrəsinə köçürün:", paymeNotSet:"Payme rekvizitləri hələ satıcı tərəfindən əlavə edilməyib.", nextStepHint:"Növbəti addımda — ödəniş rekvizitləri və köçürmənin təsdiqi.", confirmingText:"Sifariş rəsmiləşdirilir..." },
   en: { search:"Search", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
         addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
         sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
@@ -1115,7 +1189,7 @@ const STR = {
         reviewsWord:"reviews", pcsWord:"pcs", socialHeader:"Follow us", newsletterTitle:"Stay updated", newsletterSub:"Subscribe for news on new drops and discounts", supportLabel:"Support", faqHeader:"Frequently asked questions",
         statusPaying:"Payment being verified", statusPacking:"Packing", statusShipping:"On the way", statusDelivered:"Delivered",
         faqQ1:"How do I place an order?", faqA1:"Add an item to your cart, choose a payment method and select the nearest BTS pickup point.", faqQ2:"How long does delivery take?", faqA2:"Usually 2-5 days depending on the region. Order status is visible in the Profile section.", faqQ3:"Can I return an item?", faqA3:"Yes, if the size does not fit - contact support within 7 days of receiving it.",
-        policyReturn:"Returns", policyReturnText:"You have 14 days to return your order. Return shipping costs are covered by the buyer, and the item must be in its original condition.", policyDelivery:"Delivery", policyDeliveryText:"We process and ship orders as fast as possible. Usually 2-5 days depending on the region.", policyCare:"Care instructions", policyCareText:"Wash in cold water, do not tumble dry, do not iron directly on prints/embroidery.", collectionsHeader:"Collections", sizeGuide:"Size guide", trustShippingTitle:"Free shipping", trustShippingSub:"on orders over 300,000 UZS", trustReturnTitle:"Easy returns", trustReturnSub:"14-day return policy", trustSecureTitle:"Secure payment", trustSecureSub:"Payme, Click, card", checkoutTitle:"Payment & delivery", paymentMethodLabel:"Payment method", cardLabel:"Card", cardSoonNote:"Online card payment is in development — coming soon", cardSoonToast:"Card payment is still in development", soonMethodToast:"Coming soon — please choose Payme or card for now", phoneFieldLabel:"Your phone number", phoneFieldNote:"Needed so the courier can reach you.", btsLabel:"Nearest BTS pickup point", btsPlaceholder:"Start typing a city or street...", btsNoResults:"Nothing found, try a different search", confirmTransferBtn:"Transfer completed", paymePrefix:"Transfer to Payme number:", paymeNotSet:"Payme details haven't been added by the seller yet." }
+        policyReturn:"Returns", policyReturnText:"You have 14 days to return your order. Return shipping costs are covered by the buyer, and the item must be in its original condition.", policyDelivery:"Delivery", policyDeliveryText:"We process and ship orders as fast as possible. Usually 2-5 days depending on the region.", policyCare:"Care instructions", policyCareText:"Wash in cold water, do not tumble dry, do not iron directly on prints/embroidery.", collectionsHeader:"Collections", sizeGuide:"Size guide", trustShippingTitle:"Free shipping", trustShippingSub:"on orders over 300,000 UZS", trustReturnTitle:"Easy returns", trustReturnSub:"14-day return policy", trustSecureTitle:"Secure payment", trustSecureSub:"Payme, Click, card", checkoutTitle:"Payment & delivery", paymentMethodLabel:"Payment method", cardLabel:"Card", cardSoonNote:"Online card payment is in development — coming soon", cardSoonToast:"Card payment is still in development", soonMethodToast:"Coming soon — please choose Payme or card for now", phoneFieldLabel:"Your phone number", phoneFieldNote:"Needed so the courier can reach you.", btsLabel:"Nearest BTS pickup point", btsPlaceholder:"Start typing a city or street...", btsNoResults:"Nothing found, try a different search", confirmTransferBtn:"Transfer completed", paymePrefix:"Transfer to Payme number:", paymeNotSet:"Payme details haven't been added by the seller yet.", nextStepHint:"Next step — payment details and transfer confirmation.", confirmingText:"Placing your order..." }
 };
 let lang = localStorage.getItem('milaisss_lang') || 'en';
 function t(key){ return (STR[lang] && STR[lang][key]) || STR.ru[key] || key; }
@@ -2188,7 +2262,7 @@ function renderCart(){
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
     <button class="checkout-btn" onclick="requireRegistration(goToCheckoutFlow)">${t('checkoutBtn')}</button>
-    <div class="hint">На следующем шаге — реквизиты для оплаты и подтверждение перевода.</div>
+    <div class="hint" data-i18n="nextStepHint">На следующем шаге — реквизиты для оплаты и подтверждение перевода.</div>
   `;
 }
 
@@ -2324,7 +2398,8 @@ function finalizeOrder(phone, branch){
   const customerName = getCustomerName();
 
   const confirmBtn = document.getElementById('confirmPaymentBtn');
-  if (confirmBtn) confirmBtn.disabled = true;
+  const confirmBtnOriginalText = confirmBtn ? confirmBtn.textContent : '';
+  if (confirmBtn){ confirmBtn.disabled = true; confirmBtn.textContent = t('confirmingText'); }
 
   decrementStockForOrder(orderItems).then(() => {
     return db.collection('orders').add({
@@ -2346,7 +2421,7 @@ function finalizeOrder(phone, branch){
       showToast('Не удалось оформить заказ, попробуйте ещё раз');
     }
   }).finally(() => {
-    if (confirmBtn) confirmBtn.disabled = false;
+    if (confirmBtn){ confirmBtn.disabled = false; confirmBtn.textContent = confirmBtnOriginalText; }
   });
 }
 
@@ -2494,6 +2569,8 @@ function logVisit(){
 applyLang();
 setupSupportListener();
 loadCustomerProfile();
+renderProfileHeader();
+renderTelegramLoginWidget();
 renderRatingSummary();
 logVisit();
 </script>
