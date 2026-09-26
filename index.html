@@ -422,7 +422,7 @@
   .support-input-row{ display:flex; gap:8px; padding:12px 20px; position:fixed; left:0; right:0; bottom:96px; background:var(--bg); z-index:55; will-change:transform; }
   .success-overlay{ position:fixed; inset:0; z-index:600; display:flex; align-items:center; justify-content:center; background:#000; opacity:0; pointer-events:none; transition:opacity .25s ease; overflow:hidden; -webkit-transform:translateZ(0); transform:translateZ(0); }
   .success-overlay.open{ opacity:1; pointer-events:auto; }
-  .success-glow{ position:absolute; left:50%; bottom:-45%; width:150vw; height:150vw; max-width:820px; max-height:820px; transform:translate(-50%,0) translateZ(0) scale(.4); border-radius:50%; opacity:0;
+  .success-glow{ position:absolute; left:50%; bottom:-60%; width:140vmax; height:140vmax; transform:translate(-50%,0) translateZ(0) scale(.75); border-radius:50%; opacity:0; z-index:3;
     background:
       radial-gradient(circle at 32% 62%, rgba(150,90,255,.95), transparent 55%),
       radial-gradient(circle at 68% 42%, rgba(255,145,85,.9), transparent 55%),
@@ -433,15 +433,15 @@
   }
   .success-overlay.open .success-glow{ animation:success-glow-rise 2.1s cubic-bezier(.22,.61,.36,1) forwards; }
   @keyframes success-glow-rise{
-    0%{ bottom:-45%; transform:translate(-50%,0) translateZ(0) scale(.4); opacity:0; }
+    0%{ bottom:-60%; transform:translate(-50%,0) translateZ(0) scale(.75); opacity:0; }
     12%{ opacity:.9; }
-    35%{ bottom:35%; transform:translate(-50%,0) translateZ(0) scale(.9); opacity:1; }
-    50%{ bottom:50%; transform:translate(-50%,0) translateZ(0) scale(1.2); opacity:1; }
-    70%{ bottom:66%; transform:translate(-50%,0) translateZ(0) scale(1); opacity:1; }
-    92%{ bottom:100%; transform:translate(-50%,0) translateZ(0) scale(.55); opacity:.15; }
-    100%{ bottom:120%; transform:translate(-50%,0) translateZ(0) scale(.45); opacity:0; }
+    35%{ bottom:20%; transform:translate(-50%,0) translateZ(0) scale(.95); opacity:1; }
+    50%{ bottom:35%; transform:translate(-50%,0) translateZ(0) scale(1.15); opacity:1; }
+    70%{ bottom:55%; transform:translate(-50%,0) translateZ(0) scale(1); opacity:1; }
+    92%{ bottom:85%; transform:translate(-50%,0) translateZ(0) scale(.85); opacity:.15; }
+    100%{ bottom:100%; transform:translate(-50%,0) translateZ(0) scale(.75); opacity:0; }
   }
-  .success-status{ position:relative; z-index:2; display:flex; align-items:center; gap:10px; }
+  .success-status{ position:relative; z-index:1; display:flex; align-items:center; gap:10px; }
   .success-icon-wrap{ width:22px; height:22px; flex-shrink:0; position:relative; }
   .success-icon-wrap svg{ position:absolute; inset:0; width:100%; height:100%; }
   .success-spinner{ color:rgba(255,255,255,.55); animation:success-spin 1s linear infinite; }
@@ -837,7 +837,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-68";
+  const CURRENT_VERSION = "20260908-69";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
