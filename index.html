@@ -832,7 +832,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-70";
+  const CURRENT_VERSION = "20260908-71";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2445,6 +2445,7 @@ function selectBtsBranch(branch){
 }
 
 function confirmPayment(){
+  unlockSfx(); // iOS разрешает звук только в момент касания — «разблокируем» его сейчас, проиграем позже
   const phone = document.getElementById('phoneInput').value.trim();
   const branch = selectedBtsBranch;
 
@@ -2550,6 +2551,74 @@ function finalizeOrder(phone, branch){
   });
 }
 
+/* ---------- звук «вжууп» (генерируется в браузере, без аудиофайла) ---------- */
+let sfxCtx = null;
+function unlockSfx(){
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!sfxCtx) sfxCtx = new AC();
+    if (sfxCtx.state === 'suspended') sfxCtx.resume();
+    const b = sfxCtx.createBuffer(1, 1, 22050);
+    const s = sfxCtx.createBufferSource();
+    s.buffer = b; s.connect(sfxCtx.destination); s.start(0);
+  } catch(e){}
+}
+function playWhoosh(flyStartSec){
+  try {
+    if (!sfxCtx) unlockSfx();
+    const ctx = sfxCtx;
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime + 0.02;
+    const total = flyStartSec + 1.1;
+
+    const master = ctx.createGain();
+    master.gain.value = 0.9;
+    master.connect(ctx.destination);
+
+    // шум — основа «воздушного» звука
+    const len = Math.ceil(ctx.sampleRate * total);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass'; bp.Q.value = 1.1;
+    const ng = ctx.createGain();
+    noise.connect(bp); bp.connect(ng); ng.connect(master);
+
+    const f = bp.frequency, g = ng.gain;
+    const fly = now + flyStartSec;
+    // нарастание, пока сияние поднимается снизу
+    f.setValueAtTime(260, now);
+    f.linearRampToValueAtTime(520, fly);
+    g.setValueAtTime(0.0001, now);
+    g.linearRampToValueAtTime(0.10, fly - 0.05);
+    // резкий «вжух» вверх
+    f.exponentialRampToValueAtTime(3200, fly + 0.45);
+    g.linearRampToValueAtTime(0.55, fly + 0.16);
+    g.exponentialRampToValueAtTime(0.0001, fly + 0.95);
+
+    // тональная часть «ууп» — тон уходит вверх вместе с сиянием
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    const og = ctx.createGain();
+    osc.connect(og); og.connect(master);
+    osc.frequency.setValueAtTime(170, fly - 0.05);
+    osc.frequency.exponentialRampToValueAtTime(880, fly + 0.5);
+    og.gain.setValueAtTime(0.0001, now);
+    og.gain.setValueAtTime(0.0001, fly - 0.05);
+    og.gain.linearRampToValueAtTime(0.13, fly + 0.1);
+    og.gain.exponentialRampToValueAtTime(0.0001, fly + 0.6);
+
+    noise.start(now); noise.stop(now + total);
+    osc.start(fly - 0.05); osc.stop(fly + 0.7);
+  } catch(e){}
+}
+
 function showSuccessAnimation(onDone){
   const overlay = document.getElementById('successOverlay');
   const glow = document.getElementById('successGlow');
@@ -2560,8 +2629,9 @@ function showSuccessAnimation(onDone){
   document.getElementById('successLoadingText').textContent = t('confirmingText');
   document.getElementById('successDoneText').textContent = t('orderSuccessTitle');
 
-  const D = 2300;          // общая длительность, мс
-  const SWAP_AT = 0.552;   // момент, когда яркий центр сияния проходит через текст
+  const D = 2200;          // общая длительность, мс
+  const PEAK_END = 0.52;   // до этого момента сияние внизу набирает яркость, потом — полёт вверх
+  const SWAP_AT = 0.66;    // в этот момент яркий центр проходит через текст
 
   // Если браузер не умеет Web Animations — просто показываем результат без эффекта.
   if (!glow.animate){
@@ -2576,22 +2646,24 @@ function showSuccessAnimation(onDone){
   const H = window.innerHeight;
   const y = v => `translate3d(0,${(v * H).toFixed(1)}px,0)`;
 
-  // появляется снизу → разгоняется → проходит центр без остановки → плавно уходит за верх
+  // 1) поднимается снизу и набирает яркость  2) короткое «зависание» на пике
+  // 3) быстрый, но плавный разгон вверх  4) пролетает центр и уходит за верх
+  // скорости на стыке отрезков 3 и 4 совпадают, поэтому полёт без рывка
   glow.animate([
-    { offset:0,   transform:`${y(.80)} scale(.62)`,  opacity:0,  easing:'cubic-bezier(.55,0,.85,.565)' },
-    { offset:.40, transform:`${y(.42)} scale(.82)`,  opacity:.9, easing:'linear' },
-    { offset:.75, transform:`${y(-.55)} scale(1.1)`, opacity:.9, easing:'cubic-bezier(.1,.277,.3,1)' },
-    { offset:1,   transform:`${y(-.80)} scale(1.16)`,opacity:0 }
+    { offset:0,        transform:`${y(.85)} scale(.70)`,  opacity:0,  easing:'cubic-bezier(.2,.6,.3,1)' },
+    { offset:.45,      transform:`${y(.46)} scale(.95)`,  opacity:1,  easing:'ease-in-out' },
+    { offset:PEAK_END, transform:`${y(.42)} scale(.98)`,  opacity:1,  easing:'cubic-bezier(.5,0,.75,.389)' },
+    { offset:SWAP_AT,  transform:`${y(0)} scale(1.05)`,   opacity:1,  easing:'cubic-bezier(.2,.5,.2,1)' },
+    { offset:1,        transform:`${y(-.95)} scale(1.2)`, opacity:0 }
   ], { duration:D, fill:'forwards' });
 
-  // яркость максимальна ровно при прохождении центра
+  // яркость: разгорается внизу до максимума, держится во время рывка, гаснет после центра
   core.animate([
-    { offset:0,   opacity:0,   easing:'ease-in' },
-    { offset:.40, opacity:.25, easing:'ease-in-out' },
-    { offset:.51, opacity:1 },
-    { offset:.60, opacity:1,   easing:'ease-in' },
-    { offset:.78, opacity:.35, easing:'ease-out' },
-    { offset:1,   opacity:0 }
+    { offset:0,    opacity:0,  easing:'ease-in' },
+    { offset:.45,  opacity:1 },
+    { offset:.70,  opacity:1,  easing:'ease-in' },
+    { offset:.90,  opacity:.2, easing:'ease-out' },
+    { offset:1,    opacity:0 }
   ], { duration:D, fill:'forwards' });
 
   // текст меняется, пока он скрыт под белым центром — сама смена не видна
@@ -2601,8 +2673,9 @@ function showSuccessAnimation(onDone){
   done.animate([{ opacity:0, filter:'blur(3px)' }, { opacity:1, filter:'blur(0)' }],
     { duration:80, delay:swap, fill:'both', easing:'linear' });
   tick.animate([{ strokeDashoffset:20 }, { strokeDashoffset:0 }],
-    { duration:300, delay:D * .66, fill:'both', easing:'ease-out' });
+    { duration:300, delay:D * .74, fill:'both', easing:'ease-out' });
 
+  playWhoosh(D * PEAK_END / 1000);
   setTimeout(() => { if (tg) tg.HapticFeedback.notificationOccurred('success'); }, swap);
   setTimeout(() => {
     overlay.classList.remove('open');
