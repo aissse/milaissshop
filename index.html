@@ -837,7 +837,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-67";
+  const CURRENT_VERSION = "20260908-68";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1110,7 +1110,7 @@ function renderProfileHeader(){
     const avatarInner = avatarUrl ? '' : '✈️';
     el.innerHTML = `
       <div class="profile-header-card">
-        <div class="profile-avatar" style="background:var(--stone); background-image:url('${avatarUrl}'); display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;" onclick="openTelegramAvatarModal()">${avatarInner}</div>
+        <div class="profile-avatar" style="background-image:url('${avatarUrl}'); display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;" onclick="openTelegramAvatarModal()">${avatarInner}</div>
         <div>
           <div class="profile-name">${n}</div>
           ${un ? `<div class="profile-phone">@${un}</div>` : ''}
@@ -1180,8 +1180,16 @@ function onTelegramAuth(user){
   if (!localStorage.getItem('milaisss_linked_tg_avatar')) openTelegramAvatarModal();
 }
 
-function openTelegramAvatarModal(){
+function openTelegramAvatarModal(retriesLeft){
+  if (retriesLeft === undefined) retriesLeft = 6;
   const wrap = document.getElementById('tgAvatarGrid');
+  if (avatarOptions.length === 0 && retriesLeft > 0){
+    // Список аватаров может ещё не успеть подгрузиться с сервера сразу после входа — ждём и пробуем ещё раз.
+    wrap.innerHTML = '<p class="hint">Загружаем аватары...</p>';
+    document.getElementById('tgAvatarModal').classList.add('open');
+    setTimeout(() => openTelegramAvatarModal(retriesLeft - 1), 400);
+    return;
+  }
   const current = localStorage.getItem('milaisss_linked_tg_avatar') || '';
   if (avatarOptions.length === 0){ wrap.innerHTML = '<p class="hint">Аватары ещё не добавлены продавцом</p>'; }
   else {
