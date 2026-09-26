@@ -420,33 +420,28 @@
   .msg.customer{ align-self:flex-end; background:var(--orange); color:#fff; border-bottom-right-radius:4px; }
   .msg.admin{ align-self:flex-start; background:var(--stone); color:var(--ink); border-bottom-left-radius:4px; }
   .support-input-row{ display:flex; gap:8px; padding:12px 20px; position:fixed; left:0; right:0; bottom:96px; background:var(--bg); z-index:55; will-change:transform; }
-  .success-overlay{ position:fixed; inset:0; z-index:600; display:flex; align-items:center; justify-content:center; background:#000; opacity:0; pointer-events:none; transition:opacity .25s ease; overflow:hidden; -webkit-transform:translateZ(0); transform:translateZ(0); }
+  .success-overlay{ position:fixed; inset:0; z-index:600; overflow:hidden; isolation:isolate; opacity:0; pointer-events:none; transition:opacity .3s ease;
+    background:rgba(12,12,14,.78); -webkit-backdrop-filter:blur(14px) saturate(.7); backdrop-filter:blur(14px) saturate(.7); }
   .success-overlay.open{ opacity:1; pointer-events:auto; }
-  .success-glow{ position:absolute; left:50%; bottom:-60%; width:140vmax; height:140vmax; transform:translate(-50%,0) translateZ(0) scale(.75); border-radius:50%; opacity:0; z-index:3;
-    background:
-      radial-gradient(circle at 32% 62%, rgba(150,90,255,.95), transparent 55%),
-      radial-gradient(circle at 68% 42%, rgba(255,145,85,.9), transparent 55%),
-      radial-gradient(circle at 50% 52%, rgba(255,255,255,.95), transparent 42%);
-    filter:blur(70px);
-    -webkit-backface-visibility:hidden; backface-visibility:hidden;
-    will-change:transform, opacity;
-  }
-  .success-overlay.open .success-glow{ animation:success-glow-rise 2.1s cubic-bezier(.22,.61,.36,1) forwards; }
-  @keyframes success-glow-rise{
-    0%{ bottom:-60%; transform:translate(-50%,0) translateZ(0) scale(.75); opacity:0; }
-    12%{ opacity:.9; }
-    35%{ bottom:20%; transform:translate(-50%,0) translateZ(0) scale(.95); opacity:1; }
-    50%{ bottom:35%; transform:translate(-50%,0) translateZ(0) scale(1.15); opacity:1; }
-    70%{ bottom:55%; transform:translate(-50%,0) translateZ(0) scale(1); opacity:1; }
-    92%{ bottom:85%; transform:translate(-50%,0) translateZ(0) scale(.85); opacity:.15; }
-    100%{ bottom:100%; transform:translate(-50%,0) translateZ(0) scale(.75); opacity:0; }
-  }
-  .success-status{ position:relative; z-index:1; display:flex; align-items:center; gap:10px; }
-  .success-icon-wrap{ width:22px; height:22px; flex-shrink:0; position:relative; }
-  .success-icon-wrap svg{ position:absolute; inset:0; width:100%; height:100%; }
-  .success-spinner{ color:rgba(255,255,255,.55); animation:success-spin 1s linear infinite; }
+  .success-status{ position:absolute; left:0; right:0; top:50%; height:30px; margin-top:-15px; z-index:1; }
+  .success-state{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:10px; padding:0 20px;
+    font-size:15px; font-weight:600; color:rgba(255,255,255,.72); will-change:opacity,filter; text-align:center; }
+  .success-state.done{ opacity:0; color:rgba(255,255,255,.92); }
+  .success-spinner{ width:19px; height:19px; flex-shrink:0; border-radius:50%; border:1.6px solid rgba(255,255,255,.3); border-top-color:rgba(255,255,255,.9); animation:success-spin .9s linear infinite; }
   @keyframes success-spin{ to{ transform:rotate(360deg); } }
-  .success-status-text{ font-size:15px; font-weight:600; color:#fff; }
+  .success-check{ width:21px; height:21px; flex-shrink:0; border-radius:50%; background:#f2f2f5; display:grid; place-items:center; }
+  .success-check svg{ width:12px; height:12px; }
+  .success-check path{ stroke:#1b1b1d; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:20; stroke-dashoffset:20; }
+  /* Сияние без filter:blur — мягкость даёт сам градиент, поэтому по краям экрана не остаётся полос */
+  .success-glow{ position:absolute; left:50%; top:50%; width:min(160vw, 1000px); aspect-ratio:1; margin-left:calc(min(160vw, 1000px) / -2); margin-top:calc(min(160vw, 1000px) / -2);
+    z-index:2; pointer-events:none; opacity:0; mix-blend-mode:screen; will-change:transform,opacity; }
+  .success-glow > i{ position:absolute; inset:0; border-radius:50%; }
+  .success-glow .base{ background:
+    radial-gradient(closest-side at 28% 58%, rgba(104,38,214,.95), rgba(104,38,214,0) 78%),
+    radial-gradient(closest-side at 74% 46%, rgba(238,160,92,.92), rgba(238,160,92,0) 78%),
+    radial-gradient(closest-side at 50% 50%, rgba(226,140,214,.9), rgba(226,140,214,0) 92%); }
+  .success-glow .core{ opacity:0; will-change:opacity; background:radial-gradient(closest-side at 50% 50%,
+    #ffffff 0%, #ffffff 34%, rgba(255,238,248,.92) 48%, rgba(255,222,238,.5) 64%, rgba(255,220,236,0) 82%); }
   .support-input-row input{ flex:1; border:1px solid var(--line); border-radius:100px; padding:10px 16px; font-size:13px; outline:none; }
   .support-input-row button{ background:var(--orange); color:#fff; border:none; border-radius:50%; width:42px; height:42px; cursor:pointer; flex-shrink:0; }
 </style>
@@ -775,14 +770,14 @@
 </div>
 
 <div class="success-overlay" id="successOverlay">
-  <div class="success-glow"></div>
-  <div class="success-status">
-    <div class="success-icon-wrap">
-      <svg class="success-spinner" id="successSpinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke-dasharray="42 15"/></svg>
-      <svg class="success-check-icon" id="successCheckIcon" viewBox="0 0 24 24" style="display:none;"><circle cx="12" cy="12" r="11" fill="#fff"/><path d="M7 12.3l3.2 3.2L17 8.7" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="success-status" role="status" aria-live="polite">
+    <div class="success-state loading" id="successLoading"><span class="success-spinner"></span><span id="successLoadingText">Оформляем заказ...</span></div>
+    <div class="success-state done" id="successDone">
+      <span class="success-check"><svg viewBox="0 0 12 12"><path id="successTick" d="M2.5 6.3l2.3 2.2L9.5 3.6"/></svg></span>
+      <span id="successDoneText">Покупка успешно совершена!</span>
     </div>
-    <div class="success-status-text" id="successStatusText">Оформляем покупку...</div>
   </div>
+  <div class="success-glow" id="successGlow"><i class="base"></i><i class="core" id="successCore"></i></div>
 </div>
 
 <div class="modal-overlay" id="registerModal" onclick="closeRegisterModal()">
@@ -837,7 +832,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-69";
+  const CURRENT_VERSION = "20260908-70";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2556,24 +2551,63 @@ function finalizeOrder(phone, branch){
 }
 
 function showSuccessAnimation(onDone){
-  const el = document.getElementById('successOverlay');
-  const spinner = document.getElementById('successSpinner');
-  const check = document.getElementById('successCheckIcon');
-  const statusText = document.getElementById('successStatusText');
-  spinner.style.display = '';
-  check.style.display = 'none';
-  statusText.textContent = t('confirmingText');
-  el.classList.add('open');
-  if (tg) tg.HapticFeedback.notificationOccurred('success');
+  const overlay = document.getElementById('successOverlay');
+  const glow = document.getElementById('successGlow');
+  const core = document.getElementById('successCore');
+  const loading = document.getElementById('successLoading');
+  const done = document.getElementById('successDone');
+  const tick = document.getElementById('successTick');
+  document.getElementById('successLoadingText').textContent = t('confirmingText');
+  document.getElementById('successDoneText').textContent = t('orderSuccessTitle');
+
+  const D = 2300;          // общая длительность, мс
+  const SWAP_AT = 0.552;   // момент, когда яркий центр сияния проходит через текст
+
+  // Если браузер не умеет Web Animations — просто показываем результат без эффекта.
+  if (!glow.animate){
+    loading.style.opacity = 0; done.style.opacity = 1;
+    overlay.classList.add('open');
+    setTimeout(() => { overlay.classList.remove('open'); if (onDone) onDone(); }, 1600);
+    return;
+  }
+
+  [glow, core, loading, done, tick].forEach(el => el.getAnimations().forEach(a => a.cancel()));
+  overlay.classList.add('open');
+  const H = window.innerHeight;
+  const y = v => `translate3d(0,${(v * H).toFixed(1)}px,0)`;
+
+  // появляется снизу → разгоняется → проходит центр без остановки → плавно уходит за верх
+  glow.animate([
+    { offset:0,   transform:`${y(.80)} scale(.62)`,  opacity:0,  easing:'cubic-bezier(.55,0,.85,.565)' },
+    { offset:.40, transform:`${y(.42)} scale(.82)`,  opacity:.9, easing:'linear' },
+    { offset:.75, transform:`${y(-.55)} scale(1.1)`, opacity:.9, easing:'cubic-bezier(.1,.277,.3,1)' },
+    { offset:1,   transform:`${y(-.80)} scale(1.16)`,opacity:0 }
+  ], { duration:D, fill:'forwards' });
+
+  // яркость максимальна ровно при прохождении центра
+  core.animate([
+    { offset:0,   opacity:0,   easing:'ease-in' },
+    { offset:.40, opacity:.25, easing:'ease-in-out' },
+    { offset:.51, opacity:1 },
+    { offset:.60, opacity:1,   easing:'ease-in' },
+    { offset:.78, opacity:.35, easing:'ease-out' },
+    { offset:1,   opacity:0 }
+  ], { duration:D, fill:'forwards' });
+
+  // текст меняется, пока он скрыт под белым центром — сама смена не видна
+  const swap = D * SWAP_AT;
+  loading.animate([{ opacity:1, filter:'blur(0)' }, { opacity:0, filter:'blur(3px)' }],
+    { duration:80, delay:swap - 40, fill:'both', easing:'linear' });
+  done.animate([{ opacity:0, filter:'blur(3px)' }, { opacity:1, filter:'blur(0)' }],
+    { duration:80, delay:swap, fill:'both', easing:'linear' });
+  tick.animate([{ strokeDashoffset:20 }, { strokeDashoffset:0 }],
+    { duration:300, delay:D * .66, fill:'both', easing:'ease-out' });
+
+  setTimeout(() => { if (tg) tg.HapticFeedback.notificationOccurred('success'); }, swap);
   setTimeout(() => {
-    spinner.style.display = 'none';
-    check.style.display = '';
-    statusText.textContent = t('orderSuccessTitle');
-  }, 1050);
-  setTimeout(() => {
-    el.classList.remove('open');
+    overlay.classList.remove('open');
     if (onDone) onDone();
-  }, 2400);
+  }, D + 700);
 }
 
 function closePaymentModal(){
