@@ -415,11 +415,11 @@
   .support-fab{ position:fixed; right:20px; bottom:110px; width:52px; height:52px; border-radius:50%; background:var(--orange); display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.2); z-index:60; transition:transform .35s ease, opacity .35s ease; }
   .support-fab.hidden{ transform:translateX(90px); opacity:0; }
   .support-fab svg{ width:24px; height:24px; }
-  .support-msgs{ padding:12px 20px; display:flex; flex-direction:column; gap:10px; min-height:50vh; }
+  .support-msgs{ padding:12px 20px 170px; display:flex; flex-direction:column; gap:10px; min-height:50vh; }
   .msg{ max-width:78%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.4; }
   .msg.customer{ align-self:flex-end; background:var(--orange); color:#fff; border-bottom-right-radius:4px; }
   .msg.admin{ align-self:flex-start; background:var(--stone); color:var(--ink); border-bottom-left-radius:4px; }
-  .support-input-row{ display:flex; gap:8px; padding:12px 20px 24px; position:sticky; bottom:0; background:var(--bg); z-index:20; }
+  .support-input-row{ display:flex; gap:8px; padding:12px 20px; position:fixed; left:0; right:0; bottom:96px; background:var(--bg); z-index:55; will-change:transform; }
   .success-overlay{ position:fixed; inset:0; z-index:600; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0); pointer-events:none; transition:background .3s ease; }
   .success-overlay.open{ background:rgba(0,0,0,.45); pointer-events:auto; }
   .success-card{ display:flex; flex-direction:column; align-items:center; gap:14px; padding:36px 32px; border-radius:24px; background:#fff; box-shadow:0 20px 60px rgba(0,0,0,.25); transform:translateY(60px) scale(.85); opacity:0; transition:transform .1s, opacity .1s; }
@@ -823,7 +823,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-64";
+  const CURRENT_VERSION = "20260908-65";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2034,6 +2034,25 @@ function setupSupportListener(){
     wrap.scrollTop = wrap.scrollHeight;
   });
 }
+
+/* iOS Safari не уменьшает страницу под клавиатуру, а просто перекрывает её снизу —
+   поэтому вручную подтягиваем панель ввода к реальной видимой области (visualViewport). */
+(function setupSupportInputPinning(){
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const restingBottom = 96; // должно совпадать с CSS bottom у .support-input-row
+  function update(){
+    const row = document.querySelector('.support-input-row');
+    if (!row) return;
+    const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    const extra = Math.max(0, keyboardHeight - restingBottom);
+    row.style.transform = extra > 0 ? `translateY(-${extra}px)` : '';
+  }
+  vv.addEventListener('resize', update);
+  vv.addEventListener('scroll', update);
+  document.addEventListener('focusin', (e) => { if (e.target && e.target.id === 'supportInput') setTimeout(update, 50); });
+  document.addEventListener('focusout', (e) => { if (e.target && e.target.id === 'supportInput') setTimeout(update, 50); });
+})();
 
 function sendSupportMessage(){
   const input = document.getElementById('supportInput');
