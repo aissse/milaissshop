@@ -244,6 +244,10 @@
         <label>Основной цвет кнопок (Добавить в корзину, Оформить заказ)</label>
         <div class="color-row"><input type="color" id="f_orangeColor" value="#ff5a1f" onchange="syncHexInput('orangeColor', this.value)"><input type="text" id="f_orangeColorHex" placeholder="#ff5a1f" onchange="saveHexColor('orangeColor', this.value)"></div>
 
+        <label>Цвет текста выбранного адреса БТС (при оформлении заказа)</label>
+        <div class="color-row"><input type="color" id="f_btsAddressColor" value="#ff5a1f" onchange="syncHexInput('btsAddressColor', this.value)"><input type="text" id="f_btsAddressColorHex" placeholder="#ff5a1f" onchange="saveHexColor('btsAddressColor', this.value)"></div>
+        <div class="hint">Строка «✓ Выбрано: ...» под полем поиска пункта БТС. Если не задать — будет такого же цвета, как основные кнопки.</div>
+
         <label>Цвет активного пункта категории в меню</label>
         <div class="color-row"><input type="color" id="f_catChipColor" value="#ff5a1f" onchange="syncHexInput('catChipColor', this.value)"><input type="text" id="f_catChipColorHex" placeholder="#ff5a1f" onchange="saveHexColor('catChipColor', this.value)"></div>
 
@@ -935,6 +939,7 @@ function loadSettings(){
   db.collection('settings').doc('shop').onSnapshot(doc => {
     const data = doc.exists ? doc.data() : {};
     if (data.navColor){ document.getElementById('f_navcolor').value = data.navColor; document.getElementById('f_navcolorHex').value = data.navColor; }
+    if (data.btsAddressColor){ document.getElementById('f_btsAddressColor').value = data.btsAddressColor; document.getElementById('f_btsAddressColorHex').value = data.btsAddressColor; }
     if (data.categoryChipColor){ document.getElementById('f_catChipColor').value = data.categoryChipColor; document.getElementById('f_catChipColorHex').value = data.categoryChipColor; }
     if (data.categoryFont) document.getElementById('f_catFont').value = data.categoryFont;
     if (data.bgColor){ document.getElementById('f_bgcolor').value = data.bgColor; document.getElementById('f_bgcolorHex').value = data.bgColor; }
@@ -991,7 +996,7 @@ function saveSetting(key, value){
   db.collection('settings').doc('shop').set({ [key]: value }, { merge: true });
 }
 
-const COLOR_SETTING_MAP = { orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor', blackDownColor: 'blackDownColor' };
+const COLOR_SETTING_MAP = { btsAddressColor: 'btsAddressColor', orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor', blackDownColor: 'blackDownColor' };
 
 function syncHexInput(id, colorVal){
   document.getElementById(`f_${id}Hex`).value = colorVal;
