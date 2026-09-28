@@ -244,6 +244,19 @@
         <label>Основной цвет кнопок (Добавить в корзину, Оформить заказ)</label>
         <div class="color-row"><input type="color" id="f_orangeColor" value="#ff5a1f" onchange="syncHexInput('orangeColor', this.value)"><input type="text" id="f_orangeColorHex" placeholder="#ff5a1f" onchange="saveHexColor('orangeColor', this.value)"></div>
 
+        <h3 style="margin:22px 0 4px; font-size:15px;">Чат поддержки</h3>
+        <label>Фон экрана поддержки</label>
+        <div class="color-row"><input type="color" id="f_supportBgColor" value="#ffffff" onchange="syncHexInput('supportBgColor', this.value)"><input type="text" id="f_supportBgColorHex" placeholder="#ffffff" onchange="saveHexColor('supportBgColor', this.value)"></div>
+        <label>Фон сообщений клиента</label>
+        <div class="color-row"><input type="color" id="f_supportCustBubble" value="#a82318" onchange="syncHexInput('supportCustBubble', this.value)"><input type="text" id="f_supportCustBubbleHex" placeholder="#a82318" onchange="saveHexColor('supportCustBubble', this.value)"></div>
+        <label>Текст сообщений клиента</label>
+        <div class="color-row"><input type="color" id="f_supportCustText" value="#ffffff" onchange="syncHexInput('supportCustText', this.value)"><input type="text" id="f_supportCustTextHex" placeholder="#ffffff" onchange="saveHexColor('supportCustText', this.value)"></div>
+        <label>Фон ваших ответов (поддержки)</label>
+        <div class="color-row"><input type="color" id="f_supportAdminBubble" value="#f1ede6" onchange="syncHexInput('supportAdminBubble', this.value)"><input type="text" id="f_supportAdminBubbleHex" placeholder="#f1ede6" onchange="saveHexColor('supportAdminBubble', this.value)"></div>
+        <label>Текст ваших ответов (поддержки)</label>
+        <div class="color-row"><input type="color" id="f_supportAdminText" value="#141414" onchange="syncHexInput('supportAdminText', this.value)"><input type="text" id="f_supportAdminTextHex" placeholder="#141414" onchange="saveHexColor('supportAdminText', this.value)"></div>
+        <div class="hint">Если какой-то цвет не задавать — останется как сейчас.</div>
+
         <label>Цвет текста выбранного адреса БТС (при оформлении заказа)</label>
         <div class="color-row"><input type="color" id="f_btsAddressColor" value="#ff5a1f" onchange="syncHexInput('btsAddressColor', this.value)"><input type="text" id="f_btsAddressColorHex" placeholder="#ff5a1f" onchange="saveHexColor('btsAddressColor', this.value)"></div>
         <div class="hint">Строка «✓ Выбрано: ...» под полем поиска пункта БТС. Если не задать — будет такого же цвета, как основные кнопки.</div>
@@ -939,6 +952,7 @@ function loadSettings(){
   db.collection('settings').doc('shop').onSnapshot(doc => {
     const data = doc.exists ? doc.data() : {};
     if (data.navColor){ document.getElementById('f_navcolor').value = data.navColor; document.getElementById('f_navcolorHex').value = data.navColor; }
+    ['supportBgColor','supportCustBubble','supportCustText','supportAdminBubble','supportAdminText'].forEach(k => { if (data[k]){ document.getElementById('f_'+k).value = data[k]; document.getElementById('f_'+k+'Hex').value = data[k]; } });
     if (data.btsAddressColor){ document.getElementById('f_btsAddressColor').value = data.btsAddressColor; document.getElementById('f_btsAddressColorHex').value = data.btsAddressColor; }
     if (data.categoryChipColor){ document.getElementById('f_catChipColor').value = data.categoryChipColor; document.getElementById('f_catChipColorHex').value = data.categoryChipColor; }
     if (data.categoryFont) document.getElementById('f_catFont').value = data.categoryFont;
@@ -996,7 +1010,7 @@ function saveSetting(key, value){
   db.collection('settings').doc('shop').set({ [key]: value }, { merge: true });
 }
 
-const COLOR_SETTING_MAP = { btsAddressColor: 'btsAddressColor', orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor', blackDownColor: 'blackDownColor' };
+const COLOR_SETTING_MAP = { supportBgColor:'supportBgColor', supportCustBubble:'supportCustBubble', supportCustText:'supportCustText', supportAdminBubble:'supportAdminBubble', supportAdminText:'supportAdminText', btsAddressColor: 'btsAddressColor', orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor', blackDownColor: 'blackDownColor' };
 
 function syncHexInput(id, colorVal){
   document.getElementById(`f_${id}Hex`).value = colorVal;
