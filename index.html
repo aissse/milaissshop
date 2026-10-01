@@ -11,11 +11,11 @@
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
 <meta name="description" content="milaisss shop — интернет-магазин кроссовок и обуви. Доставка по всему Узбекистану, оплата Payme, Click или картой.">
 <meta name="keywords" content="milaisss, milaisss shop, магазин кроссовок, кроссовки Ташкент, купить кроссовки Узбекистан">
-<link rel="canonical" href="https://aissse.github.io/milaissshop/">
+<link rel="canonical" href="https://milaisss.com/">
 <meta property="og:title" content="milaisss shop — интернет-магазин кроссовок">
 <meta property="og:description" content="Кроссовки и обувь с доставкой по Узбекистану. Оплата Payme, Click, картой.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://aissse.github.io/milaissshop/">
+<meta property="og:url" content="https://milaisss.com/">
 <meta name="google-site-verification" content="QLeo5HznJQ2owHKI2oFHkqQVdqxb7G_StqUlit7m_HU" />
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -421,6 +421,8 @@
   .msg.customer{ align-self:flex-end; background:var(--support-cust-bg, var(--orange)); color:var(--support-cust-text, #fff); border-bottom-right-radius:4px; }
   .msg.admin{ align-self:flex-start; background:var(--support-admin-bg, var(--stone)); color:var(--support-admin-text, var(--ink)); border-bottom-left-radius:4px; }
   .support-input-row{ display:flex; gap:8px; padding:12px 20px; position:fixed; left:0; right:0; bottom:96px; background:var(--support-bg, var(--bg)); z-index:55; will-change:transform; }
+  /* шрифт чата поддержки из админки — включается, только если он задан */
+  #support.custom-font .cart-title h2, #support.custom-font .msg, #support.custom-font .empty-state, #support.custom-font .support-input-row input{ font-family:var(--support-font); }
   /* ---------- живой шарик-помощник в поддержке ---------- */
   .support-orb-wrap{ display:flex; justify-content:center; padding:6px 0 14px; }
   .support-orb{ position:relative; width:112px; height:112px; border-radius:50%; background:#0c0812; overflow:hidden; isolation:isolate;
@@ -861,7 +863,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-73";
+  const CURRENT_VERSION = "20260908-74";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1961,6 +1963,21 @@ db.collection('reviews').onSnapshot(snap => {
   renderRatingSummary();
 });
 
+/* шрифт чата поддержки: подгружаем с Google Fonts и включаем только на экране поддержки */
+function applySupportFont(fontName){
+  const screen = document.getElementById('support');
+  if (!fontName){
+    document.documentElement.style.removeProperty('--support-font');
+    if (screen) screen.classList.remove('custom-font');
+    return;
+  }
+  let link = document.getElementById('supportFontLink');
+  if (!link){ link = document.createElement('link'); link.id = 'supportFontLink'; link.rel = 'stylesheet'; document.head.appendChild(link); }
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g,'+')}:wght@400;500;600;700&display=swap`;
+  document.documentElement.style.setProperty('--support-font', `'${fontName}', 'Inter', sans-serif`);
+  if (screen) screen.classList.add('custom-font');
+}
+
 db.collection('settings').doc('shop').onSnapshot(doc => {
   if (!doc.exists){ markLoaded('settings'); return; }
   const data = doc.data();
@@ -2017,6 +2034,7 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   [['supportBgColor','--support-bg'],['supportCustBubble','--support-cust-bg'],['supportCustText','--support-cust-text'],['supportAdminBubble','--support-admin-bg'],['supportAdminText','--support-admin-text']].forEach(([k,v]) => {
     if (data[k]) document.documentElement.style.setProperty(v, data[k]); else document.documentElement.style.removeProperty(v);
   });
+  applySupportFont(data.supportFont || '');
   if (data.pmrSelectedBg) document.documentElement.style.setProperty('--pmr-selected-bg', data.pmrSelectedBg);
   if (data.iconBorderColor) document.documentElement.style.setProperty('--icon-border-color', data.iconBorderColor);
   if (data.langBtnBg) document.documentElement.style.setProperty('--langbtn-bg', data.langBtnBg);
