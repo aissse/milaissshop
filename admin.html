@@ -108,6 +108,10 @@
   .faq-row{ border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; }
   .faq-row input{ margin-bottom:6px; }
   .faq-row .rm{ float:right; color:#a83232; font-size:12px; cursor:pointer; font-weight:600; }
+  .support-font-preview{ margin-top:12px; padding:14px; border:1px dashed var(--line); border-radius:12px; display:flex; flex-direction:column; gap:8px; font-size:14px; }
+  .support-font-preview .sfp-msg{ max-width:85%; padding:9px 13px; border-radius:14px; line-height:1.4; }
+  .support-font-preview .sfp-cust{ align-self:flex-end; background:var(--maroon); color:#fff; border-bottom-right-radius:4px; }
+  .support-font-preview .sfp-admin{ align-self:flex-start; background:var(--pink); color:var(--maroon-dark); border-bottom-left-radius:4px; }
 </style>
 </head>
 <body>
@@ -256,6 +260,28 @@
         <label>Текст ваших ответов (поддержки)</label>
         <div class="color-row"><input type="color" id="f_supportAdminText" value="#141414" onchange="syncHexInput('supportAdminText', this.value)"><input type="text" id="f_supportAdminTextHex" placeholder="#141414" onchange="saveHexColor('supportAdminText', this.value)"></div>
         <div class="hint">Если какой-то цвет не задавать — останется как сейчас.</div>
+
+        <label>Шрифт чата поддержки — быстрый выбор</label>
+        <select id="f_supportFont" onchange="onSupportFontPreset(this.value)">
+          <option value="">Как основной текст сайта</option>
+          <option value="Nunito">Nunito (мягкий, округлый)</option>
+          <option value="Comfortaa">Comfortaa (круглый, дружелюбный)</option>
+          <option value="Manrope">Manrope (современный)</option>
+          <option value="Rubik">Rubik (плотный, округлый)</option>
+          <option value="Montserrat">Montserrat (строгий)</option>
+        </select>
+
+        <label>Или любой другой шрифт с fonts.google.com</label>
+        <input type="text" id="customSupportFontInput" placeholder="Например: Raleway, Jost, Unbounded...">
+        <div class="row" style="margin-top:8px;">
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="previewSupportFont(document.getElementById('customSupportFontInput').value.trim())">Просмотреть</button>
+          <button type="button" class="btn" style="margin-top:0;" onclick="saveCustomSupportFont()">Сохранить этот шрифт</button>
+        </div>
+        <div class="support-font-preview" id="supportFontPreview">
+          <div class="sfp-msg sfp-cust">Здравствуйте! Есть 42 размер?</div>
+          <div class="sfp-msg sfp-admin">Да, есть 😊 Assalomu alaykum!</div>
+        </div>
+        <div class="hint">Меняется шрифт заголовка «Поддержка», сообщений и поля ввода. Выбирай шрифт с поддержкой кириллицы — иначе русский текст покажется стандартным шрифтом. Шрифты из списка выше кириллицу поддерживают.</div>
 
         <label>Цвет текста выбранного адреса БТС (при оформлении заказа)</label>
         <div class="color-row"><input type="color" id="f_btsAddressColor" value="#ff5a1f" onchange="syncHexInput('btsAddressColor', this.value)"><input type="text" id="f_btsAddressColorHex" placeholder="#ff5a1f" onchange="saveHexColor('btsAddressColor', this.value)"></div>
@@ -451,7 +477,7 @@ const ADMIN_PASSWORD = "milaisss2026"; // смени на свой пароль
 const EMAILJS_PUBLIC_KEY = "Xt-d7Y57TX4fCJNjr";
 const EMAILJS_SERVICE_ID = "service_ttler58";
 const EMAILJS_TEMPLATE_ID = "template_9e32fyl";
-const SHOP_URL = "https://aissse.github.io/milaissshop/";
+const SHOP_URL = "https://milaisss.com/";
 
 function isEmailNotifyConfigured(){
   return EMAILJS_PUBLIC_KEY && !EMAILJS_PUBLIC_KEY.startsWith('ВСТАВЬ')
@@ -953,6 +979,7 @@ function loadSettings(){
     const data = doc.exists ? doc.data() : {};
     if (data.navColor){ document.getElementById('f_navcolor').value = data.navColor; document.getElementById('f_navcolorHex').value = data.navColor; }
     ['supportBgColor','supportCustBubble','supportCustText','supportAdminBubble','supportAdminText'].forEach(k => { if (data[k]){ document.getElementById('f_'+k).value = data[k]; document.getElementById('f_'+k+'Hex').value = data[k]; } });
+    syncSupportFontFields(data.supportFont || '');
     if (data.btsAddressColor){ document.getElementById('f_btsAddressColor').value = data.btsAddressColor; document.getElementById('f_btsAddressColorHex').value = data.btsAddressColor; }
     if (data.categoryChipColor){ document.getElementById('f_catChipColor').value = data.categoryChipColor; document.getElementById('f_catChipColorHex').value = data.categoryChipColor; }
     if (data.categoryFont) document.getElementById('f_catFont').value = data.categoryFont;
@@ -1025,6 +1052,42 @@ function saveHexColor(id, hexVal){
   }
   document.getElementById(`f_${id}`).value = hexVal;
   saveSetting(COLOR_SETTING_MAP[id], hexVal);
+}
+
+/* ---------- шрифт чата поддержки ---------- */
+function loadSupportPreviewFont(fontName){
+  let link = document.getElementById('supportPreviewFontLink');
+  if (!link){ link = document.createElement('link'); link.id = 'supportPreviewFontLink'; link.rel = 'stylesheet'; document.head.appendChild(link); }
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g,'+')}:wght@400;500;600;700&display=swap`;
+}
+function previewSupportFont(fontName){
+  const preview = document.getElementById('supportFontPreview');
+  if (!preview) return;
+  if (!fontName){ preview.style.fontFamily = ''; return; }
+  loadSupportPreviewFont(fontName);
+  setTimeout(() => { preview.style.fontFamily = `'${fontName}', 'Inter', sans-serif`; }, 300);
+}
+function onSupportFontPreset(fontName){
+  document.getElementById('customSupportFontInput').value = fontName;
+  saveSetting('supportFont', fontName);
+  previewSupportFont(fontName);
+}
+function saveCustomSupportFont(){
+  const name = document.getElementById('customSupportFontInput').value.trim();
+  if (!name){ alert('Сначала впиши название шрифта'); return; }
+  const sel = document.getElementById('f_supportFont');
+  sel.value = Array.from(sel.options).some(o => o.value === name) ? name : '';
+  saveSetting('supportFont', name);
+  previewSupportFont(name);
+  showAdminToast('Шрифт чата сохранён — открой поддержку на сайте, чтобы проверить');
+}
+function syncSupportFontFields(fontName){
+  const sel = document.getElementById('f_supportFont');
+  const input = document.getElementById('customSupportFontInput');
+  if (!sel || !input) return;
+  sel.value = Array.from(sel.options).some(o => o.value === fontName) ? fontName : '';
+  if (document.activeElement !== input) input.value = fontName;
+  previewSupportFont(fontName);
 }
 
 let categoryImages = {};
