@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
 
-Sitemap: https://aissse.github.io/milaissshop/sitemap.xml
+Sitemap: https://milaisss.com/sitemap.xml
