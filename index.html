@@ -863,7 +863,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-74";
+  const CURRENT_VERSION = "20260908-75";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1339,6 +1339,7 @@ function applyLang(){
   renderMainGrid();
   renderFavGrid();
   renderLegalFooter();
+  renderSupportMsgs();
   if (!faqCustomized){ faqItems = defaultFaqItems(); renderFaq(); }
   if (!policyCustomized){ policyItems = defaultPolicyItems(); }
   if (currentProduct) renderPolicyAccordion();
@@ -2097,14 +2098,22 @@ function setupSupportListener(){
     const adminCount = msgs.filter(m => m.sender === 'admin').length;
     if (setupSupportListener._admin !== undefined && adminCount > setupSupportListener._admin) orbReact();
     setupSupportListener._admin = adminCount;
-    const wrap = document.getElementById('supportMsgs');
-    if (msgs.length === 0){
-      wrap.innerHTML = `<div class="empty-state">${t('supportEmpty')}</div>`;
-    } else {
-      wrap.innerHTML = msgs.map(m => `<div class="msg ${m.sender}">${m.text}</div>`).join('');
-    }
-    wrap.scrollTop = wrap.scrollHeight;
+    supportMsgsCache = msgs;
+    renderSupportMsgs();
   });
+}
+
+/* сообщения поддержки храним отдельно, чтобы перерисовать их при смене языка */
+let supportMsgsCache = [];
+function renderSupportMsgs(){
+  const wrap = document.getElementById('supportMsgs');
+  if (!wrap) return;
+  if (supportMsgsCache.length === 0){
+    wrap.innerHTML = `<div class="empty-state">${t('supportEmpty')}</div>`;
+  } else {
+    wrap.innerHTML = supportMsgsCache.map(m => `<div class="msg ${m.sender}">${m.text}</div>`).join('');
+  }
+  wrap.scrollTop = wrap.scrollHeight;
 }
 
 /* iOS Safari не уменьшает страницу под клавиатуру, а просто перекрывает её снизу —
