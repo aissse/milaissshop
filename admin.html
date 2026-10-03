@@ -56,6 +56,9 @@
   .prod-row .acts span{ font-size:12px; cursor:pointer; color:var(--muted); font-weight:600; }
   .prod-row .acts .edit{ color:var(--maroon); }
   .prod-row .acts .del{ color:#a83232; }
+  .prod-row .acts .vis{ color:var(--maroon-dark); }
+  .prod-row.is-hidden img, .prod-row.is-hidden .ph, .prod-row.is-hidden .meta{ opacity:.45; }
+  .hidden-badge{ display:inline-block; background:#a83232; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:100px; margin-left:4px; }
   .lock-screen{ max-width:340px; margin:0 auto; text-align:center; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
   .lock-screen .logo{ font-size:44px; margin-bottom:6px; }
   .lock-screen .sub{ margin-bottom:0; }
@@ -149,6 +152,8 @@
 
       <div class="card">
         <h1>Список товаров</h1>
+        <button type="button" class="btn secondary" id="bulkTrBtn" style="margin:8px 0 6px;" onclick="translateAllProducts()">🌐 Перевести все товары автоматически</button>
+        <div class="hint" style="margin:0 0 10px;">Заполнит пустые переводы (en, uz, tr, az) у всех уже добавленных товаров: название, описание, политики, цвета. Переводы, которые ты писал вручную, не трогает. «Скрыть» — товар пропадёт из магазина, но все его данные останутся здесь.</div>
         <div id="prodList"></div>
       </div>
     </div>
@@ -479,6 +484,71 @@ const EMAILJS_SERVICE_ID = "service_ttler58";
 const EMAILJS_TEMPLATE_ID = "template_9e32fyl";
 const SHOP_URL = "https://milaisss.com/";
 
+/* ---------- автоперевод (Google Translate, запасной — MyMemory; без ключей и сервера) ---------- */
+const AUTO_LANGS = ['en','uz','tr','az'];
+const MT_EMAIL = "aissse.issse@gmail.com"; // увеличивает бесплатный лимит запасного переводчика
+const TR_PAIRS = [['name','nameTranslations'],['desc','descTranslations'],['returnPolicy','returnPolicyTranslations'],['deliveryPolicy','deliveryPolicyTranslations'],['careInstructions','careInstructionsTranslations']];
+
+async function translateChunk(text, target){
+  try {
+    const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(text)}`);
+    if (!r.ok) throw new Error('gtx ' + r.status);
+    const d = await r.json();
+    const out = (d && d[0] ? d[0] : []).map(x => (x && x[0]) ? x[0] : '').join('');
+    if (out) return out;
+    throw new Error('empty');
+  } catch(e){
+    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=ru|${target}&de=${encodeURIComponent(MT_EMAIL)}`);
+    const d = await r.json();
+    const out = d && d.responseData && d.responseData.translatedText;
+    if (!out || Number(d.responseStatus) !== 200) throw new Error('mymemory');
+    return out;
+  }
+}
+async function translateText(text, target){
+  const out = [];
+  for (const line of String(text).split('\n')){
+    out.push(line.trim() ? await translateChunk(line, target) : line);
+  }
+  return out.join('\n');
+}
+async function runQueue(jobs, limit, onProgress){
+  let next = 0, done = 0;
+  async function worker(){
+    while (next < jobs.length){
+      const job = jobs[next++];
+      await job();
+      done++;
+      if (onProgress) onProgress(done, jobs.length);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, jobs.length) }, worker));
+}
+// заполняет переводы прямо в объекте товара; overwrite=false — только пустые
+async function fillTranslations(data, overwrite, onProgress){
+  const jobs = [];
+  let failed = 0;
+  TR_PAIRS.forEach(([src, trKey]) => {
+    const text = (data[src] || '').trim();
+    data[trKey] = Object.assign({}, data[trKey] || {});
+    if (!text){ if (overwrite) data[trKey] = {}; return; }
+    AUTO_LANGS.forEach(l => {
+      if (!overwrite && data[trKey][l]) return;
+      jobs.push(() => translateText(text, l).then(v => { if (v) data[trKey][l] = v; }).catch(() => { failed++; }));
+    });
+  });
+  (data.colors || []).forEach(c => {
+    if (!c.name) return;
+    c.nameTranslations = Object.assign({}, c.nameTranslations || {});
+    AUTO_LANGS.forEach(l => {
+      if (!overwrite && c.nameTranslations[l]) return;
+      jobs.push(() => translateText(c.name, l).then(v => { if (v) c.nameTranslations[l] = v; }).catch(() => { failed++; }));
+    });
+  });
+  await runQueue(jobs, 4, onProgress);
+  return failed;
+}
+
 function isEmailNotifyConfigured(){
   return EMAILJS_PUBLIC_KEY && !EMAILJS_PUBLIC_KEY.startsWith('ВСТАВЬ')
     && EMAILJS_SERVICE_ID && !EMAILJS_SERVICE_ID.startsWith('ВСТАВЬ')
@@ -614,7 +684,7 @@ function productFormCardHTML(type){
       <label>Цвета: фото, перевод названия и наличие по размерам</label>
       <div id="colorRows_${suf}"></div>
       <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow('colorRows_${suf}', null, '${suf}')">+ Добавить цвет</button>
-      <div class="hint">Наличие указывается по каждому цвету отдельно. В строке переводов впиши: en:Gray, uz:..., tr:..., az:... — иначе на других языках покупатель увидит русское название цвета.</div>
+      <div class="hint">Наличие указывается по каждому цвету отдельно. Переводы названия цвета заполнятся сами при сохранении. Если перевод не нравится — исправь его в строке переводов в формате en:Gray, uz:..., tr:..., az:...</div>
 
       <label>Цвет карточки товара (фон, если нет фото)</label>
       <input type="color" id="f_cardcolor_${suf}" value="#f4f1ec">
@@ -652,6 +722,9 @@ function productFormCardHTML(type){
       <textarea id="f_careInstructions_tr_${suf}" rows="2" placeholder="Türkçe" style="margin-top:6px;"></textarea>
       <textarea id="f_careInstructions_az_${suf}" rows="2" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
       <div class="hint">Переводы необязательны — без них покупатель на других языках увидит общий (переведённый) текст из "Оформление".</div>
+
+      <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--maroon-dark); margin-top:18px;"><input type="checkbox" id="f_retranslate_${suf}" style="width:auto; accent-color:var(--maroon);"> Перевести заново все переводы</label>
+      <div class="hint" style="margin-top:4px;">Пустые переводы на en, uz, tr, az (название, описание, политики, цвета) заполняются автоматически при сохранении — вручную писать не нужно. Галочка нужна, если ты поменял русский текст и хочешь обновить все переводы.</div>
 
       <button class="btn" onclick="saveProduct('${suf}')" id="saveBtn_${suf}">Добавить товар</button>
       <button class="btn secondary" onclick="resetForm('${suf}')" id="cancelBtn_${suf}" style="display:none;">Отменить редактирование</button>
@@ -756,7 +829,7 @@ function collectColors(containerId){
 }
 function clearColorRows(containerId){ document.getElementById(containerId).innerHTML = ''; }
 
-function saveProduct(type){
+async function saveProduct(type){
   const suf = type;
   const typeConfig = PRODUCT_TYPES.find(t => t.key === suf);
   const name = document.getElementById(`f_name_${suf}`).value.trim();
@@ -799,13 +872,27 @@ function saveProduct(type){
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
   const data = { name, nameTranslations, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
-  if (editingId && editingType === suf){ db.collection('products').doc(editingId).update(data).then(() => resetForm(suf)); }
-  else {
-    db.collection('products').add(data).then(() => {
-      resetForm(suf);
-      notifySubscribersNewProduct(name, price);
-    });
-  }
+  const saveBtn = document.getElementById(`saveBtn_${suf}`);
+  if (saveBtn.disabled) return;
+  const isEdit = !!(editingId && editingType === suf);
+  const editId = editingId;
+  const btnText = saveBtn.textContent;
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Переводим...';
+  const overwrite = document.getElementById(`f_retranslate_${suf}`).checked;
+  const failed = await fillTranslations(data, overwrite, (done, total) => { saveBtn.textContent = `Переводим ${done}/${total}...`; });
+  saveBtn.textContent = 'Сохраняем...';
+  const savePromise = isEdit
+    ? db.collection('products').doc(editId).update(data)
+    : db.collection('products').add(data);
+  savePromise.then(() => {
+    resetForm(suf);
+    if (!isEdit) notifySubscribersNewProduct(name, price);
+    if (failed) alert(`Товар сохранён, но ${failed} перевод(ов) не получилось сделать — проверь интернет. Можно открыть товар, поставить галочку «Перевести заново» и сохранить ещё раз.`);
+  }).catch(() => {
+    alert('Не удалось сохранить товар, проверь интернет');
+    saveBtn.textContent = btnText;
+  }).finally(() => { saveBtn.disabled = false; });
 }
 
 function resetForm(type){
@@ -832,6 +919,7 @@ function resetForm(type){
     document.getElementById(`f_deliveryPolicy_${l}_${suf}`).value = '';
     document.getElementById(`f_careInstructions_${l}_${suf}`).value = '';
   });
+  document.getElementById(`f_retranslate_${suf}`).checked = false;
   document.getElementById(`saveBtn_${suf}`).textContent = 'Добавить товар';
   document.getElementById(`cancelBtn_${suf}`).style.display = 'none';
 }
@@ -912,24 +1000,63 @@ function loadProducts(){
       const p = { id: doc.id, ...doc.data() };
       allProducts.push(p);
       const row = document.createElement('div');
-      row.className = 'prod-row';
+      row.className = 'prod-row' + (p.hidden ? ' is-hidden' : '');
       const thumb = p.image ? `<img src="${p.image}">` : `<div class="ph">👟</div>`;
       row.innerHTML = `
         ${thumb}
         <div class="meta">
-          <div class="name">${p.name}</div>
+          <div class="name">${p.name}${p.hidden ? '<span class="hidden-badge">скрыт</span>' : ''}</div>
           <div class="info">${TYPE_LABELS[p.type] || 'Обувь'} · ${Number(p.price||0).toLocaleString('ru-RU')} сум · в наличии: ${p.stock||0}</div>
         </div>
         <div class="acts">
+          <span class="vis">${p.hidden ? 'Показать' : 'Скрыть'}</span>
           <span class="edit" data-id="${doc.id}">Изм.</span>
           <span class="del" data-id="${doc.id}">Удал.</span>
         </div>`;
+      row.querySelector('.vis').onclick = () => db.collection('products').doc(doc.id).update({ hidden: !p.hidden });
       row.querySelector('.edit').onclick = () => editProduct(doc.id, p);
       row.querySelector('.del').onclick = () => deleteProduct(doc.id);
       list.appendChild(row);
     });
     renderStockList();
   });
+}
+
+async function translateAllProducts(){
+  const btn = document.getElementById('bulkTrBtn');
+  if (btn.disabled) return;
+  if (!allProducts.length){ alert('Товаров пока нет'); return; }
+  if (!confirm('Заполнить пустые переводы у всех товаров? Это займёт около минуты.')) return;
+  btn.disabled = true;
+  const btnText = btn.textContent;
+  let failed = 0;
+  for (let i = 0; i < allProducts.length; i++){
+    const p = allProducts[i];
+    btn.textContent = `Переводим товар ${i + 1} из ${allProducts.length}...`;
+    const copy = JSON.parse(JSON.stringify(p));
+    failed += await fillTranslations(copy, false);
+    // записываем только переводы, а остатки берём свежие из базы — чтобы не затереть заказы, пришедшие за это время
+    const ref = db.collection('products').doc(p.id);
+    try {
+      await db.runTransaction(tx => tx.get(ref).then(doc => {
+        if (!doc.exists) return;
+        const fresh = doc.data();
+        const upd = {};
+        TR_PAIRS.forEach(([, k]) => { upd[k] = Object.assign({}, copy[k] || {}, fresh[k] || {}); });
+        if (fresh.colors && fresh.colors.length){
+          upd.colors = fresh.colors.map(c => {
+            const tc = (copy.colors || []).find(x => x.name === c.name);
+            if (!tc || !tc.nameTranslations) return c;
+            return Object.assign({}, c, { nameTranslations: Object.assign({}, tc.nameTranslations, c.nameTranslations || {}) });
+          });
+        }
+        tx.update(ref, upd);
+      }));
+    } catch(e){ failed++; }
+  }
+  btn.disabled = false;
+  btn.textContent = btnText;
+  alert(failed ? `Готово, но ${failed} перевод(ов) не получилось — проверь интернет и нажми ещё раз.` : 'Готово! Все товары переведены.');
 }
 
 function renderStockList(){
