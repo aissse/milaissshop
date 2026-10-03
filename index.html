@@ -863,7 +863,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-77";
+  const CURRENT_VERSION = "20260908-78";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1820,11 +1820,11 @@ try {
 } catch(e){ favorites = []; }
 function isFavorite(id){ return favorites.some(f => f.productId === id); }
 function saveFavorites(){ localStorage.setItem('milaisss_favorites', JSON.stringify(favorites)); }
-function toggleFavorite(id, event, colorName, size){
+function toggleFavorite(id, event, colorName, size, image){
   if (event) event.stopPropagation();
   const i = favorites.findIndex(f => f.productId === id);
   if (i !== -1) favorites.splice(i, 1);
-  else favorites.push({ productId: id, colorName: colorName || null, size: size || null });
+  else favorites.push({ productId: id, colorName: colorName || null, size: size || null, image: image || null });
   saveFavorites();
   renderMainGrid(); renderFavGrid();
   if (currentProduct && currentProduct.id === id) updateDetailFavIcon();
@@ -1832,7 +1832,11 @@ function toggleFavorite(id, event, colorName, size){
 function toggleCurrentFavorite(){
   if (!currentProduct) return;
   const chosen = currentColors[selectedColorIdx];
-  toggleFavorite(currentProduct.id, null, chosen ? chosen.name : null, selectedSize || null);
+  // запоминаем именно ту фотографию, которая сейчас открыта в галерее
+  const carousel = document.getElementById('detailCarousel');
+  const photoIdx = carousel && carousel.clientWidth ? Math.round(carousel.scrollLeft / carousel.clientWidth) : 0;
+  const photo = currentDetailImages[photoIdx] || currentDetailImages[0] || null;
+  toggleFavorite(currentProduct.id, null, chosen ? chosen.name : null, selectedSize || null, photo);
 }
 function updateDetailFavIcon(){
   const btn = document.getElementById('detailFavBtn');
@@ -1856,6 +1860,7 @@ let currentProduct = null;
 let selectedSize = "";
 let selectedColorIdx = 0;
 let currentColors = [];
+let currentDetailImages = [];
 
 const favGrid = document.getElementById('favGrid');
 
@@ -1907,6 +1912,7 @@ function favoriteCardHTML(p, fav){
     }
   }
   if (fav.size) colorLine += (colorLine ? ' · ' : '') + fav.size;
+  if (fav.image) displayImage = fav.image;
   const imgStyle = displayImage ? `style="background-image:url('${displayImage}')"` : '';
   const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
   return `
@@ -1929,7 +1935,7 @@ function renderFavGrid(){
   favEntries.forEach(({ fav, product }) => {
     const card = document.createElement('div');
     card.className = 'card';
-    card.onclick = () => openProduct(product.id, fav.colorName, fav.size);
+    card.onclick = () => openProduct(product.id, fav.colorName, fav.size, fav.image);
     card.innerHTML = favoriteCardHTML(product, fav);
     card.querySelector('[data-fav]').onclick = (e) => toggleFavorite(product.id, e);
     favGrid.appendChild(card);
@@ -2254,7 +2260,7 @@ function openReviews(){
   showScreen('reviewsScreen');
 }
 
-function openProduct(id, preferredColor, preferredSize){
+function openProduct(id, preferredColor, preferredSize, preferredImage){
   currentProduct = products.find(p => p.id === id);
   if (!currentProduct) return;
   renderPolicyAccordion();
@@ -2298,6 +2304,7 @@ function openProduct(id, preferredColor, preferredSize){
     const c = colors[colorIdx];
     currentGalleryImages = getColorImages(c);
     const list = currentGalleryImages.length ? currentGalleryImages : [''];
+    currentDetailImages = currentGalleryImages.slice();
     carousel.innerHTML = ''; dotsWrap.innerHTML = ''; thumbRail.innerHTML = '';
     list.forEach((img, i) => {
       const slide = document.createElement('div');
@@ -2424,6 +2431,15 @@ function openProduct(id, preferredColor, preferredSize){
   }
 
   showScreen('detail');
+
+  // открыли из «Избранного» — сразу листаем галерею к сохранённой фотографии
+  if (preferredImage){
+    const photoIdx = currentDetailImages.indexOf(preferredImage);
+    if (photoIdx > 0) requestAnimationFrame(() => {
+      carousel.scrollLeft = photoIdx * carousel.clientWidth;
+      updateActivePhoto(photoIdx);
+    });
+  }
 }
 
 /* ---------- cart ---------- */
