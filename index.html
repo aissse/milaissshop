@@ -78,7 +78,7 @@
 
   .cats{ display:flex; gap:8px; padding:0 20px 18px; overflow-x:auto; scrollbar-width:none; }
   .cats::-webkit-scrollbar{ display:none; }
-  .chip{ flex:0 0 auto; padding:9px 16px; border-radius:100px; font-size:13px; font-weight:600; white-space:nowrap; background:var(--stone); border:1px solid var(--line); color:var(--ink); cursor:pointer; }
+  .chip{ flex:0 0 auto; padding:9px 16px; border-radius:100px; font-size:13px; font-weight:600; white-space:nowrap; background:var(--stone); border:1px solid var(--line); color:var(--on-stone, var(--ink)); cursor:pointer; }
   .chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
   .filter-panel{ display:none; padding:0 20px 16px; }
   .filter-panel.open{ display:block; }
@@ -117,7 +117,7 @@
 
   .cat-pills-row{ display:flex; align-items:center; gap:10px; padding:0 20px 20px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row::-webkit-scrollbar{ display:none; }
-  .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; animation: cardFadeIn .4s ease both; transition:background .45s ease, border-color .45s ease, padding .55s cubic-bezier(.22,1,.36,1); }
+  .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--on-stone, var(--ink)); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; animation: cardFadeIn .4s ease both; transition:background .45s ease, border-color .45s ease, padding .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; height:100%; position:relative; top:1px; }
   .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); padding:0 18px 0 14px; }
@@ -131,7 +131,7 @@
 
   .cat-pills-row-mini{ display:flex; align-items:center; gap:8px; padding:0 20px 14px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row-mini::-webkit-scrollbar{ display:none; }
-  .cat-pill-mini{ flex:0 0 auto; height:34px; border-radius:100px; display:flex; align-items:center; gap:6px; padding:0 13px; background:var(--stone); border:1px solid var(--line); color:var(--ink); font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; animation: cardFadeIn .4s ease both; transition:background .3s ease, border-color .3s ease; }
+  .cat-pill-mini{ flex:0 0 auto; height:34px; border-radius:100px; display:flex; align-items:center; gap:6px; padding:0 13px; background:var(--stone); border:1px solid var(--line); color:var(--on-stone, var(--ink)); font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; animation: cardFadeIn .4s ease both; transition:background .3s ease, border-color .3s ease; }
   .cat-pill-mini .icon{ font-size:14px; line-height:1; display:inline-flex; align-items:center; justify-content:center; position:relative; top:1px; }
   .cat-pill-mini.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
 
@@ -863,7 +863,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-76";
+  const CURRENT_VERSION = "20260908-77";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1965,6 +1965,14 @@ db.collection('reviews').onSnapshot(snap => {
   renderRatingSummary();
 });
 
+function isDarkColor(hex){
+  const m = /^#?([0-9a-f]{6})$/i.exec((hex || '').trim());
+  if (!m) return false;
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) < 140;
+}
+
 /* шрифт чата поддержки: подгружаем с Google Fonts и включаем только на экране поддержки */
 function applySupportFont(fontName){
   const screen = document.getElementById('support');
@@ -1985,6 +1993,9 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   const data = doc.data();
   if (data.navColor) document.getElementById('bottomNav').style.background = data.navColor;
   if (data.bgColor) document.documentElement.style.setProperty('--stone', data.bgColor);
+  // цвет текста на кнопках категорий подбирается под фон: на тёмном — белый, на светлом — тёмный
+  if (isDarkColor(data.bgColor || '#f4f1ec')) document.documentElement.style.setProperty('--on-stone', '#ffffff');
+  else document.documentElement.style.removeProperty('--on-stone');
   if (data.colorBorder) document.documentElement.style.setProperty('--colordot-border', data.colorBorder);
   if (data.fontFamily){
     document.documentElement.style.setProperty('--logofont', `'${data.fontFamily}',serif`);
