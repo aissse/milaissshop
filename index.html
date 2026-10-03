@@ -863,7 +863,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-78";
+  const CURRENT_VERSION = "20260908-79";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1959,8 +1959,13 @@ setTimeout(revealApp, 2500); // страховка на случай медле�
 
 db.collection('products').onSnapshot(snap => {
   products = [];
-  snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
+  snap.forEach(doc => {
+    const d = doc.data();
+    if (d.hidden) return; // товар скрыт в админке — покупатели его не видят
+    products.push({ id: doc.id, ...d });
+  });
   renderMainGrid(); renderFavGrid();
+  if (document.getElementById('shopAll').classList.contains('active')) renderShopAllGrid();
   markLoaded('products');
 });
 
