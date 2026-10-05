@@ -874,7 +874,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-81";
+  const CURRENT_VERSION = "20260908-82";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2103,6 +2103,7 @@ function showScreen(name){
   const START = 40;   // с какой высоты от верха экрана начинается эффект
   const SPAN = 220;   // за сколько пикселей прокрутки блок полностью растворяется
   let targets = [], dirty = true, ticking = false;
+  const geo = new Map(); // для каждого блока запоминаем его место на странице (top, height)
 
   function collect(el, out, depth){
     if (el.offsetHeight === 0) return;
@@ -2115,16 +2116,26 @@ function showScreen(name){
   function refresh(){
     targets.forEach(el => { el.style.opacity = ''; el.style.filter = ''; el.style.transform = ''; el.style.willChange = ''; });
     targets = [];
+    geo.clear();
     const screen = document.querySelector('.screen.active');
     if (screen) Array.from(screen.children).forEach(c => collect(c, targets, 0));
+    // измеряем, пока стили сброшены, — место блока на странице не зависит от прокрутки
+    targets.forEach(el => {
+      const r = el.getBoundingClientRect();
+      geo.set(el, { top: r.top + window.scrollY, h: r.height });
+    });
     dirty = false;
   }
   function update(){
     ticking = false;
     if (dirty) refresh();
+    const y = window.scrollY;
     for (const el of targets){
-      const r = el.getBoundingClientRect();
-      const p = Math.min(1, Math.max(0, (START - r.top) / Math.min(Math.max(r.height, 1), SPAN)));
+      const g = geo.get(el);
+      if (!g) continue;
+      // блок, который в покое стоит у самого верха (шапка, лого), начинает таять только когда его реально прокрутили
+      const threshold = Math.min(START, g.top);
+      const p = Math.min(1, Math.max(0, (threshold - (g.top - y)) / Math.min(Math.max(g.h, 1), SPAN)));
       if (p <= 0){
         if (el.style.opacity){ el.style.opacity = ''; el.style.filter = ''; el.style.transform = ''; el.style.willChange = ''; }
         continue;
@@ -2140,6 +2151,8 @@ function showScreen(name){
   function schedule(){ if (!ticking){ ticking = true; requestAnimationFrame(update); } }
   window.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', () => { dirty = true; schedule(); });
+  // картинки догружаются и сдвигают блоки — пересчитываем их места
+  document.addEventListener('load', () => { dirty = true; schedule(); }, true);
   // содержимое меняется (сменился экран, перерисовалась сетка) — пересобираем список блоков
   const root = document.getElementById('appRoot');
   if (root && window.MutationObserver){
