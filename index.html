@@ -122,6 +122,9 @@
   .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); padding:0 18px 0 14px; }
   .cat-pill.active .label{ max-width:140px; opacity:1; margin-left:8px; transition-delay:.15s; }
+  /* кнопка без иконки (например «All») — надпись видна всегда, как иконка у остальных */
+  .cat-pill.text-only{ padding:0 18px; }
+  .cat-pill.text-only .label, .cat-pill.text-only.active .label{ max-width:none; opacity:1; margin-left:0; transition-delay:0s; }
   .cat-pills-row .cat-pill:nth-child(1){ animation-delay:0s; }
   .cat-pills-row .cat-pill:nth-child(2){ animation-delay:.05s; }
   .cat-pills-row .cat-pill:nth-child(3){ animation-delay:.1s; }
@@ -244,6 +247,18 @@
   .hint{ padding:0 20px 20px; font-size:11px; color:var(--muted); line-height:1.5; }
   .empty-state{ padding:60px 20px; text-align:center; color:var(--muted); font-size:13px; grid-column:1/-1; }
 
+  /* плавное размытие верхнего края: контент, уходящий вверх, мягко растворяется */
+  .scroll-blur{ position:fixed; top:0; left:0; right:0; height:calc(env(safe-area-inset-top, 0px) + 86px); z-index:45; pointer-events:none;
+    opacity:0; transform:translateY(-12px); transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
+  .scroll-blur.on{ opacity:1; transform:translateY(0); }
+  .scroll-blur > i{ position:absolute; inset:0; }
+  .scroll-blur > i:nth-child(1){ -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 55%,transparent 100%); mask-image:linear-gradient(to bottom,#000 0%,#000 55%,transparent 100%); }
+  .scroll-blur > i:nth-child(2){ -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 30%,transparent 72%); mask-image:linear-gradient(to bottom,#000 0%,#000 30%,transparent 72%); }
+  .scroll-blur > i:nth-child(3){ -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,transparent 45%); mask-image:linear-gradient(to bottom,#000 0%,transparent 45%); }
+  .scroll-blur > i:nth-child(4){ background:linear-gradient(to bottom, rgba(255,255,255,.78) 0%, rgba(255,255,255,.35) 45%, rgba(255,255,255,0) 100%); }
   .toast{ position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:100px; font-size:13px; font-weight:600; opacity:0; transition:all .25s; z-index:200; white-space:nowrap; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
@@ -393,12 +408,20 @@
   .modal-box button{ background:var(--ink); color:#fff; border:none; border-radius:12px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; width:100%; }
   .reg-input{ width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 14px; font-size:14px; margin-bottom:6px; }
   .avatar-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:8px; }
-  .avatar-opt{ aspect-ratio:1/1; border-radius:50%; border:3px solid transparent; cursor:pointer; overflow:hidden; background:var(--stone); position:relative; }
-  .avatar-opt img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .avatar-opt{ aspect-ratio:1/1; border-radius:50%; border:3px solid transparent; cursor:pointer; overflow:hidden; background:#eeebe6; position:relative;
+    transition:border-color .35s ease, transform .35s cubic-bezier(.22,1,.36,1); }
+  .avatar-opt:active{ transform:scale(.94); }
+  .avatar-opt img{ width:100%; height:100%; object-fit:cover; display:block; opacity:0; transform:scale(1.08);
+    transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+  .avatar-opt.loaded img{ opacity:1; transform:scale(1); }
   .avatar-opt.avatar-broken::after{ content:"?"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--muted); font-weight:700; font-size:16px; }
   .avatar-opt.selected{ border-color:var(--orange); }
-  .avatar-loader{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:var(--muted); }
-  .avatar-loader svg{ width:55%; height:55%; animation: avatarSpin .8s linear infinite; }
+  /* вместо крутилки — мягкий перелив, который плавно исчезает, когда картинка загрузилась */
+  .avatar-loader{ position:absolute; inset:0; border-radius:50%; pointer-events:none;
+    background:linear-gradient(110deg, #ebe8e2 30%, #f8f6f2 48%, #ebe8e2 66%); background-size:260% 100%;
+    animation:avatarShimmer 1.8s cubic-bezier(.45,0,.55,1) infinite; transition:opacity .6s ease; }
+  .avatar-opt.loaded .avatar-loader{ opacity:0; }
+  @keyframes avatarShimmer{ from{ background-position:130% 0; } to{ background-position:-130% 0; } }
   @keyframes avatarSpin{ to{ transform:rotate(360deg); } }
   .modal-close-x{ position:absolute; top:0; right:0; color:var(--muted); cursor:pointer; padding:4px; }
   .profile-header-card{ display:flex; align-items:center; gap:14px; padding:16px 20px; }
@@ -787,6 +810,7 @@
 
 </div>
 
+<div class="scroll-blur" id="scrollBlur" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="toast" id="toast"></div>
 <div class="lightbox" id="lightbox">
   <span class="close-x" onclick="closeLightbox()">✕</span>
@@ -863,7 +887,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-79";
+  const CURRENT_VERSION = "20260908-80";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1066,8 +1090,8 @@ function renderAvatarGrid(){
   if (avatarOptions.length === 0){ wrap.innerHTML = `<p class="hint">${t('regNoAvatars')}</p>`; return; }
   wrap.innerHTML = avatarOptions.map(url => `
     <div class="avatar-opt ${url===selectedAvatarUrl?'selected':''}" onclick="selectAvatar('${url.replace(/'/g,"\\'")}')">
-      <div class="avatar-loader">${AVATAR_LOADER_SVG}</div>
-      <img src="${url}" loading="lazy" onload="this.previousElementSibling.style.display='none';" onerror="this.style.display='none'; this.previousElementSibling.style.display='none'; this.parentElement.classList.add('avatar-broken');">
+      <div class="avatar-loader"></div>
+      <img src="${url}" loading="lazy" onload="this.parentElement.classList.add('loaded')" onerror="this.style.display='none'; this.parentElement.classList.add('loaded','avatar-broken');">
     </div>
   `).join('');
 }
@@ -1222,7 +1246,8 @@ function openTelegramAvatarModal(retriesLeft){
   else {
     wrap.innerHTML = avatarOptions.map(url => `
       <div class="avatar-opt ${url===current?'selected':''}" onclick="selectTelegramAvatar('${url.replace(/'/g,"\\'")}')">
-        <img src="${url}" loading="lazy" onerror="this.parentElement.classList.add('avatar-broken')">
+        <div class="avatar-loader"></div>
+        <img src="${url}" loading="lazy" onload="this.parentElement.classList.add('loaded')" onerror="this.style.display='none'; this.parentElement.classList.add('loaded','avatar-broken');">
       </div>
     `).join('');
   }
@@ -1508,9 +1533,10 @@ function renderCatPills(){
     const iconColor = catIconColorFor(it.key);
     const borderStyle = iconColor ? `border-color:${iconColor}; border-width:2px;` : '';
     const glyphStyle = iconColor ? `color:${iconColor};` : '';
+    const icon = catIconFor(it.key, i);
     return `
-    <div class="cat-pill ${activeCategory===it.key?'active':''}" style="${borderStyle}" onclick="selectMainCategory('${it.key.replace(/'/g,"\\'")}')">
-      <span class="icon" style="${glyphStyle}">${catIconFor(it.key, i)}</span>
+    <div class="cat-pill ${icon ? '' : 'text-only'} ${activeCategory===it.key?'active':''}" style="${borderStyle}" onclick="selectMainCategory('${it.key.replace(/'/g,"\\'")}')">
+      ${icon ? `<span class="icon" style="${glyphStyle}">${icon}</span>` : ''}
       <span class="label">${translateCategory(it.key)}</span>
     </div>
   `;
@@ -2082,6 +2108,16 @@ function showScreen(name){
   document.getElementById('supportFab').style.display = (name === 'profile') ? 'flex' : 'none';
   window.scrollTo(0,0);
 }
+
+/* размытие верхнего края включается, когда страницу начали прокручивать */
+(function setupScrollBlur(){
+  const el = document.getElementById('scrollBlur');
+  if (!el) return;
+  let ticking = false;
+  function update(){ el.classList.toggle('on', window.scrollY > 12); ticking = false; }
+  window.addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  update();
+})();
 
 let fabScrollTimer = null;
 window.addEventListener('scroll', () => {
