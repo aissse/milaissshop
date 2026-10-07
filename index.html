@@ -487,6 +487,28 @@
     #ffffff 0%, #ffffff 34%, rgba(255,238,248,.92) 48%, rgba(255,222,238,.5) 64%, rgba(255,220,236,0) 82%); }
   .support-input-row input{ flex:1; border:1px solid var(--line); border-radius:100px; padding:10px 16px; font-size:13px; outline:none; }
   .support-input-row button{ background:var(--orange); color:#fff; border:none; border-radius:50%; width:42px; height:42px; cursor:pointer; flex-shrink:0; }
+
+  /* ---------- версия для компьютера (стоит в конце, чтобы перебить базовые правила) ---------- */
+  @media (min-width:768px){
+    .grid{ grid-template-columns:repeat(3,1fr); gap:18px; }
+    .collections-grid{ grid-template-columns:repeat(3,1fr); }
+    .grid.list-view{ grid-template-columns:repeat(2,1fr); }
+    .card .info{ padding:12px 14px 16px; }
+    .card .name{ font-size:14px; }
+    .card .price{ font-size:16px; }
+    .hero-photo{ aspect-ratio:21/9; max-height:520px; }
+    .hero-photo-text{ padding:34px 40px; }
+    .hero-photo-text h2{ font-size:28px; max-width:620px; }
+  }
+  @media (min-width:1100px){
+    .grid{ grid-template-columns:repeat(4,1fr); gap:20px; }
+    .collections-grid{ grid-template-columns:repeat(4,1fr); }
+    .grid.list-view{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (min-width:1500px){
+    .app{ max-width:1500px; }
+    .grid{ grid-template-columns:repeat(5,1fr); }
+  }
 </style>
 </head>
 <body>
@@ -876,7 +898,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-83";
+  const CURRENT_VERSION = "20260908-84";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1395,15 +1417,24 @@ function applyHeroBannerText(banner){
   customHero = { tag, title, btn };
 }
 
+function isDesktopView(){ return window.matchMedia('(min-width:768px)').matches; }
+// экран стал шире/уже (поворот, окно на ПК) — подбираем подходящий баннер
+if (window.matchMedia){
+  const mq = window.matchMedia('(min-width:768px)');
+  const onChange = () => { if (currentHeroBanner) applyHeroBanner(currentHeroBanner); };
+  if (mq.addEventListener) mq.addEventListener('change', onChange); else if (mq.addListener) mq.addListener(onChange);
+}
+
 function applyHeroBanner(banner){
   currentHeroBanner = banner;
   const heroPhoto = document.getElementById('heroPhoto');
   const heroVideo = document.getElementById('heroVideo');
   const heroSoundBtn = document.getElementById('heroSoundBtn');
-  const media = banner.media || '';
+  // на компьютере берём отдельное горизонтальное видео/фото, если оно задано в админке
+  const media = (isDesktopView() && banner.mediaDesktop) ? banner.mediaDesktop : (banner.media || '');
   const isVideo = /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(media);
   if (media && isVideo){
-    heroVideo.src = media;
+    if (heroVideo.getAttribute('src') !== media) heroVideo.src = media;
     heroVideo.style.display = 'block';
     heroPhoto.style.backgroundImage = '';
     heroVideo.muted = true;
@@ -2120,7 +2151,8 @@ function showScreen(name){
     targets = [];
     geo.clear();
     const screen = document.querySelector('.screen.active');
-    if (screen) Array.from(screen.children).forEach(c => collect(c, targets, 0));
+    // эффект работает только на главной и на экране «Все товары» (там, где категории)
+    if (screen && (screen.id === 'home' || screen.id === 'shopAll')) Array.from(screen.children).forEach(c => collect(c, targets, 0));
     // измеряем, пока стили сброшены, — место блока на странице не зависит от прокрутки
     targets.forEach(el => {
       const r = el.getBoundingClientRect();
