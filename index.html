@@ -532,6 +532,14 @@
   html[data-theme="dark"] .search-box input{ background:transparent; }
   html[data-theme="dark"] ::placeholder{ color:var(--muted); opacity:1; }
   html[data-theme="dark"] .bottomnav{ box-shadow:0 0 0 1px #2c2c31, 0 10px 34px rgba(0,0,0,.55); }
+  html[data-theme="dark"] #langBtn, html[data-theme="dark"] #menuBtn{ background:#26262b !important; color:#f3f1ee; box-shadow:0 0 0 1px #34343a; }
+  html[data-theme="dark"] .drawer-item.active{ color:#fff; }
+  html[data-theme="dark"] .checkout-btn{ border:2px solid #fff; }
+  .drawer-item{ transition:color .25s cubic-bezier(.22,1,.36,1), padding-left .25s cubic-bezier(.22,1,.36,1); }
+  @media (hover:hover){
+    .drawer-item:hover{ color:#8a8a90; padding-left:8px; }
+    .drawer-item.active:hover{ color:#8a8a90; }
+  }
   html[data-theme="dark"] .pay-card-logo{ background:#ffffff; }
   html[data-theme="dark"] .card .imgwrap.oos::before{ background:rgba(14,14,16,.78); }
 
@@ -541,7 +549,9 @@
   .theme-switch button{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:16px 10px; border-radius:16px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer;
     transition:border-color .35s ease, background-color .35s ease, transform .25s cubic-bezier(.22,1,.36,1); }
   .theme-switch button:active{ transform:scale(.97); }
-  .theme-switch button.active{ border-color:var(--ink); background:var(--stone); }
+  .theme-switch button.active{ border-color:var(--ink); background:#fbf6ec; }
+  html[data-theme="dark"] .theme-switch button.active{ background:var(--stone); border-color:#f3f1ee; }
+  html[data-theme="dark"] .theme-switch button svg[stroke="#444444"]{ stroke:#c9c6c0; }
 </style>
 </head>
 <body>
@@ -836,8 +846,8 @@
     <div class="settings-block">
       <div class="block-label" data-i18n="themeLabel">Тема оформления</div>
       <div class="theme-switch" id="themeSwitch">
-        <button type="button" data-theme="light" onclick="setTheme('light')">☀️ <span data-i18n="themeLight">Светлая</span></button>
-        <button type="button" data-theme="dark" onclick="setTheme('dark')">🌙 <span data-i18n="themeDark">Тёмная</span></button>
+        <button type="button" data-theme="light" onclick="setTheme('light')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffaa00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> <span data-i18n="themeLight">Светлая</span></button>
+        <button type="button" data-theme="dark" onclick="setTheme('dark')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg> <span data-i18n="themeDark">Тёмная</span></button>
       </div>
     </div>
   </div>
@@ -940,7 +950,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-85";
+  const CURRENT_VERSION = "20260908-86";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1932,7 +1942,7 @@ function renderDrawer(){
     }).join('');
   }
 
-  html += `<div style="margin-top:16px;"></div><div class="drawer-item" style="border-bottom:none; cursor:pointer;" onclick="openSettings()">⚙️ ${t('settingsMenu')}</div>`;
+  html += `<div style="margin-top:16px;"></div><div class="drawer-item" style="border-bottom:none; cursor:pointer;" onclick="openSettings()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px; margin-right:6px;"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>${t('settingsMenu')}</div>`;
   wrap.innerHTML = html;
 }
 function openSettings(){
