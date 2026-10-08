@@ -950,7 +950,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-87";
+  const CURRENT_VERSION = "20260908-88";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1661,7 +1661,7 @@ function renderCatPills(){
   const items = [{ key: 'Все' }, ...CATEGORIES.map(c => ({ key: c }))];
   wrap.innerHTML = items.map((it, i) => {
     const iconColor = catIconColorFor(it.key);
-    const borderStyle = iconColor ? `border-color:${iconColor}; border-width:2px;` : '';
+    const borderStyle = '';
     const glyphStyle = iconColor ? `color:${iconColor};` : '';
     const icon = catIconFor(it.key, i);
     return `
@@ -1863,7 +1863,7 @@ function renderShopAllCats(){
   const items = ['Все', ...CATEGORIES];
   wrap.innerHTML = items.map((cat, i) => {
     const iconColor = catIconColorFor(cat);
-    const borderStyle = iconColor ? `border-color:${iconColor}; border-width:2px;` : '';
+    const borderStyle = '';
     const glyphStyle = iconColor ? `color:${iconColor};` : '';
     const icon = catIconFor(cat, i);
     return `
