@@ -534,7 +534,7 @@
   html[data-theme="dark"] .bottomnav{ box-shadow:0 0 0 1px #2c2c31, 0 10px 34px rgba(0,0,0,.55); }
   html[data-theme="dark"] #langBtn, html[data-theme="dark"] #menuBtn{ background:#26262b !important; color:#f3f1ee; box-shadow:0 0 0 1px #34343a; }
   html[data-theme="dark"] .drawer-item.active{ color:#fff; }
-  html[data-theme="dark"] .checkout-btn{ border:2px solid #fff; }
+  html[data-theme="dark"] .checkout-btn{ border:1px solid #fff; }
   .drawer-item{ transition:color .25s cubic-bezier(.22,1,.36,1), padding-left .25s cubic-bezier(.22,1,.36,1); }
   @media (hover:hover){
     .drawer-item:hover{ color:#8a8a90; padding-left:8px; }
@@ -950,7 +950,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-86";
+  const CURRENT_VERSION = "20260908-87";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
