@@ -379,11 +379,14 @@
       <div class="card collapsible" id="card-hero">
         <div class="card-header" onclick="toggleCard('card-hero')"><h1>Главный баннер и витрина</h1><span class="card-chevron">▲</span></div>
         <div class="card-body">
-        <label>Баннеры на главной (можно несколько — показываются по очереди при каждом новом заходе)</label>
+        <label>Фото-баннеры на главной (слайдер: листаются сами и свайпом)</label>
         <div id="heroBannerRows"></div>
         <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addHeroBannerRow()">+ Добавить баннер</button>
         <button class="btn" onclick="saveHeroBanners()">Сохранить баннеры</button>
-        <div class="hint">Если баннер один — показывается всегда он. Если несколько — первый посетитель увидит баннер №1, при следующем заходе (новая вкладка/сессия) — баннер №2, и так по кругу.</div>
+        <label style="margin-top:14px;">Как часто листать, секунд</label>
+        <input type="number" id="f_heroInterval" min="2" max="30" placeholder="5">
+        <button class="btn secondary" onclick="saveSetting('heroInterval', Number(document.getElementById('f_heroInterval').value) || 5); alert('Сохранено')">Сохранить скорость</button>
+        <div class="hint">Баннеры показываются слайдером: каждый баннер — один слайд. Листаются автоматически и свайпом. Если баннер один — просто картинка. Текст и кнопка на слайде необязательны: оставь поля пустыми, и будет только фото.</div>
 
         <label style="margin-top:20px;">Контакты для футера сайта (email, адрес — по одному на строке)</label>
         <textarea id="f_shopContacts" rows="3" placeholder="hello@milaisss.uz&#10;Ташкент, Чиланзар" onchange="saveSetting('shopContacts', this.value)"></textarea>
@@ -1130,6 +1133,7 @@ function loadSettings(){
       heroBanners = [{ media: data.heroImage || '', tag: data.heroTag || '', title: data.heroTitle || '', btnText: data.heroBtnText || '' }];
     }
     loadHeroBannerRows(heroBanners);
+    { const _i = document.getElementById('f_heroInterval'); if (_i) _i.value = data.heroInterval || ''; }
     if (data.shopContacts) document.getElementById('f_shopContacts').value = data.shopContacts;
     categoryImages = data.categoryImages || {};
     categoryIcons = data.categoryIcons || {};
@@ -1519,16 +1523,19 @@ function heroTranslationRows(fieldKey, dataObj){
 }
 function addHeroBannerRow(data){
   data = data || { media: '', mediaDesktop: '', tag: '', title: '', btnText: '', tagTranslations: {}, titleTranslations: {}, btnTextTranslations: {} };
+  const _vid = /\.(mp4|webm|mov|ogg)(\?.*)?$/i;
+  if (_vid.test(data.media||'') || _vid.test(data.mediaDesktop||'')){ data = Object.assign({}, data, { media: _vid.test(data.media||'') ? '' : data.media, mediaDesktop: _vid.test(data.mediaDesktop||'') ? '' : data.mediaDesktop }); }
   const row = document.createElement('div');
   row.className = 'faq-row';
   row.innerHTML = `
     <span class="rm" onclick="this.parentElement.remove()">✕ удалить баннер</span>
-    <label style="margin-top:6px;">Ссылка на фото ИЛИ видео (для телефона)</label>
-    <input type="url" class="hb-media" placeholder="https://... (.mp4/.webm = видео, иначе фото)" value="${(data.media||'').replace(/"/g,'&quot;')}">
+    <label style="margin-top:6px;">Фото для телефона (ссылка)</label>
+    <input type="url" class="hb-media" placeholder="https://milaisss.com/banner1.jpg" value="${(data.media||'').replace(/"/g,'&quot;')}">
+    <div class="hint" style="margin-top:4px;">Фото лучше вертикальное или квадратное, JPG/WEBP, до 1 МБ. Загрузи в репозиторий GitHub и вставь ссылку https://milaisss.com/ИМЯ.jpg</div>
 
-    <label>Фото ИЛИ видео для компьютера (необязательно)</label>
-    <input type="url" class="hb-media-desktop" placeholder="https://... горизонтальное, 16:9" value="${(data.mediaDesktop||'').replace(/"/g,'&quot;')}">
-    <div class="hint" style="margin-top:4px;">На компьютере баннер широкий. Если здесь пусто, показывается ролик для телефона и растягивается, поэтому на ПК он мутный. Загрузи сюда горизонтальное видео 16:9, лучше 1920×1080 (MP4, H.264). Ссылка в том же виде: https://milaisss.com/ИМЯ.mp4</div>
+    <label>Фото для компьютера (необязательно)</label>
+    <input type="url" class="hb-media-desktop" placeholder="https://milaisss.com/banner1-pc.jpg" value="${(data.mediaDesktop||'').replace(/"/g,'&quot;')}">
+    <div class="hint" style="margin-top:4px;">Горизонтальное, 16:9 или шире, лучше 1920×820 и больше. Если пусто — на компьютере покажется фото для телефона.</div>
 
     <label>Метка над заголовком — рус.</label>
     <input type="text" class="hb-tag" placeholder="НОВАЯ КОЛЛЕКЦИЯ" value="${(data.tag||'').replace(/"/g,'&quot;')}">
