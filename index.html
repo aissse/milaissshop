@@ -116,6 +116,13 @@
   .card .info{ padding:10px 12px 14px; flex:1; display:flex; flex-direction:column; }
   .card .name{ font-size:13px; font-weight:600; line-height:1.3; margin-bottom:2px; }
   .card .sub{ font-size:11px; color:var(--muted); margin-bottom:8px; }
+  .price .old, #detailPrice .old{ display:block; font-size:12px; font-weight:500; color:#9a9a9a; text-decoration:line-through; text-decoration-color:#4a4a4a; text-decoration-thickness:1.5px; line-height:1.2; margin-bottom:1px; }
+  #detailPrice .old{ display:inline-block; font-size:15px; margin:0 8px 0 0; }
+  html[data-theme="dark"] .price .old, html[data-theme="dark"] #detailPrice .old{ text-decoration-color:#bdbdbd; }
+  #detailPrice{ text-align:right; }
+  .disc-badge{ position:absolute; top:10px; left:10px; z-index:2; background:#141414; color:#fff; font-size:11px; font-weight:700; padding:4px 8px; border-radius:100px; font-family:'Space Grotesk'; letter-spacing:.01em; }
+  html[data-theme="dark"] .disc-badge{ background:#f3f1ee; color:#111; }
+  .disc-line{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-size:12px; font-weight:700; color:var(--ink); background:var(--stone); border-radius:100px; padding:4px 10px; }
   .card .price{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; margin-top:auto; } /* цена всегда прижата к низу карточки — в одном ряду все цены на одной линии */
 
   @keyframes cardFadeIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
@@ -973,7 +980,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-95";
+  const CURRENT_VERSION = "20260908-96";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1377,6 +1384,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+function discOf(p){ const d = Number(p && p.discount) || 0; return (d > 0 && d < 100) ? d : 0; }
+function effPrice(p){ const d = discOf(p); return d ? Math.round(Number(p.price||0) * (100 - d) / 100 / 100) * 100 : Number(p.price||0); }
+function priceHTML(p){ return discOf(p) ? `<span class="old">${fmt(p.price)}</span>${fmt(effPrice(p))}` : fmt(p.price); }
+function discBadge(p){ return discOf(p) ? `<div class="disc-badge">−${discOf(p)}%</div>` : ''; }
 function fmt(n){ return Number(n||0).toLocaleString('ru-RU') + " сум"; }
 
 /* ---------- i18n ---------- */
@@ -1440,11 +1451,11 @@ const STR = {
         policyReturn:"Returns", policyReturnText:"You have 14 days to return your order. Return shipping costs are covered by the buyer, and the item must be in its original condition.", policyDelivery:"Delivery", policyDeliveryText:"We process and ship orders as fast as possible. Usually 2-5 days depending on the region.", policyCare:"Care instructions", policyCareText:"Wash in cold water, do not tumble dry, do not iron directly on prints/embroidery.", collectionsHeader:"Collections", sizeGuide:"Size guide", trustShippingTitle:"Free shipping", trustShippingSub:"on orders over 300,000 UZS", trustReturnTitle:"Easy returns", trustReturnSub:"14-day return policy", trustSecureTitle:"Secure payment", trustSecureSub:"Payme, Click, card", checkoutTitle:"Payment & delivery", paymentMethodLabel:"Payment method", cardLabel:"Card", cardSoonNote:"Online card payment is in development — coming soon", cardSoonToast:"Card payment is still in development", soonMethodToast:"Coming soon — please choose Payme or card for now", phoneFieldLabel:"Your phone number", phoneFieldNote:"Needed so the courier can reach you.", btsLabel:"Nearest BTS pickup point", btsPlaceholder:"Start typing a city or street...", btsNoResults:"Nothing found, try a different search", confirmTransferBtn:"Transfer completed", paymePrefix:"Transfer to Payme number:", paymeNotSet:"Payme details haven't been added by the seller yet.", nextStepHint:"Next step — payment details and transfer confirmation.", confirmingText:"Placing your order...", loginToSeeOrders:"Log in to see your orders on any device", loginByPhone:"By phone", sizeWord:"Size", orderSuccessTitle:"Purchase completed successfully!", supportTitle:"Support", supportPlaceholder:"Write a message...", supportEmpty:"No messages yet. Write to us if you have questions 💬", btsSelected:"Selected", phoneLoginSoon:"Phone number login is coming soon — currently in development",  orderPlacedText:"Your order has been placed. The seller will check the payment in their app and confirm the order. If no payment is found, the item won't be shipped. For any questions, contact support in your profile.", gotItBtn:"Got it", regTitle:"Sign up", regSub:"Needed to place orders and get delivery updates", regSubSupport:"Sign up to message support — so we can reply to you", regFirstName:"First name", regLastName:"Last name", regPhoneLabel:"Phone number", regTgLabel:"Telegram username (optional)", regTgHint:"If you mistype your number, we can still find you on Telegram.", regAvatarLabel:"Choose an avatar", regSubmit:"Sign up", regSaving:"Saving...", regNoAvatars:"The seller hasn't added avatars yet", regErrName:"Enter your first name", regErrLast:"Enter your last name", regErrPhone:"Enter your phone number", regSaveFail:"Couldn't save your profile, check your connection" }
 };
 const STR_EXTRA = {
-  ru: { settingsTitle:"Настройки", settingsMenu:"Настройки", themeLabel:"Тема оформления", themeLight:"Светлая", themeDark:"Тёмная" },
-  uz: { settingsTitle:"Sozlamalar", settingsMenu:"Sozlamalar", themeLabel:"Mavzu", themeLight:"Yorug‘", themeDark:"Qorong‘i" },
-  tr: { settingsTitle:"Ayarlar", settingsMenu:"Ayarlar", themeLabel:"Tema", themeLight:"Açık", themeDark:"Koyu" },
-  az: { settingsTitle:"Parametrlər", settingsMenu:"Parametrlər", themeLabel:"Tema", themeLight:"Açıq", themeDark:"Tünd" },
-  en: { settingsTitle:"Settings", settingsMenu:"Settings", themeLabel:"Appearance", themeLight:"Light", themeDark:"Dark" }
+  ru: { discountWord:"Скидка", catSale:"Скидки", settingsTitle:"Настройки", settingsMenu:"Настройки", themeLabel:"Тема оформления", themeLight:"Светлая", themeDark:"Тёмная" },
+  uz: { discountWord:"Chegirma", catSale:"Chegirmalar", settingsTitle:"Sozlamalar", settingsMenu:"Sozlamalar", themeLabel:"Mavzu", themeLight:"Yorug‘", themeDark:"Qorong‘i" },
+  tr: { discountWord:"İndirim", catSale:"İndirimler", settingsTitle:"Ayarlar", settingsMenu:"Ayarlar", themeLabel:"Tema", themeLight:"Açık", themeDark:"Koyu" },
+  az: { discountWord:"Endirim", catSale:"Endirimlər", settingsTitle:"Parametrlər", settingsMenu:"Parametrlər", themeLabel:"Tema", themeLight:"Açıq", themeDark:"Tünd" },
+  en: { discountWord:"Discount", catSale:"Sale", settingsTitle:"Settings", settingsMenu:"Settings", themeLabel:"Appearance", themeLight:"Light", themeDark:"Dark" }
 };
 Object.keys(STR_EXTRA).forEach(l => Object.assign(STR[l], STR_EXTRA[l]));
 
@@ -1652,6 +1663,9 @@ function openLightbox(images, startIdx){
 function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
 
 /* ---------- categories (dynamic from settings) ---------- */
+const SALE_CAT = 'Скидки';
+const SALE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>';
+function allCats(){ return (products.some(p => discOf(p) > 0) && !CATEGORIES.includes(SALE_CAT)) ? [...CATEGORIES, SALE_CAT] : CATEGORIES; }
 let CATEGORIES = ["Тренды","Oversize","Минимализм","Лимитки"];
 let activeCategory = "Все";
 let paymentCardInfo = '';
@@ -1676,6 +1690,7 @@ function setGridView(v){
 
 function catIconFor(key, idx){
   if (key === 'Все') return categoryIcons['Все'] || '';
+  if (key === SALE_CAT) return categoryIcons[key] || SALE_ICON;
   return categoryIcons[key] || DEFAULT_CAT_ICONS[idx % DEFAULT_CAT_ICONS.length];
 }
 function catIconColorFor(key){
@@ -1686,7 +1701,7 @@ function catIconColorFor(key){
 function renderCatPills(){
   const wrap = document.getElementById('catPillsRow');
   if (!wrap) return;
-  const items = [{ key: 'Все' }, ...CATEGORIES.map(c => ({ key: c }))];
+  const items = [{ key: 'Все' }, ...allCats().map(c => ({ key: c }))];
   wrap.innerHTML = items.map((it, i) => {
     const iconColor = catIconColorFor(it.key);
     const borderStyle = '';
@@ -1836,10 +1851,11 @@ renderFaq();
 
 function filteredProducts(){
   let list = products;
-  if (activeCategory === 'До 500 000') list = list.filter(p => Number(p.price||0) <= 500000);
+  if (activeCategory === 'До 500 000') list = list.filter(p => effPrice(p) <= 500000);
   else if (categoryAutoPopular[activeCategory]){
     list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
   }
+  else if (activeCategory === SALE_CAT) list = list.filter(p => discOf(p) > 0);
   else if (activeCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === activeCategory.trim().toLowerCase());
   if (searchQuery.trim()){
     const q = searchQuery.trim().toLowerCase();
@@ -1888,7 +1904,7 @@ function applyPriceFilter(){
 
 function renderShopAllCats(){
   const wrap = document.getElementById('shopAllCats');
-  const items = ['Все', ...CATEGORIES];
+  const items = ['Все', ...allCats()];
   wrap.innerHTML = items.map((cat, i) => {
     const iconColor = catIconColorFor(cat);
     const borderStyle = '';
@@ -1912,9 +1928,10 @@ function renderShopAllGrid(){
   let list = products;
   if (categoryAutoPopular[shopAllCategory]){
     list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
-  } else if (shopAllCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === shopAllCategory.trim().toLowerCase());
-  if (priceMin !== null) list = list.filter(p => Number(p.price||0) >= priceMin);
-  if (priceMax !== null) list = list.filter(p => Number(p.price||0) <= priceMax);
+  } else if (shopAllCategory === SALE_CAT) list = list.filter(p => discOf(p) > 0);
+  else if (shopAllCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === shopAllCategory.trim().toLowerCase());
+  if (priceMin !== null) list = list.filter(p => effPrice(p) >= priceMin);
+  if (priceMax !== null) list = list.filter(p => effPrice(p) <= priceMax);
 
   const wrap = document.getElementById('shopAllGrid');
   wrap.innerHTML = '';
@@ -1938,7 +1955,7 @@ function toggleDrawer(){
 }
 function renderDrawer(){
   const wrap = document.getElementById('drawerItems');
-  const items = ['Все', ...CATEGORIES];
+  const items = ['Все', ...allCats()];
   let html = items.map((cat, i) => {
     const info = categoryInfo[cat];
     const chevron = info ? `<span class="drawer-chevron" onclick="event.stopPropagation(); toggleDrawerInfo('cat-${i}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>` : '';
@@ -1984,6 +2001,7 @@ function toggleDrawerInfo(id){
 }
 function translateCategory(cat){
   if (cat === 'Все') return t('allCat');
+  if (cat === SALE_CAT && !(categoryTranslations[cat] && categoryTranslations[cat][lang])) return t('catSale');
   if (cat === 'До 500 000') return categoryTranslations['До 500 000'] && categoryTranslations['До 500 000'][lang] ? categoryTranslations['До 500 000'][lang] : cat;
   return (categoryTranslations[cat] && categoryTranslations[cat][lang]) ? categoryTranslations[cat][lang] : cat;
 }
@@ -2059,12 +2077,12 @@ function productCardHTML(p){
   const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${p.image ? '' : (p.emoji || '👟')}
-      <div class="heart-btn" data-fav="${p.id}">${heartIcon(isFavorite(p.id))}</div>
+      ${discBadge(p)}<div class="heart-btn" data-fav="${p.id}">${heartIcon(isFavorite(p.id))}</div>
     </div>
     <div class="info">
       <div class="name">${getTranslatedProductName(p)}</div>
       <div class="sub">${p.sub || ''}</div>
-      <div class="price">${fmt(p.price)}</div>
+      <div class="price">${priceHTML(p)}</div>
     </div>`;
 }
 
@@ -2107,12 +2125,12 @@ function favoriteCardHTML(p, fav){
   const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${displayImage ? '' : (p.emoji || '👟')}
-      <div class="heart-btn" data-fav="${p.id}">${heartIcon(true)}</div>
+      ${discBadge(p)}<div class="heart-btn" data-fav="${p.id}">${heartIcon(true)}</div>
     </div>
     <div class="info">
       <div class="name">${getTranslatedProductName(p)}</div>
       <div class="sub">${colorLine || (p.sub || '')}</div>
-      <div class="price">${fmt(p.price)}</div>
+      <div class="price">${priceHTML(p)}</div>
     </div>`;
 }
 
@@ -2154,6 +2172,8 @@ db.collection('products').onSnapshot(snap => {
     if (d.hidden) return; // товар скрыт в админке — покупатели его не видят
     products.push({ id: doc.id, ...d });
   });
+  if (activeCategory === SALE_CAT && !products.some(p => discOf(p) > 0)) activeCategory = 'Все';
+  renderCatPills(); if (typeof renderDrawer === 'function') renderDrawer();
   renderMainGrid(); renderFavGrid();
   if (document.getElementById('shopAll').classList.contains('active')) renderShopAllGrid();
   markLoaded('products');
@@ -2659,7 +2679,7 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
   updateReviewsSummary();
 
   document.getElementById('detailName').textContent = getTranslatedProductName(currentProduct);
-  document.getElementById('detailPrice').textContent = fmt(currentProduct.price);
+  document.getElementById('detailPrice').innerHTML = priceHTML(currentProduct) + (discOf(currentProduct) ? `<div class="disc-line">−${discOf(currentProduct)}% · ${t('discountWord')}</div>` : '');
   document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
 
   const stockNote = document.getElementById('stockNote');
@@ -2769,7 +2789,7 @@ function addToCart(){
     cart.push({
       productId: currentProduct.id, name: currentProduct.name,
       image: chosen.image || currentProduct.image || '', emoji: currentProduct.emoji || '👟',
-      price: currentProduct.price, size: selectedSize, colorName, qty: 1
+      price: effPrice(currentProduct), size: selectedSize, colorName, qty: 1
     });
   }
   updateCartBadge();
