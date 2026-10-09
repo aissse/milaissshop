@@ -1545,6 +1545,7 @@ function addHeroBannerRow(data){
     <input type="text" class="hb-title" placeholder="Скидка 20% на первую покупку" value="${(data.title||'').replace(/"/g,'&quot;')}">
     ${heroTranslationRows('title', data.titleTranslations)}
 
+    <label style="display:flex; align-items:center; gap:8px; margin-top:12px;"><input type="checkbox" class="hb-showbtn" style="width:auto;" ${data.showBtn ? 'checked' : ''}> Показывать кнопку на этом баннере</label>
     <label>Текст на кнопке — рус.</label>
     <input type="text" class="hb-btn" placeholder="Смотреть" value="${(data.btnText||'').replace(/"/g,'&quot;')}">
     ${heroTranslationRows('btn', data.btnTextTranslations)}
@@ -1575,7 +1576,7 @@ function saveHeroBanners(){
       if (bv) btnTextTranslations[l] = bv;
     });
     if (media || mediaDesktop || tag || title || btnText){
-      const banner = { media, tag, title, btnText };
+      const banner = { media, tag, title, btnText, showBtn: !!row.querySelector('.hb-showbtn').checked };
       if (mediaDesktop) banner.mediaDesktop = mediaDesktop;
       if (Object.keys(tagTranslations).length) banner.tagTranslations = tagTranslations;
       if (Object.keys(titleTranslations).length) banner.titleTranslations = titleTranslations;
