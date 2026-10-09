@@ -970,7 +970,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-93";
+  const CURRENT_VERSION = "20260908-94";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1510,8 +1510,8 @@ function renderHero(list){
     const img = b._default ? '' : heroImgFor(b);
     const tag = b._default ? t('heroTag') : getHeroBannerText(b, 'tag');
     const title = b._default ? t('heroTitle') : getHeroBannerText(b, 'title');
-    const btn = b._default ? t('heroBtn') : getHeroBannerText(b, 'btnText');
-    let h = img ? `<img src="${heroEsc(img)}" alt="" draggable="false" decoding="async"${i===0?'':' loading="lazy"'}>` : '';
+    const btn = (!b._default && b.showBtn) ? getHeroBannerText(b, 'btnText') : '';
+    let h = img ? `<img src="${heroEsc(img)}" alt="" draggable="false" decoding="async" onerror="this.remove()"${i===0?'':' loading="lazy"'}>` : '';
     if (tag || title || btn){
       h += '<div class="hero-photo-text">' + (tag ? `<div class="tag">${heroEsc(tag)}</div>` : '') + (title ? `<h2 class="display">${heroEsc(title)}</h2>` : '') +
            (btn ? `<button class="hero-btn" onclick="openShopAll()">${heroEsc(btn)}</button>` : '') + '</div>';
