@@ -360,6 +360,9 @@
   .hero-slide{ position:absolute; inset:0; display:flex; align-items:flex-end; will-change:transform; visibility:hidden; }
   .hero-slide.on{ visibility:visible; }
   .hero-slide img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none; -webkit-user-drag:none; }
+  .hero-blur{ display:none; position:absolute; inset:-30px; background-size:cover; background-position:center; filter:blur(28px) brightness(.8); pointer-events:none; }
+  .hero-slide.fit .hero-blur{ display:block; }
+  .hero-slide.fit img{ object-fit:contain; }
   .hero-slide .hero-photo-text{ width:100%; box-sizing:border-box; }
   .hero-dots{ position:absolute; left:0; right:0; bottom:10px; z-index:4; display:flex; justify-content:center; gap:6px; pointer-events:none; }
   .hero-dots i{ width:6px; height:6px; border-radius:6px; background:rgba(255,255,255,.5); transition:width .5s cubic-bezier(.32,.72,0,1), background .4s ease; }
@@ -970,7 +973,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-94";
+  const CURRENT_VERSION = "20260908-95";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1511,20 +1514,38 @@ function renderHero(list){
     const tag = b._default ? t('heroTag') : getHeroBannerText(b, 'tag');
     const title = b._default ? t('heroTitle') : getHeroBannerText(b, 'title');
     const btn = (!b._default && b.showBtn) ? getHeroBannerText(b, 'btnText') : '';
-    let h = img ? `<img src="${heroEsc(img)}" alt="" draggable="false" decoding="async" onerror="this.remove()"${i===0?'':' loading="lazy"'}>` : '';
+    let h = img ? `<div class="hero-blur"></div><img src="${heroEsc(img)}" alt="" draggable="false" decoding="async" onerror="this.remove()"${i===0?'':' loading="lazy"'}>` : '';
     if (tag || title || btn){
       h += '<div class="hero-photo-text">' + (tag ? `<div class="tag">${heroEsc(tag)}</div>` : '') + (title ? `<h2 class="display">${heroEsc(title)}</h2>` : '') +
            (btn ? `<button class="hero-btn" onclick="openShopAll()">${heroEsc(btn)}</button>` : '') + '</div>';
     }
     el.innerHTML = h;
+    if (img){
+      const bl = el.querySelector('.hero-blur'), im = el.querySelector('img');
+      if (bl) bl.style.backgroundImage = 'url("' + img.replace(/"/g, '%22') + '")';
+      if (im) im.addEventListener('load', () => heroFitSlide(el, im, i === 0));
+      if (im && im.complete && im.naturalWidth) heroFitSlide(el, im, i === 0);
+    }
     hp.insertBefore(el, document.getElementById('heroDots'));
     return el;
   });
   if (heroCur >= heroSlides.length) heroCur = 0;
+  if (isDesktopView()) hp.style.aspectRatio = '';
   heroSlides.forEach((el, i) => { el.style.transition = 'none'; el.style.transform = 'translateX(0)'; el.classList.toggle('on', i === heroCur); });
   const dots = document.getElementById('heroDots');
   dots.innerHTML = heroSlides.length > 1 ? heroSlides.map((_, i) => `<i class="${i===heroCur?'on':''}"></i>`).join('') : '';
   heroRestart();
+}
+/* картинка не обрезается: рамка подстраивается под первое фото, остальные — целиком поверх размытого фона */
+function heroFitSlide(el, im, first){
+  const hp = document.getElementById('heroPhoto');
+  const r = im.naturalWidth / (im.naturalHeight || 1);
+  if (first){
+    if (isDesktopView()) hp.style.aspectRatio = '';
+    else hp.style.aspectRatio = String(Math.min(2.2, Math.max(1.2, r)).toFixed(3));
+  }
+  const box = hp.offsetWidth / (hp.offsetHeight || 1);
+  el.classList.toggle('fit', Math.abs(r - box) / box > 0.1);
 }
 function heroPlace(el, pct, px, anim){
   el.style.transition = anim ? 'transform .8s cubic-bezier(.32,.72,0,1)' : 'none';
