@@ -274,9 +274,8 @@
   .myrev img{ width:64px; height:64px; border-radius:12px; object-fit:cover; margin-top:8px; display:block; }
   .orders-chev{ font-size:16px; color:var(--muted); transition:transform .5s cubic-bezier(.32,.72,0,1); }
   .orders-chev.closed{ transform:rotate(-90deg); }
-  /* шрифт всех надписей в профиле */
-  #profile, #profile *:not(svg):not(path):not(circle):not(line){ font-family:'Forum','Inter',serif; font-synthesis:none; }
-  #profile .trk-name, #profile .cart-title h2{ letter-spacing:-.01em; }
+  /* шрифт заголовков вкладок в профиле (лого и остальной текст не меняются) */
+  #profile .orders-toggle h2{ font-family:'Forum','Inter',serif; font-weight:400; font-synthesis:none; letter-spacing:.01em; }
   .orders-collapse{ display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .65s cubic-bezier(.32,.72,0,1), opacity .5s ease; }
   .orders-collapse.open{ grid-template-rows:1fr; opacity:1; }
   .orders-collapse > div{ overflow:hidden; min-height:0; }
@@ -1044,7 +1043,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-100";
+  const CURRENT_VERSION = "20260908-101";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
