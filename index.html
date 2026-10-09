@@ -117,12 +117,12 @@
   .card .name{ font-size:13px; font-weight:600; line-height:1.3; margin-bottom:2px; }
   .card .sub{ font-size:11px; color:var(--muted); margin-bottom:8px; }
   .price .old, #detailPrice .old{ display:block; font-size:12px; font-weight:500; color:#9a9a9a; text-decoration:line-through; text-decoration-color:#4a4a4a; text-decoration-thickness:1.5px; line-height:1.2; margin-bottom:1px; }
-  #detailPrice .old{ display:inline-block; font-size:15px; margin:0 8px 0 0; }
+  #detailPrice .old{ display:block; font-size:14px; margin:0 0 2px; }
   html[data-theme="dark"] .price .old, html[data-theme="dark"] #detailPrice .old{ text-decoration-color:#bdbdbd; }
   #detailPrice{ text-align:right; }
-  .disc-badge{ position:absolute; top:10px; left:10px; z-index:2; background:#141414; color:#fff; font-size:11px; font-weight:700; padding:4px 8px; border-radius:100px; font-family:'Space Grotesk'; letter-spacing:.01em; }
-  html[data-theme="dark"] .disc-badge{ background:#f3f1ee; color:#111; }
-  .disc-line{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-size:12px; font-weight:700; color:var(--ink); background:var(--stone); border-radius:100px; padding:4px 10px; }
+  .disc-badge{ position:absolute; top:10px; left:10px; z-index:2; background:rgba(255,255,255,.92); color:#141414; font-size:11px; font-weight:700; padding:4px 8px; border-radius:100px; font-family:'Space Grotesk'; letter-spacing:.01em; }
+  .disc-line{ display:block; margin-top:4px; font-size:12px; font-weight:700; color:var(--ink); background:none; padding:0; white-space:nowrap; }
+  .detail-body .p{ flex-shrink:0; }
   .card .price{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; margin-top:auto; } /* цена всегда прижата к низу карточки — в одном ряду все цены на одной линии */
 
   @keyframes cardFadeIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
@@ -232,7 +232,39 @@
   .back-circle{ width:38px; height:38px; border-radius:50%; background:var(--surface); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink); }
 
   .cart-title{ padding:18px 20px 6px; }
-  .cart-title.orders-toggle{ display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+  .cart-title.orders-toggle{ display:flex; align-items:center; justify-content:space-between; cursor:pointer; margin:0 20px; padding:16px 0 12px; border-bottom:1px solid var(--line); }
+  .sec-pad{ padding:12px 0 6px; }
+  :root{ --trk-dark:#141414; --trk-dark-on:#fff; --trk-blue:#2f5bea; --trk-green:#22b35a; }
+  html[data-theme="dark"]{ --trk-dark:#f3f1ee; --trk-dark-on:#111; }
+  .trk-card{ margin:12px 20px 0; border:1px solid var(--line); border-radius:22px; padding:16px 16px 14px; background:var(--surface, var(--bg)); box-shadow:0 6px 22px rgba(0,0,0,.05); }
+  .trk-item{ display:flex; gap:12px; align-items:flex-start; padding-bottom:12px; }
+  .trk-item + .trk-item{ border-top:1px dashed var(--line); padding-top:12px; }
+  .trk-img{ width:64px; height:64px; border-radius:16px; border:1.5px solid var(--line); background:var(--stone) center/cover no-repeat; display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0; }
+  .trk-info{ flex:1; min-width:0; }
+  .trk-name{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; line-height:1.25; margin-bottom:8px; }
+  .trk-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .trk-chips span{ font-size:12px; font-weight:700; padding:5px 10px; border-radius:100px; background:var(--stone); color:var(--on-stone, var(--ink)); }
+  .trk-chips span.pr{ background:rgba(47,91,234,.12); color:var(--trk-blue); }
+  .trk-state{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); font-weight:600; margin:2px 0 12px; }
+  .trk-state b{ color:var(--ink); }
+  .trk{ position:relative; display:grid; grid-template-columns:repeat(4,1fr); padding-top:2px; }
+  .trk-bar{ position:absolute; top:11px; left:12.5%; right:12.5%; height:4px; border-radius:4px; background:var(--line); overflow:hidden; }
+  .trk-fill{ height:100%; width:0; border-radius:4px; transition:width .9s cubic-bezier(.32,.72,0,1); }
+  .trk-col{ position:relative; display:flex; flex-direction:column; align-items:center; gap:8px; font-size:11px; font-weight:700; color:var(--muted); text-align:center; }
+  .trk-node{ width:26px; height:26px; border-radius:50%; background:var(--bg); border:4px solid var(--line); box-sizing:border-box; display:flex; align-items:center; justify-content:center; z-index:1; transition:background .4s ease, border-color .4s ease; }
+  .trk-node svg{ width:14px; height:14px; display:none; }
+  .trk-col.done .trk-node{ border:none; }
+  .trk-col.done .trk-node svg{ display:block; }
+  .trk-col.done{ color:var(--ink); }
+  .trk-col.cur{ color:var(--c); }
+  .trk-col.done .trk-node{ background:var(--c); }
+  .trk-empty{ margin:12px 20px; color:var(--muted); font-size:13px; }
+  .myrev{ margin:12px 20px 0; border:1px solid var(--line); border-radius:18px; padding:14px; }
+  .myrev .mr-top{ display:flex; justify-content:space-between; gap:8px; font-weight:700; font-size:14px; }
+  .myrev .mr-st{ font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; }
+  .myrev .mr-stars{ color:#f5a623; font-size:13px; margin:4px 0; }
+  .myrev .mr-text{ font-size:13px; line-height:1.4; color:var(--text-soft, var(--ink)); }
+  .myrev img{ width:64px; height:64px; border-radius:12px; object-fit:cover; margin-top:8px; display:block; }
   .orders-chev{ font-size:16px; color:var(--muted); transition:transform .35s cubic-bezier(.4,0,.2,1); }
   .orders-chev.closed{ transform:rotate(-90deg); }
   .orders-collapse{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .45s cubic-bezier(.4,0,.2,1); }
@@ -564,6 +596,10 @@
     box-shadow:inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -1px 2px rgba(255,255,255,.4), 0 4px 14px rgba(20,20,20,.14);
     transition:transform .8s cubic-bezier(.32,.72,0,1), width .8s cubic-bezier(.32,.72,0,1), opacity .3s ease; will-change:transform,width; }
   .nav-glass.ready{ opacity:1; }
+  .nav-glass.dragging{ scale:1.12; }
+  .navitem.peek{ color:#141414; }
+  html[data-theme="dark"] .navitem.peek{ color:#fff; }
+  .bottomnav{ touch-action:none; user-select:none; -webkit-user-select:none; }
   .nav-glass.stretch{ animation:glassStretch .8s cubic-bezier(.32,.72,0,1); }
   @keyframes glassStretch{ 0%{ scale:1 1; } 35%{ scale:1.07 .96; } 70%{ scale:.99 1.015; } 100%{ scale:1 1; } }
   html[data-theme="dark"] .bottomnav{
@@ -839,12 +875,28 @@
     <div class="topbar"><div class="logo">milaisss</div></div>
     <div id="profileHeader"></div>
     <div id="tgLoginWrap" style="padding:0 20px 16px;"></div>
-    <div class="cart-title orders-toggle" onclick="toggleOrdersSection()">
+    <div class="cart-title orders-toggle" onclick="toggleSec(this)">
       <h2 class="display" data-i18n="profileTitle">Мои заказы</h2>
-      <span class="orders-chev" id="ordersChev">⌄</span>
+      <span class="orders-chev">⌄</span>
     </div>
     <div class="orders-collapse open" id="ordersCollapse">
       <div><div id="ordersList"></div></div>
+    </div>
+
+    <div class="cart-title orders-toggle" onclick="toggleSec(this)">
+      <h2 class="display" data-i18n="secStatus">Статус моих заказов</h2>
+      <span class="orders-chev">⌄</span>
+    </div>
+    <div class="orders-collapse open">
+      <div><div id="statusList"></div></div>
+    </div>
+
+    <div class="cart-title orders-toggle" onclick="toggleSec(this)">
+      <h2 class="display" data-i18n="secReviews">Мои отзывы</h2>
+      <span class="orders-chev closed">⌄</span>
+    </div>
+    <div class="orders-collapse">
+      <div><div id="myReviewsList"></div></div>
     </div>
   </div>
 
@@ -980,7 +1032,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-96";
+  const CURRENT_VERSION = "20260908-97";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1321,7 +1373,8 @@ function onTelegramAuth(user){
   renderProfileHeader();
   renderTelegramLoginWidget();
   renderOrders();
-  if (!localStorage.getItem('milaisss_linked_tg_avatar')) openTelegramAvatarModal();
+  if (user.photo_url){ localStorage.setItem('milaisss_linked_tg_avatar', user.photo_url); renderProfileHeader(); }
+  else if (!localStorage.getItem('milaisss_linked_tg_avatar')) openTelegramAvatarModal();
 }
 
 function openTelegramAvatarModal(retriesLeft){
@@ -1451,11 +1504,11 @@ const STR = {
         policyReturn:"Returns", policyReturnText:"You have 14 days to return your order. Return shipping costs are covered by the buyer, and the item must be in its original condition.", policyDelivery:"Delivery", policyDeliveryText:"We process and ship orders as fast as possible. Usually 2-5 days depending on the region.", policyCare:"Care instructions", policyCareText:"Wash in cold water, do not tumble dry, do not iron directly on prints/embroidery.", collectionsHeader:"Collections", sizeGuide:"Size guide", trustShippingTitle:"Free shipping", trustShippingSub:"on orders over 300,000 UZS", trustReturnTitle:"Easy returns", trustReturnSub:"14-day return policy", trustSecureTitle:"Secure payment", trustSecureSub:"Payme, Click, card", checkoutTitle:"Payment & delivery", paymentMethodLabel:"Payment method", cardLabel:"Card", cardSoonNote:"Online card payment is in development — coming soon", cardSoonToast:"Card payment is still in development", soonMethodToast:"Coming soon — please choose Payme or card for now", phoneFieldLabel:"Your phone number", phoneFieldNote:"Needed so the courier can reach you.", btsLabel:"Nearest BTS pickup point", btsPlaceholder:"Start typing a city or street...", btsNoResults:"Nothing found, try a different search", confirmTransferBtn:"Transfer completed", paymePrefix:"Transfer to Payme number:", paymeNotSet:"Payme details haven't been added by the seller yet.", nextStepHint:"Next step — payment details and transfer confirmation.", confirmingText:"Placing your order...", loginToSeeOrders:"Log in to see your orders on any device", loginByPhone:"By phone", sizeWord:"Size", orderSuccessTitle:"Purchase completed successfully!", supportTitle:"Support", supportPlaceholder:"Write a message...", supportEmpty:"No messages yet. Write to us if you have questions 💬", btsSelected:"Selected", phoneLoginSoon:"Phone number login is coming soon — currently in development",  orderPlacedText:"Your order has been placed. The seller will check the payment in their app and confirm the order. If no payment is found, the item won't be shipped. For any questions, contact support in your profile.", gotItBtn:"Got it", regTitle:"Sign up", regSub:"Needed to place orders and get delivery updates", regSubSupport:"Sign up to message support — so we can reply to you", regFirstName:"First name", regLastName:"Last name", regPhoneLabel:"Phone number", regTgLabel:"Telegram username (optional)", regTgHint:"If you mistype your number, we can still find you on Telegram.", regAvatarLabel:"Choose an avatar", regSubmit:"Sign up", regSaving:"Saving...", regNoAvatars:"The seller hasn't added avatars yet", regErrName:"Enter your first name", regErrLast:"Enter your last name", regErrPhone:"Enter your phone number", regSaveFail:"Couldn't save your profile, check your connection" }
 };
 const STR_EXTRA = {
-  ru: { discountWord:"Скидка", catSale:"Скидки", settingsTitle:"Настройки", settingsMenu:"Настройки", themeLabel:"Тема оформления", themeLight:"Светлая", themeDark:"Тёмная" },
-  uz: { discountWord:"Chegirma", catSale:"Chegirmalar", settingsTitle:"Sozlamalar", settingsMenu:"Sozlamalar", themeLabel:"Mavzu", themeLight:"Yorug‘", themeDark:"Qorong‘i" },
-  tr: { discountWord:"İndirim", catSale:"İndirimler", settingsTitle:"Ayarlar", settingsMenu:"Ayarlar", themeLabel:"Tema", themeLight:"Açık", themeDark:"Koyu" },
-  az: { discountWord:"Endirim", catSale:"Endirimlər", settingsTitle:"Parametrlər", settingsMenu:"Parametrlər", themeLabel:"Tema", themeLight:"Açıq", themeDark:"Tünd" },
-  en: { discountWord:"Discount", catSale:"Sale", settingsTitle:"Settings", settingsMenu:"Settings", themeLabel:"Appearance", themeLight:"Light", themeDark:"Dark" }
+  ru: { secStatus:"Статус моих заказов", secReviews:"Мои отзывы", noMyReviews:"Вы ещё не оставляли отзывов", revModeration:"На проверке", trkAccepted:"Принято", trkOnWay:"В пути", trkPickup:"В ПВЗ", trkDelivered:"Доставлен", noOrdersYet:"Пока нет заказов", discountWord:"Скидка", catSale:"Скидки", settingsTitle:"Настройки", settingsMenu:"Настройки", themeLabel:"Тема оформления", themeLight:"Светлая", themeDark:"Тёмная" },
+  uz: { secStatus:"Buyurtmalarim holati", secReviews:"Mening sharhlarim", noMyReviews:"Siz hali sharh qoldirmagansiz", revModeration:"Tekshiruvda", trkAccepted:"Qabul qilindi", trkOnWay:"Yo‘lda", trkPickup:"PVZda", trkDelivered:"Yetkazildi", noOrdersYet:"Hozircha buyurtmalar yo‘q", discountWord:"Chegirma", catSale:"Chegirmalar", settingsTitle:"Sozlamalar", settingsMenu:"Sozlamalar", themeLabel:"Mavzu", themeLight:"Yorug‘", themeDark:"Qorong‘i" },
+  tr: { secStatus:"Siparişlerimin durumu", secReviews:"Yorumlarım", noMyReviews:"Henüz yorum bırakmadınız", revModeration:"İnceleniyor", trkAccepted:"Alındı", trkOnWay:"Yolda", trkPickup:"Teslim noktasında", trkDelivered:"Teslim edildi", noOrdersYet:"Henüz sipariş yok", discountWord:"İndirim", catSale:"İndirimler", settingsTitle:"Ayarlar", settingsMenu:"Ayarlar", themeLabel:"Tema", themeLight:"Açık", themeDark:"Koyu" },
+  az: { secStatus:"Sifarişlərimin statusu", secReviews:"Rəylərim", noMyReviews:"Hələ rəy yazmamısınız", revModeration:"Yoxlanılır", trkAccepted:"Qəbul edildi", trkOnWay:"Yoldadır", trkPickup:"Məntəqədə", trkDelivered:"Çatdırıldı", noOrdersYet:"Hələ sifariş yoxdur", discountWord:"Endirim", catSale:"Endirimlər", settingsTitle:"Parametrlər", settingsMenu:"Parametrlər", themeLabel:"Tema", themeLight:"Açıq", themeDark:"Tünd" },
+  en: { secStatus:"My order status", secReviews:"My reviews", noMyReviews:"You haven’t left any reviews yet", revModeration:"Under review", trkAccepted:"Accepted", trkOnWay:"On the way", trkPickup:"At pickup point", trkDelivered:"Delivered", noOrdersYet:"No orders yet", discountWord:"Discount", catSale:"Sale", settingsTitle:"Settings", settingsMenu:"Settings", themeLabel:"Appearance", themeLight:"Light", themeDark:"Dark" }
 };
 Object.keys(STR_EXTRA).forEach(l => Object.assign(STR[l], STR_EXTRA[l]));
 
@@ -1493,6 +1546,7 @@ function applyLang(){
   if (!policyCustomized){ policyItems = defaultPolicyItems(); }
   if (currentProduct) renderPolicyAccordion();
   renderHero();
+  renderStatusList(_lastOrders); renderMyReviews();
   if (currentProduct){
     document.getElementById('detailName').textContent = getTranslatedProductName(currentProduct);
     document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
@@ -2184,6 +2238,7 @@ db.collection('reviews').onSnapshot(snap => {
   snap.forEach(doc => reviews.push({ id: doc.id, ...doc.data() }));
   if (currentProduct) updateReviewsSummary();
   renderRatingSummary();
+  renderMyReviews();
 });
 
 function isDarkColor(hex){
@@ -2305,6 +2360,48 @@ function moveNavGlass(animate){
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(re);
 })();
 
+/* нажми и веди пальцем по нижней панели: капсула едет за пальцем, выбор — где отпустил */
+(function(){
+  const nav = document.getElementById('bottomNav'); if (!nav) return;
+  let d = null, suppress = false;
+  const items = () => [...nav.querySelectorAll('.navitem')];
+  function nearest(cx){
+    let best = null, bd = 1e9;
+    items().forEach(it => { const c = it.offsetLeft + it.offsetWidth / 2, dd = Math.abs(c - cx); if (dd < bd){ bd = dd; best = it; } });
+    return best;
+  }
+  nav.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const g = document.getElementById('navGlass'); if (!g) return;
+    d = { x:e.clientX, moved:false, g };
+  });
+  window.addEventListener('pointermove', e => {
+    if (!d) return;
+    if (!d.moved && Math.abs(e.clientX - d.x) < 8) return;
+    if (!d.moved){ d.moved = true; d.g.classList.add('dragging'); d.g.style.transition = 'none'; }
+    const r = nav.getBoundingClientRect(), its = items(), w = d.g.offsetWidth;
+    const min = its[0].offsetLeft, max = its[its.length - 1].offsetLeft + its[its.length - 1].offsetWidth - w;
+    const x = Math.min(max, Math.max(min, e.clientX - r.left - w / 2));
+    d.g.style.transform = 'translateX(' + x + 'px)';
+    const nr = nearest(x + w / 2);
+    its.forEach(it => it.classList.toggle('peek', it === nr));
+  }, { passive:true });
+  const end = () => {
+    if (!d) return;
+    const cur = d; d = null;
+    items().forEach(it => it.classList.remove('peek'));
+    if (!cur.moved) return;
+    suppress = true; setTimeout(() => { suppress = false; }, 80);
+    cur.g.classList.remove('dragging'); cur.g.style.transition = '';
+    const x = parseFloat((cur.g.style.transform.match(/-?[\d.]+/) || [0])[0]) || 0;
+    const target = nearest(x + cur.g.offsetWidth / 2);
+    const name = target && target.dataset.screen;
+    if (name) showScreen(name);
+  };
+  window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end);
+  nav.addEventListener('click', e => { if (suppress){ e.stopPropagation(); e.preventDefault(); } }, true);
+})();
+
 /* ---------- screens ---------- */
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -2315,7 +2412,7 @@ function showScreen(name){
   moveNavGlass(true);
   if (name === 'cart') renderCart();
   if (name === 'favorites') renderFavGrid();
-  if (name === 'profile') renderOrders();
+  if (name === 'profile'){ renderOrders(); renderMyReviews(); }
   document.getElementById('supportFab').style.display = (name === 'profile') ? 'flex' : 'none';
   window.scrollTo(0,0);
 }
@@ -2679,7 +2776,7 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
   updateReviewsSummary();
 
   document.getElementById('detailName').textContent = getTranslatedProductName(currentProduct);
-  document.getElementById('detailPrice').innerHTML = priceHTML(currentProduct) + (discOf(currentProduct) ? `<div class="disc-line">−${discOf(currentProduct)}% · ${t('discountWord')}</div>` : '');
+  document.getElementById('detailPrice').innerHTML = priceHTML(currentProduct) + (discOf(currentProduct) ? `<div class="disc-line">${t('discountWord')} −${discOf(currentProduct)}%</div>` : '');
   document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
 
   const stockNote = document.getElementById('stockNote');
@@ -2789,7 +2886,7 @@ function addToCart(){
     cart.push({
       productId: currentProduct.id, name: currentProduct.name,
       image: chosen.image || currentProduct.image || '', emoji: currentProduct.emoji || '👟',
-      price: effPrice(currentProduct), size: selectedSize, colorName, qty: 1
+      price: effPrice(currentProduct), oldPrice: Number(currentProduct.price||0), discount: discOf(currentProduct), size: selectedSize, colorName, qty: 1
     });
   }
   updateCartBadge();
@@ -2811,9 +2908,12 @@ function renderCart(){
     content.innerHTML = `<div class="cart-empty">${t('empty')}<br>${t('emptyCatalogHint')} 👟</div>`;
     return;
   }
-  let total = 0;
+  let total = 0, totalOld = 0, discSet = new Set(), allDisc = true;
   const itemsHtml = cart.map((item, idx) => {
     total += item.price * item.qty;
+    const oldP = (item.oldPrice && item.oldPrice > item.price) ? item.oldPrice : item.price;
+    totalOld += oldP * item.qty;
+    if (oldP > item.price) discSet.add(item.discount || Math.round((1 - item.price / oldP) * 100)); else allDisc = false;
     const thumbStyle = item.image ? `style="background-image:url('${item.image}')"` : '';
     const product = products.find(pr => pr.id === item.productId);
     const displayName = product ? getTranslatedProductName(product) : item.name;
@@ -2823,7 +2923,7 @@ function renderCart(){
         <div class="meta">
           <div class="name">${displayName}</div>
           <div class="opts">${t('sizeWord')} ${item.size} · ${item.colorName} · ${item.qty} ${t('pcsWord')}</div>
-          <div class="price">${fmt(item.price * item.qty)}</div>
+          <div class="price">${oldP > item.price ? `<span class="old">${fmt(oldP * item.qty)}</span>` : ''}${fmt(item.price * item.qty)}</div>
         </div>
         <div class="remove" onclick="removeFromCart(${idx})">Убрать</div>
       </div>`;
@@ -2832,7 +2932,8 @@ function renderCart(){
   content.innerHTML = `
     <div class="cart-list">${itemsHtml}</div>
     <div class="cart-summary">
-      <div class="sum-row"><span>${t('goodsLabel')}</span><span>${fmt(total)}</span></div>
+      <div class="sum-row"><span>${t('goodsLabel')}</span><span>${fmt(totalOld)}</span></div>
+      ${totalOld > total ? `<div class="sum-row"><span>${t('discountWord')}${(allDisc && discSet.size === 1) ? ' −' + [...discSet][0] + '%' : ''}</span><span>−${fmt(totalOld - total)}</span></div>` : ''}
       <div class="sum-row"><span>${t('deliveryLabel')}</span><span>По согласованию</span></div>
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
@@ -2965,7 +3066,7 @@ function finalizeOrder(phone, branch){
   cart.forEach(item => {
     total += item.price * item.qty;
     text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
-    orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price });
+    orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price, oldPrice:item.oldPrice||item.price, discount:item.discount||0, image:item.image||'' });
   });
   const methodLabel = PAY_METHOD_LABELS[selectedPayMethod] || selectedPayMethod || 'Уточняется';
   text += `\nИтого: ${fmt(total)}\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n💰 Способ оплаты: ${methodLabel}`;
@@ -3140,23 +3241,70 @@ function closePaymentModal(){
 
 /* ---------- profile / orders / reviews ---------- */
 function translateStatus(status){
-  const map = { 'Проверяется оплата':'statusPaying', 'Собирается':'statusPacking', 'В пути':'statusShipping', 'Доставлен':'statusDelivered' };
+  const map = { 'Проверяется оплата':'statusPaying', 'Собирается':'statusPacking', 'В пути':'statusShipping', 'Доставлен':'statusDelivered', 'Принято':'trkAccepted', 'В ПВЗ':'trkPickup' };
   return map[status] ? t(map[status]) : status;
 }
 
-function toggleOrdersSection(){
-  document.getElementById('ordersCollapse').classList.toggle('open');
-  document.getElementById('ordersChev').classList.toggle('closed');
+function toggleSec(head){
+  const body = head.nextElementSibling, chev = head.querySelector('.orders-chev');
+  if (body) body.classList.toggle('open');
+  if (chev) chev.classList.toggle('closed', !body.classList.contains('open'));
+}
+let _lastOrders = [];
+const ORDER_STEP = { 'Проверяется оплата':0, 'Принято':1, 'Собирается':1, 'В пути':2, 'В ПВЗ':3, 'Доставлен':4 };
+const TRK_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function trackHTML(status){
+  const step = ORDER_STEP[status] !== undefined ? ORDER_STEP[status] : 1;
+  const col = step <= 1 ? 'var(--trk-blue)' : step === 2 ? 'var(--trk-dark)' : step === 3 ? 'var(--trk-green)' : 'var(--trk-green)';
+  const fillBg = step === 3 ? 'linear-gradient(90deg, var(--trk-dark), var(--trk-green))' : col;
+  const pct = step <= 0 ? 0 : step === 1 ? 6 : (step - 1) / 3 * 100;
+  const labels = [t('trkAccepted'), t('trkOnWay'), t('trkPickup'), t('trkDelivered')];
+  const cols = labels.map((lb, i) => {
+    const n = i + 1, done = step >= n, cur = step === n;
+    // цвет самого кружка: 1-й всегда по статусу «принято» только пока он текущий
+    let c = n === 1 ? (step === 1 ? 'var(--trk-blue)' : (step === 4 ? 'var(--trk-green)' : 'var(--trk-dark)')) : n === 2 ? (step === 4 ? 'var(--trk-green)' : 'var(--trk-dark)') : 'var(--trk-green)';
+    if (n === 3 && step === 3) c = 'var(--trk-green)';
+    if (n === 2 && step === 3) c = 'var(--trk-dark)';
+    return `<div class="trk-col ${done?'done':''} ${cur?'cur':''}" style="--c:${c}"><div class="trk-node" style="color:${n===1&&step===1?'#fff':(c==='var(--trk-dark)'?'var(--trk-dark-on)':'#fff')}">${TRK_CHECK}</div><span>${lb}</span></div>`;
+  }).join('');
+  return `<div class="trk"><div class="trk-bar"><div class="trk-fill" style="width:${pct}%; background:${fillBg}"></div></div>${cols}</div>`;
+}
+function renderStatusList(orders){
+  const wrap = document.getElementById('statusList'); if (!wrap) return;
+  if (!orders.length){ wrap.innerHTML = `<div class="trk-empty">${t('noOrdersYet')}</div>`; return; }
+  wrap.innerHTML = orders.map(o => `
+    <div class="trk-card">
+      ${(o.items||[]).map(it => {
+        const pr = products.find(x => x.id === it.productId);
+        const img = it.image || (pr && pr.image) || '';
+        const nm = pr ? getTranslatedProductName(pr) : it.name;
+        return `<div class="trk-item"><div class="trk-img" style="${img ? `background-image:url('${String(img).replace(/'/g,"%27")}')` : ''}">${img ? '' : '👟'}</div>
+          <div class="trk-info"><div class="trk-name">${nm}</div>
+          <div class="trk-chips"><span>${it.size}</span><span>${it.colorName}</span><span>× ${it.qty}</span><span class="pr">${fmt(it.price*it.qty)}</span></div></div></div>`;
+      }).join('')}
+      <div class="trk-state"><span>${new Date(o.createdAt).toLocaleDateString('ru-RU')}</span><b>${translateStatus(o.status)}</b></div>
+      ${trackHTML(o.status)}
+    </div>`).join('');
+}
+function renderMyReviews(){
+  const wrap = document.getElementById('myReviewsList'); if (!wrap) return;
+  const id = getCustomerId();
+  const mine = (typeof reviews !== 'undefined' ? reviews : []).filter(r => r.customerId === id).sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+  if (!mine.length){ wrap.innerHTML = `<div class="trk-empty">${t('noMyReviews')}</div>`; return; }
+  wrap.innerHTML = mine.map(r => `<div class="myrev"><div class="mr-top"><span>${r.productName || ''}${r.colorName ? ' · ' + r.colorName : ''}</span><span class="mr-st">${r.approved ? '✓' : t('revModeration')}</span></div>
+    ${r.rating ? `<div class="mr-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>` : ''}
+    <div class="mr-text">${String(r.text||'').replace(/</g,'&lt;')}</div>${r.photo ? `<img src="${r.photo}" alt="">` : ''}</div>`).join('');
 }
 
 function renderOrders(){
   const wrap = document.getElementById('ordersList');
   const customerId = getCustomerId();
   db.collection('orders').where('customerId','==',customerId).onSnapshot(snap => {
-    if (snap.empty){ wrap.innerHTML = `<div class="empty-state">${t('noOrders')}</div>`; return; }
+    if (snap.empty){ wrap.innerHTML = `<div class="empty-state">${t('noOrders')}</div>`; renderStatusList([]); return; }
     const orders = [];
     snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
     orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+    _lastOrders = orders; renderStatusList(orders);
     wrap.innerHTML = orders.map((order) => `
       <div class="order-card">
         <div class="odate">${new Date(order.createdAt).toLocaleDateString('ru-RU')} · <strong>${translateStatus(order.status)}</strong></div>
@@ -3231,7 +3379,7 @@ function submitReview(orderId, ii, productId, productName, colorName){
   const finish = (photoUrl) => {
     const payload = {
       productId, productName, colorName: colorName || '', text, approved: false, createdAt: Date.now(),
-      anonymous, authorName: anonymous ? '' : getCustomerName()
+      anonymous, authorName: anonymous ? '' : getCustomerName(), customerId: getCustomerId()
     };
     if (rating) payload.rating = rating;
     if (photoUrl) payload.photo = photoUrl;
