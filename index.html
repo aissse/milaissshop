@@ -24,7 +24,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=Forum&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#ffffff; --ink:#141414; --stone:#f4f1ec; --line:#e7e2d9;
@@ -247,17 +247,24 @@
   .trk-chips span.pr{ background:rgba(47,91,234,.12); color:var(--trk-blue); }
   .trk-state{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); font-weight:600; margin:2px 0 12px; }
   .trk-state b{ color:var(--ink); }
-  .trk{ position:relative; display:grid; grid-template-columns:repeat(4,1fr); padding-top:2px; }
-  .trk-bar{ position:absolute; top:11px; left:12.5%; right:12.5%; height:4px; border-radius:4px; background:var(--line); overflow:hidden; }
-  .trk-fill{ height:100%; width:0; border-radius:4px; transition:width .9s cubic-bezier(.32,.72,0,1); }
-  .trk-col{ position:relative; display:flex; flex-direction:column; align-items:center; gap:8px; font-size:11px; font-weight:700; color:var(--muted); text-align:center; }
-  .trk-node{ width:26px; height:26px; border-radius:50%; background:var(--bg); border:4px solid var(--line); box-sizing:border-box; display:flex; align-items:center; justify-content:center; z-index:1; transition:background .4s ease, border-color .4s ease; }
-  .trk-node svg{ width:14px; height:14px; display:none; }
-  .trk-col.done .trk-node{ border:none; }
+  .trk{ position:relative; display:grid; grid-template-columns:repeat(4,1fr); --ic-off:#c9c9d0; }
+  html[data-theme="dark"] .trk{ --ic-off:#4a4a52; }
+  .trk-bar{ position:absolute; top:50px; left:12.5%; right:12.5%; height:4px; border-radius:4px; background:var(--line); overflow:hidden; }
+  .trk-fill{ height:100%; width:0; border-radius:4px; transition:width 1s cubic-bezier(.32,.72,0,1); }
+  .trk-col{ position:relative; display:flex; flex-direction:column; align-items:center; gap:10px; font-size:11px; font-weight:700; color:var(--ic-off); text-align:center; }
+  .trk-ic{ height:30px; display:flex; align-items:center; color:var(--ic-off); transition:color .4s ease; }
+  .trk-ic svg{ width:28px; height:28px; stroke-width:1.7; }
+  .trk-node{ position:relative; width:26px; height:26px; border-radius:50%; box-sizing:border-box; display:flex; align-items:center; justify-content:center; z-index:1; background:transparent; transition:background .4s ease; }
+  .trk-node::before{ content:''; position:absolute; width:14px; height:14px; border-radius:50%; background:var(--bg); border:3px solid var(--ic-off); box-sizing:border-box; transition:opacity .3s ease; }
+  .trk-node svg{ position:relative; width:14px; height:14px; display:none; }
+  .trk-col.done .trk-node{ background:var(--c); }
+  .trk-col.done .trk-node::before{ opacity:0; }
   .trk-col.done .trk-node svg{ display:block; }
+  .trk-col.done .trk-ic{ color:var(--c); }
   .trk-col.done{ color:var(--ink); }
   .trk-col.cur{ color:var(--c); }
-  .trk-col.done .trk-node{ background:var(--c); }
+  .trk-col.cur:not(.fin) .trk-node::after{ content:''; position:absolute; inset:-5px; border-radius:50%; border:2px solid var(--c); opacity:.4; animation:trkPulse 2.2s ease-out infinite; }
+  @keyframes trkPulse{ 0%{ transform:scale(.8); opacity:.6; } 100%{ transform:scale(1.25); opacity:0; } }
   .trk-empty{ margin:12px 20px; color:var(--muted); font-size:13px; }
   .myrev{ margin:12px 20px 0; border:1px solid var(--line); border-radius:18px; padding:14px; }
   .myrev .mr-top{ display:flex; justify-content:space-between; gap:8px; font-weight:700; font-size:14px; }
@@ -265,11 +272,16 @@
   .myrev .mr-stars{ color:#f5a623; font-size:13px; margin:4px 0; }
   .myrev .mr-text{ font-size:13px; line-height:1.4; color:var(--text-soft, var(--ink)); }
   .myrev img{ width:64px; height:64px; border-radius:12px; object-fit:cover; margin-top:8px; display:block; }
-  .orders-chev{ font-size:16px; color:var(--muted); transition:transform .35s cubic-bezier(.4,0,.2,1); }
+  .orders-chev{ font-size:16px; color:var(--muted); transition:transform .5s cubic-bezier(.32,.72,0,1); }
   .orders-chev.closed{ transform:rotate(-90deg); }
-  .orders-collapse{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .45s cubic-bezier(.4,0,.2,1); }
-  .orders-collapse.open{ grid-template-rows:1fr; }
-  .orders-collapse > div{ overflow:hidden; }
+  /* шрифт всех надписей в профиле */
+  #profile, #profile *:not(svg):not(path):not(circle):not(line){ font-family:'Forum','Inter',serif; font-synthesis:none; }
+  #profile .trk-name, #profile .cart-title h2{ letter-spacing:-.01em; }
+  .orders-collapse{ display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .65s cubic-bezier(.32,.72,0,1), opacity .5s ease; }
+  .orders-collapse.open{ grid-template-rows:1fr; opacity:1; }
+  .orders-collapse > div{ overflow:hidden; min-height:0; }
+  .cart-title.orders-toggle{ transition:border-color .4s ease; }
+  .cart-title.orders-toggle.is-open{ border-bottom-color:transparent; }
   .cart-title h2{ font-family:'Space Grotesk'; font-size:21px; }
   .cart-list{ padding:10px 20px; display:flex; flex-direction:column; gap:12px; }
   .cart-item{ display:flex; gap:12px; border:1px solid var(--line); border-radius:16px; padding:12px; }
@@ -877,17 +889,17 @@
     <div id="tgLoginWrap" style="padding:0 20px 16px;"></div>
     <div class="cart-title orders-toggle" onclick="toggleSec(this)">
       <h2 class="display" data-i18n="profileTitle">Мои заказы</h2>
-      <span class="orders-chev">⌄</span>
+      <span class="orders-chev closed">⌄</span>
     </div>
-    <div class="orders-collapse open" id="ordersCollapse">
+    <div class="orders-collapse" id="ordersCollapse">
       <div><div id="ordersList"></div></div>
     </div>
 
     <div class="cart-title orders-toggle" onclick="toggleSec(this)">
       <h2 class="display" data-i18n="secStatus">Статус моих заказов</h2>
-      <span class="orders-chev">⌄</span>
+      <span class="orders-chev closed">⌄</span>
     </div>
-    <div class="orders-collapse open">
+    <div class="orders-collapse">
       <div><div id="statusList"></div></div>
     </div>
 
@@ -1032,7 +1044,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-97";
+  const CURRENT_VERSION = "20260908-100";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -3249,10 +3261,17 @@ function toggleSec(head){
   const body = head.nextElementSibling, chev = head.querySelector('.orders-chev');
   if (body) body.classList.toggle('open');
   if (chev) chev.classList.toggle('closed', !body.classList.contains('open'));
+  head.classList.toggle('is-open', body.classList.contains('open'));
 }
 let _lastOrders = [];
 const ORDER_STEP = { 'Проверяется оплата':0, 'Принято':1, 'Собирается':1, 'В пути':2, 'В ПВЗ':3, 'Доставлен':4 };
 const TRK_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const TRK_ICONS = [
+ '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>',
+ '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 6v5a1 1 0 0 0 1 1h6.102a1 1 0 0 1 .712.298l.898.91a1 1 0 0 1 .288.702V17a1 1 0 0 1-1 1h-3"/><path d="M5 18H3a1 1 0 0 1-1-1V8a2 2 0 0 1 2-2h12c1.1 0 2.1.8 2.4 1.8l1.176 4.2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>',
+ '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22a1 1 0 0 1-1-1v-4a1 1 0 0 1 .445-.832l3-2a1 1 0 0 1 1.11 0l3 2A1 1 0 0 1 22 17v4a1 1 0 0 1-1 1z"/><path d="M18 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 .601.2"/><path d="M18 22v-3"/><circle cx="10" cy="10" r="3"/></svg>',
+ '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="m16 17 2 2 4-4"/><path d="M21 11.127V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l1.32-.753"/><path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/></svg>'
+];
 function trackHTML(status){
   const step = ORDER_STEP[status] !== undefined ? ORDER_STEP[status] : 1;
   const col = step <= 1 ? 'var(--trk-blue)' : step === 2 ? 'var(--trk-dark)' : step === 3 ? 'var(--trk-green)' : 'var(--trk-green)';
@@ -3265,7 +3284,7 @@ function trackHTML(status){
     let c = n === 1 ? (step === 1 ? 'var(--trk-blue)' : (step === 4 ? 'var(--trk-green)' : 'var(--trk-dark)')) : n === 2 ? (step === 4 ? 'var(--trk-green)' : 'var(--trk-dark)') : 'var(--trk-green)';
     if (n === 3 && step === 3) c = 'var(--trk-green)';
     if (n === 2 && step === 3) c = 'var(--trk-dark)';
-    return `<div class="trk-col ${done?'done':''} ${cur?'cur':''}" style="--c:${c}"><div class="trk-node" style="color:${n===1&&step===1?'#fff':(c==='var(--trk-dark)'?'var(--trk-dark-on)':'#fff')}">${TRK_CHECK}</div><span>${lb}</span></div>`;
+    return `<div class="trk-col ${done?'done':''} ${cur?'cur':''} ${step===4?'fin':''}" style="--c:${c}"><div class="trk-ic">${TRK_ICONS[i]}</div><div class="trk-node" style="color:${n===1&&step===1?'#fff':(c==='var(--trk-dark)'?'var(--trk-dark-on)':'#fff')}">${TRK_CHECK}</div><span>${lb}</span></div>`;
   }).join('');
   return `<div class="trk"><div class="trk-bar"><div class="trk-fill" style="width:${pct}%; background:${fillBg}"></div></div>${cols}</div>`;
 }
