@@ -676,7 +676,11 @@ function productFormCardHTML(type){
       <div class="hint">Если не выбрать категорию, товар автоматически попадёт в категорию «Все».</div>
 
       <label>Цена (сум)</label>
-      <input type="number" id="f_price_${suf}" placeholder="250000">
+      <input type="number" id="f_price_${suf}" placeholder="250000" oninput="updateDiscPreview('${suf}')">
+
+      <label>Скидка, % (необязательно)</label>
+      <input type="number" id="f_discount_${suf}" min="0" max="90" placeholder="например 20" oninput="updateDiscPreview('${suf}')">
+      <div class="hint" id="discPreview_${suf}">Оставь пусто или 0 — скидки нет. Со скидкой старая цена на сайте будет зачёркнута, на карточке появится значок «−20%», а товар попадёт в категорию «Скидки».</div>
 
       <label>Ссылка на фото товара (общее, если у цвета нет своего)</label>
       <input type="url" id="f_image_${suf}" placeholder="https://...">
@@ -845,6 +849,7 @@ async function saveProduct(type){
   const category = document.getElementById(`f_category_${suf}`).value || 'Все';
   const price = Number(document.getElementById(`f_price_${suf}`).value) || 0;
   const image = document.getElementById(`f_image_${suf}`).value.trim();
+  const discount = Math.min(90, Math.max(0, Math.round(Number(document.getElementById(`f_discount_${suf}`).value) || 0)));
 
   const sizes = getCurrentSizeLabels(suf);
 
@@ -874,7 +879,7 @@ async function saveProduct(type){
 
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
-  const data = { name, nameTranslations, sub, category, price, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
+  const data = { name, nameTranslations, sub, category, price, discount, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
   const saveBtn = document.getElementById(`saveBtn_${suf}`);
   if (saveBtn.disabled) return;
   const isEdit = !!(editingId && editingType === suf);
@@ -898,6 +903,15 @@ async function saveProduct(type){
   }).finally(() => { saveBtn.disabled = false; });
 }
 
+function updateDiscPreview(suf){
+  const el = document.getElementById(`discPreview_${suf}`); if (!el) return;
+  const price = Number(document.getElementById(`f_price_${suf}`).value) || 0;
+  const d = Math.min(90, Math.max(0, Number(document.getElementById(`f_discount_${suf}`).value) || 0));
+  if (price && d > 0){
+    const np = Math.round(price * (100 - d) / 100 / 100) * 100;
+    el.textContent = `Покупатель увидит: ${price.toLocaleString('ru-RU')} (зачёркнуто) → ${np.toLocaleString('ru-RU')} сум, значок −${d}%`;
+  } else el.textContent = 'Оставь пусто или 0 — скидки нет. Со скидкой старая цена на сайте будет зачёркнута, на карточке появится значок «−20%», а товар попадёт в категорию «Скидки».';
+}
 function resetForm(type){
   const suf = type;
   const typeConfig = PRODUCT_TYPES.find(t => t.key === suf);
@@ -907,6 +921,8 @@ function resetForm(type){
   document.getElementById(`f_sub_${suf}`).value = '';
   document.getElementById(`f_category_${suf}`).value = 'Все';
   document.getElementById(`f_price_${suf}`).value = '';
+  document.getElementById(`f_discount_${suf}`).value = '';
+  updateDiscPreview(suf);
   document.getElementById(`f_image_${suf}`).value = '';
   if (typeConfig.sizeMode === 'free'){ document.getElementById(`f_sizes_${suf}`).value = ''; }
   else { document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => cb.checked = false); }
@@ -938,6 +954,8 @@ function editProduct(id, p){
   document.getElementById(`f_sub_${suf}`).value = p.sub || '';
   document.getElementById(`f_category_${suf}`).value = p.category || 'Все';
   document.getElementById(`f_price_${suf}`).value = p.price || '';
+  document.getElementById(`f_discount_${suf}`).value = p.discount || '';
+  updateDiscPreview(suf);
   document.getElementById(`f_image_${suf}`).value = p.image || '';
 
   // поддержка старого формата sizes (массив объектов {size, stock}) — переносим как общий ориентир для новых цветов
@@ -1009,7 +1027,7 @@ function loadProducts(){
         ${thumb}
         <div class="meta">
           <div class="name">${p.name}${p.hidden ? '<span class="hidden-badge">скрыт</span>' : ''}</div>
-          <div class="info">${TYPE_LABELS[p.type] || 'Обувь'} · ${Number(p.price||0).toLocaleString('ru-RU')} сум · в наличии: ${p.stock||0}</div>
+          <div class="info">${TYPE_LABELS[p.type] || 'Обувь'} · ${Number(p.price||0).toLocaleString('ru-RU')} сум${p.discount ? ' · скидка −' + p.discount + '%' : ''} · в наличии: ${p.stock||0}</div>
         </div>
         <div class="acts">
           <span class="vis">${p.hidden ? 'Показать' : 'Скрыть'}</span>
