@@ -138,6 +138,9 @@
   .cat-pills-row::-webkit-scrollbar{ display:none; }
   .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--on-stone, var(--ink)); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; animation: cardFadeIn .4s ease both; transition:background .45s ease, border-color .45s ease, padding .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill .icon, .cat-pill-mini .icon{ color:var(--icon-cat) !important; }
+  .cat-pill .icon svg, .cat-pill-mini .icon svg, .cat-pill .icon svg *, .cat-pill-mini .icon svg *{ stroke:currentColor !important; }
+  .cat-pill .icon svg [fill]:not([fill="none"]), .cat-pill-mini .icon svg [fill]:not([fill="none"]){ fill:currentColor !important; }
+  .cat-pill .icon svg[fill]:not([fill="none"]), .cat-pill-mini .icon svg[fill]:not([fill="none"]){ fill:currentColor !important; }
   .cat-pill.active .icon, .cat-pill-mini.active .icon{ color:var(--on-ink) !important; }
   .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; height:100%; position:relative; top:1px; }
   .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
@@ -1055,7 +1058,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-104";
+  const CURRENT_VERSION = "20260908-105";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
