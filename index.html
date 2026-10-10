@@ -30,15 +30,18 @@
     --bg:#F6F5F2; --ink:#121212; --stone:#ECE9E3; --line:#E1DDD4;
     --orange:#7A1C1C; --orange-dark:#5F1515; --muted:#857F75; --navbg:#121212;
     --logofont:'Inter','Helvetica Neue',Arial,sans-serif; --colordot-border:#121212;
-    --surface:#FBFAF8; --text-soft:#555; --on-ink:#ffffff;
+    --icon-cat:#5A1414; --surface:#FBFAF8; --text-soft:#555; --on-ink:#ffffff;
   }
+  :root{ color-scheme:light; }
+  input, textarea, select{ color:var(--ink); -webkit-text-fill-color:var(--ink); caret-color:var(--orange); }
+  input::placeholder, textarea::placeholder{ color:var(--muted); -webkit-text-fill-color:var(--muted); opacity:1; }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
   html, body{ -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; }
   body{ font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; }
   .app{ width:100%; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; overflow-x:hidden; padding-bottom:84px; transition:opacity .35s ease; }
 
   .app-loader{ position:fixed; inset:0; background:var(--bg); z-index:500; display:flex; align-items:center; justify-content:center; }
-  .app-loader-logo{ font-family:var(--logofont); font-size:34px; font-weight:600; color:var(--ink); animation:pulseLogo 1.4s ease-in-out infinite; }
+  .app-loader-logo{ font-family:var(--logofont); font-size:38px; font-weight:800; letter-spacing:-.035em; color:var(--ink); animation:pulseLogo 1.4s ease-in-out infinite; }
   @keyframes pulseLogo{ 0%,100%{ opacity:.35; } 50%{ opacity:1; } }
 
   @media (min-width:768px){
@@ -54,7 +57,7 @@
   }
   .display{ font-family:'Space Grotesk',sans-serif; }
   .logo{ font-family:var(--logofont); font-size:32px; font-weight:800; text-align:center; color:var(--ink); letter-spacing:-.035em; }
-  .logo .slash{ color:var(--orange); }
+  .logo .slash, .app-loader-logo .slash{ color:var(--orange); }
 
   .topbar{ display:flex; align-items:center; gap:8px; padding:18px 20px 8px; }
   .topbar .logo{ flex:1; }
@@ -134,6 +137,8 @@
   .cat-pills-row{ display:flex; align-items:center; gap:10px; padding:0 20px 20px; overflow-x:auto; scrollbar-width:none; }
   .cat-pills-row::-webkit-scrollbar{ display:none; }
   .cat-pill{ flex:0 0 auto; height:46px; min-width:46px; border-radius:100px; display:flex; align-items:center; padding:0; justify-content:center; background:var(--stone); border:1px solid var(--line); color:var(--on-stone, var(--ink)); font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; animation: cardFadeIn .4s ease both; transition:background .45s ease, border-color .45s ease, padding .55s cubic-bezier(.22,1,.36,1); }
+  .cat-pill .icon, .cat-pill-mini .icon{ color:var(--icon-cat) !important; }
+  .cat-pill.active .icon, .cat-pill-mini.active .icon{ color:var(--on-ink) !important; }
   .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; height:100%; position:relative; top:1px; }
   .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill.active{ background:var(--ink); color:var(--on-ink); border-color:var(--ink); padding:0 18px 0 14px; }
@@ -588,7 +593,7 @@
   html.theme-anim, html.theme-anim *{ transition:background-color .45s ease, color .45s ease, border-color .45s ease, fill .45s ease !important; }
   html[data-theme="dark"]{
     color-scheme:dark;
-    --orange:#b3363a; --orange-dark:#962b2f;
+    --orange:#b3363a; --orange-dark:#962b2f; --icon-cat:#c9605f;
     --bg:#0e0e10; --ink:#f3f1ee; --line:#2c2c31; --muted:#9a968f; --surface:#1a1a1e; --text-soft:#b9b5ad; --on-ink:#111111;
     --stone:#1b1b1f !important; --on-stone:#f3f1ee !important; --colordot-border:#f3f1ee !important;
     --support-bg:#0e0e10 !important; --support-admin-bg:#25252a !important; --support-admin-text:#f3f1ee !important;
@@ -652,7 +657,7 @@
 </head>
 <body>
 <div class="app-loader" id="appLoader">
-  <div class="app-loader-logo">milaisss</div>
+  <div class="app-loader-logo">mila<span class="slash">/</span>isss</div>
 </div>
 
 <div class="app" id="appRoot" style="opacity:0;">
@@ -1050,7 +1055,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-103";
+  const CURRENT_VERSION = "20260908-104";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
