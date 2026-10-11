@@ -567,8 +567,82 @@
     radial-gradient(closest-side at 50% 50%, rgba(226,140,214,.9), rgba(226,140,214,0) 92%); }
   .success-glow .core{ opacity:0; will-change:opacity; background:radial-gradient(closest-side at 50% 50%,
     #ffffff 0%, #ffffff 34%, rgba(255,238,248,.92) 48%, rgba(255,222,238,.5) 64%, rgba(255,220,236,0) 82%); }
-  .support-input-row input{ flex:1; border:1px solid var(--line); border-radius:100px; padding:10px 16px; font-size:13px; outline:none; }
-  .support-input-row button{ background:var(--orange); color:#fff; border:none; border-radius:50%; width:42px; height:42px; cursor:pointer; flex-shrink:0; }
+  /* ---------- поддержка: «пилюля» ввода + анимация отправки ---------- */
+  .support-input-row{ padding:12px 16px; transition:opacity .45s cubic-bezier(.22,1,.36,1); }
+  #support.mo-busy .support-input-row{ opacity:0; pointer-events:none; transition:none; }
+  .sup-pill{ display:flex; align-items:center; gap:10px; height:60px; max-width:560px; margin:0 auto; width:100%; padding:0 8px 0 18px; border-radius:999px;
+    background:#131315; border:1px solid rgba(255,255,255,.12); color:#fff;
+    box-shadow:0 12px 30px -12px rgba(110,90,255,.45), 0 2px 8px rgba(0,0,0,.18); }
+  .sup-spark{ width:22px; height:22px; flex-shrink:0; color:rgba(255,255,255,.7); }
+  .sup-pill input{ flex:1; min-width:0; background:transparent !important; border:none !important; outline:none !important; color:#fff !important; font-size:16px; padding:0 !important; -webkit-appearance:none; appearance:none; }
+  .sup-pill input::placeholder{ color:rgba(255,255,255,.5); }
+  .sup-send{ width:44px; height:44px; border-radius:50%; border:none; flex-shrink:0; display:grid; place-items:center; cursor:pointer; padding:0;
+    background:rgba(255,255,255,.14); color:rgba(255,255,255,.6); transition:background .3s cubic-bezier(.22,1,.36,1), color .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1); }
+  .sup-send[data-ready]{ background:#fff; color:#131315; }
+  .sup-send:active{ transform:scale(.92); }
+  .sup-send svg{ width:20px; height:20px; }
+  .sup-pill.shake{ animation:supShake .26s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes supShake{ 20%,60%{ transform:translateX(-5px); } 40%,80%{ transform:translateX(5px); } }
+  .mo-root{ position:fixed; inset:0; z-index:650; visibility:hidden; pointer-events:none; transition:visibility 0s linear .5s; -webkit-tap-highlight-color:transparent; }
+  .mo-root.on{ visibility:visible; pointer-events:auto; transition-delay:0s; }
+  .mo-bg{ position:absolute; inset:0; background:rgba(10,10,12,.84); -webkit-backdrop-filter:blur(16px) saturate(.8); backdrop-filter:blur(16px) saturate(.8); opacity:0; transition:opacity .45s cubic-bezier(.4,0,.2,1); }
+  .mo-root.on .mo-bg{ opacity:1; }
+  .mo-halo{ position:absolute; inset:0; pointer-events:none; opacity:var(--oCenter,0); background:radial-gradient(circle at 50% 46%, rgba(150,110,255,.30), rgba(255,130,210,.10) 28%, transparent 52%); }
+  .mo-mover{ position:absolute; left:50%; top:46%; width:0; height:0; will-change:transform; }
+  .mo-actor{ position:absolute; left:0; top:0; width:var(--w,320px); height:var(--h,60px); border-radius:var(--r,999px); transform:translate(-50%,-50%) scale(var(--cs,1)); }
+  .mo-actor > *{ position:absolute; pointer-events:none; }
+  .mo-underglow{ left:12%; right:12%; bottom:-10px; height:26px; border-radius:50%; background:linear-gradient(90deg,#6f8dff,#b57bff,#ff8fcf); filter:blur(16px); opacity:calc(var(--oGlow,0) * .5); }
+  .mo-halo-green{ inset:-34px; border-radius:50%; background:radial-gradient(circle, rgba(52,211,153,.5), transparent 66%); opacity:var(--oHalo,0); }
+  .mo-surface{ inset:0; border-radius:inherit; background:#131315; border:1px solid rgba(255,255,255,.12); overflow:hidden; opacity:var(--oPill,1); }
+  .mo-aurora{ position:absolute; inset:0; opacity:calc(var(--oAur,1) * .16); }
+  .mo-aurora i{ position:absolute; width:46%; height:180%; top:-40%; border-radius:50%; filter:blur(18px); animation:moAur 7s ease-in-out infinite; }
+  .mo-aurora i:nth-child(1){ left:-8%; background:#6f8dff; }
+  .mo-aurora i:nth-child(2){ left:22%; background:#b57bff; animation-delay:-2s; }
+  .mo-aurora i:nth-child(3){ left:50%; background:#ff8fcf; animation-delay:-4s; }
+  .mo-aurora i:nth-child(4){ left:72%; background:#7be0ff; animation-delay:-1s; }
+  @keyframes moAur{ 0%,100%{ transform:translateX(0) scale(1); } 50%{ transform:translateX(14%) scale(1.15); } }
+  .mo-ball{ inset:0; border-radius:50%; opacity:var(--oBall,0);
+    background:radial-gradient(circle at 30% 26%, rgba(255,255,255,.55), transparent 36%), radial-gradient(circle at 55% 58%, #2a2140, #0c0812 72%);
+    box-shadow:0 0 34px 6px rgba(170,120,255,.45), inset 0 0 14px rgba(255,255,255,.28); }
+  .mo-green{ left:50%; top:50%; width:30px; height:30px; margin:-15px 0 0 -15px; border-radius:50%; background:#34d399; box-shadow:0 0 28px 6px rgba(52,211,153,.55); opacity:var(--oGreen,0); transform:scale(var(--gs,.55)); }
+  .mo-card{ inset:0; border-radius:inherit; background:var(--surface); border:1px solid var(--line); opacity:var(--oCard,0);
+    box-shadow:0 22px 60px -18px rgba(0,0,0,.6), 0 0 calc(40px * (var(--bloom,1) - .6)) rgba(52,211,153,.35); }
+  .mo-ring{ inset:-1px; border-radius:inherit; border:1px solid rgba(255,255,255,.1); opacity:var(--oRing,1); }
+  .mo-input{ inset:0; display:flex; align-items:center; gap:10px; padding:0 8px 0 18px; border-radius:inherit; overflow:hidden; color:#fff; opacity:var(--oInput,1); transform:scale(var(--inScale,1)); }
+  .mo-input .sp{ width:22px; height:22px; flex-shrink:0; color:rgba(255,255,255,.7); }
+  .mo-field{ flex:1; min-width:0; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mo-sendbtn{ width:44px; height:44px; border-radius:50%; background:#fff; color:#131315; display:grid; place-items:center; flex-shrink:0; }
+  .mo-orb{ left:50%; top:50%; width:220px; height:220px; margin:-110px 0 0 -110px; }
+  .mo-pulse{ left:50%; top:50%; width:44px; height:44px; margin:-22px 0 0 -22px; border-radius:50%; border:1.5px solid rgba(52,211,153,.8); opacity:0; }
+  .mo-answer{ inset:0; padding:16px 20px; display:flex; flex-direction:column; justify-content:center; gap:7px; color:var(--ink); opacity:var(--hOp,0); overflow:hidden; border-radius:inherit; outline:none; }
+  .mo-a-head{ display:flex; align-items:center; gap:8px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .mo-a-dot{ width:8px; height:8px; border-radius:50%; background:#34d399; box-shadow:0 0 10px rgba(52,211,153,.8); transform:scale(var(--dotS,0)); display:block; }
+  .mo-a-body{ font-size:16px; font-weight:600; line-height:1.3; margin:0; }
+  .mo-w{ display:inline-block; opacity:0; }
+  .mo-trail{ position:absolute; left:0; top:0; width:100px; height:100px; border-radius:50%; background:radial-gradient(circle, rgba(190,150,255,.7), rgba(120,140,255,0) 70%); opacity:0; transform:translate(-50%,-50%); pointer-events:none; will-change:transform,opacity; }
+  .mo-status{ position:absolute; left:0; right:0; top:calc(46% + 112px); height:30px; display:flex; justify-content:center; align-items:center; opacity:var(--sOp,0); transform:translateY(calc(var(--sTy,6) * 1px)); pointer-events:none; }
+  .mo-lab{ position:absolute; display:flex; align-items:center; font-size:15px; font-weight:600; color:rgba(255,255,255,.72); white-space:nowrap; }
+  .mo-lab.mo-in{ animation:moIn .45s cubic-bezier(.22,1,.36,1) both; }
+  .mo-lab.mo-out{ animation:moOut .35s cubic-bezier(.4,0,1,1) both; }
+  @keyframes moIn{ from{ opacity:0; filter:blur(6px); transform:translateY(6px); } to{ opacity:1; filter:none; transform:none; } }
+  @keyframes moOut{ from{ opacity:1; } to{ opacity:0; filter:blur(6px); transform:translateY(-6px); } }
+  .mo-lab-done{ color:#34d399; font-weight:700; }
+  .mo-dots{ display:inline-flex; gap:2px; margin-left:4px; }
+  .mo-dots i{ width:3px; height:3px; border-radius:50%; background:currentColor; animation:moDot 1.2s infinite; }
+  .mo-dots i:nth-child(2){ animation-delay:.15s; } .mo-dots i:nth-child(3){ animation-delay:.3s; }
+  @keyframes moDot{ 0%,60%,100%{ opacity:.25; } 30%{ opacity:1; } }
+  .mo-reset{ position:absolute; left:50%; top:calc(46% + 92px); transform:translate(-50%,8px); opacity:0; pointer-events:none; padding:10px 22px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#fff; font-size:14px; font-weight:600; cursor:pointer;
+    transition:opacity .45s cubic-bezier(.22,1,.36,1) .15s, transform .45s cubic-bezier(.22,1,.36,1) .15s; }
+  .mo-root[data-phase="answered"] .mo-reset{ opacity:1; transform:translate(-50%,0); pointer-events:auto; }
+  .mo-live{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+  /* карточка «Уведомления в Telegram» в профиле */
+  .notify-card{ margin:0 20px 14px; background:var(--stone); border:1px solid var(--line); border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .notify-card .nt{ font-size:13px; font-weight:700; }
+  .notify-card .ns{ font-size:11px; color:var(--muted); margin-top:2px; line-height:1.35; }
+  .notify-btn{ flex-shrink:0; background:var(--ink); color:var(--on-ink,#fff); border-radius:12px; padding:9px 14px; font-size:12px; font-weight:700; text-decoration:none; transition:transform .3s cubic-bezier(.22,1,.36,1); }
+  .notify-btn:active{ transform:scale(.95); }
+  .notify-on{ margin:0 20px 14px; font-size:12px; font-weight:700; color:#1f9d6b; }
 
   /* ---------- версия для компьютера (стоит в конце, чтобы перебить базовые правила) ---------- */
   @media (min-width:768px){
@@ -656,6 +730,41 @@
   .theme-switch button.active{ border-color:var(--ink); background:#fbf6ec; }
   html[data-theme="dark"] .theme-switch button.active{ background:var(--stone); border-color:#f3f1ee; }
   html[data-theme="dark"] .theme-switch button svg[stroke="#444444"]{ stroke:#c9c6c0; }
+
+  /* ---------- адаптивность: планшеты, ноутбуки, большие мониторы ---------- */
+  .app{ min-height:100vh; min-height:100dvh; }
+  @media (min-width:768px){
+    /* экраны с формами и списками не растягиваем на всю ширину */
+    #cart, #checkoutFlow, #profile, #support, #settings, #reviewsScreen, #infoDetail{ max-width:760px; margin-left:auto; margin-right:auto; }
+    .bottomnav{ max-width:520px; }
+    .support-fab{ right:max(24px, calc((100vw - 1500px) / 2 + 24px)); }
+    .trk-card, .myrev{ margin-left:0; margin-right:0; }
+    #profile .orders-toggle{ margin-left:20px; margin-right:20px; }
+    #profile .trk-card, #profile .myrev, #profile .trk-empty{ margin-left:20px; margin-right:20px; }
+  }
+  @media (min-width:1100px){
+    .bottomnav{ max-width:560px; }
+    #cart, #checkoutFlow, #profile, #support, #settings{ max-width:820px; }
+    .topbar{ padding-left:40px; padding-right:40px; }
+    .cat-pills-row{ padding-left:40px; padding-right:40px; }
+  }
+  @media (min-width:1900px){
+    .app{ max-width:1760px; }
+    .grid{ grid-template-columns:repeat(6,1fr); }
+    .hero-photo{ max-height:600px; }
+  }
+  /* низкие горизонтальные экраны (телефон повёрнут набок) */
+  @media (max-height:480px) and (orientation:landscape){
+    .bottomnav{ bottom:8px; padding:4px 8px; }
+    .navitem{ padding:4px 12px; }
+    .navitem span{ font-size:9px; }
+    .app{ padding-bottom:64px; }
+  }
+  .field-bad{ border-color:var(--orange) !important; box-shadow:0 0 0 3px rgba(122,28,28,.14); }
+  html[data-theme="dark"] .field-bad{ box-shadow:0 0 0 3px rgba(179,54,58,.25); }
+  .field-err-msg{ display:none; color:var(--orange); font-size:12px; font-weight:700; text-align:center; margin-top:10px; }
+  .field-err-msg.show{ display:block; animation:fadeInErr .3s cubic-bezier(.4,0,.2,1); }
+  @keyframes fadeInErr{ from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:none;} }
 </style>
 </head>
 <body>
@@ -939,8 +1048,11 @@
     <div class="support-orb-wrap"><div class="support-orb" id="supportOrb"><div class="orb-eyes"><span class="orb-eye"></span><span class="orb-eye"></span></div></div></div>
     <div class="support-msgs" id="supportMsgs"></div>
     <div class="support-input-row">
-      <input type="text" id="supportInput" data-i18n-ph="supportPlaceholder" placeholder="Напишите сообщение...">
-      <button onclick="sendSupportMessage()">➤</button>
+      <div class="sup-pill" id="supPill">
+        <svg class="sup-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5l1.7 4.8 4.8 1.7-4.8 1.7L10 16.5l-1.7-4.8L3.5 10l4.8-1.7L10 3.5z"/><path d="M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z"/></svg>
+        <input type="text" id="supportInput" data-i18n-ph="supportPlaceholder" placeholder="Напишите сообщение..." autocomplete="off" maxlength="500">
+        <button class="sup-send" id="supSend" onclick="sendSupportMessage()" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5.5 11.5L12 5l6.5 6.5"/></svg></button>
+      </div>
     </div>
   </div>
 
@@ -1015,7 +1127,7 @@
     <label class="block-label" style="margin-top:0;" data-i18n="regFirstName">Имя</label>
     <input type="text" id="regFirstName" class="reg-input" data-i18n-ph="regFirstName" placeholder="Имя">
 
-    <label class="block-label" data-i18n="regLastName">Фамилия</label>
+    <label class="block-label" data-i18n="regLastNameOpt">Фамилия (необязательно)</label>
     <input type="text" id="regLastName" class="reg-input" data-i18n-ph="regLastName" placeholder="Фамилия">
 
     <label class="block-label" data-i18n="regPhoneLabel">Номер телефона</label>
@@ -1029,13 +1141,14 @@
       <input type="tel" inputmode="numeric" id="regPhone" class="reg-input" placeholder="90 123 45 67" style="flex:1; margin-bottom:0;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     </div>
 
-    <label class="block-label" data-i18n="regTgLabel">Telegram юзернейм (необязательно)</label>
+    <label class="block-label" data-i18n="regTgLabel2">Telegram @username (желательно)</label>
     <input type="text" id="regTelegram" class="reg-input" placeholder="@username" oninput="this.value=this.value.replace(/\s/g,'')">
-    <div style="font-size:11px; color:#999; line-height:1.4; margin:-6px 0 6px;" data-i18n="regTgHint">Если номер укажете с ошибкой, мы сможем найти вас в Telegram.</div>
+    <div style="font-size:11px; color:#999; line-height:1.4; margin:-6px 0 6px;" data-i18n="regTgHint2">Необязательно, но так бот @MilaisssOthers_bot сможет присылать вам уведомления о покупках и статусе заказа.</div>
 
     <label class="block-label" data-i18n="regAvatarLabel">Выберите аватар</label>
     <div class="avatar-grid" id="avatarGrid"></div>
 
+    <div id="regErr" class="field-err-msg" data-i18n="fillFields">Заполните эти поля!</div>
     <button class="checkout-btn" id="regSubmitBtn" style="margin:16px 0 0;" onclick="submitRegistration()" data-i18n="regSubmit">Зарегистрироваться</button>
   </div>
 </div>
@@ -1058,7 +1171,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-105";
+  const CURRENT_VERSION = "20260908-108";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1172,15 +1285,27 @@ function isRegistered(){
   return isTelegramUser() || !!customerProfile || !!getLinkedTelegramId();
 }
 
+let _custUnsub = null, _custUnsubId = '';
 function loadCustomerProfile(){
   if (isTelegramUser()) return;
-  db.collection('customers').doc(getCustomerId()).get().then(doc => {
+  const cid = getCustomerId();
+  if (_custUnsub && _custUnsubId === cid) return;
+  if (_custUnsub){ _custUnsub(); _custUnsub = null; }
+  _custUnsubId = cid;
+  let first = true;
+  _custUnsub = db.collection('customers').doc(cid).onSnapshot(doc => {
+    const was = notifyIsOn();
     if (doc.exists){
-      customerProfile = doc.data();
-      renderProfileHeader();
-      renderTelegramLoginWidget();
+      const d = doc.data();
+      customerNotify = !!d.tgChatId;
+      if (d.firstName) customerProfile = d;           // «профиль» — только если клиент заполнял регистрацию
+      else if (customerProfile && d.tgChatId) customerProfile.tgChatId = d.tgChatId;
     }
-  });
+    renderProfileHeader();
+    renderTelegramLoginWidget();
+    if (!first && !was && notifyIsOn()) showToast('🔔 ' + t('notifOn'));
+    first = false;
+  }, () => {});
 }
 
 function requireRegistration(action, context){
@@ -1236,6 +1361,8 @@ function openRegisterModal(context){
   document.getElementById('regSubText').textContent = t(context === 'support' ? 'regSubSupport' : 'regSub');
   document.getElementById('regFirstName').value = customerProfile ? (customerProfile.firstName||'') : '';
   document.getElementById('regLastName').value = customerProfile ? (customerProfile.lastName||'') : '';
+  document.querySelectorAll('#registerModal .field-bad').forEach(x=>x.classList.remove('field-bad'));
+  const _eb=document.getElementById('regErr'); if(_eb) _eb.classList.remove('show');
   document.getElementById('regTelegram').value = customerProfile ? (customerProfile.telegramUsername||'') : '';
   const existingPhone = (customerProfile && customerProfile.phone) ? customerProfile.phone : '';
   const digitsOnly = existingPhone.replace(/\D/g, '');
@@ -1270,6 +1397,14 @@ function selectAvatar(url){
   selectedAvatarUrl = url;
   renderAvatarGrid();
 }
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el && el.classList && el.classList.contains('field-bad') && el.value.trim()){
+    el.classList.remove('field-bad');
+    const eb = document.getElementById('regErr');
+    if (eb && !document.querySelector('#registerModal .field-bad')) eb.classList.remove('show');
+  }
+});
 function submitRegistration(){
   const btn = document.getElementById('regSubmitBtn');
   if (btn && btn.disabled) return;
@@ -1278,9 +1413,12 @@ function submitRegistration(){
   const lastName = document.getElementById('regLastName').value.trim();
   const phoneDigits = document.getElementById('regPhone').value.trim().replace(/\D/g, '');
   const telegramUsername = document.getElementById('regTelegram').value.trim().replace(/^@/, '');
-  if (!firstName){ showToast(t('regErrName')); return; }
-  if (!lastName){ showToast(t('regErrLast')); return; }
-  if (!phoneDigits){ showToast(t('regErrPhone')); return; }
+  const nameEl = document.getElementById('regFirstName'), phoneEl = document.getElementById('regPhone');
+  nameEl.classList.toggle('field-bad', !firstName);
+  phoneEl.classList.toggle('field-bad', !phoneDigits);
+  const errBox = document.getElementById('regErr');
+  if (errBox) errBox.classList.toggle('show', !firstName || !phoneDigits);
+  if (!firstName || !phoneDigits){ (!firstName ? nameEl : phoneEl).focus(); return; }
   if (!selectedAvatarUrl){ showToast(t('regAvatarLabel')); return; }
 
   const phone = '+' + regCountry.calling + ' ' + phoneDigits;
@@ -1296,6 +1434,7 @@ function submitRegistration(){
   renderTelegramLoginWidget();
   const pending = pendingAfterRegister;
   pendingAfterRegister = null;
+  if (telegramUsername && !notifyIsOn()) setTimeout(() => showToast('🔔 ' + t('notifAfterReg')), 700);
   if (pending) pending();
 
   db.collection('customers').doc(getCustomerId()).set(profile, { merge: true })
@@ -1316,11 +1455,12 @@ function renderProfileHeader(){
       <div class="profile-header-card">
         <div class="profile-avatar" style="background-image:url('${customerProfile.avatarUrl||''}')" onclick="openRegisterModal()"></div>
         <div style="cursor:pointer;" onclick="openRegisterModal()">
-          <div class="profile-name">${customerProfile.firstName} ${customerProfile.lastName}</div>
+          <div class="profile-name">${(customerProfile.firstName+' '+(customerProfile.lastName||'')).trim()}</div>
           <div class="profile-phone">${customerProfile.phone}</div>
           ${customerProfile.telegramUsername ? `<div class="profile-phone">@${customerProfile.telegramUsername}</div>` : ''}
         </div>
       </div>
+      ${notifyBlockHTML()}
     `;
     return;
   }
@@ -1339,6 +1479,7 @@ function renderProfileHeader(){
           <div class="profile-phone" style="color:#c0392b; cursor:pointer;" onclick="logoutTelegram()">Выйти</div>
         </div>
       </div>
+      ${notifyBlockHTML()}
     `;
     return;
   }
@@ -1394,7 +1535,11 @@ function onTelegramAuth(user){
   localStorage.setItem('milaisss_linked_tg_name', (user.first_name||'') + (user.last_name ? (' '+user.last_name) : ''));
   if (user.username) localStorage.setItem('milaisss_linked_tg_username', user.username);
   else localStorage.removeItem('milaisss_linked_tg_username');
-  showToast('Вход выполнен');
+  showToast(t('loginDone'));
+  tgSend(String(user.id), tgMsg().connected).then(ok => {
+    localStorage.setItem('milaisss_notify_ok', ok ? '1' : '0');
+    renderProfileHeader();
+  });
   loadCustomerProfile();
   renderProfileHeader();
   renderTelegramLoginWidget();
@@ -1439,6 +1584,8 @@ function logoutTelegram(){
   localStorage.removeItem('milaisss_linked_tg_name');
   localStorage.removeItem('milaisss_linked_tg_username');
   localStorage.removeItem('milaisss_linked_tg_avatar');
+  localStorage.removeItem('milaisss_notify_ok');
+  customerNotify = false;
   customerProfile = null;
   renderProfileHeader();
   renderTelegramLoginWidget();
@@ -1450,6 +1597,65 @@ function notifyAdmin(text){
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text })
   }).catch(() => {});
+}
+
+/* ---------- уведомления клиентам от бота ---------- */
+const NOTIFY_BOT_LINK = 'https://t.me/' + NOTIFY_BOT_USERNAME.replace('@','');
+function tgSend(chatId, text){
+  if (!chatId || !NOTIFY_BOT_TOKEN || NOTIFY_BOT_TOKEN.startsWith('ВСТАВЬ')) return Promise.resolve(false);
+  return fetch(`https://api.telegram.org/bot${NOTIFY_BOT_TOKEN}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text })
+  }).then(r => r.json()).then(j => !!(j && j.ok)).catch(() => false);
+}
+const TG_MSG = {
+  ru:{ connected:"✅ Уведомления milaisss подключены. Здесь будут статусы ваших заказов и ответы поддержки.", orderTitle:"🛍️ Заказ оформлен!", total:"Итого", pickup:"Пункт БТС", status:"Статус", hint:"Мы пришлём сообщение здесь, когда статус изменится." },
+  uz:{ connected:"✅ milaisss bildirishnomalari yoqildi. Bu yerda buyurtmalaringiz holati va yordam javoblari keladi.", orderTitle:"🛍️ Buyurtma rasmiylashtirildi!", total:"Jami", pickup:"BTS punkti", status:"Holati", hint:"Holat o‘zgarganda shu yerga xabar yuboramiz." },
+  tr:{ connected:"✅ milaisss bildirimleri bağlandı. Sipariş durumlarınız ve destek yanıtları burada gelecek.", orderTitle:"🛍️ Siparişiniz alındı!", total:"Toplam", pickup:"BTS noktası", status:"Durum", hint:"Durum değiştiğinde buraya mesaj göndereceğiz." },
+  az:{ connected:"✅ milaisss bildirişləri qoşuldu. Sifariş statusları və dəstək cavabları burada gələcək.", orderTitle:"🛍️ Sifariş rəsmiləşdirildi!", total:"Cəmi", pickup:"BTS məntəqəsi", status:"Status", hint:"Status dəyişəndə buraya mesaj göndərəcəyik." },
+  en:{ connected:"✅ milaisss notifications are on. Order statuses and support replies will arrive here.", orderTitle:"🛍️ Order placed!", total:"Total", pickup:"BTS pickup point", status:"Status", hint:"We’ll message you here when the status changes." }
+};
+const TG_STATUS = {
+  'Проверяется оплата':{ ru:'Проверяется оплата', uz:'To‘lov tekshirilmoqda', tr:'Ödeme kontrol ediliyor', az:'Ödəniş yoxlanılır', en:'Checking payment' }
+};
+function tgMsg(){ return TG_MSG[lang] || TG_MSG.ru; }
+let customerNotify = false; // у клиента в базе есть tgChatId (подключил бота кнопкой «Подключить»)
+function getNotifyChatId(){
+  if (isTelegramUser()) return String(tg.initDataUnsafe.user.id);
+  const linked = getLinkedTelegramId();
+  if (linked) return linked;
+  if (customerProfile && customerProfile.tgChatId) return String(customerProfile.tgChatId);
+  return '';
+}
+function notifyIsOn(){
+  return customerNotify || localStorage.getItem('milaisss_notify_ok') === '1' || !!(customerProfile && customerProfile.tgChatId);
+}
+/* одноразовый «ключ привязки»: бот проверяет его, прежде чем связать Telegram с этим клиентом */
+function notifyLinkPayload(){
+  let tok = '';
+  try { tok = localStorage.getItem('milaisss_link_token') || ''; } catch(e){}
+  if (!tok){
+    tok = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2,'0')).join('');
+    try { localStorage.setItem('milaisss_link_token', tok); } catch(e){}
+  }
+  const cid = getCustomerId();
+  if (notifyLinkPayload._sent !== cid){
+    notifyLinkPayload._sent = cid;
+    db.collection('notify_links').doc(cid).set({ token: tok, createdAt: Date.now() }).catch(() => {});
+  }
+  return encodeURIComponent(cid) + '-' + tok;
+}
+function notifyBlockHTML(){
+  if (isTelegramUser()) return '';
+  if (notifyIsOn()) return `<div class="notify-on">🔔 ${t('notifOn')}</div>`;
+  const link = NOTIFY_BOT_LINK + '?start=' + notifyLinkPayload();
+  return `<div class="notify-card"><div><div class="nt">🔔 ${t('notifTitle')}</div><div class="ns">${t('notifSub')}</div></div><a class="notify-btn" href="${link}" target="_blank" rel="noopener">${t('notifBtn')}</a></div>`;
+}
+function buildOrderNotifyText(items, total, branch){
+  const m = tgMsg();
+  const st = (TG_STATUS['Проверяется оплата'][lang]) || 'Проверяется оплата';
+  return `${m.orderTitle}\n\n` + items.map(i => `• ${i.name} (${i.size}) × ${i.qty}`).join('\n') +
+    `\n\n${m.total}: ${fmt(total)}\n📍 ${m.pickup}: ${branch}\n📦 ${m.status}: ${st}\n\n${m.hint}`;
 }
 
 const firebaseConfig = {
@@ -1537,6 +1743,37 @@ const STR_EXTRA = {
   en: { secStatus:"My order status", secReviews:"My reviews", noMyReviews:"You haven’t left any reviews yet", revModeration:"Under review", trkAccepted:"Accepted", trkOnWay:"On the way", trkPickup:"At pickup point", trkDelivered:"Delivered", noOrdersYet:"No orders yet", discountWord:"Discount", catSale:"Sale", settingsTitle:"Settings", settingsMenu:"Settings", themeLabel:"Appearance", themeLight:"Light", themeDark:"Dark" }
 };
 Object.keys(STR_EXTRA).forEach(l => Object.assign(STR[l], STR_EXTRA[l]));
+const STR_NEW = {
+  ru:{regLastNameOpt:"Фамилия (необязательно)", fillFields:"Заполните эти поля!", errBts:"Выберите пункт БТС"},
+  uz:{regLastNameOpt:"Familiya (ixtiyoriy)", fillFields:"Ushbu maydonlarni to‘ldiring!", errBts:"BTS punktini tanlang"},
+  tr:{regLastNameOpt:"Soyad (isteğe bağlı)", fillFields:"Bu alanları doldurun!", errBts:"BTS noktasını seçin"},
+  az:{regLastNameOpt:"Soyad (istəyə bağlı)", fillFields:"Bu sahələri doldurun!", errBts:"BTS məntəqəsini seçin"},
+  en:{regLastNameOpt:"Last name (optional)", fillFields:"Please fill in these fields!", errBts:"Choose a BTS pickup point"}
+};
+Object.keys(STR_NEW).forEach(l => Object.assign(STR[l], STR_NEW[l]));
+const STR_NEW2 = {
+  ru:{ regTgLabel2:"Telegram @username (желательно)", regTgHint2:"Необязательно, но так бот @MilaisssOthers_bot сможет присылать вам уведомления о покупках и статусе заказа.",
+    notifTitle:"Уведомления в Telegram", notifSub:"Бот пришлёт статус заказа и ответы поддержки", notifBtn:"Подключить", notifOn:"Уведомления в Telegram включены", notifAfterReg:"Осталось подключить уведомления — кнопка в профиле", loginDone:"Вход выполнен",
+    supAnswerTitle:"Ответ", supAnswerBody:"Вам ответят в течение 5 минут", supSendFail:"Не удалось отправить. Проверьте интернет и попробуйте ещё раз", supSendSlow:"Нет связи — сообщение отправится, как только появится интернет",
+    supL1:"Отправляем", supL2:"Передаём продавцу", supL3:"Уведомляем", supL4:"Почти готово", supDone:"Готово", supNew:"Написать ещё" },
+  uz:{ regTgLabel2:"Telegram @username (tavsiya etiladi)", regTgHint2:"Majburiy emas, lekin shunda @MilaisssOthers_bot xaridlar va buyurtma holati haqida xabar yuboradi.",
+    notifTitle:"Telegram bildirishnomalari", notifSub:"Bot buyurtma holati va yordam javoblarini yuboradi", notifBtn:"Ulash", notifOn:"Telegram bildirishnomalari yoqilgan", notifAfterReg:"Bildirishnomalarni ulash qoldi — profildagi tugma", loginDone:"Kirish bajarildi",
+    supAnswerTitle:"Javob", supAnswerBody:"Sizga 5 daqiqa ichida javob berishadi", supSendFail:"Yuborib bo‘lmadi. Internetni tekshirib, qayta urinib ko‘ring", supSendSlow:"Aloqa yo‘q — internet paydo bo‘lishi bilan xabar yuboriladi",
+    supL1:"Yuborilmoqda", supL2:"Sotuvchiga uzatilmoqda", supL3:"Xabardor qilinmoqda", supL4:"Deyarli tayyor", supDone:"Tayyor", supNew:"Yana yozish" },
+  tr:{ regTgLabel2:"Telegram @kullanıcıadı (önerilir)", regTgHint2:"Zorunlu değil, ancak @MilaisssOthers_bot size alışveriş ve sipariş durumu bildirimleri gönderebilir.",
+    notifTitle:"Telegram bildirimleri", notifSub:"Bot sipariş durumunu ve destek yanıtlarını gönderir", notifBtn:"Bağla", notifOn:"Telegram bildirimleri açık", notifAfterReg:"Bildirimleri bağlamak kaldı — profildeki düğme", loginDone:"Giriş yapıldı",
+    supAnswerTitle:"Yanıt", supAnswerBody:"5 dakika içinde size yanıt verilecek", supSendFail:"Gönderilemedi. İnterneti kontrol edip tekrar deneyin", supSendSlow:"Bağlantı yok — internet gelince mesaj gönderilecek",
+    supL1:"Gönderiliyor", supL2:"Satıcıya iletiliyor", supL3:"Bildirim gidiyor", supL4:"Neredeyse hazır", supDone:"Tamam", supNew:"Yeni mesaj" },
+  az:{ regTgLabel2:"Telegram @istifadəçi (tövsiyə olunur)", regTgHint2:"Məcburi deyil, amma @MilaisssOthers_bot alış-veriş və sifariş statusu barədə bildiriş göndərə bilər.",
+    notifTitle:"Telegram bildirişləri", notifSub:"Bot sifariş statusunu və dəstək cavablarını göndərəcək", notifBtn:"Qoş", notifOn:"Telegram bildirişləri aktivdir", notifAfterReg:"Bildirişləri qoşmaq qalıb — profildəki düymə", loginDone:"Giriş edildi",
+    supAnswerTitle:"Cavab", supAnswerBody:"5 dəqiqə ərzində sizə cavab veriləcək", supSendFail:"Göndərmək alınmadı. İnterneti yoxlayıb yenidən cəhd edin", supSendSlow:"Bağlantı yoxdur — internet gələn kimi mesaj göndəriləcək",
+    supL1:"Göndərilir", supL2:"Satıcıya ötürülür", supL3:"Bildiriş göndərilir", supL4:"Demək olar hazırdır", supDone:"Hazırdır", supNew:"Yeni mesaj" },
+  en:{ regTgLabel2:"Telegram @username (recommended)", regTgHint2:"Optional, but this lets the @MilaisssOthers_bot send you purchase and order status updates.",
+    notifTitle:"Telegram notifications", notifSub:"The bot will send order status and support replies", notifBtn:"Connect", notifOn:"Telegram notifications are on", notifAfterReg:"One step left — connect notifications in your profile", loginDone:"Logged in",
+    supAnswerTitle:"Reply", supAnswerBody:"We’ll reply within 5 minutes", supSendFail:"Couldn’t send. Check your connection and try again", supSendSlow:"No connection — your message will be sent once you’re online",
+    supL1:"Sending", supL2:"Passing to the seller", supL3:"Notifying", supL4:"Almost done", supDone:"Done", supNew:"Write again" }
+};
+Object.keys(STR_NEW2).forEach(l => Object.assign(STR[l], STR_NEW2[l]));
 
 /* ---------- тема: светлая / тёмная ---------- */
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
@@ -2590,15 +2827,616 @@ function renderSupportMsgs(){
 function sendSupportMessage(){
   // без регистрации писать в поддержку нельзя — сначала окно регистрации, потом сообщение уйдёт само
   if (!isRegistered()){ requireRegistration(sendSupportMessage, 'support'); return; }
+  if (MorphSupport.busy()) return;
   const input = document.getElementById('supportInput');
   const text = input.value.trim();
-  if (!text) return;
+  if (!text){ MorphSupport.shake(); return; }
+  const customerId = getCustomerId();
   const customerName = getCustomerName();
-  db.collection('support').add({ customerId: getCustomerId(), customerName, sender:'customer', text, createdAt: Date.now() });
-  notifyAdmin(`💬 Сообщение в поддержку от ${customerName}:\n${text}`);
+  input.blur();
+  MorphSupport.start(text, () => {
+    const saved = Promise.race([
+      db.collection('support').add({ customerId, customerName, sender:'customer', text, createdAt: Date.now() }).then(() => 'ok'),
+      new Promise(res => setTimeout(() => res('slow'), 8000))
+    ]).catch(() => 'fail');
+    // в Telegram уходит тег #c:ID — по нему ответ вернётся именно этому клиенту
+    const toAdmin = tgSend(ADMIN_CHAT_ID, `💬 Сообщение в поддержку\n👤 ${customerName}\n\n${text}\n\n↩️ Ответьте свайпом на это сообщение — ответ придёт клиенту на сайт\n#c:${customerId}`);
+    return Promise.all([saved, toAdmin]).then(([st, tgOk]) => {
+      if (st === 'ok' || tgOk) return t('supAnswerBody');
+      return st === 'slow' ? t('supSendSlow') : t('supSendFail');
+    });
+  });
   input.value = '';
-  orbReact();
+  const sb = document.getElementById('supSend'); if (sb) sb.removeAttribute('data-ready');
+  const orbEl = document.getElementById('supportOrb'); if (orbEl) orbEl.classList.remove('typing');
 }
+
+/* ---------- анимация отправки в поддержку (шарик → «Вам ответят в течение 5 минут») ---------- */
+const MorphSupport = (function(){
+  const PILL_H = 60, BALL_SMALL = 60, ORB_D = 132, ORB_R = 66, CANVAS = 220, CARD_H = 108, FLY_D = 138, STAGE = 0.46;
+  const TAU = Math.PI * 2;
+  const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const rnd = v => String(Math.round(v * 1e4) / 1e4);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function cubicBezier(x1, y1, x2, y2){
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const sx = t => ((ax * t + bx) * t + cx) * t;
+    const sy = t => ((ay * t + by) * t + cy) * t;
+    const dx = t => (3 * ax * t + 2 * bx) * t + cx;
+    const solve = x => {
+      let t = x;
+      for (let i = 0; i < 8; i++){
+        const e = sx(t) - x;
+        if (Math.abs(e) < 1e-6) return t;
+        const d = dx(t);
+        if (Math.abs(d) < 1e-6) break;
+        t -= e / d;
+      }
+      let lo = 0, hi = 1; t = x;
+      for (let i = 0; i < 40; i++){
+        const e = sx(t);
+        if (Math.abs(e - x) < 1e-6) break;
+        if (x > e) lo = t; else hi = t;
+        t = (hi - lo) / 2 + lo;
+      }
+      return t;
+    };
+    return x => (x <= 0 ? 0 : x >= 1 ? 1 : sy(solve(x)));
+  }
+  const E = {
+    out: cubicBezier(0.22, 1, 0.36, 1), io: cubicBezier(0.65, 0, 0.35, 1), in: cubicBezier(0.4, 0, 1, 1),
+    fly: cubicBezier(0.5, 0, 0.1, 1), grow: cubicBezier(0.3, 0, 0.2, 1), vortex: cubicBezier(0.6, 0, 0.2, 1),
+    spring: cubicBezier(0.34, 1.4, 0.64, 1), card: cubicBezier(0.65, 0, 0.2, 1), lin: t => t
+  };
+  const bez = (t, p0, c, p2) => (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * c + t * t * p2;
+  const T = (ch, from, to, t0, t1, ease) => ({ ch, from, to, t0, t1, ease: ease || E.io });
+
+  const launchTracks = g => [
+    T('w', g.pw, g.pw - 12, 0, 100, E.out),
+    T('oInput', 1, 0, 0, 160, E.in), T('inScale', 1, 0.6, 0, 160, E.in),
+    T('oGlow', 1, 0, 0, 300, E.out), T('oAur', 1, 0, 0, 300, E.out),
+    T('w', g.pw - 12, BALL_SMALL, 100, 560, E.io),
+    T('h', PILL_H, PILL_H + 6, 380, 500, E.out), T('h', PILL_H + 6, BALL_SMALL, 500, 620, E.out),
+    T('oPill', 1, 0, 300, 560, E.out), T('oBall', 0, 1, 300, 560, E.out),
+    T('u', 0, 1, 620, 1500, E.fly),
+    T('w', BALL_SMALL, FLY_D, 620, 1300, E.grow), T('h', BALL_SMALL, FLY_D, 620, 1300, E.grow),
+    T('w', FLY_D, ORB_D, 1300, 1500, E.out), T('h', FLY_D, ORB_D, 1300, 1500, E.out),
+    T('cHalo', 0, 0.6, 620, 1500, E.out),
+    T('trail', 0, 1, 700, 800, E.out), T('trail', 1, 0, 1300, 1500, E.in)
+  ];
+  const ASSEMBLE = [
+    T('oRing', 1, 0, 0, 300, E.out), T('oBall', 1, 0, 0, 260, E.out),
+    T('orb.k', 0, 1, 0, 800, E.out), T('orb.alpha', 0, 1, 0, 800, E.out), T('orb.spin', 0, 0.9, 0, 800, E.out),
+    T('orb.pop', 1, 1.05, 0, 420, E.out), T('orb.pop', 1.05, 1, 420, 800, E.io),
+    T('sOp', 0, 1, 300, 620, E.out), T('sTy', 6, 0, 300, 620, E.out)
+  ];
+  const RESOLVE = [
+    T('orb.sweep', 0, 1, 0, 700, E.io), T('orb.spin', 0.9, 0.3, 0, 700, E.out), T('orb.gain', 1, 0, 0, 700, E.out),
+    T('orb.floor', 0, 0.95, 400, 900, E.out), T('orb.rad', 0, 0.15, 400, 900, E.out),
+    T('orb.pop', 1, 1.04, 600, 800, E.out), T('orb.pop', 1.04, 1, 800, 900, E.out)
+  ];
+  const CONDENSE = [
+    T('orb.pop', 1, 1.06, 0, 120, E.out), T('sOp', 1, 0, 0, 160, E.in), T('sTy', 0, -6, 0, 160, E.in),
+    T('orb.k', 1, 0, 120, 640, E.vortex), T('orb.vortex', 0, 1.6, 120, 640, E.vortex),
+    T('oGreen', 0, 1, 260, 700, E.spring), T('gs', 0.55, 1, 260, 700, E.spring),
+    T('pulse', 0, 1, 320, 760, E.out), T('oHalo', 0, 0.35, 380, 700, E.out),
+    T('orb.alpha', 1, 0, 500, 800, E.out)
+  ];
+  const unfoldTracks = (g, tw) => [
+    T('w', ORB_D, 124, 0, 90, E.in), T('h', ORB_D, 124, 0, 90, E.in),
+    T('w', 124, g.cw, 90, 700, E.card), T('h', 124, CARD_H, 90, 700, E.out),
+    T('r', ORB_D / 2, 20, 90, 700, E.io),
+    T('oGreen', 1, 0, 200, 560, E.out), T('oCard', 0, 1, 200, 560, E.out),
+    T('oHalo', 0.35, 0, 300, 700, E.out), T('cHalo', 0.6, 0.22, 300, 700, E.out),
+    T('hOp', 0, 1, 520, 840, E.out), T('dotS', 0, 1, 520, 840, E.spring),
+    T('wp', 0, 1, 600, 600 + tw, E.lin), T('bloom', 1, 0.625, 700, 1200, E.io)
+  ];
+  const R_OUT = [
+    T('oInput', 1, 0, 0, 140, E.out), T('oPill', 1, 0, 0, 200, E.out), T('oGlow', 1, 0, 0, 200, E.out),
+    T('oAur', 1, 0, 0, 200, E.out), T('oRing', 1, 0, 0, 200, E.out)
+  ];
+  const R_IN = [T('orb.alpha', 0, 1, 0, 200, E.out), T('sOp', 0, 1, 0, 200, E.out), T('cHalo', 0, 0.6, 0, 200, E.out)];
+  const R_RESOLVE = [T('orb.sweep', 0, 1, 0, 250, E.io), T('orb.floor', 0, 0.95, 0, 250, E.out)];
+  const R_CONDENSE = [T('oGreen', 0, 1, 0, 250, E.out), T('orb.alpha', 1, 0, 0, 250, E.out), T('sOp', 1, 0, 0, 250, E.out)];
+  const R_GREEN_OUT = [T('oGreen', 1, 0, 0, 120, E.out)];
+  const rCardIn = tw => [T('oCard', 0, 1, 0, 250, E.out), T('hOp', 0, 1, 0, 250, E.out), T('wp', 0, 1, 0, tw, E.lin), T('bloom', 1, 0.625, 0, 250, E.out)];
+
+  const FADE = ['oGlow','oAur','oPill','oBall','oGreen','oCard','oRing','oInput','oHalo','sOp','orb.alpha','trail'];
+  const INIT = {
+    h: PILL_H, r: 999, oGlow: 1, oHalo: 0, oPill: 1, oBall: 0, oGreen: 0, oCard: 0, oRing: 1, oInput: 1, inScale: 1, oAur: 1,
+    gs: 0.55, cs: 1, hOp: 0, dotS: 0, bloom: 1, u: 0, yOff: 0, trail: 0, pulse: -1, sOp: 0, sTy: 6, cHalo: 0, wp: 0,
+    'orb.k': 0, 'orb.alpha': 0, 'orb.spin': 0, 'orb.pop': 1, 'orb.sweep': 0, 'orb.vortex': 0, 'orb.gain': 1, 'orb.floor': 0, 'orb.rad': 0
+  };
+
+  const ABORT = {};
+  function sleep(ms, sig){
+    return new Promise(res => {
+      if (sig.aborted) return res();
+      let id = 0;
+      const onAbort = () => { clearTimeout(id); res(); };
+      id = setTimeout(() => { sig.removeEventListener('abort', onAbort); res(); }, Math.max(0, ms));
+      sig.addEventListener('abort', onAbort, { once: true });
+    });
+  }
+  function abortable(p, sig){
+    return new Promise(res => {
+      if (sig.aborted) return res(undefined);
+      const onAbort = () => res(undefined);
+      sig.addEventListener('abort', onAbort, { once: true });
+      p.then(v => { sig.removeEventListener('abort', onAbort); res(v); }, () => { sig.removeEventListener('abort', onAbort); res(undefined); });
+    });
+  }
+
+  /* ---- точечный шар на canvas ---- */
+  const RINGS = 16;
+  const DOT_LIST = (function(){
+    const rand = mulberry32(7), out = [];
+    for (let k = 0; k < RINGS; k++){
+      const y = 1 - ((k + 0.5) / RINGS) * 2, r = Math.sqrt(1 - y * y), m = Math.max(4, Math.round(30 * r));
+      for (let j = 0; j < m; j++){
+        const a = (j / m) * TAU + k * 0.35;
+        out.push({ x: Math.cos(a) * r, y, z: Math.sin(a) * r, u: (1 - y) / 2, seed: rand() * 6.283 });
+      }
+    }
+    return out;
+  })();
+  const N = DOT_LIST.length;
+  const DX = Float32Array.from(DOT_LIST, d => d.x), DY = Float32Array.from(DOT_LIST, d => d.y), DZ = Float32Array.from(DOT_LIST, d => d.z);
+  const DU = Float32Array.from(DOT_LIST, d => d.u), DS = Float32Array.from(DOT_LIST, d => d.seed);
+  const G_STEPS = 24, A_STEPS = 48;
+  const COLORS = (function(){
+    const out = [];
+    for (let gi = 0; gi <= G_STEPS; gi++){
+      const g = gi / G_STEPS;
+      const r = Math.round(lerp(235, 52, g)), gg = Math.round(lerp(235, 211, g)), b = Math.round(lerp(235, 153, g));
+      for (let ai = 0; ai <= A_STEPS; ai++) out.push('rgba(' + r + ',' + gg + ',' + b + ',' + (ai / A_STEPS).toFixed(3) + ')');
+    }
+    return out;
+  })();
+  const ORB_KEYS = ['k','alpha','spin','sweep','pop','vortex','gain','floor','rad'];
+
+  function createOrb(canvas, isReduced){
+    const P = { k: 0, alpha: 0, spin: 0, rot: 0, sweep: 0, pop: 1, vortex: 0, gain: 1, floor: 0, rad: 0, prog: 0 };
+    const ctx = canvas.getContext('2d');
+    const lit = new Float32Array(N);
+    const SX = new Float32Array(N), SY = new Float32Array(N), SR = new Float32Array(N), SD = new Float32Array(N);
+    const SC = new Int16Array(N);
+    const pw = [1, 0, 0, 0];
+    let time = 0, raf = 0, last = 0, dead = false;
+    const reset = () => {
+      P.k = 0; P.alpha = 0; P.spin = 0; P.rot = 0; P.sweep = 0; P.pop = 1; P.vortex = 0; P.gain = 1; P.floor = 0; P.rad = 0; P.prog = 0;
+      lit.fill(0); pw[0] = 1; pw[1] = 0; pw[2] = 0; pw[3] = 0;
+      time = isReduced() ? 1.2 : 0;
+    };
+    reset();
+    if (!ctx) return { P, ensure(){}, reset, destroy(){} };
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(CANVAS * dpr); canvas.height = Math.round(CANVAS * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const S = 0.6, CP = Math.cos(0.35), SP = Math.sin(0.35), C0 = CANVAS / 2;
+
+    const draw = dt => {
+      ctx.clearRect(0, 0, CANVAS, CANVAS);
+      time += dt; P.rot += P.spin * dt;
+      const yaw = P.rot + P.vortex, cyw = Math.cos(yaw), syw = Math.sin(yaw);
+      const stepW = dt / 0.35;
+      for (let q = 0; q < 4; q++){
+        const d = (q === P.prog ? 1 : 0) - pw[q];
+        pw[q] += Math.abs(d) <= stepW ? d : d > 0 ? stepW : -stepW;
+      }
+      const decay = Math.exp(-dt / 0.5);
+      const h0 = (time * 300) % N, h3 = (time * 480) % N;
+      const a1 = time * 0.8, b1 = Math.sin(time * 0.5) * 0.9;
+      const f1x = Math.cos(b1) * Math.cos(a1), f1y = Math.sin(b1), f1z = Math.cos(b1) * Math.sin(a1);
+      const a2 = time * 0.55 + 2.1, b2 = Math.cos(time * 0.42) * 0.9;
+      const f2x = Math.cos(b2) * Math.cos(a2), f2y = Math.sin(b2), f2z = Math.cos(b2) * Math.sin(a2);
+      const lat = Math.sin(time * 2.2);
+      const swirlK = P.vortex * 1.5;
+      for (let n = 0; n < N; n++){
+        const dx = DX[n], dy = DY[n], dz = DZ[n], u = DU[n];
+        let pulse = 0;
+        if (pw[0] > 0.001){
+          let dd = Math.abs(n - h0); if (dd > N - dd) dd = N - dd;
+          const v = Math.max(0, 1 - dd / 16); pulse = Math.max(pulse, v * v * pw[0]);
+        }
+        if (pw[1] > 0.001){
+          const v1 = Math.max(0, (dx * f1x + dy * f1y + dz * f1z - 0.72) / 0.28);
+          const v2 = Math.max(0, (dx * f2x + dy * f2y + dz * f2z - 0.72) / 0.28);
+          const v = Math.max(v1, v2); pulse = Math.max(pulse, v * v * pw[1]);
+        }
+        if (pw[2] > 0.001){
+          const e = dy - lat, v = Math.max(0, 1 - (e * e) / 0.02); pulse = Math.max(pulse, v * v * pw[2]);
+        }
+        if (pw[3] > 0.001){
+          let dd = Math.abs(n - h3); if (dd > N - dd) dd = N - dd;
+          const v = Math.max(0, 1 - dd / 22); pulse = Math.max(pulse, v * v * pw[3]);
+        }
+        const l = Math.max(lit[n] * decay, pulse * P.gain);
+        lit[n] = l;
+        const ki = clamp01(P.k * (1 + S) - S * u);
+        if (ki <= 0.001){ SC[n] = -1; continue; }
+        const eo = E.out(ki), kk = eo * P.pop;
+        const x1 = dx * cyw + dz * syw, z1 = -dx * syw + dz * cyw;
+        const y2 = dy * CP - z1 * SP, z2 = dy * SP + z1 * CP;
+        const f = 2.8 / (2.8 - z2), depth = (z2 + 1) / 2;
+        let ox = x1 * ORB_R * kk * f, oy = -y2 * ORB_R * kk * f;
+        if (swirlK > 0.001){
+          const sw = (1 - ki) * swirlK, cc = Math.cos(sw), ss = Math.sin(sw);
+          const tx = ox * cc - oy * ss; oy = ox * ss + oy * cc; ox = tx;
+        }
+        const g = clamp01((P.sweep * 1.4 - u) / 0.4);
+        let a = 0.1 + 0.035 * Math.sin(DS[n] + time * 1.6) * (1 - g) + 0.32 * depth * depth + 0.75 * l * (1 - g) + g * (0.55 + 0.4 * depth) + 2 * g * (1 - g);
+        a = Math.max(a, P.floor * (0.7 + 0.3 * depth));
+        if (a > 1) a = 1;
+        a *= eo * P.alpha;
+        SX[n] = C0 + ox; SY[n] = C0 + oy; SD[n] = depth;
+        SR[n] = (1.15 * (0.45 + 0.75 * depth) * f + 0.9 * l + g * 0.25) * (1 + P.rad) * (0.4 + 0.6 * eo);
+        const ai = Math.round(a * A_STEPS), gi = Math.round(g * G_STEPS);
+        SC[n] = ai <= 0 ? -1 : gi * (A_STEPS + 1) + ai;
+      }
+      for (let pass = 0; pass < 2; pass++){
+        for (let n = 0; n < N; n++){
+          const c = SC[n];
+          if (c < 0) continue;
+          if ((SD[n] >= 0.5) !== (pass === 1)) continue;
+          ctx.fillStyle = COLORS[c];
+          ctx.beginPath(); ctx.arc(SX[n], SY[n], SR[n], 0, TAU); ctx.fill();
+        }
+      }
+    };
+    const frame = now => {
+      raf = 0;
+      if (dead) return;
+      const dt = isReduced() ? 0 : Math.max(0, Math.min(0.05, (now - last) / 1000));
+      last = now;
+      draw(dt);
+      if (P.alpha > 0.002) raf = requestAnimationFrame(frame);
+      else ctx.clearRect(0, 0, CANVAS, CANVAS);
+    };
+    const ensure = () => {
+      if (raf || dead || P.alpha <= 0.002) return;
+      last = performance.now(); raf = requestAnimationFrame(frame);
+    };
+    return { P, ensure, reset, destroy(){ dead = true; if (raf) cancelAnimationFrame(raf); raf = 0; } };
+  }
+
+  /* ---- DOM ---- */
+  let root, mover, actor, inputEl, fieldEl, canvas, pulseEl, statusEl, bodyEl, liveEl, ghosts = [], orb = null;
+  let built = false;
+  const SPARK = '<svg class="sp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5l1.7 4.8 4.8 1.7-4.8 1.7L10 16.5l-1.7-4.8L3.5 10l4.8-1.7L10 3.5z"/><path d="M18 14.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z"/></svg>';
+  const ARROW = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5.5 11.5L12 5l6.5 6.5"/></svg>';
+  function build(){
+    if (built) return;
+    built = true;
+    root = document.createElement('div');
+    root.className = 'mo-root'; root.id = 'moRoot'; root.dataset.phase = 'idle';
+    root.innerHTML =
+      '<div class="mo-bg"></div><div class="mo-halo"></div>' +
+      '<div class="mo-mover">' + '<span class="mo-trail"></span>'.repeat(6) +
+        '<div class="mo-actor">' +
+          '<div class="mo-underglow"></div><div class="mo-halo-green"></div>' +
+          '<div class="mo-surface"><div class="mo-aurora"><i></i><i></i><i></i><i></i></div></div>' +
+          '<div class="mo-ball"></div><div class="mo-green"></div><div class="mo-card"></div><div class="mo-ring"></div>' +
+          '<div class="mo-input">' + SPARK + '<span class="mo-field"></span><span class="mo-sendbtn">' + ARROW + '</span></div>' +
+          '<canvas class="mo-orb" aria-hidden="true"></canvas><div class="mo-pulse"></div>' +
+          '<div class="mo-answer" tabindex="-1" role="group"><div class="mo-a-head"><i class="mo-a-dot"></i><span class="mo-a-title"></span></div><p class="mo-a-body"></p></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mo-status" aria-hidden="true"></div>' +
+      '<button type="button" class="mo-reset"></button>' +
+      '<div class="mo-live" role="status" aria-live="polite"></div>';
+    document.body.appendChild(root);
+    mover = root.querySelector('.mo-mover'); actor = root.querySelector('.mo-actor');
+    inputEl = root.querySelector('.mo-input'); fieldEl = root.querySelector('.mo-field');
+    canvas = root.querySelector('.mo-orb'); pulseEl = root.querySelector('.mo-pulse');
+    statusEl = root.querySelector('.mo-status'); bodyEl = root.querySelector('.mo-a-body'); liveEl = root.querySelector('.mo-live');
+    ghosts = Array.from(root.querySelectorAll('.mo-trail'));
+    orb = createOrb(canvas, isReduced);
+    root.querySelector('.mo-reset').addEventListener('click', () => reset());
+    root.addEventListener('click', e => { if (phase === 'answered' && (e.target === root || e.target.classList.contains('mo-bg'))) reset(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && busy && !idling){ e.preventDefault(); escape(); } });
+    buildChannels();
+  }
+
+  const mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const isReduced = () => !!(mq && mq.matches);
+
+  /* ---- состояние ---- */
+  const geo = { pw: 320, cw: 320, H: 0, dir: -1 };
+  const vals = {}, dirty = new Set(), CH = {};
+  const hist = [], tmp = { x: 0, y: 0, d: 0 };
+  let life = new AbortController(), current = null, idleCtl = null;
+  let busy = false, idling = false, epoch = 0, phase = 'idle';
+  let curX = 0, curY = 0, curD = BALL_SMALL, trailVis = 0, ghostsShown = false;
+  let wStagger = 45, wDur = 320, curLabel = '';
+
+  const copy = () => ({
+    labels: [t('supL1'), t('supL2'), t('supL3'), t('supL4')],
+    done: t('supDone'), title: t('supAnswerTitle'), again: t('supNew')
+  });
+  function setPhase(p){ phase = p; if (root) root.dataset.phase = p; }
+  function labelInner(name, isDone){
+    return isDone ? '<span class="mo-lab-done">' + esc(name) + '</span>' : '<span>' + esc(name) + '</span><span class="mo-dots" aria-hidden="true"><i></i><i></i><i></i></span>';
+  }
+  function swapLabel(name, isDone){
+    if (curLabel === name) return;
+    const prev = statusEl.querySelector('.mo-in');
+    if (prev){ prev.classList.remove('mo-in'); prev.classList.add('mo-out'); setTimeout(() => prev.remove(), 450); }
+    const s = document.createElement('span');
+    s.className = 'mo-lab mo-in'; s.innerHTML = labelInner(name, isDone);
+    statusEl.appendChild(s); curLabel = name;
+  }
+  function resetLabel(){ statusEl.innerHTML = ''; curLabel = ''; }
+  function setAnswer(s){
+    bodyEl.innerHTML = s ? String(s).split(/\s+/).filter(Boolean).map(w => '<span class="mo-w">' + esc(w) + '</span> ').join('') : '';
+  }
+
+  function sampleAt(h, tt, out){
+    const n = h.length;
+    const cp = s => { out.x = s.x; out.y = s.y; out.d = s.d; };
+    if (n === 0){ out.x = 0; out.y = 0; out.d = 0; return; }
+    if (tt <= h[0].t) return cp(h[0]);
+    for (let i = n - 1; i > 0; i--){
+      const a = h[i - 1], b = h[i];
+      if (tt >= a.t){
+        if (tt >= b.t) return cp(b);
+        const k = (tt - a.t) / (b.t - a.t || 1);
+        out.x = lerp(a.x, b.x, k); out.y = lerp(a.y, b.y, k); out.d = lerp(a.d, b.d, k);
+        return;
+      }
+    }
+    cp(h[n - 1]);
+  }
+  function renderTrail(){
+    if (trailVis <= 0.001){
+      if (ghostsShown){ ghosts.forEach(g => g.style.opacity = '0'); ghostsShown = false; }
+      return;
+    }
+    ghostsShown = true;
+    const now = performance.now();
+    for (let i = 0; i < ghosts.length; i++){
+      sampleAt(hist, now - (i + 1) * 45, tmp);
+      const k = (tmp.d * (1 - 0.08 * (i + 1))) / 100;
+      const g = ghosts[i];
+      g.style.transform = 'translate3d(' + (tmp.x - curX).toFixed(2) + 'px,' + (tmp.y - curY).toFixed(2) + 'px,0) translate(-50%,-50%) scale(' + k.toFixed(3) + ')';
+      g.style.opacity = (0.28 * Math.pow(1 - i / 6, 1.5) * trailVis).toFixed(3);
+    }
+  }
+  function applyPath(){
+    const u = vals.u || 0, H = geo.H;
+    curX = bez(u, 0, geo.dir * 0.3 * H, 0);
+    curY = bez(u, H, 0.6 * H, 0) + (vals.yOff || 0);
+    mover.style.transform = 'translate3d(' + curX.toFixed(2) + 'px,' + curY.toFixed(2) + 'px,0)';
+    const now = performance.now();
+    hist.push({ t: now, x: curX, y: curY, d: curD });
+    while (hist.length > 2 && hist[0].t < now - 500) hist.shift();
+    renderTrail();
+  }
+  function applyWords(v){
+    const nodes = bodyEl.querySelectorAll('.mo-w');
+    if (!nodes.length) return;
+    const total = (nodes.length - 1) * wStagger + wDur, time = v * total, reduced = isReduced();
+    nodes.forEach((el, i) => {
+      const p = E.out(clamp01((time - i * wStagger) / wDur));
+      el.style.opacity = rnd(p);
+      el.style.transform = p >= 0.999 || reduced ? 'none' : 'translateY(' + rnd((1 - p) * 4) + 'px)';
+      el.style.filter = p >= 0.999 || reduced ? 'none' : 'blur(' + rnd((1 - p) * 4) + 'px)';
+    });
+  }
+  function buildChannels(){
+    ['oGlow','oHalo','oPill','oBall','oGreen','oCard','oRing','oInput','oAur','gs','cs','hOp','dotS','bloom'].forEach(n => {
+      CH[n] = v => actor.style.setProperty('--' + n, rnd(v));
+    });
+    ['w','h','r'].forEach(n => {
+      CH[n] = v => { actor.style.setProperty('--' + n, rnd(v) + 'px'); if (n === 'w') curD = v; };
+    });
+    CH.inScale = v => { actor.style.setProperty('--inScale', rnd(v)); inputEl.style.filter = v >= 0.999 ? 'none' : 'blur(' + rnd((1 - v) * 15) + 'px)'; };
+    CH.sOp = v => statusEl.style.setProperty('--sOp', rnd(v));
+    CH.sTy = v => statusEl.style.setProperty('--sTy', rnd(v));
+    CH.cHalo = v => root.style.setProperty('--oCenter', rnd(v));
+    CH.u = () => applyPath();
+    CH.yOff = () => applyPath();
+    CH.trail = v => { trailVis = v; renderTrail(); };
+    CH.pulse = v => {
+      if (v < 0){ pulseEl.style.opacity = '0'; return; }
+      pulseEl.style.opacity = rnd(0.5 * (1 - v));
+      pulseEl.style.transform = 'scale(' + rnd(1 + v) + ')';
+    };
+    CH.wp = applyWords;
+    ORB_KEYS.forEach(name => {
+      CH['orb.' + name] = v => { orb.P[name] = v; if (name === 'alpha') orb.ensure(); };
+    });
+  }
+  const set = (ch, v) => { vals[ch] = v; dirty.add(ch); };
+  const flush = () => { dirty.forEach(ch => { if (CH[ch]) CH[ch](vals[ch]); }); dirty.clear(); };
+  const setNow = (ch, v) => { vals[ch] = v; if (CH[ch]) CH[ch](v); };
+  const resetChannels = () => {
+    setNow('w', geo.pw);
+    Object.keys(INIT).forEach(ch => setNow(ch, INIT[ch]));
+  };
+
+  function play(tracks, sig){
+    return new Promise(res => {
+      if (sig.aborted) return res();
+      const end = tracks.reduce((m, k) => Math.max(m, k.t1), 0);
+      const done = new Set();
+      let raf = 0, tt = 0, last = performance.now();
+      const onAbort = () => { cancelAnimationFrame(raf); res(); };
+      const finish = () => { sig.removeEventListener('abort', onAbort); res(); };
+      const step = now => {
+        const dt = Math.max(0, Math.min(100, now - last));
+        last = now; tt += dt;
+        for (const k of tracks){
+          if (done.has(k) || tt < k.t0) continue;
+          const p = Math.min(1, (tt - k.t0) / Math.max(1, k.t1 - k.t0));
+          set(k.ch, k.from + (k.to - k.from) * k.ease(p));
+          if (p === 1) done.add(k);
+        }
+        flush();
+        if (tt >= end) finish(); else raf = requestAnimationFrame(step);
+      };
+      sig.addEventListener('abort', onAbort, { once: true });
+      raf = requestAnimationFrame(step);
+    });
+  }
+  async function labelLoop(sig, ctl, labels){
+    let i = 0;
+    for (;;){
+      await sleep(1150, sig);
+      if (sig.aborted || ctl.stop) return;
+      i = (i + 1) % labels.length;
+      orb.P.prog = i % 4;
+      swapLabel(labels[i], false);
+    }
+  }
+  const child = () => {
+    const ac = new AbortController();
+    if (life.signal.aborted) ac.abort();
+    else life.signal.addEventListener('abort', () => ac.abort(), { once: true });
+    return ac;
+  };
+
+  async function run(text, sig, cfg){
+    const reduced = isReduced(), C = copy();
+    const go = async tracks => { await play(tracks, sig); if (sig.aborted) throw ABORT; };
+    try {
+      setPhase('launch'); hist.length = 0;
+      if (!reduced){
+        await go(launchTracks(geo));
+        setNow('r', ORB_D / 2);
+        setPhase('assemble');
+        await go(ASSEMBLE);
+      } else {
+        await go(R_OUT);
+        setNow('u', 1); setNow('w', ORB_D); setNow('h', ORB_D); setNow('r', ORB_D / 2);
+        setNow('sTy', 0); setNow('orb.k', 1); setNow('orb.spin', 0);
+        setPhase('assemble');
+        await go(R_IN);
+      }
+      setPhase('think');
+      liveEl.textContent = C.labels[0];
+      const ctl = { stop: false };
+      labelLoop(sig, ctl, C.labels);
+      const t0 = performance.now();
+      const pending = Promise.resolve().then(() => cfg.onSubmit(text))
+        .then(b => (typeof b === 'string' && b.trim() ? b : ''), () => '');
+      const got = await abortable(pending, sig);
+      if (sig.aborted) throw ABORT;
+      const body = got || t('supAnswerBody');
+      await sleep(cfg.minThink - (performance.now() - t0), sig);
+      ctl.stop = true;
+      if (sig.aborted) throw ABORT;
+      const n = Math.max(1, body.split(/\s+/).filter(Boolean).length);
+
+      if (!reduced){
+        setPhase('resolve'); swapLabel(C.done, true);
+        await go(RESOLVE);
+        setPhase('condense');
+        await go(CONDENSE);
+        setPhase('unfold');
+        wDur = 320; wStagger = n > 1 ? Math.min(45, 280 / (n - 1)) : 0;
+        setAnswer(body);
+        await go(unfoldTracks(geo, (n - 1) * wStagger + wDur));
+      } else {
+        setPhase('resolve'); swapLabel(C.done, true);
+        await go(R_RESOLVE);
+        await sleep(350, sig);
+        if (sig.aborted) throw ABORT;
+        setPhase('condense'); setNow('gs', 1);
+        await go(R_CONDENSE);
+        setPhase('unfold');
+        wDur = 250; wStagger = 0;
+        setAnswer(body);
+        await go(R_GREEN_OUT);
+        setNow('w', geo.cw); setNow('h', CARD_H); setNow('r', 20); setNow('dotS', 1);
+        await go(rCardIn(wDur));
+      }
+      setPhase('answered');
+      liveEl.textContent = body;
+    } catch (e){
+      if (e === ABORT) return;
+      hard();
+    }
+  }
+
+  function closeUI(){
+    setNow('pulse', -1); setAnswer(''); resetLabel();
+    orb.reset(); hist.length = 0; resetChannels();
+    root.classList.remove('on'); setPhase('idle');
+    current = null; idleCtl = null; busy = false; idling = false;
+    const sc = document.getElementById('support');
+    if (sc) sc.classList.remove('mo-busy');
+    if (typeof orbReact === 'function') orbReact();
+  }
+  async function toIdle(kind){
+    if (idling) return;
+    idling = true;
+    const my = ++epoch, ac = child();
+    idleCtl = ac;
+    setPhase('reset');
+    const out = [T('cHalo', vals.cHalo || 0, 0, 0, 300, E.out)];
+    FADE.forEach(ch => { const v = vals[ch] || 0; if (v > 0.001) out.push(T(ch, v, 0, 0, 300, E.out)); });
+    if (kind === 'reset') out.push(T('cs', 1, 0.97, 0, 300, E.out));
+    await play(out, ac.signal);
+    if (ac.signal.aborted || my !== epoch) return;
+    closeUI();
+  }
+  function hard(){
+    epoch++;
+    if (current) current.abort(); current = null;
+    if (idleCtl) idleCtl.abort(); idleCtl = null;
+    if (root) closeUI();
+    busy = false; idling = false;
+  }
+  function measure(){
+    const pill = document.getElementById('supPill');
+    const r = pill ? pill.getBoundingClientRect() : null;
+    geo.pw = r && r.width > 80 ? r.width : Math.min(560, window.innerWidth - 32);
+    const cy = r && r.height > 20 ? r.top + r.height / 2 : window.innerHeight - 130;
+    geo.H = cy - window.innerHeight * STAGE;
+    geo.cw = Math.min(320, window.innerWidth - 32);
+  }
+  function start(text, onSubmit, minThink){
+    if (busy) return false;
+    build();
+    busy = true;
+    measure();
+    geo.dir = -geo.dir;
+    const C = copy();
+    root.querySelector('.mo-reset').textContent = C.again;
+    root.querySelector('.mo-a-title').textContent = C.title;
+    fieldEl.textContent = text;
+    orb.reset(); setNow('u', 0); hist.length = 0;
+    resetChannels(); setAnswer(''); resetLabel(); swapLabel(C.labels[0], false);
+    const sc = document.getElementById('support');
+    if (sc) sc.classList.add('mo-busy');
+    root.classList.add('on');
+    const ac = child();
+    current = ac;
+    run(text, ac.signal, { onSubmit, minThink: minThink || 2800 });
+    return true;
+  }
+  function escape(){ if (!busy || idling) return; if (current) current.abort(); toIdle('esc'); }
+  function reset(){ if (!busy || idling || phase !== 'answered') return; toIdle('reset'); }
+  function shake(){
+    const p = document.getElementById('supPill');
+    if (!p) return;
+    p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
+    setTimeout(() => p.classList.remove('shake'), 300);
+  }
+  return { start, busy: () => busy, shake, reset, escape };
+})();
 
 /* глазки пузырька следят за мышкой / пальцем */
 (function(){
@@ -2638,6 +3476,8 @@ document.addEventListener('focusin', (e) => {
 });
 document.addEventListener('input', (e) => {
   if (!e.target || e.target.id !== 'supportInput') return;
+  const sb = document.getElementById('supSend');
+  if (sb) sb.toggleAttribute('data-ready', e.target.value.trim().length > 0);
   const orb = document.getElementById('supportOrb');
   if (!orb || orb.classList.contains('react')) return;
   orb.classList.remove('tracking'); const _e2 = orb.querySelector('.orb-eyes'); if (_e2) _e2.style.transform = '';
@@ -3030,8 +3870,10 @@ function confirmPayment(){
   const phone = document.getElementById('phoneInput').value.trim();
   const branch = selectedBtsBranch;
 
-  if (!phone){ showToast('Укажите номер телефона'); return; }
-  if (!branch){ showToast('Выберите пункт БТС'); return; }
+  const phEl = document.getElementById('phoneInput');
+  if (phEl) phEl.classList.toggle('field-bad', !phone);
+  if (!phone){ showToast(t('regErrPhone')); if (phEl) phEl.focus(); return; }
+  if (!branch){ showToast(t('errBts')); return; }
 
   finalizeOrder(phone, branch);
 }
@@ -3108,13 +3950,16 @@ function finalizeOrder(phone, branch){
   const confirmBtnOriginalText = confirmBtn ? confirmBtn.textContent : '';
   if (confirmBtn){ confirmBtn.disabled = true; confirmBtn.textContent = t('confirmingText'); }
 
+  const notifyChatId = getNotifyChatId();
   decrementStockForOrder(orderItems).then(() => {
     return db.collection('orders').add({
       customerId, customerName, items: orderItems, total,
       btsBranch: branch, phone, paymentMethod: methodLabel,
-      status: 'Проверяется оплата', createdAt: Date.now()
+      status: 'Проверяется оплата', createdAt: Date.now(),
+      lang, notifyChatId
     });
   }).then(() => {
+    if (notifyChatId) tgSend(notifyChatId, buildOrderNotifyText(orderItems, total, branch));
     cart = []; updateCartBadge();
     document.getElementById('phoneInput').value = '';
     notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text);
