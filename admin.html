@@ -1532,6 +1532,61 @@ function saveSocialLink(key, value){
 }
 
 const STATUS_OPTIONS = ['Проверяется оплата','Принято','Собирается','В пути','В ПВЗ','Доставлен'];
+
+/* ---------- уведомления клиентам в Telegram (от бота магазина) ---------- */
+const NOTIFY_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
+function tgSend(chatId, text){
+  if (!chatId || !NOTIFY_BOT_TOKEN) return Promise.resolve(false);
+  return fetch(`https://api.telegram.org/bot${NOTIFY_BOT_TOKEN}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text })
+  }).then(r => r.json()).then(j => !!(j && j.ok)).catch(() => false);
+}
+async function resolveChatId(customerId, hint){
+  if (hint) return String(hint);
+  if (/^\d+$/.test(customerId || '')) return String(customerId);
+  try {
+    const d = await db.collection('customers').doc(customerId).get();
+    if (d.exists && d.data().tgChatId) return String(d.data().tgChatId);
+  } catch(e){}
+  return '';
+}
+const STATUS_TXT = {
+  'Проверяется оплата':{ ru:'Проверяется оплата', uz:'To‘lov tekshirilmoqda', tr:'Ödeme kontrol ediliyor', az:'Ödəniş yoxlanılır', en:'Checking payment' },
+  'Принято':{ ru:'Принято', uz:'Qabul qilindi', tr:'Alındı', az:'Qəbul edildi', en:'Accepted' },
+  'Собирается':{ ru:'Собирается', uz:'Yig‘ilmoqda', tr:'Hazırlanıyor', az:'Yığılır', en:'Being packed' },
+  'В пути':{ ru:'В пути', uz:'Yo‘lda', tr:'Yolda', az:'Yoldadır', en:'On the way' },
+  'В ПВЗ':{ ru:'В пункте выдачи', uz:'Topshirish punktida', tr:'Teslim noktasında', az:'Çatdırılma məntəqəsində', en:'At the pickup point' },
+  'Доставлен':{ ru:'Доставлен', uz:'Yetkazildi', tr:'Teslim edildi', az:'Çatdırıldı', en:'Delivered' }
+};
+const STATUS_HEAD = {
+  ru:{ title:'📦 Статус вашего заказа обновлён', st:'Статус', pickup:'Заберите заказ в пункте БТС', thanks:'Спасибо за покупку! 🤍' },
+  uz:{ title:'📦 Buyurtmangiz holati yangilandi', st:'Holati', pickup:'Buyurtmani BTS punktidan oling', thanks:'Xaridingiz uchun rahmat! 🤍' },
+  tr:{ title:'📦 Sipariş durumunuz güncellendi', st:'Durum', pickup:'Siparişinizi BTS noktasından alın', thanks:'Alışverişiniz için teşekkürler! 🤍' },
+  az:{ title:'📦 Sifarişinizin statusu yeniləndi', st:'Status', pickup:'Sifarişi BTS məntəqəsindən götürün', thanks:'Alış-verişiniz üçün təşəkkür edirik! 🤍' },
+  en:{ title:'📦 Your order status was updated', st:'Status', pickup:'Pick up your order at the BTS point', thanks:'Thank you for your purchase! 🤍' }
+};
+function buildStatusText(o, status){
+  const L = (o.lang && STATUS_HEAD[o.lang]) ? o.lang : 'ru';
+  const H = STATUS_HEAD[L];
+  const label = (STATUS_TXT[status] && STATUS_TXT[status][L]) || status;
+  const items = (o.items || []).map(i => `• ${i.name} (${i.size}) × ${i.qty}`).join('\n');
+  let txt = `${H.title}\n\n${items}\n\n${H.st}: ${label}`;
+  if (status === 'В ПВЗ') txt += `\n📍 ${H.pickup}${o.btsBranch ? ': ' + o.btsBranch : ''}`;
+  if (status === 'Доставлен') txt += `\n\n${H.thanks}`;
+  return txt;
+}
+function adminToast(msg){
+  let el = document.getElementById('adminToast');
+  if (!el){
+    el = document.createElement('div'); el.id = 'adminToast';
+    el.style.cssText = 'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#121212;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;max-width:90%;text-align:center;transition:opacity .3s;opacity:0;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(adminToast._t); adminToast._t = setTimeout(() => { el.style.opacity = '0'; }, 2600);
+}
+
 let allOrders = [];
 
 function deleteSubscriber(id){
@@ -1721,8 +1776,13 @@ function filterAndRenderOrders(){
         ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
       </select>
     `;
-    card.querySelector('.status-select').onchange = (e) => {
-      db.collection('orders').doc(o.id).update({ status: e.target.value });
+    card.querySelector('.status-select').onchange = async (e) => {
+      const st = e.target.value;
+      await db.collection('orders').doc(o.id).update({ status: st });
+      const chat = await resolveChatId(o.customerId, o.notifyChatId);
+      if (!chat){ adminToast('Статус сохранён. У клиента не подключены уведомления Telegram'); return; }
+      const ok = await tgSend(chat, buildStatusText(o, st));
+      adminToast(ok ? 'Статус сохранён, клиенту отправлено в Telegram ✅' : 'Статус сохранён, но Telegram не доставил (клиент не запускал бота?)');
     };
     wrap.appendChild(card);
   });
@@ -1786,6 +1846,9 @@ function sendSupportReply(){
     customerName: supportData[selectedSupportCustomer].name,
     sender: 'admin', text, createdAt: Date.now()
   });
+  // если у клиента подключён Telegram — дублируем ответ ему в бота
+  const cid = selectedSupportCustomer;
+  resolveChatId(cid, '').then(chat => { if (chat) tgSend(chat, `💬 milaisss:\n\n${text}`); });
   input.value = '';
 }
 
