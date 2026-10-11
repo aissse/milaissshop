@@ -574,8 +574,8 @@
     background:#131315; border:1px solid rgba(255,255,255,.12); color:#fff;
     box-shadow:0 12px 30px -12px rgba(110,90,255,.45), 0 2px 8px rgba(0,0,0,.18); }
   .sup-spark{ width:22px; height:22px; flex-shrink:0; color:rgba(255,255,255,.7); }
-  .sup-pill input{ flex:1; min-width:0; background:transparent !important; border:none !important; outline:none !important; color:#fff !important; font-size:16px; padding:0 !important; -webkit-appearance:none; appearance:none; }
-  .sup-pill input::placeholder{ color:rgba(255,255,255,.5); }
+  .sup-pill input{ flex:1; min-width:0; background:transparent !important; border:none !important; outline:none !important; color:#fff !important; -webkit-text-fill-color:#fff !important; caret-color:#fff; font-size:16px; padding:0 !important; -webkit-appearance:none; appearance:none; }
+  .sup-pill input::placeholder{ color:rgba(255,255,255,.5); -webkit-text-fill-color:rgba(255,255,255,.5); opacity:1; }
   .sup-send{ width:44px; height:44px; border-radius:50%; border:none; flex-shrink:0; display:grid; place-items:center; cursor:pointer; padding:0;
     background:rgba(255,255,255,.14); color:rgba(255,255,255,.6); transition:background .3s cubic-bezier(.22,1,.36,1), color .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1); }
   .sup-send[data-ready]{ background:#fff; color:#131315; }
@@ -1143,7 +1143,7 @@
 
     <label class="block-label" data-i18n="regTgLabel2">Telegram @username (желательно)</label>
     <input type="text" id="regTelegram" class="reg-input" placeholder="@username" oninput="this.value=this.value.replace(/\s/g,'')">
-    <div style="font-size:11px; color:#999; line-height:1.4; margin:-6px 0 6px;" data-i18n="regTgHint2">Необязательно, но так бот @MilaisssOthers_bot сможет присылать вам уведомления о покупках и статусе заказа.</div>
+    <div style="font-size:11px; color:#999; line-height:1.4; margin:-6px 0 6px;" data-i18n="regTgHint2">Необязательно, но так бот @milasssBOT сможет присылать вам уведомления о покупках и статусе заказа.</div>
 
     <label class="block-label" data-i18n="regAvatarLabel">Выберите аватар</label>
     <div class="avatar-grid" id="avatarGrid"></div>
@@ -1171,7 +1171,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-108";
+  const CURRENT_VERSION = "20260908-109";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1752,23 +1752,23 @@ const STR_NEW = {
 };
 Object.keys(STR_NEW).forEach(l => Object.assign(STR[l], STR_NEW[l]));
 const STR_NEW2 = {
-  ru:{ regTgLabel2:"Telegram @username (желательно)", regTgHint2:"Необязательно, но так бот @MilaisssOthers_bot сможет присылать вам уведомления о покупках и статусе заказа.",
+  ru:{ regTgLabel2:"Telegram @username (желательно)", regTgHint2:"Необязательно, но так бот @milasssBOT сможет присылать вам уведомления о покупках и статусе заказа.",
     notifTitle:"Уведомления в Telegram", notifSub:"Бот пришлёт статус заказа и ответы поддержки", notifBtn:"Подключить", notifOn:"Уведомления в Telegram включены", notifAfterReg:"Осталось подключить уведомления — кнопка в профиле", loginDone:"Вход выполнен",
     supAnswerTitle:"Ответ", supAnswerBody:"Вам ответят в течение 5 минут", supSendFail:"Не удалось отправить. Проверьте интернет и попробуйте ещё раз", supSendSlow:"Нет связи — сообщение отправится, как только появится интернет",
     supL1:"Отправляем", supL2:"Передаём продавцу", supL3:"Уведомляем", supL4:"Почти готово", supDone:"Готово", supNew:"Написать ещё" },
-  uz:{ regTgLabel2:"Telegram @username (tavsiya etiladi)", regTgHint2:"Majburiy emas, lekin shunda @MilaisssOthers_bot xaridlar va buyurtma holati haqida xabar yuboradi.",
+  uz:{ regTgLabel2:"Telegram @username (tavsiya etiladi)", regTgHint2:"Majburiy emas, lekin shunda @milasssBOT xaridlar va buyurtma holati haqida xabar yuboradi.",
     notifTitle:"Telegram bildirishnomalari", notifSub:"Bot buyurtma holati va yordam javoblarini yuboradi", notifBtn:"Ulash", notifOn:"Telegram bildirishnomalari yoqilgan", notifAfterReg:"Bildirishnomalarni ulash qoldi — profildagi tugma", loginDone:"Kirish bajarildi",
     supAnswerTitle:"Javob", supAnswerBody:"Sizga 5 daqiqa ichida javob berishadi", supSendFail:"Yuborib bo‘lmadi. Internetni tekshirib, qayta urinib ko‘ring", supSendSlow:"Aloqa yo‘q — internet paydo bo‘lishi bilan xabar yuboriladi",
     supL1:"Yuborilmoqda", supL2:"Sotuvchiga uzatilmoqda", supL3:"Xabardor qilinmoqda", supL4:"Deyarli tayyor", supDone:"Tayyor", supNew:"Yana yozish" },
-  tr:{ regTgLabel2:"Telegram @kullanıcıadı (önerilir)", regTgHint2:"Zorunlu değil, ancak @MilaisssOthers_bot size alışveriş ve sipariş durumu bildirimleri gönderebilir.",
+  tr:{ regTgLabel2:"Telegram @kullanıcıadı (önerilir)", regTgHint2:"Zorunlu değil, ancak @milasssBOT size alışveriş ve sipariş durumu bildirimleri gönderebilir.",
     notifTitle:"Telegram bildirimleri", notifSub:"Bot sipariş durumunu ve destek yanıtlarını gönderir", notifBtn:"Bağla", notifOn:"Telegram bildirimleri açık", notifAfterReg:"Bildirimleri bağlamak kaldı — profildeki düğme", loginDone:"Giriş yapıldı",
     supAnswerTitle:"Yanıt", supAnswerBody:"5 dakika içinde size yanıt verilecek", supSendFail:"Gönderilemedi. İnterneti kontrol edip tekrar deneyin", supSendSlow:"Bağlantı yok — internet gelince mesaj gönderilecek",
     supL1:"Gönderiliyor", supL2:"Satıcıya iletiliyor", supL3:"Bildirim gidiyor", supL4:"Neredeyse hazır", supDone:"Tamam", supNew:"Yeni mesaj" },
-  az:{ regTgLabel2:"Telegram @istifadəçi (tövsiyə olunur)", regTgHint2:"Məcburi deyil, amma @MilaisssOthers_bot alış-veriş və sifariş statusu barədə bildiriş göndərə bilər.",
+  az:{ regTgLabel2:"Telegram @istifadəçi (tövsiyə olunur)", regTgHint2:"Məcburi deyil, amma @milasssBOT alış-veriş və sifariş statusu barədə bildiriş göndərə bilər.",
     notifTitle:"Telegram bildirişləri", notifSub:"Bot sifariş statusunu və dəstək cavablarını göndərəcək", notifBtn:"Qoş", notifOn:"Telegram bildirişləri aktivdir", notifAfterReg:"Bildirişləri qoşmaq qalıb — profildəki düymə", loginDone:"Giriş edildi",
     supAnswerTitle:"Cavab", supAnswerBody:"5 dəqiqə ərzində sizə cavab veriləcək", supSendFail:"Göndərmək alınmadı. İnterneti yoxlayıb yenidən cəhd edin", supSendSlow:"Bağlantı yoxdur — internet gələn kimi mesaj göndəriləcək",
     supL1:"Göndərilir", supL2:"Satıcıya ötürülür", supL3:"Bildiriş göndərilir", supL4:"Demək olar hazırdır", supDone:"Hazırdır", supNew:"Yeni mesaj" },
-  en:{ regTgLabel2:"Telegram @username (recommended)", regTgHint2:"Optional, but this lets the @MilaisssOthers_bot send you purchase and order status updates.",
+  en:{ regTgLabel2:"Telegram @username (recommended)", regTgHint2:"Optional, but this lets the @milasssBOT send you purchase and order status updates.",
     notifTitle:"Telegram notifications", notifSub:"The bot will send order status and support replies", notifBtn:"Connect", notifOn:"Telegram notifications are on", notifAfterReg:"One step left — connect notifications in your profile", loginDone:"Logged in",
     supAnswerTitle:"Reply", supAnswerBody:"We’ll reply within 5 minutes", supSendFail:"Couldn’t send. Check your connection and try again", supSendSlow:"No connection — your message will be sent once you’re online",
     supL1:"Sending", supL2:"Passing to the seller", supL3:"Notifying", supL4:"Almost done", supDone:"Done", supNew:"Write again" }
@@ -2834,7 +2834,7 @@ function sendSupportMessage(){
   const customerId = getCustomerId();
   const customerName = getCustomerName();
   input.blur();
-  MorphSupport.start(text, () => {
+  const submitFn = () => {
     const saved = Promise.race([
       db.collection('support').add({ customerId, customerName, sender:'customer', text, createdAt: Date.now() }).then(() => 'ok'),
       new Promise(res => setTimeout(() => res('slow'), 8000))
@@ -2845,7 +2845,15 @@ function sendSupportMessage(){
       if (st === 'ok' || tgOk) return t('supAnswerBody');
       return st === 'slow' ? t('supSendSlow') : t('supSendFail');
     });
-  });
+  };
+  // анимация «пилюли» — один раз за заход в магазин (на первое сообщение), дальше сообщения уходят сразу
+  if (!sendSupportMessage._played){
+    sendSupportMessage._played = true;
+    MorphSupport.start(text, submitFn);
+  } else {
+    submitFn().then(msg => { if (msg !== t('supAnswerBody')) showToast(msg); });
+    orbReact();
+  }
   input.value = '';
   const sb = document.getElementById('supSend'); if (sb) sb.removeAttribute('data-ready');
   const orbEl = document.getElementById('supportOrb'); if (orbEl) orbEl.classList.remove('typing');
