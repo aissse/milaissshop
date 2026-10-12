@@ -511,12 +511,12 @@
   .support-fab svg{ width:24px; height:24px; }
   #support{ background:var(--support-bg, var(--bg)); min-height:100vh; }
   .support-msgs{ padding:12px 20px 170px; display:flex; flex-direction:column; gap:10px; min-height:40vh; }
-  .msg{ max-width:78%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.4; }
-  .msg.customer{ align-self:flex-end; background:var(--support-cust-bg, var(--orange)); color:var(--support-cust-text, #fff); border-bottom-right-radius:4px; }
-  .msg.admin{ align-self:flex-start; background:var(--support-admin-bg, var(--stone)); color:var(--support-admin-text, var(--ink)); border-bottom-left-radius:4px; }
+  .msg{ overflow-wrap:anywhere; white-space:pre-wrap; max-width:78%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.4; }
+  .msg.customer{ align-self:flex-end; background:var(--orange); color:#fff !important; -webkit-text-fill-color:#fff !important; border-bottom-right-radius:4px; }
+  .msg.admin{ align-self:flex-start; background:var(--stone); color:var(--ink) !important; -webkit-text-fill-color:var(--ink) !important; border-bottom-left-radius:4px; }
   .support-input-row{ display:flex; gap:8px; padding:12px 20px; position:fixed; left:0; right:0; bottom:96px; background:var(--support-bg, var(--bg)); z-index:55; will-change:transform; }
   /* шрифт чата поддержки из админки — включается, только если он задан */
-  #support.custom-font .cart-title h2, #support.custom-font .msg, #support.custom-font .empty-state, #support.custom-font .support-input-row input{ font-family:var(--support-font); }
+  #support.custom-font .cart-title h2, #support.custom-font .empty-state, #support.custom-font .support-input-row input{ font-family:var(--support-font); }
   /* ---------- живой шарик-помощник в поддержке ---------- */
   .support-orb-wrap{ display:flex; justify-content:center; padding:6px 0 14px; }
   .support-orb{ position:relative; width:112px; height:112px; border-radius:50%; background:#0c0812; overflow:hidden; isolation:isolate;
@@ -1182,7 +1182,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-111";
+  const CURRENT_VERSION = "20260908-112";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2611,10 +2611,9 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   if (data.orangeColor) document.documentElement.style.setProperty('--orange', data.orangeColor);
   if (data.btsAddressColor) document.documentElement.style.setProperty('--bts-address-color', data.btsAddressColor);
   else document.documentElement.style.removeProperty('--bts-address-color');
-  [['supportBgColor','--support-bg'],['supportCustBubble','--support-cust-bg'],['supportCustText','--support-cust-text'],['supportAdminBubble','--support-admin-bg'],['supportAdminText','--support-admin-text']].forEach(([k,v]) => {
-    if (data[k]) document.documentElement.style.setProperty(v, data[k]); else document.documentElement.style.removeProperty(v);
-  });
-  applySupportFont(data.supportFont || '');
+  // цвета и шрифт чата поддержки больше не берём из админки — они задаются только в коде (CSS выше)
+  ['--support-bg','--support-cust-bg','--support-cust-text','--support-admin-bg','--support-admin-text'].forEach(v => document.documentElement.style.removeProperty(v));
+  applySupportFont('');
   if (data.pmrSelectedBg) document.documentElement.style.setProperty('--pmr-selected-bg', data.pmrSelectedBg);
   if (data.iconBorderColor) document.documentElement.style.setProperty('--icon-border-color', data.iconBorderColor);
   if (data.langBtnBg) document.documentElement.style.setProperty('--langbtn-bg', data.langBtnBg);
