@@ -336,6 +336,13 @@
   .review-form .stars{ display:flex; gap:4px; margin-bottom:6px; font-size:18px; }
   .review-form .stars span{ cursor:pointer; color:var(--line); }
   .review-form .stars span.on{ color:#f5a623; }
+  .anon-sw{ display:flex; align-items:center; gap:10px; margin:2px 0 12px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; }
+  .anon-sw input{ position:absolute; opacity:0; width:0; height:0; }
+  .anon-track{ position:relative; width:40px; height:24px; border-radius:100px; background:var(--stone); border:1px solid var(--line); flex:none; transition:background .35s cubic-bezier(.4,0,.2,1), border-color .35s cubic-bezier(.4,0,.2,1); }
+  .anon-track i{ position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--surface); box-shadow:0 1px 4px rgba(0,0,0,.25); transition:transform .35s cubic-bezier(.34,1.4,.64,1); }
+  .anon-sw input:checked + .anon-track{ background:var(--orange); border-color:var(--orange); }
+  .anon-sw input:checked + .anon-track i{ transform:translateX(16px); }
+  .anon-txt{ font-size:13px; font-weight:600; color:var(--ink); }
   .review-form button{ background:var(--ink); color:var(--on-ink); border:none; border-radius:8px; padding:7px 12px; font-size:12px; cursor:pointer; }
   .review-form button:disabled{ background:var(--muted); cursor:not-allowed; }
   .review-photo-btn{ display:inline-flex; align-items:center; gap:6px; border:1px dashed var(--line); border-radius:10px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer; margin-bottom:6px; color:var(--ink); background:var(--surface); }
@@ -1184,7 +1191,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-114";
+  const CURRENT_VERSION = "20260908-115";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1795,11 +1802,11 @@ const STR_NEW2 = {
 };
 Object.keys(STR_NEW2).forEach(l => Object.assign(STR[l], STR_NEW2[l]));
 const STR_NEW3 = {
-  ru:{ notifTap:"Нажмите «Старт» в боте — и уведомления о заказах будут приходить" },
-  uz:{ notifTap:"Botda «Start» tugmasini bosing — buyurtmalar haqida xabarlar keladi" },
-  tr:{ notifTap:"Botta «Başlat»a basın — sipariş bildirimleri gelmeye başlar" },
-  az:{ notifTap:"Botda «Start» düyməsinə basın — sifariş bildirişləri gələcək" },
-  en:{ notifTap:"Tap “Start” in the bot — order updates will arrive there" }
+  ru:{ notifTap:"Нажмите «Старт» в боте — и уведомления о заказах будут приходить", revAnon:"Скрыть моё имя", revAnonName:"Аноним", revBuyer:"Покупатель" },
+  uz:{ notifTap:"Botda «Start» tugmasini bosing — buyurtmalar haqida xabarlar keladi", revAnon:"Ismimni yashirish", revAnonName:"Anonim", revBuyer:"Xaridor" },
+  tr:{ notifTap:"Botta «Başlat»a basın — sipariş bildirimleri gelmeye başlar", revAnon:"Adımı gizle", revAnonName:"Anonim", revBuyer:"Müşteri" },
+  az:{ notifTap:"Botda «Start» düyməsinə basın — sifariş bildirişləri gələcək", revAnon:"Adımı gizlət", revAnonName:"Anonim", revBuyer:"Müştəri" },
+  en:{ notifTap:"Tap “Start” in the bot — order updates will arrive there", revAnon:"Hide my name", revAnonName:"Anonymous", revBuyer:"Customer" }
 };
 Object.keys(STR_NEW3).forEach(l => Object.assign(STR[l], STR_NEW3[l]));
 
@@ -3572,7 +3579,7 @@ function openReviews(){
     html += '<p class="hint">Пока нет отзывов по этому товару</p>';
   } else {
     html += approved.map(r => {
-      const name = r.anonymous ? 'Аноним' : (r.authorName || 'Покупатель');
+      const name = r.anonymous ? t('revAnonName') : (String(r.authorName||'').replace(/\s*\(@[^)]*\)/g,'').trim() || t('revBuyer'));
       const initial = name.trim().charAt(0).toUpperCase();
       return `
       <div class="review-item">
@@ -4240,9 +4247,7 @@ function renderOrders(){
               <label class="review-photo-btn" for="rp-${order.id}-${ii}">📷 <span id="rpLabel-${order.id}-${ii}">Добавить фото (необязательно)</span></label>
               <input type="file" id="rp-${order.id}-${ii}" accept="image/*" onchange="previewReviewPhoto('${order.id}',${ii})" style="display:none;">
               <div class="review-photo-preview" id="rpPreview-${order.id}-${ii}"></div>
-              <label style="display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:8px;">
-                <input type="checkbox" id="ra-${order.id}-${ii}"> Оставить анонимно
-              </label>
+              <label class="anon-sw"><input type="checkbox" id="ra-${order.id}-${ii}"><span class="anon-track"><i></i></span><span class="anon-txt">${t('revAnon')}</span></label>
               <button id="rsBtn-${order.id}-${ii}" onclick="submitReview('${order.id}',${ii},'${it.productId}','${(it.name||'').replace(/'/g,"")}','${(it.colorName||'').replace(/'/g,"")}')">Отправить</button>
             </div>` : ''}
         `;
@@ -4295,7 +4300,7 @@ function submitReview(orderId, ii, productId, productName, colorName){
   const finish = (photoUrl) => {
     const payload = {
       productId, productName, colorName: colorName || '', text, approved: false, createdAt: Date.now(),
-      anonymous, authorName: anonymous ? '' : getCustomerName(), customerId: getCustomerId()
+      anonymous, authorName: anonymous ? '' : String(getCustomerName()||'').replace(/\s*\(@[^)]*\)/g,'').trim(), customerId: getCustomerId()
     };
     if (rating) payload.rating = rating;
     if (photoUrl) payload.photo = photoUrl;
