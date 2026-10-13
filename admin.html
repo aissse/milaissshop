@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -126,13 +127,14 @@
 
 <div id="lockScreen" class="lock-screen">
   <div class="logo">milaisss</div>
-  <p class="sub">Введите пароль владельца</p>
-  <input type="text" id="pwInput" placeholder="Пароль">
+  <p class="sub">Вход для владельца</p>
+  <input type="email" id="emInput" placeholder="Email" autocomplete="username" autocapitalize="off">
+  <input type="password" id="pwInput" placeholder="Пароль" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPassword()">
   <button class="btn" onclick="checkPassword()">Войти</button>
 </div>
 
 <div id="adminWrap" style="display:none;">
-  <div class="topbar"><div class="logo">milaisss</div></div>
+  <div class="topbar"><div class="logo">milaisss</div><button class="btn" style="position:absolute; right:0; padding:6px 14px; font-size:12px;" onclick="adminLogout()">Выйти</button></div>
   <div class="tabs">
     <div class="tab active" data-tab="products" onclick="switchTab('products')">Товары</div>
     <div class="tab" data-tab="reviews" onclick="switchTab('reviews')">Отзывы</div>
@@ -361,7 +363,7 @@
 </div>
 
 <script>
-const ADMIN_PASSWORD = "milaisss2026"; // смени на свой пароль
+const WORKER_URL = "https://milaisss-bot.24sb7kyvfp.workers.dev"; // сообщения в Telegram идут через воркер (токенов ботов здесь больше нет)
 
 // Настройки почтовых уведомлений подписчикам о новых товарах (через emailjs.com — те же данные,
 // что ты уже вписал(а) в index.html. Впиши сюда точно такие же значения).
@@ -483,24 +485,25 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 
-function checkPassword(){
-  const val = document.getElementById('pwInput').value;
-  if (val === ADMIN_PASSWORD){
-    document.getElementById('lockScreen').style.display = 'none';
-    document.getElementById('adminWrap').style.display = 'block';
-    loadProducts();
-    loadSettings();
-    loadReviews();
-    loadOrders();
-    loadSupport();
-    loadSubscribers();
-    loadVisits();
-    PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
-  } else {
-    alert('Неверный пароль');
-  }
+let _adminOpened = false;
+function openAdmin(){
+  if (_adminOpened) return; _adminOpened = true;
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('adminWrap').style.display = 'block';
+  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSupport(); loadSubscribers(); loadVisits();
+  PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
 }
+function checkPassword(){
+  const email = (document.getElementById('emInput').value || '').trim();
+  const pw = document.getElementById('pwInput').value;
+  if (!email || !pw){ alert('Введите email и пароль'); return; }
+  auth.signInWithEmailAndPassword(email, pw).then(openAdmin).catch(() => alert('Неверный email или пароль'));
+}
+// уже входили раньше — открываем сразу (но только настоящий вход по email, не гостя)
+auth.onAuthStateChanged(u => { if (u && !u.isAnonymous && u.email) openAdmin(); });
+function adminLogout(){ auth.signOut().then(() => location.reload()); }
 
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
@@ -1535,23 +1538,16 @@ function saveSocialLink(key, value){
 const STATUS_OPTIONS = ['Проверяется оплата','Принято','Собирается','В пути','В ПВЗ','Доставлен'];
 
 /* ---------- уведомления клиентам в Telegram (от бота магазина) ---------- */
-const NOTIFY_BOT_TOKEN = "8994741861:AAHQOewBvm8hXMubKbCDsWO0Sai8jUSwLyw";
-function tgSend(chatId, text){
-  if (!chatId || !NOTIFY_BOT_TOKEN) return Promise.resolve(false);
-  return fetch(`https://api.telegram.org/bot${NOTIFY_BOT_TOKEN}/sendMessage`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text })
-  }).then(r => r.json()).then(j => !!(j && j.ok)).catch(() => false);
+async function tgSend(customerId, text){
+  try{
+    const u = auth.currentUser; if (!u || !customerId) return false;
+    const idt = await u.getIdToken();
+    const r = await fetch(WORKER_URL + '/status', { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + idt }, body: JSON.stringify({ customerId: String(customerId), text }) });
+    const j = await r.json(); return !!(j && j.ok);
+  }catch(e){ return false; }
 }
-async function resolveChatId(customerId, hint){
-  if (hint) return String(hint);
-  if (/^\d+$/.test(customerId || '')) return String(customerId);
-  try {
-    const d = await db.collection('customers').doc(customerId).get();
-    if (d.exists && d.data().tgChatId) return String(d.data().tgChatId);
-  } catch(e){}
-  return '';
-}
+// чат клиента определяет воркер по его ID — здесь достаточно вернуть ID
+async function resolveChatId(customerId){ return customerId ? String(customerId) : ''; }
 const STATUS_TXT = {
   'Проверяется оплата':{ ru:'Проверяется оплата', uz:'To‘lov tekshirilmoqda', tr:'Ödeme kontrol ediliyor', az:'Ödəniş yoxlanılır', en:'Checking payment' },
   'Принято':{ ru:'Принято', uz:'Qabul qilindi', tr:'Alındı', az:'Qəbul edildi', en:'Accepted' },
@@ -1780,8 +1776,7 @@ function filterAndRenderOrders(){
     card.querySelector('.status-select').onchange = async (e) => {
       const st = e.target.value;
       await db.collection('orders').doc(o.id).update({ status: st });
-      const chat = await resolveChatId(o.customerId, o.notifyChatId);
-      if (!chat){ adminToast('Статус сохранён. У клиента не подключены уведомления Telegram'); return; }
+      const chat = await resolveChatId(o.customerId);
       const ok = await tgSend(chat, buildStatusText(o, st));
       adminToast(ok ? 'Статус сохранён, клиенту отправлено в Telegram ✅' : 'Статус сохранён, но Telegram не доставил (клиент не запускал бота?)');
     };
