@@ -970,9 +970,9 @@ function renderStockList(){
     const colors = (p.colors && p.colors.length) ? p.colors : [{name:'Стандарт', stock:p.stock||0}];
     const breakdownHTML = colors.map(c => {
       if (c.sizeStocks && Object.keys(c.sizeStocks).length){
-        return Object.entries(c.sizeStocks).map(([size, stock]) => `<div class="stock-item ${Number(stock||0)<=0?'zero':''}"><span>${c.name} · ${size}</span><span>${stock||0} шт</span></div>`).join('');
+        return Object.entries(c.sizeStocks).map(([size, stock]) => `<div class="stock-item ${Number(stock||0)<=0?'zero':''}"><span>${escH(c.name)} · ${escH(size)}</span><span>${stock||0} шт</span></div>`).join('');
       }
-      return `<div class="stock-item ${Number(c.stock||0)<=0?'zero':''}"><span>${c.name}</span><span>${c.stock||0} шт</span></div>`;
+      return `<div class="stock-item ${Number(c.stock||0)<=0?'zero':''}"><span>${escH(c.name)}</span><span>${c.stock||0} шт</span></div>`;
     }).join('');
     return `<div style="margin-bottom:10px;">
       <div style="font-weight:700; font-size:13px; margin-bottom:4px;">${p.name}</div>
@@ -992,10 +992,10 @@ function loadReviews(){
       row.className = 'review-row';
       row.innerHTML = `
         <span class="rdel" data-id="${doc.id}">Удалить</span>
-        <div class="rmeta">${r.productName || ''}${r.colorName ? ' · цвет: '+r.colorName : ''}${r.rating ? ' · ' + '★'.repeat(r.rating) : ''}</div>
-        <div class="rmeta">${r.anonymous ? '👤 Аноним' : '👤 ' + (r.authorName || 'Покупатель')}</div>
-        <div class="rtext">${r.text}</div>
-        ${r.photo ? `<img src="${r.photo}" style="max-width:140px; border-radius:8px; margin-bottom:8px; display:block;">` : ''}
+        <div class="rmeta">${escH(r.productName || '')}${r.colorName ? ' · цвет: '+escH(r.colorName) : ''}${r.rating ? ' · ' + '★'.repeat(r.rating) : ''}</div>
+        <div class="rmeta">${r.anonymous ? '👤 Аноним' : '👤 ' + escH(r.authorName || 'Покупатель')}</div>
+        <div class="rtext">${escH(r.text)}</div>
+        ${/^https?:\/\//i.test(r.photo||'') ? `<img src="${escH(r.photo)}" style="max-width:140px; border-radius:8px; margin-bottom:8px; display:block;">` : ''}
         <label><input type="checkbox" class="rcheck" data-id="${doc.id}" ${r.approved ? 'checked' : ''}> Показывать покупателям</label>
       `;
       row.querySelector('.rcheck').onchange = (e) => db.collection('reviews').doc(doc.id).update({ approved: e.target.checked });
@@ -1221,6 +1221,7 @@ function removeAvatarOption(i){
   saveSetting('avatarOptions', avatarOptions);
 }
 
+function escH(v){ return String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 let btsBranches = [];
 function renderBtsTags(){
   const wrap = document.getElementById('btsTags');
@@ -1229,7 +1230,7 @@ function renderBtsTags(){
       <input type="text" id="btsAdminSearch" placeholder="Поиск пункта для удаления..." oninput="filterBtsAdminList(this.value)">
       <div id="btsAdminSearchResults"></div>`;
   } else {
-    wrap.innerHTML = btsBranches.map((b,i) => `<span class="cat-tag">${b} <span class="x" onclick="removeBtsBranch(${i})">✕</span></span>`).join('');
+    wrap.innerHTML = btsBranches.map((b,i) => `<span class="cat-tag">${escH(b)} <span class="x" onclick="removeBtsBranch(${i})">✕</span></span>`).join('');
   }
 }
 
@@ -1702,7 +1703,7 @@ function renderAnalytics(){
       <div class="ph">👤</div>
       <div class="meta">
         <div class="name">${b.name}</div>
-        <div class="info">${b.phone ? b.phone + ' · ' : ''}заказов: ${b.count} · ${b.total.toLocaleString('ru-RU')} сум</div>
+        <div class="info">${b.phone ? escH(b.phone) + ' · ' : ''}заказов: ${b.count} · ${b.total.toLocaleString('ru-RU')} сум</div>
       </div>
     </div>
   `).join('') : '<p class="hint" style="margin-top:0;">За этот период покупателей нет</p>';
@@ -1765,13 +1766,13 @@ function filterAndRenderOrders(){
     const card = document.createElement('div');
     card.className = 'order-admin-card';
     card.innerHTML = `
-      <div class="who">${o.customerName || 'Покупатель'}</div>
+      <div class="who">${escH(o.customerName || 'Покупатель')}</div>
       <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
-      ${o.items.map(it => `<div class="oline">${it.name} (${it.size}, ${it.colorName}) × ${it.qty} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
+      ${o.items.map(it => `<div class="oline">${escH(it.name)} (${escH(it.size)}, ${escH(it.colorName)}) × ${Number(it.qty)||0} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
       <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
-      ${o.phone ? `<div class="oline">📞 ${o.phone}</div>` : ''}
-      ${o.btsBranch ? `<div class="oline">📍 ${o.btsBranch}</div>` : ''}
-      ${o.paymentMethod ? `<div class="oline" style="font-weight:700;">💰 Способ оплаты: ${o.paymentMethod}</div>` : ''}
+      ${o.phone ? `<div class="oline">📞 ${escH(o.phone)}</div>` : ''}
+      ${o.btsBranch ? `<div class="oline">📍 ${escH(o.btsBranch)}</div>` : ''}
+      ${o.paymentMethod ? `<div class="oline" style="font-weight:700;">💰 Способ оплаты: ${escH(o.paymentMethod)}</div>` : ''}
       <select class="status-select">
         ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
       </select>
@@ -1811,9 +1812,9 @@ function renderSupportTab(){
     const c = supportData[selectedSupportCustomer];
     wrap.innerHTML = `
       <div style="margin-bottom:10px; cursor:pointer; color:var(--maroon); font-weight:700;" onclick="selectedSupportCustomer=null; renderSupportTab();">← Все чаты</div>
-      <div style="font-weight:700; margin-bottom:10px;">${c.name}</div>
+      <div style="font-weight:700; margin-bottom:10px;">${escH(c.name)}</div>
       <div style="max-height:360px; overflow-y:auto; display:flex; flex-direction:column; margin-bottom:10px;">
-        ${c.messages.map(m => `<div class="chat-bubble ${m.sender}">${m.text}</div>`).join('')}
+        ${c.messages.map(m => `<div class="chat-bubble ${m.sender==='admin'?'admin':'customer'}">${escH(m.text)}</div>`).join('')}
       </div>
       <input type="text" id="supportReplyInput" placeholder="Ответ клиенту...">
       <button class="btn" onclick="sendSupportReply()">Отправить</button>
@@ -1829,7 +1830,7 @@ function renderSupportTab(){
       const last = c.messages[c.messages.length-1];
       return `<div class="prod-row" style="cursor:pointer;" onclick="openSupportChat('${cid}')">
         <div class="ph">💬</div>
-        <div class="meta"><div class="name">${c.name}</div><div class="info">${(last.text||'').slice(0,40)}</div></div>
+        <div class="meta"><div class="name">${escH(c.name)}</div><div class="info">${escH((last.text||'').slice(0,40))}</div></div>
       </div>`;
     }).join('');
   }
