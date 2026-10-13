@@ -23,6 +23,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&display=swap" rel="stylesheet">
 <style>
@@ -1193,9 +1194,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-function escH(v){ return String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function safeUrl(u){ u=String(u||''); return /^https?:\/\//i.test(u) ? escH(u) : ''; }
-  const CURRENT_VERSION = "20260908-116";
+  const CURRENT_VERSION = "20260908-117";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1219,11 +1218,11 @@ const ADMIN_USERNAME = "isssroilov";
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
-// бот для КЛИЕНТОВ (@milaisss_bot): вход через Telegram, статусы заказов, ответы поддержки
-const NOTIFY_BOT_TOKEN = "8994741861:AAHQOewBvm8hXMubKbCDsWO0Sai8jUSwLyw";
-// бот для ВАС (@MilaisssOthers_bot): сюда приходят заказы и вопросы клиентов, в нём вы отвечаете
-const ADMIN_BOT_TOKEN = "8923014509:AAFyHc8gVllm0nV88YwH32PsRClRIKp0-MY";
-const ADMIN_CHAT_ID = "6620851909";
+function escH(v){ return String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function safeUrl(u){ u=String(u||''); return /^https?:\/\//i.test(u) ? escH(u) : ''; }
+// Токены ботов на сайте больше НЕ хранятся — все сообщения в Telegram идут через воркер Cloudflare.
+const WORKER_URL = "https://milaisss-bot.24sb7kyvfp.workers.dev";
+const NOTIFY_BOT_ID = "8994741861"; // публичный ID бота @milaisss_bot (нужен для входа через Telegram)
 const NOTIFY_BOT_USERNAME = "@milaisss_bot";
 
 // Настройки почтовых уведомлений (через emailjs.com — бесплатно, без своего сервера).
@@ -1274,15 +1273,8 @@ function sendNotifyEmail(toEmail, subject, message){
   return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: toEmail, subject, message }).catch(() => {});
 }
 
-function getLinkedTelegramId(){ return localStorage.getItem('milaisss_linked_tg_id') || ''; }
-function getCustomerId(){
-  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) return String(tg.initDataUnsafe.user.id);
-  const linkedId = getLinkedTelegramId();
-  if (linkedId) return linkedId;
-  let gid = localStorage.getItem('milaisss_guest_id');
-  if (!gid){ gid = 'guest_' + Date.now(); localStorage.setItem('milaisss_guest_id', gid); }
-  return gid;
-}
+function getLinkedTelegramId(){ return (authUser && !authUser.isAnonymous && !isTelegramUser()) ? authUid : ''; }
+function getCustomerId(){ return authUid || 'pending'; }
 function getCustomerName(){
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user){
     const u = tg.initDataUnsafe.user;
@@ -1543,7 +1535,7 @@ function renderTelegramLoginWidget(){
 }
 
 function startTelegramLogin(){
-  const botId = (NOTIFY_BOT_TOKEN || '').split(':')[0];
+  const botId = NOTIFY_BOT_ID;
   if (!botId || !window.Telegram || !window.Telegram.Login){
     showToast(t('tgOpenFail'));
     return;
@@ -1557,22 +1549,24 @@ function showPhoneLoginSoon(){
   showToast(t('phoneLoginSoon'));
 }
 
-function onTelegramAuth(user){
-  localStorage.setItem('milaisss_linked_tg_id', String(user.id));
+async function onTelegramAuth(user){
+  try{
+    const r = await fetch(WORKER_URL + '/auth/telegram', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ user }) });
+    const j = await r.json();
+    if (!j || !j.ok || !j.token) throw new Error('auth');
+    await firebase.auth().signInWithCustomToken(j.token);
+  }catch(e){ showToast(t('tgOpenFail')); return; }
   localStorage.setItem('milaisss_linked_tg_name', (user.first_name||'') + (user.last_name ? (' '+user.last_name) : ''));
   if (user.username) localStorage.setItem('milaisss_linked_tg_username', user.username);
   else localStorage.removeItem('milaisss_linked_tg_username');
   showToast(t('loginDone'));
-  tgSend(String(user.id), tgMsg().connected).then(ok => {
+  workerNotify('customer', tgMsg().connected).then(ok => {
     localStorage.setItem('milaisss_notify_ok', ok ? '1' : '0');
     renderProfileHeader();
   });
-  loadCustomerProfile();
+  if (user.photo_url){ localStorage.setItem('milaisss_linked_tg_avatar', user.photo_url); }
   renderProfileHeader();
-  renderTelegramLoginWidget();
-  renderOrders();
-  if (user.photo_url){ localStorage.setItem('milaisss_linked_tg_avatar', user.photo_url); renderProfileHeader(); }
-  else if (!localStorage.getItem('milaisss_linked_tg_avatar')) openTelegramAvatarModal();
+  if (!user.photo_url && !localStorage.getItem('milaisss_linked_tg_avatar')) openTelegramAvatarModal();
 }
 
 function openTelegramAvatarModal(retriesLeft){
@@ -1607,6 +1601,7 @@ function selectTelegramAvatar(url){
 }
 
 function logoutTelegram(){
+  try{ firebase.auth().signOut(); }catch(e){}
   localStorage.removeItem('milaisss_linked_tg_id');
   localStorage.removeItem('milaisss_linked_tg_name');
   localStorage.removeItem('milaisss_linked_tg_username');
@@ -1618,24 +1613,21 @@ function logoutTelegram(){
   renderTelegramLoginWidget();
   renderOrders();
 }
-function notifyAdmin(text){
-  if (!ADMIN_BOT_TOKEN || ADMIN_BOT_TOKEN.startsWith('ВСТАВЬ')) return Promise.resolve();
-  return fetch(`https://api.telegram.org/bot${ADMIN_BOT_TOKEN}/sendMessage`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text })
-  }).catch(() => {});
+function notifyAdmin(text){ return workerNotify('admin', text); }
+/* отправка в Telegram — через воркер (он знает токены; сайт их не хранит) */
+async function workerNotify(kind, text){
+  try{
+    await authReady;
+    const u = firebase.auth().currentUser; if (!u) return false;
+    const idt = await u.getIdToken();
+    const r = await fetch(WORKER_URL + '/notify', { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + idt }, body: JSON.stringify({ kind, text }) });
+    const j = await r.json(); return !!(j && j.ok);
+  }catch(e){ return false; }
 }
 
 /* ---------- уведомления клиентам от бота ---------- */
 const NOTIFY_BOT_LINK = 'https://t.me/' + NOTIFY_BOT_USERNAME.replace('@','');
-function tgSend(chatId, text, token){
-  token = token || NOTIFY_BOT_TOKEN;
-  if (!chatId || !token || token.startsWith('ВСТАВЬ')) return Promise.resolve(false);
-  return fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text })
-  }).then(r => r.json()).then(j => !!(j && j.ok)).catch(() => false);
-}
+function tgSend(chatId, text){ return workerNotify('customer', text); }
 const TG_MSG = {
   ru:{ connected:"✅ Уведомления milaisss подключены. Здесь будут статусы ваших заказов и ответы поддержки.", orderTitle:"🛍️ Заказ оформлен!", total:"Итого", pickup:"Пункт БТС", status:"Статус", hint:"Мы пришлём сообщение здесь, когда статус изменится." },
   uz:{ connected:"✅ milaisss bildirishnomalari yoqildi. Bu yerda buyurtmalaringiz holati va yordam javoblari keladi.", orderTitle:"🛍️ Buyurtma rasmiylashtirildi!", total:"Jami", pickup:"BTS punkti", status:"Holati", hint:"Holat o‘zgarganda shu yerga xabar yuboramiz." },
@@ -1699,6 +1691,27 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+/* ---------- вход (Firebase Auth) ----------
+   Гость = анонимный пользователь. Telegram = подписанный токен из воркера (uid = Telegram ID). */
+let authUser = null, authUid = '';
+let _authResolve; const authReady = new Promise(r => { _authResolve = r; });
+firebase.auth().onAuthStateChanged(async u => {
+  if (!u){
+    if (isTelegramUser()){
+      try{
+        const r = await fetch(WORKER_URL + '/auth/telegram', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ initData: tg.initData }) });
+        const j = await r.json();
+        if (j && j.ok && j.token){ await firebase.auth().signInWithCustomToken(j.token); return; }
+      }catch(e){}
+    }
+    try{ await firebase.auth().signInAnonymously(); }catch(e){ console.warn('anon auth failed', e); _authResolve(); }
+    return;
+  }
+  const changed = authUid && authUid !== u.uid;
+  authUser = u; authUid = u.uid; _authResolve();
+  if (changed || afterAuth._done) afterAuth(); 
+});
 
 function discOf(p){ const d = Number(p && p.discount) || 0; return (d > 0 && d < 100) ? d : 0; }
 function effPrice(p){ const d = discOf(p); return d ? Math.round(Number(p.price||0) * (100 - d) / 100 / 100) * 100 : Number(p.price||0); }
@@ -2836,9 +2849,10 @@ document.addEventListener('touchend', (e) => {
 });
 
 /* ---------- support chat ---------- */
+let _supUnsub = null;
 function setupSupportListener(){
   const customerId = getCustomerId();
-  db.collection('support').where('customerId','==',customerId).onSnapshot(snap => {
+  _supUnsub = db.collection('support').where('customerId','==',customerId).onSnapshot(snap => {
     let msgs = [];
     snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
     msgs.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
@@ -2898,7 +2912,7 @@ function sendSupportMessage(){
       new Promise(res => setTimeout(() => res('slow'), 8000))
     ]).catch(() => 'fail');
     // в Telegram уходит тег #c:ID — по нему ответ вернётся именно этому клиенту
-    const toAdmin = tgSend(ADMIN_CHAT_ID, `💬 Сообщение в поддержку\n👤 ${customerName}\n\n${text}\n\n↩️ Ответьте свайпом на это сообщение — ответ придёт клиенту на сайт\n#c:${customerId}`, ADMIN_BOT_TOKEN);
+    const toAdmin = workerNotify('admin', `💬 Сообщение в поддержку\n👤 ${customerName}\n\n${text}\n\n↩️ Ответьте свайпом на это сообщение — ответ придёт клиенту на сайт\n#c:${customerId}`);
     return Promise.all([saved, toAdmin]).then(([st, tgOk]) => {
       if (st === 'ok' || tgOk) return t('supAnswerBody');
       return st === 'slow' ? t('supSendSlow') : t('supSendFail');
@@ -4039,7 +4053,7 @@ function finalizeOrder(phone, branch){
   const confirmBtnOriginalText = confirmBtn ? confirmBtn.textContent : '';
   if (confirmBtn){ confirmBtn.disabled = true; confirmBtn.textContent = t('confirmingText'); }
 
-  const notifyChatId = getNotifyChatId();
+  const notifyChatId = '';
   let stockTaken = false;
   decrementStockForOrder(orderItems).then(() => {
     stockTaken = true;
@@ -4050,7 +4064,7 @@ function finalizeOrder(phone, branch){
       lang, notifyChatId
     });
   }).then(() => {
-    if (notifyChatId) tgSend(notifyChatId, buildOrderNotifyText(orderItems, total, branch));
+    workerNotify('customer', buildOrderNotifyText(orderItems, total, branch));
     cart = []; updateCartBadge();
     document.getElementById('phoneInput').value = '';
     notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text);
@@ -4398,14 +4412,19 @@ function logVisit(){
 }
 
 /* ---------- init ---------- */
+function afterAuth(){
+  afterAuth._done = true;
+  _supUnsub && _supUnsub(); _supUnsub = null; setupSupportListener._admin = undefined;
+  setupSupportListener();
+  loadCustomerProfile();
+  renderProfileHeader();
+  renderTelegramLoginWidget();
+  try{ if (document.getElementById('profile').classList.contains('active')){ renderOrders(); renderMyReviews(); } }catch(e){}
+}
 applyLang();
 updateThemeButtons();
-setupSupportListener();
-loadCustomerProfile();
-renderProfileHeader();
-renderTelegramLoginWidget();
 renderRatingSummary();
-logVisit();
+authReady.then(() => { afterAuth(); logVisit(); });
 </script>
 </body>
 </html>
