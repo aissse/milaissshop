@@ -315,6 +315,8 @@
   .hint{ padding:0 20px 20px; font-size:11px; color:var(--muted); line-height:1.5; }
   .empty-state{ padding:60px 20px; text-align:center; color:var(--muted); font-size:13px; grid-column:1/-1; }
 
+  #netBanner{ position:fixed; left:16px; right:16px; top:calc(env(safe-area-inset-top,0px) + 12px); z-index:900; display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--ink); color:var(--on-ink); padding:12px 14px 12px 18px; border-radius:18px; font-size:13px; font-weight:600; box-shadow:0 12px 30px -10px rgba(0,0,0,.4); }
+  #netBanner button{ background:var(--orange); color:#fff; border:0; border-radius:100px; padding:8px 16px; font-size:13px; font-weight:700; cursor:pointer; }
   .toast{ position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--on-ink); padding:12px 20px; border-radius:100px; font-size:13px; font-weight:600; opacity:0; transition:all .25s; z-index:200; white-space:normal; width:max-content; max-width:calc(100vw - 40px); text-align:center; line-height:1.35; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
@@ -1191,7 +1193,9 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-115";
+function escH(v){ return String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function safeUrl(u){ u=String(u||''); return /^https?:\/\//i.test(u) ? escH(u) : ''; }
+  const CURRENT_VERSION = "20260908-116";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1497,9 +1501,9 @@ function renderProfileHeader(){
       <div class="profile-header-card">
         <div class="profile-avatar" style="background-image:url('${avatarUrl}'); display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;" onclick="openTelegramAvatarModal()">${avatarInner}</div>
         <div>
-          <div class="profile-name">${n}</div>
-          ${un ? `<div class="profile-phone">@${un}</div>` : ''}
-          <div class="profile-phone" style="color:#c0392b; cursor:pointer;" onclick="logoutTelegram()">Выйти</div>
+          <div class="profile-name">${escH(n)}</div>
+          ${un ? `<div class="profile-phone">@${escH(un)}</div>` : ''}
+          <div class="profile-phone" style="color:#c0392b; cursor:pointer;" onclick="logoutTelegram()">${t('logoutTxt')}</div>
         </div>
         ${bellBtnHTML()}
       </div>
@@ -1541,7 +1545,7 @@ function renderTelegramLoginWidget(){
 function startTelegramLogin(){
   const botId = (NOTIFY_BOT_TOKEN || '').split(':')[0];
   if (!botId || !window.Telegram || !window.Telegram.Login){
-    showToast('Не удалось открыть вход через Telegram, попробуйте ещё раз через пару секунд');
+    showToast(t('tgOpenFail'));
     return;
   }
   window.Telegram.Login.auth({ bot_id: botId, request_access: 'write' }, function(data){
@@ -1802,11 +1806,11 @@ const STR_NEW2 = {
 };
 Object.keys(STR_NEW2).forEach(l => Object.assign(STR[l], STR_NEW2[l]));
 const STR_NEW3 = {
-  ru:{ notifTap:"Нажмите «Старт» в боте — и уведомления о заказах будут приходить", revAnon:"Скрыть моё имя", revAnonName:"Аноним", revBuyer:"Покупатель" },
-  uz:{ notifTap:"Botda «Start» tugmasini bosing — buyurtmalar haqida xabarlar keladi", revAnon:"Ismimni yashirish", revAnonName:"Anonim", revBuyer:"Xaridor" },
-  tr:{ notifTap:"Botta «Başlat»a basın — sipariş bildirimleri gelmeye başlar", revAnon:"Adımı gizle", revAnonName:"Anonim", revBuyer:"Müşteri" },
-  az:{ notifTap:"Botda «Start» düyməsinə basın — sifariş bildirişləri gələcək", revAnon:"Adımı gizlət", revAnonName:"Anonim", revBuyer:"Müştəri" },
-  en:{ notifTap:"Tap “Start” in the bot — order updates will arrive there", revAnon:"Hide my name", revAnonName:"Anonymous", revBuyer:"Customer" }
+  ru:{ notifTap:"Нажмите «Старт» в боте — и уведомления о заказах будут приходить", revAnon:"Скрыть моё имя", revAnonName:"Аноним", revBuyer:"Покупатель", revColor:"цвет", netErr:"Нет связи с магазином", netRetry:"Повторить", tgOpenFail:"Не удалось открыть вход через Telegram, попробуйте ещё раз через пару секунд", badEmail:"Введите корректный email", subThanks:"Спасибо за подписку! ✓", noMoreStock:"Больше нет в наличии", addedCart:"Товар добавлен в корзину ✓", outOfStockToast:"К сожалению, кто-то только что забрал последний товар. Обновите корзину.", orderFail:"Не удалось оформить заказ, попробуйте ещё раз", revSent:"Спасибо! Отзыв отправлен на проверку", revFail:"Не удалось отправить отзыв, попробуйте ещё раз", revNoPhotoCfg:"Загрузка фото пока не настроена продавцом — отзыв отправлен без фото", photoFail:"Не удалось загрузить фото, попробуйте ещё раз", logoutTxt:"Выйти", revFromBuyers:"отзывов от покупателей", socialSoon:"Ссылки на соцсети скоро появятся", rmPhoto:"Убрать фото", sendBtn:"Отправить" },
+  uz:{ notifTap:"Botda «Start» tugmasini bosing — buyurtmalar haqida xabarlar keladi", revAnon:"Ismimni yashirish", revAnonName:"Anonim", revBuyer:"Xaridor", revColor:"rang", netErr:"Do‘kon bilan aloqa yo‘q", netRetry:"Qayta urinish", tgOpenFail:"Telegram orqali kirishni ochib bo‘lmadi, bir necha soniyadan so‘ng qayta urinib ko‘ring", badEmail:"To‘g‘ri email kiriting", subThanks:"Obuna uchun rahmat! ✓", noMoreStock:"Omborda boshqa qolmadi", addedCart:"Mahsulot savatga qo‘shildi ✓", outOfStockToast:"Afsuski, oxirgi mahsulotni kimdir olib qo‘ydi. Savatni yangilang.", orderFail:"Buyurtmani rasmiylashtirib bo‘lmadi, qayta urinib ko‘ring", revSent:"Rahmat! Sharh tekshiruvga yuborildi", revFail:"Sharhni yuborib bo‘lmadi, qayta urinib ko‘ring", revNoPhotoCfg:"Rasm yuklash hali sozlanmagan — sharh rasmsiz yuborildi", photoFail:"Rasmni yuklab bo‘lmadi, qayta urinib ko‘ring", logoutTxt:"Chiqish", revFromBuyers:"xaridorlar sharhlari", socialSoon:"Ijtimoiy tarmoq havolalari tez orada paydo bo‘ladi", rmPhoto:"Rasmni olib tashlash", sendBtn:"Yuborish" },
+  tr:{ notifTap:"Botta «Başlat»a basın — sipariş bildirimleri gelmeye başlar", revAnon:"Adımı gizle", revAnonName:"Anonim", revBuyer:"Müşteri", revColor:"renk", netErr:"Mağaza ile bağlantı yok", netRetry:"Tekrar dene", tgOpenFail:"Telegram girişi açılamadı, birkaç saniye sonra tekrar deneyin", badEmail:"Geçerli bir e-posta girin", subThanks:"Abone olduğunuz için teşekkürler! ✓", noMoreStock:"Stokta başka kalmadı", addedCart:"Ürün sepete eklendi ✓", outOfStockToast:"Maalesef son ürünü az önce biri aldı. Sepeti yenileyin.", orderFail:"Sipariş oluşturulamadı, tekrar deneyin", revSent:"Teşekkürler! Yorum incelemeye gönderildi", revFail:"Yorum gönderilemedi, tekrar deneyin", revNoPhotoCfg:"Fotoğraf yükleme henüz ayarlanmadı — yorum fotoğrafsız gönderildi", photoFail:"Fotoğraf yüklenemedi, tekrar deneyin", logoutTxt:"Çıkış yap", revFromBuyers:"müşteri yorumu", socialSoon:"Sosyal medya bağlantıları yakında eklenecek", rmPhoto:"Fotoğrafı kaldır", sendBtn:"Gönder" },
+  az:{ notifTap:"Botda «Start» düyməsinə basın — sifariş bildirişləri gələcək", revAnon:"Adımı gizlət", revAnonName:"Anonim", revBuyer:"Müştəri", revColor:"rəng", netErr:"Mağaza ilə əlaqə yoxdur", netRetry:"Yenidən cəhd et", tgOpenFail:"Telegram girişi açılmadı, bir neçə saniyədən sonra yenidən cəhd edin", badEmail:"Düzgün e-poçt daxil edin", subThanks:"Abunə olduğunuz üçün təşəkkürlər! ✓", noMoreStock:"Stokda daha qalmayıb", addedCart:"Məhsul səbətə əlavə edildi ✓", outOfStockToast:"Təəssüf ki, son məhsulu kimsə götürdü. Səbəti yeniləyin.", orderFail:"Sifariş rəsmiləşdirilmədi, yenidən cəhd edin", revSent:"Təşəkkürlər! Rəy yoxlanışa göndərildi", revFail:"Rəy göndərilmədi, yenidən cəhd edin", revNoPhotoCfg:"Şəkil yükləmə hələ qurulmayıb — rəy şəkilsiz göndərildi", photoFail:"Şəkil yüklənmədi, yenidən cəhd edin", logoutTxt:"Çıxış", revFromBuyers:"müştəri rəyi", socialSoon:"Sosial şəbəkə linkləri tezliklə əlavə olunacaq", rmPhoto:"Şəkli sil", sendBtn:"Göndər" },
+  en:{ notifTap:"Tap “Start” in the bot — order updates will arrive there", revAnon:"Hide my name", revAnonName:"Anonymous", revBuyer:"Customer", revColor:"color", netErr:"No connection to the shop", netRetry:"Retry", tgOpenFail:"Couldn’t open Telegram login, please try again in a few seconds", badEmail:"Enter a valid email", subThanks:"Thanks for subscribing! ✓", noMoreStock:"No more in stock", addedCart:"Added to cart ✓", outOfStockToast:"Sorry, someone just took the last item. Please refresh your cart.", orderFail:"Couldn’t place the order, please try again", revSent:"Thanks! Your review was sent for moderation", revFail:"Couldn’t send the review, please try again", revNoPhotoCfg:"Photo upload isn’t set up yet — the review was sent without a photo", photoFail:"Couldn’t upload the photo, please try again", logoutTxt:"Log out", revFromBuyers:"customer reviews", socialSoon:"Social links are coming soon", rmPhoto:"Remove photo", sendBtn:"Send" }
 };
 Object.keys(STR_NEW3).forEach(l => Object.assign(STR[l], STR_NEW3[l]));
 
@@ -2086,18 +2090,18 @@ function renderRatingSummary(){
   const fullStars = Math.round(avg);
   wrap.innerHTML = `
     <span class="stars-big">${'★'.repeat(fullStars)}${'☆'.repeat(5-fullStars)}</span><span class="rs-num">${avg}</span>
-    <div class="rs-count">${approved.length} отзывов от покупателей</div>
+    <div class="rs-count">${approved.length} ${t('revFromBuyers')}</div>
   `;
 }
 
 function submitNewsletter(){
   const input = document.getElementById('newsletterEmail');
   const email = input.value.trim();
-  if (!email || !email.includes('@')){ showToast('Введите корректный email'); return; }
+  if (!email || !email.includes('@')){ showToast(t('badEmail')); return; }
   db.collection('newsletter').add({ email, createdAt: Date.now() });
   sendNotifyEmail(email, 'Подписка оформлена', 'Спасибо, что подписались на новости milaisss — теперь вы первыми узнаете о новых дропах и скидках.');
   input.value = '';
-  showToast('Спасибо за подписку! ✓');
+  showToast(t('subThanks'));
 }
 
 function renderFooterContacts(){
@@ -2185,7 +2189,7 @@ function renderSocialIcons(){
   let html = '';
   if (socialLinks.instagram) html += `<a href="${socialLinks.instagram}" target="_blank">${IG_SVG}</a>`;
   if (socialLinks.tiktok) html += `<a href="${socialLinks.tiktok}" target="_blank">${TT_SVG}</a>`;
-  wrap.innerHTML = html || '<span class="hint">Ссылки на соцсети скоро появятся</span>';
+  wrap.innerHTML = html || '<span class="hint">'+t('socialSoon')+'</span>';
 }
 
 function renderFaq(){
@@ -2417,6 +2421,7 @@ function openSizeGuide(){
 let products = [];
 let reviews = [];
 let cart = [];
+try{ const _c = JSON.parse(localStorage.getItem('milaisss_cart')||'[]'); if (Array.isArray(_c)) cart = _c.filter(x => x && x.productId && x.qty > 0 && x.price >= 0); }catch(e){}
 let currentProduct = null;
 let selectedSize = "";
 let selectedColorIdx = 0;
@@ -2518,6 +2523,14 @@ function revealApp(){
 }
 setTimeout(revealApp, 2500); // страховка на случай медленной сети
 
+function showNetBanner(on){
+  let b = document.getElementById('netBanner');
+  if (!on){ if (b) b.remove(); return; }
+  if (b) return;
+  b = document.createElement('div'); b.id = 'netBanner';
+  b.innerHTML = '<span>'+escH(t('netErr'))+'</span><button type="button" onclick="location.reload()">'+escH(t('netRetry'))+'</button>';
+  document.body.appendChild(b);
+}
 db.collection('products').onSnapshot(snap => {
   products = [];
   snap.forEach(doc => {
@@ -2530,7 +2543,8 @@ db.collection('products').onSnapshot(snap => {
   renderMainGrid(); renderFavGrid();
   if (document.getElementById('shopAll').classList.contains('active')) renderShopAllGrid();
   markLoaded('products');
-});
+  showNetBanner(false);
+}, err => { console.warn(err); showNetBanner(true); markLoaded('products'); });
 
 db.collection('reviews').onSnapshot(snap => {
   reviews = [];
@@ -2703,7 +2717,11 @@ function moveNavGlass(animate){
 })();
 
 /* ---------- screens ---------- */
-function showScreen(name){
+let _curScreen = 'home';
+function showScreen(name, fromPop){
+  if (!fromPop && name !== _curScreen){ try{ history.pushState({s:name}, ''); }catch(e){} }
+  _curScreen = name;
+  try{ if (tg && tg.BackButton){ name === 'home' ? tg.BackButton.hide() : tg.BackButton.show(); } }catch(e){}
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(name).classList.add('active');
   document.querySelectorAll('.navitem').forEach(n => n.classList.remove('active'));
@@ -2716,6 +2734,12 @@ function showScreen(name){
   document.getElementById('supportFab').style.display = (name === 'profile') ? 'flex' : 'none';
   window.scrollTo(0,0);
 }
+try{ history.replaceState({s:'home'}, ''); }catch(e){}
+window.addEventListener('popstate', e => {
+  const n = (e.state && e.state.s) || 'home';
+  if (document.getElementById(n)) showScreen(n, true);
+});
+try{ if (tg && tg.BackButton) tg.BackButton.onClick(() => history.back()); }catch(e){}
 
 
 /* ---------- плавный уход блоков вверх с размытием при прокрутке ----------
@@ -2834,7 +2858,7 @@ function renderSupportMsgs(){
   if (supportMsgsCache.length === 0){
     wrap.innerHTML = `<div class="empty-state">${t('supportEmpty')}</div>`;
   } else {
-    wrap.innerHTML = supportMsgsCache.map(m => `<div class="msg ${m.sender}">${m.text}</div>`).join('');
+    wrap.innerHTML = supportMsgsCache.map(m => `<div class="msg ${m.sender==="admin"?"admin":"customer"}">${escH(m.text)}</div>`).join('');
   }
   wrap.scrollTop = wrap.scrollHeight;
 }
@@ -3584,14 +3608,14 @@ function openReviews(){
       return `
       <div class="review-item">
         <div class="rev-top">
-          <div class="rev-avatar">${initial}</div>
+          <div class="rev-avatar">${escH(initial)}</div>
           <div>
-            <div class="rauthor">${name}</div>
+            <div class="rauthor">${escH(name)}</div>
             <div class="rev-stars">${r.rating ? '★'.repeat(r.rating)+'☆'.repeat(5-r.rating) : ''}</div>
           </div>
         </div>
-        <div class="rev-text">${r.text}${r.colorName ? ` <span class="hint" style="display:inline;">· цвет: ${r.colorName}</span>` : ''}</div>
-        ${r.photo ? `<img class="rphoto" src="${r.photo}" onclick="openLightbox(['${r.photo.replace(/'/g,"\\'")}'], 0)">` : ''}
+        <div class="rev-text">${escH(r.text)}${r.colorName ? ` <span class="hint" style="display:inline;">· ${t('revColor')}: ${escH(r.colorName)}</span>` : ''}</div>
+        ${safeUrl(r.photo) ? `<img class="rphoto" loading="lazy" alt="" src="${safeUrl(r.photo)}" onclick="openLightbox([this.getAttribute('src')], 0)">` : ''}
       </div>`;
     }).join('');
   }
@@ -3791,7 +3815,7 @@ function addToCart(){
   const colorName = chosen.name;
   const existing = cart.find(c => c.productId === currentProduct.id && c.size === selectedSize && c.colorName === colorName);
   if (existing){
-    if (existing.qty >= stockLimit){ showToast('Больше нет в наличии'); return; }
+    if (existing.qty >= stockLimit){ showToast(t('noMoreStock')); return; }
     existing.qty++;
   } else {
     cart.push({
@@ -3802,10 +3826,11 @@ function addToCart(){
   }
   updateCartBadge();
   if (tg) tg.HapticFeedback.notificationOccurred('success');
-  showToast('Товар добавлен в корзину ✓');
+  showToast(t('addedCart'));
 }
 
 function updateCartBadge(){
+  try{ localStorage.setItem('milaisss_cart', JSON.stringify(cart)); }catch(e){}
   const count = cart.reduce((a,c) => a + c.qty, 0);
   const badge = document.getElementById('cartCount');
   badge.textContent = count;
@@ -3972,7 +3997,30 @@ function decrementStockForOrder(orderItems){
   });
 }
 
+let _ordering = false;
+function restoreStockForOrder(orderItems){
+  try{
+    const ids = [...new Set(orderItems.map(it => it.productId).filter(Boolean))];
+    ids.forEach(id => {
+      const ref = db.collection('products').doc(id);
+      db.runTransaction(tx => tx.get(ref).then(doc => {
+        if (!doc.exists) return;
+        const d = JSON.parse(JSON.stringify(doc.data())); const its = orderItems.filter(it => it.productId === id);
+        const colors = d.colors || [];
+        if (colors.length){
+          its.forEach(it => { const c = colors.find(x => x.name === it.colorName); if (!c) return;
+            if (c.sizeStocks && Object.prototype.hasOwnProperty.call(c.sizeStocks, it.size)){ c.sizeStocks[it.size] = (Number(c.sizeStocks[it.size])||0) + it.qty; c.stock = Object.values(c.sizeStocks).reduce((a,b)=>a+(Number(b)||0),0); }
+            else c.stock = (Number(c.stock)||0) + it.qty; });
+          tx.update(ref, { colors, stock: colors.reduce((s,c) => s + (Number(c.stock)||0), 0) });
+        } else { tx.update(ref, { stock: (Number(d.stock)||0) + its.reduce((a,b)=>a+b.qty,0) }); }
+      })).catch(()=>{});
+    });
+  }catch(e){}
+}
+
 function finalizeOrder(phone, branch){
+  if (_ordering || !cart.length) return;
+  _ordering = true;
   let total = 0;
   let text = "Здравствуйте! Хочу оформить заказ:\n\n";
   const orderItems = [];
@@ -3992,7 +4040,9 @@ function finalizeOrder(phone, branch){
   if (confirmBtn){ confirmBtn.disabled = true; confirmBtn.textContent = t('confirmingText'); }
 
   const notifyChatId = getNotifyChatId();
+  let stockTaken = false;
   decrementStockForOrder(orderItems).then(() => {
+    stockTaken = true;
     return db.collection('orders').add({
       customerId, customerName, items: orderItems, total,
       btsBranch: branch, phone, paymentMethod: methodLabel,
@@ -4004,14 +4054,16 @@ function finalizeOrder(phone, branch){
     cart = []; updateCartBadge();
     document.getElementById('phoneInput').value = '';
     notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text);
-    sendNotifyEmail(ADMIN_EMAIL, `Новый заказ от ${customerName}`, text).finally(() => {
-      showSuccessAnimation(() => showScreen('home')); // окно «Заказ оформлен…» больше не показываем
-    });
+    try{ sendNotifyEmail(ADMIN_EMAIL, `Новый заказ от ${customerName}`, text).catch(()=>{}); }catch(e){}
+    showSuccessAnimation(() => showScreen('home'));
+    _ordering = false;
   }).catch(err => {
+    _ordering = false;
+    if (stockTaken) restoreStockForOrder(orderItems);
     if (err && err.message === 'OUT_OF_STOCK'){
-      showToast('К сожалению, кто-то только что забрал последний товар. Обновите корзину.');
+      showToast(t('outOfStockToast'));
     } else {
-      showToast('Не удалось оформить заказ, попробуйте ещё раз');
+      showToast(t('orderFail'));
     }
   }).finally(() => {
     if (confirmBtn){ confirmBtn.disabled = false; confirmBtn.textContent = confirmBtnOriginalText; }
@@ -4214,15 +4266,18 @@ function renderMyReviews(){
   const id = getCustomerId();
   const mine = (typeof reviews !== 'undefined' ? reviews : []).filter(r => r.customerId === id).sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
   if (!mine.length){ wrap.innerHTML = `<div class="trk-empty">${t('noMyReviews')}</div>`; return; }
-  wrap.innerHTML = mine.map(r => `<div class="myrev"><div class="mr-top"><span>${r.productName || ''}${r.colorName ? ' · ' + r.colorName : ''}</span><span class="mr-st">${r.approved ? '✓' : t('revModeration')}</span></div>
+  wrap.innerHTML = mine.map(r => `<div class="myrev"><div class="mr-top"><span>${escH(r.productName || '')}${r.colorName ? ' · ' + escH(r.colorName) : ''}</span><span class="mr-st">${r.approved ? '✓' : t('revModeration')}</span></div>
     ${r.rating ? `<div class="mr-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>` : ''}
-    <div class="mr-text">${String(r.text||'').replace(/</g,'&lt;')}</div>${r.photo ? `<img src="${r.photo}" alt="">` : ''}</div>`).join('');
+    <div class="mr-text">${escH(r.text)}</div>${safeUrl(r.photo) ? `<img src="${safeUrl(r.photo)}" alt="">` : ''}</div>`).join('');
 }
 
 function renderOrders(){
   const wrap = document.getElementById('ordersList');
   const customerId = getCustomerId();
-  db.collection('orders').where('customerId','==',customerId).onSnapshot(snap => {
+  if (window._ordersUnsub && window._ordersCid === customerId) return;
+  if (window._ordersUnsub) window._ordersUnsub();
+  window._ordersCid = customerId;
+  window._ordersUnsub = db.collection('orders').where('customerId','==',customerId).onSnapshot(snap => {
     if (snap.empty){ wrap.innerHTML = `<div class="empty-state">${t('noOrders')}</div>`; renderStatusList([]); return; }
     const orders = [];
     snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
@@ -4274,7 +4329,7 @@ function previewReviewPhoto(orderId, ii){
   const file = input.files && input.files[0];
   if (!file){ preview.innerHTML = ''; if (label) label.textContent = 'Добавить фото (необязательно)'; return; }
   const url = URL.createObjectURL(file);
-  preview.innerHTML = `<img src="${url}"><span class="rp-remove" onclick="removeReviewPhoto('${orderId}',${ii})">Убрать фото</span>`;
+  preview.innerHTML = `<img src="${url}"><span class="rp-remove" onclick="removeReviewPhoto('${orderId}',${ii})">${t('rmPhoto')}</span>`;
   if (label) label.textContent = 'Заменить фото';
 }
 function removeReviewPhoto(orderId, ii){
@@ -4305,26 +4360,26 @@ function submitReview(orderId, ii, productId, productName, colorName){
     if (rating) payload.rating = rating;
     if (photoUrl) payload.photo = photoUrl;
     db.collection('reviews').add(payload).then(() => {
-      showToast('Спасибо! Отзыв отправлен на проверку');
+      showToast(t('revSent'));
       document.getElementById(`rf-${orderId}-${ii}`).classList.remove('open');
     }).catch(() => {
-      showToast('Не удалось отправить отзыв, попробуйте ещё раз');
+      showToast(t('revFail'));
     }).finally(() => {
-      if (btn){ btn.disabled = false; btn.textContent = 'Отправить'; }
+      if (btn){ btn.disabled = false; btn.textContent = t('sendBtn'); }
     });
   };
 
   if (file){
     if (!isImgbbConfigured()){
-      showToast('Загрузка фото пока не настроена продавцом — отзыв отправлен без фото');
+      showToast(t('revNoPhotoCfg'));
       finish(null);
       return;
     }
     uploadReviewPhoto(file)
       .then(url => finish(url))
       .catch(() => {
-        showToast('Не удалось загрузить фото, попробуйте ещё раз');
-        if (btn){ btn.disabled = false; btn.textContent = 'Отправить'; }
+        showToast(t('photoFail'));
+        if (btn){ btn.disabled = false; btn.textContent = t('sendBtn'); }
       });
   } else {
     finish(null);
