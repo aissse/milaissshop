@@ -502,7 +502,10 @@ function checkPassword(){
   auth.signInWithEmailAndPassword(email, pw).then(openAdmin).catch(() => alert('Неверный email или пароль'));
 }
 // уже входили раньше — открываем сразу (но только настоящий вход по email, не гостя)
-auth.onAuthStateChanged(u => { if (u && !u.isAnonymous && u.email) openAdmin(); });
+auth.onAuthStateChanged(u => {
+  if (u && !u.isAnonymous && u.email) openAdmin();
+  else if (_adminOpened) location.reload(); // вход сменился (например, зашли на сайт как покупатель) — вернёмся на экран входа
+});
 function adminLogout(){ auth.signOut().then(() => location.reload()); }
 
 function switchTab(name){
