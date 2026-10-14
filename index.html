@@ -1207,7 +1207,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-118";
+  const CURRENT_VERSION = "20260908-119";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2575,17 +2575,36 @@ db.collection('products').onSnapshot(snap => {
   renderCatPills(); if (typeof renderDrawer === 'function') renderDrawer();
   renderMainGrid(); renderFavGrid();
   if (document.getElementById('shopAll').classList.contains('active')) renderShopAllGrid();
+  try{ localStorage.setItem('milaisss_products_cache', JSON.stringify({ t: Date.now(), p: products })); }catch(e){}
   markLoaded('products');
   showNetBanner(false);
 }, err => { console.warn(err); showNetBanner(true); markLoaded('products'); });
 
-db.collection('reviews').onSnapshot(snap => {
-  reviews = [];
-  snap.forEach(doc => reviews.push({ id: doc.id, ...doc.data() }));
+/* отзывы: все одобренные + свои (ещё на модерации). Чужие неодобренные не загружаем — меньше чтений и приватнее */
+let _revPublic = {}, _revMine = {}, _revMineUnsub = null, _revMineCid = '';
+function mergeReviews(){
+  reviews = Object.values(Object.assign({}, _revPublic, _revMine));
   if (currentProduct) updateReviewsSummary();
   renderRatingSummary();
   renderMyReviews();
-});
+}
+db.collection('reviews').where('approved', '==', true).onSnapshot(snap => {
+  _revPublic = {};
+  snap.forEach(doc => { _revPublic[doc.id] = { id: doc.id, ...doc.data() }; });
+  mergeReviews();
+}, () => {});
+function subscribeMyReviews(){
+  const cid = getCustomerId();
+  if (!cid || cid === 'pending' || _revMineCid === cid) return;
+  _revMineCid = cid;
+  if (_revMineUnsub) _revMineUnsub();
+  _revMine = {};
+  _revMineUnsub = db.collection('reviews').where('customerId', '==', cid).onSnapshot(snap => {
+    _revMine = {};
+    snap.forEach(doc => { _revMine[doc.id] = { id: doc.id, ...doc.data() }; });
+    mergeReviews();
+  }, () => {});
+}
 
 function isDarkColor(hex){
   const m = /^#?([0-9a-f]{6})$/i.exec((hex || '').trim());
@@ -4435,6 +4454,7 @@ function logVisit(){
 /* ---------- init ---------- */
 function afterAuth(){
   afterAuth._done = true;
+  subscribeMyReviews();
   _supUnsub && _supUnsub(); _supUnsub = null; setupSupportListener._admin = undefined;
   setupSupportListener();
   loadCustomerProfile();
@@ -4442,6 +4462,10 @@ function afterAuth(){
   renderTelegramLoginWidget();
   try{ if (document.getElementById('profile').classList.contains('active')){ renderOrders(); renderMyReviews(); } }catch(e){}
 }
+try{
+  const _pc = JSON.parse(localStorage.getItem('milaisss_products_cache') || 'null');
+  if (_pc && Array.isArray(_pc.p) && _pc.p.length && Date.now() - _pc.t < 7 * 86400000){ products = _pc.p; markLoaded('products'); }
+}catch(e){}
 applyLang();
 updateThemeButtons();
 renderRatingSummary();
