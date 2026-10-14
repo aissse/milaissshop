@@ -2,7 +2,10 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F6F5F2" id="themeColorMeta">
 <script>try{ if (localStorage.getItem('milaisss_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){}</script>
@@ -18,6 +21,14 @@
 <meta property="og:title" content="milaisss shop — интернет-магазин кроссовок">
 <meta property="og:description" content="Кроссовки и обувь с доставкой по Узбекистану. Оплата Payme, Click, картой.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="milaisss">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image" content="https://milaisss.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://milaisss.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"milaisss","url":"https://milaisss.com/","logo":"https://milaisss.com/favicon-192x192.png","image":"https://milaisss.com/og.png","areaServed":"UZ","description":"Кроссовки и одежда с доставкой по Узбекистану"}</script>
 <meta property="og:url" content="https://milaisss.com/">
 <meta name="google-site-verification" content="QLeo5HznJQ2owHKI2oFHkqQVdqxb7G_StqUlit7m_HU" />
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -62,6 +73,8 @@
 
   .topbar{ display:flex; align-items:center; gap:8px; padding:18px 20px 8px; }
   .topbar .logo{ flex:1; }
+  html{ touch-action:manipulation; }
+  .icon-btn::after{ content:''; position:absolute; inset:-4px; }
   .icon-btn{ height:38px; border-radius:12px; background:var(--stone); display:flex; align-items:center; justify-content:center; border:1px solid var(--line); cursor:pointer; flex-shrink:0; position:relative; padding:0 10px; gap:4px; }
   #langBtn{ background:var(--langbtn-bg, var(--stone)); }
   #menuBtn{ background:var(--menubtn-bg, var(--stone)); }
@@ -1194,7 +1207,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-117";
+  const CURRENT_VERSION = "20260908-118";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1847,7 +1860,14 @@ function setTheme(theme){
 let lang = localStorage.getItem('milaisss_lang') || 'en';
 function t(key){ return (STR[lang] && STR[lang][key]) || STR.ru[key] || key; }
 
+const META_BY_LANG = {
+  ru:["milaisss shop — интернет-магазин кроссовок","ru_RU"], uz:["milaisss shop — krossovkalar onlayn do‘koni","uz_UZ"],
+  tr:["milaisss shop — spor ayakkabı online mağazası","tr_TR"], az:["milaisss shop — krossovka onlayn mağazası","az_AZ"],
+  en:["milaisss shop — online sneaker store","en_US"]
+};
 function applyLang(){
+  try{ document.documentElement.lang = lang; const m = META_BY_LANG[lang] || META_BY_LANG.ru; document.title = m[0];
+    const og = document.querySelector('meta[property="og:locale"]'); if (og) og.setAttribute('content', m[1]); }catch(e){}
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.getAttribute('data-i18n')));
   document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.getAttribute('data-i18n-ph')));
   document.getElementById('langFlag').innerHTML = flagImg(lang);
@@ -4407,7 +4427,8 @@ function logVisit(){
     sessionStorage.setItem('milaisss_visit_logged', '1');
     const now = new Date();
     const dateStr = now.toISOString().slice(0,10);
-    db.collection('analytics_visits').add({ date: dateStr, createdAt: Date.now(), customerId: getCustomerId() });
+    // один документ на человека в день (а не на каждый заход) — экономит чтения базы
+    db.collection('analytics_visits').doc(dateStr + '_' + getCustomerId()).set({ date: dateStr, createdAt: Date.now(), customerId: getCustomerId() }).catch(() => {});
   } catch(e) {}
 }
 
