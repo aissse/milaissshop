@@ -1201,7 +1201,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-125";
+  const CURRENT_VERSION = "20260908-126";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -4081,6 +4081,33 @@ function restoreStockForOrder(orderItems){
   }catch(e){}
 }
 
+/* Откуда пришёл покупатель: запоминаем первый источник (UTM, реферер или Telegram) */
+function detectSource(){
+  try{
+    const saved = localStorage.getItem('milaisss_src');
+    if (saved) return saved;
+    const q = new URLSearchParams(location.search);
+    let src = q.get('utm_source') || q.get('src') || q.get('ref') || '';
+    if (!src){
+      try{ if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) src = 'Telegram'; }catch(e){}
+    }
+    if (!src && document.referrer){
+      try{
+        const h = new URL(document.referrer).hostname.replace(/^www\./,'');
+        if (h && h.indexOf('milaisss.com') < 0) src = h;
+      }catch(e){}
+    }
+    src = String(src || 'Напрямую').toLowerCase();
+    const map = [['instagram','Instagram'],['ig','Instagram'],['t.me','Telegram'],['telegram','Telegram'],['tiktok','TikTok'],['google','Google'],['yandex','Yandex'],['facebook','Facebook'],['fb','Facebook'],['youtube','YouTube']];
+    let name = null;
+    for (const [k,v] of map){ if (src === k || src.indexOf(k) >= 0){ name = v; break; } }
+    if (!name) name = src === 'напрямую' ? 'Напрямую' : src.slice(0,40);
+    localStorage.setItem('milaisss_src', name);
+    return name;
+  }catch(e){ return 'Напрямую'; }
+}
+try{ detectSource(); }catch(e){}
+
 function finalizeOrder(phone, branch){
   if (_ordering || !cart.length) return;
   _ordering = true;
@@ -4110,7 +4137,7 @@ function finalizeOrder(phone, branch){
     stockTaken = true;
     return db.collection('orders').add({
       customerId, customerName, items: orderItems, total,
-      btsBranch: branch, phone, paymentMethod: methodLabel, note: orderNote,
+      btsBranch: branch, phone, paymentMethod: methodLabel, note: orderNote, source: detectSource(),
       status: 'Проверяется оплата', createdAt: Date.now(),
       lang, notifyChatId
     });
