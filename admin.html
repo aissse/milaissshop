@@ -66,6 +66,26 @@
   .lock-screen .sub{ margin-bottom:0; }
   .lock-screen input{ margin-top:20px; text-align:center; }
   .lock-screen .btn{ background:var(--maroon); }
+  .acc-kpis{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+  .acc-kpi{ border:1px solid var(--line); border-radius:14px; padding:12px; background:var(--pink); }
+  .acc-kpi .k{ font-size:11px; color:var(--muted); font-weight:700; }
+  .acc-kpi .v{ font-size:17px; font-weight:800; margin-top:4px; word-break:break-word; }
+  .acc-kpi.good .v{ color:#1f8a4c; } .acc-kpi.bad .v{ color:#a83232; }
+  .acc-kpi.wide{ grid-column:1 / -1; }
+  .acc-h{ font-size:12px; font-weight:800; color:var(--muted); margin:14px 0 6px; text-transform:uppercase; letter-spacing:.04em; }
+  .acc-h:first-child{ margin-top:0; }
+  .acc-line{ display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:7px 0; border-bottom:1px solid var(--line); }
+  .acc-line:last-child{ border-bottom:none; }
+  .acc-line .r{ text-align:right; font-weight:700; white-space:nowrap; }
+  .acc-line .s{ font-size:11px; color:var(--muted); font-weight:500; }
+  .acc-sale{ border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:8px; font-size:12px; }
+  .acc-sale b{ font-size:13px; }
+  .acc-cost-row{ padding:10px 0; border-bottom:1px solid var(--line); }
+  .acc-cost-row:last-child{ border-bottom:none; }
+  .acc-cost-row .nm{ font-size:13px; font-weight:700; margin-bottom:6px; }
+  .acc-cost-row .row input{ padding:8px 10px; }
+  .acc-warnbox{ margin-top:12px; font-size:12px; background:#fff4e0; border:1px solid #f0d9a8; color:#7a5200; border-radius:12px; padding:10px 12px; line-height:1.5; }
+  .acc-del{ color:#a83232; font-size:12px; font-weight:700; cursor:pointer; margin-left:10px; }
   .hint{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5; }
   .color-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
   .color-row input[type=text]{ flex:1; }
@@ -142,7 +162,8 @@
     <div class="tab" data-tab="stock" onclick="switchTab('stock')">Склад</div>
     <div class="tab" data-tab="delivery" onclick="switchTab('delivery')">Доставка</div>
     <div class="tab" data-tab="support" onclick="switchTab('support')">Чат с клиентами</div>
-    <div class="tab" data-tab="finance" onclick="switchTab('finance')">Финансы</div>
+    <div class="tab" data-tab="accounting" onclick="switchTab('accounting')">Учёт</div>
+    <div class="tab" data-tab="finance" onclick="switchTab('finance')">Реквизиты</div>
     <div class="tab" data-tab="subscribers" onclick="switchTab('subscribers')">Подписки</div>
     <div class="tab" data-tab="analytics" onclick="switchTab('analytics')">Аналитика</div>
     <div class="tab" data-tab="design" onclick="switchTab('design')">Оформление</div>
@@ -200,6 +221,62 @@
         <h1>Чат с клиентами</h1>
         <p class="hint" style="margin-top:0;">Здесь появляются покупатели, которые писали в поддержку.</p>
         <div id="supportTabContent"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-accounting">
+      <div class="card">
+        <h1>Учёт: доходы и расходы</h1>
+        <p class="hint" style="margin-top:0;">В продажи попадают все заказы, кроме «Проверяется оплата». Себестоимость берётся из раздела ниже и фиксируется в момент, когда ты принимаешь заказ.</p>
+        <div class="row" style="margin-bottom:10px;">
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setAccRange('today')">Сегодня</button>
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setAccRange('week')">7 дней</button>
+        </div>
+        <div class="row">
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setAccRange('month')">30 дней</button>
+          <button type="button" class="btn secondary" style="margin-top:0;" onclick="setAccRange('all')">Всё время</button>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <div><label>От</label><input type="date" id="accFrom" onchange="renderAccounting()"></div>
+          <div><label>До</label><input type="date" id="accTo" onchange="renderAccounting()"></div>
+        </div>
+        <div id="accKpis" class="acc-kpis"></div>
+        <div id="accWarn"></div>
+      </div>
+
+      <div class="card"><h1>Откуда и как платят</h1>
+        <div id="accBreakdowns"></div>
+      </div>
+
+      <div class="card"><h1>Расходы</h1>
+        <label>Категория</label>
+        <select id="expCat">
+          <option>Упаковка</option><option>Реклама</option><option>Доставка / карго</option>
+          <option>Съёмка / контент</option><option>Аренда</option><option>Зарплата</option><option>Прочее</option>
+        </select>
+        <div class="row">
+          <div><label>Сумма, сум</label><input type="number" id="expAmount" inputmode="numeric" placeholder="50000"></div>
+          <div><label>Дата</label><input type="date" id="expDate"></div>
+        </div>
+        <label>Примечание (необязательно)</label>
+        <input type="text" id="expNote" placeholder="Например: коробки 50 шт">
+        <button type="button" class="btn" onclick="addExpense()">Добавить расход</button>
+        <div id="accExpenses" style="margin-top:14px;"></div>
+      </div>
+
+      <div class="card"><h1>Себестоимость товаров</h1>
+        <p class="hint" style="margin-top:0;">Закупка и карго — за 1 штуку. Покупатели этих цифр не видят.</p>
+        <div id="accCosts"></div>
+      </div>
+
+      <div class="card"><h1>Продажи по товарам</h1>
+        <div id="accProducts"></div>
+      </div>
+
+      <div class="card"><h1>Каждая продажа</h1>
+        <div id="accSales"></div>
+        <button type="button" class="btn secondary" onclick="exportAccSales()">Скачать продажи (Excel)</button>
+        <button type="button" class="btn secondary" onclick="exportAccExpenses()">Скачать расходы (Excel)</button>
       </div>
     </div>
 
@@ -493,7 +570,7 @@ function openAdmin(){
   if (_adminOpened) return; _adminOpened = true;
   document.getElementById('lockScreen').style.display = 'none';
   document.getElementById('adminWrap').style.display = 'block';
-  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSupport(); loadSubscribers(); loadVisits();
+  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSupport(); loadSubscribers(); loadVisits(); loadAccounting();
   PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
 }
 function checkPassword(){
@@ -904,6 +981,7 @@ let allProducts = [];
 function loadProducts(){
   db.collection('products').onSnapshot(snap => {
     allProducts = [];
+    setTimeout(()=>{ try{ renderAccCosts(); }catch(e){} }, 0);
     const list = document.getElementById('prodList');
     if (snap.empty){ list.innerHTML = '<p class="hint">Товаров пока нет</p>'; renderStockList(); return; }
     list.innerHTML = '';
@@ -1634,6 +1712,7 @@ function loadOrders(){
     allOrders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     filterAndRenderOrders();
     renderAnalytics();
+    try{ renderAccounting(); }catch(e){}
   });
 }
 
@@ -1780,7 +1859,13 @@ function filterAndRenderOrders(){
     `;
     card.querySelector('.status-select').onchange = async (e) => {
       const st = e.target.value;
-      await db.collection('orders').doc(o.id).update({ status: st });
+      const upd = { status: st };
+      if (st !== 'Проверяется оплата' && !o.unitCosts){
+        const uc = (o.items || []).map(it => unitCostFromTable(it.productId));
+        if (uc.some(x => x != null)) upd.unitCosts = uc.map(x => x == null ? null : x);
+      }
+      await db.collection('orders').doc(o.id).update(upd);
+      Object.assign(o, upd);
       const chat = await resolveChatId(o.customerId);
       const ok = await tgSend(chat, buildStatusText(o, st));
       adminToast(ok ? 'Статус сохранён, клиенту отправлено в Telegram ✅' : 'Статус сохранён, но Telegram не доставил (клиент не запускал бота?)');
@@ -1895,6 +1980,237 @@ function saveCustomBlackDownFont(){
 }
 
 function showAdminToast(msg){ alert(msg); }
+
+/* ================= УЧЁТ: доходы, расходы, себестоимость ================= */
+let accCosts = {};      // productId -> { cost, cargo }
+let accExpenses = [];   // { id, date, ts, category, amount, note }
+const NOT_SALE_STATUS = 'Проверяется оплата';
+const fmtN = n => Math.round(Number(n)||0).toLocaleString('ru-RU');
+
+function loadAccounting(){
+  db.collection('product_costs').onSnapshot(snap => {
+    accCosts = {};
+    snap.forEach(d => { accCosts[d.id] = d.data(); });
+    renderAccCosts(); renderAccounting();
+  }, e => console.warn('product_costs', e));
+  db.collection('expenses').onSnapshot(snap => {
+    accExpenses = [];
+    snap.forEach(d => accExpenses.push({ id: d.id, ...d.data() }));
+    accExpenses.sort((a,b) => (b.ts||0) - (a.ts||0));
+    renderAccounting();
+  }, e => console.warn('expenses', e));
+  const ed = document.getElementById('expDate');
+  if (ed && !ed.value) ed.value = new Date().toISOString().slice(0,10);
+}
+
+function unitCostFromTable(productId){
+  const c = accCosts[productId];
+  if (!c) return null;
+  return (Number(c.cost)||0) + (Number(c.cargo)||0);
+}
+
+/* Себестоимость одной единицы товара из заказа: сначала «снимок» на момент приёма, иначе текущая таблица */
+function unitCostOf(o, idx, it){
+  if (o.unitCosts && o.unitCosts[idx] != null) return Number(o.unitCosts[idx]);
+  return unitCostFromTable(it.productId);
+}
+
+function setAccRange(preset){
+  const now = new Date();
+  const iso = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const from = document.getElementById('accFrom'), to = document.getElementById('accTo');
+  if (preset === 'all'){ from.value = ''; to.value = ''; }
+  else {
+    const days = preset === 'today' ? 0 : preset === 'week' ? 6 : 29;
+    const s = new Date(now); s.setDate(s.getDate() - days);
+    from.value = iso(s); to.value = iso(now);
+  }
+  renderAccounting();
+}
+
+function accRange(){
+  const f = document.getElementById('accFrom').value, t = document.getElementById('accTo').value;
+  return {
+    fromTs: f ? new Date(f + 'T00:00:00').getTime() : null,
+    toTs: t ? new Date(t + 'T23:59:59').getTime() : null
+  };
+}
+
+function accSalesRows(){
+  const { fromTs, toTs } = accRange();
+  const rows = [];
+  allOrders.forEach(o => {
+    if (o.status === NOT_SALE_STATUS) return;
+    const ts = o.createdAt || 0;
+    if (fromTs && ts < fromTs) return;
+    if (toTs && ts > toTs) return;
+    (o.items || []).forEach((it, idx) => {
+      const qty = Number(it.qty)||0, price = Number(it.price)||0;
+      const uc = unitCostOf(o, idx, it);
+      rows.push({
+        ts, orderId: o.id, customer: o.customerName || 'Покупатель', phone: o.phone || '',
+        name: it.name || '', size: it.size || '', color: it.colorName || '', productId: it.productId || '',
+        qty, revenue: price*qty, cost: uc == null ? null : uc*qty,
+        profit: uc == null ? null : (price - uc)*qty,
+        pay: o.paymentMethod || 'Не указан', source: o.source || 'Не определён',
+        city: accCity(o.btsBranch), branch: o.btsBranch || '', status: o.status || ''
+      });
+    });
+  });
+  rows.sort((a,b) => b.ts - a.ts);
+  return rows;
+}
+
+function accCity(b){
+  if (!b) return 'Не указан';
+  return String(b).split(/[,\-–—(]/)[0].trim() || 'Не указан';
+}
+
+function accGroup(rows, key){
+  const m = {};
+  rows.forEach(r => {
+    const k = r[key] || '—';
+    if (!m[k]) m[k] = { name: k, revenue: 0, profit: 0, qty: 0, orders: new Set() };
+    m[k].revenue += r.revenue; m[k].qty += r.qty; m[k].orders.add(r.orderId);
+    if (r.profit != null) m[k].profit += r.profit;
+  });
+  return Object.values(m).sort((a,b) => b.revenue - a.revenue);
+}
+
+function accBlock(title, groups, totalRevenue){
+  if (!groups.length) return '';
+  return `<div class="acc-h">${escH(title)}</div>` + groups.map(g => {
+    const pct = totalRevenue ? Math.round(g.revenue / totalRevenue * 100) : 0;
+    return `<div class="acc-line"><div>${escH(g.name)}<div class="s">заказов: ${g.orders.size} · шт: ${g.qty} · прибыль: ${fmtN(g.profit)}</div></div><div class="r">${fmtN(g.revenue)}<div class="s">${pct}%</div></div></div>`;
+  }).join('');
+}
+
+function renderAccounting(){
+  const kEl = document.getElementById('accKpis');
+  if (!kEl) return;
+  const rows = accSalesRows();
+  const { fromTs, toTs } = accRange();
+
+  const revenue = rows.reduce((s,r) => s + r.revenue, 0);
+  const known = rows.filter(r => r.cost != null);
+  const cost = known.reduce((s,r) => s + r.cost, 0);
+  const grossKnown = known.reduce((s,r) => s + r.profit, 0);
+  const unknownCount = rows.length - known.length;
+  const orderIds = new Set(rows.map(r => r.orderId));
+  const units = rows.reduce((s,r) => s + r.qty, 0);
+
+  const exps = accExpenses.filter(e => (!fromTs || (e.ts||0) >= fromTs) && (!toTs || (e.ts||0) <= toTs));
+  const expTotal = exps.reduce((s,e) => s + (Number(e.amount)||0), 0);
+  const net = grossKnown - expTotal;
+  const margin = revenue ? Math.round(net / revenue * 100) : 0;
+  const avg = orderIds.size ? revenue / orderIds.size : 0;
+
+  const kpi = (k, v, cls='') => `<div class="acc-kpi ${cls}"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+  kEl.innerHTML =
+    kpi('Выручка', fmtN(revenue) + ' сум') +
+    kpi('Себестоимость', fmtN(cost) + ' сум') +
+    kpi('Валовая прибыль', fmtN(grossKnown) + ' сум', grossKnown >= 0 ? 'good' : 'bad') +
+    kpi('Расходы', fmtN(expTotal) + ' сум') +
+    kpi('Чистая прибыль', fmtN(net) + ' сум', (net >= 0 ? 'good' : 'bad') + ' wide') +
+    kpi('Заказов', orderIds.size) +
+    kpi('Продано, шт', units) +
+    kpi('Средний чек', fmtN(avg) + ' сум') +
+    kpi('Маржа', margin + '%', margin >= 0 ? 'good' : 'bad');
+
+  document.getElementById('accWarn').innerHTML = unknownCount
+    ? `<div class="acc-warnbox">⚠️ У ${unknownCount} позиций не указана себестоимость — они не входят в прибыль. Заполни «Себестоимость товаров» ниже.</div>` : '';
+
+  document.getElementById('accBreakdowns').innerHTML = rows.length
+    ? accBlock('Способ оплаты', accGroup(rows,'pay'), revenue) +
+      accBlock('Откуда пришёл покупатель', accGroup(rows,'source'), revenue) +
+      accBlock('Город / пункт БТС', accGroup(rows,'city'), revenue)
+    : '<p class="hint">За выбранный период продаж нет</p>';
+
+  const expBy = {};
+  exps.forEach(e => { expBy[e.category] = (expBy[e.category]||0) + (Number(e.amount)||0); });
+  const expSummary = Object.keys(expBy).length
+    ? `<div class="acc-h">По категориям</div>` + Object.entries(expBy).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `<div class="acc-line"><div>${escH(k)}</div><div class="r">${fmtN(v)}</div></div>`).join('') : '';
+  document.getElementById('accExpenses').innerHTML = expSummary +
+    (exps.length ? `<div class="acc-h">Записи</div>` + exps.map(e =>
+      `<div class="acc-line"><div>${escH(e.category)}<div class="s">${escH(e.date||'')}${e.note ? ' · ' + escH(e.note) : ''}</div></div><div class="r">${fmtN(e.amount)}<span class="acc-del" onclick="delExpense('${escH(e.id)}')">удалить</span></div></div>`).join('')
+      : '<p class="hint">Расходов за период нет</p>');
+
+  const byProd = {};
+  rows.forEach(r => {
+    const k = r.productId || r.name;
+    if (!byProd[k]) byProd[k] = { name: r.name, qty: 0, revenue: 0, profit: 0, unknown: 0 };
+    byProd[k].qty += r.qty; byProd[k].revenue += r.revenue;
+    if (r.profit == null) byProd[k].unknown += 1; else byProd[k].profit += r.profit;
+  });
+  const pl = Object.values(byProd).sort((a,b) => b.revenue - a.revenue);
+  document.getElementById('accProducts').innerHTML = pl.length ? pl.map(p =>
+    `<div class="acc-line"><div>${escH(p.name)}<div class="s">продано: ${p.qty} шт${p.unknown ? ' · нет себестоимости' : ''}</div></div><div class="r">${fmtN(p.revenue)}<div class="s">прибыль ${fmtN(p.profit)}</div></div></div>`).join('')
+    : '<p class="hint">Нет данных</p>';
+
+  document.getElementById('accSales').innerHTML = rows.length ? rows.slice(0, 60).map(r =>
+    `<div class="acc-sale"><b>${escH(r.name)}</b> (${escH(r.size)}${r.color ? ', ' + escH(r.color) : ''}) × ${r.qty}
+      <div class="s" style="color:var(--muted);">${new Date(r.ts).toLocaleString('ru-RU')} · ${escH(r.customer)}</div>
+      <div>Сумма: <b>${fmtN(r.revenue)}</b> · себестоимость: ${r.cost == null ? '—' : fmtN(r.cost)} · прибыль: <b>${r.profit == null ? '—' : fmtN(r.profit)}</b></div>
+      <div style="color:var(--muted);">💰 ${escH(r.pay)} · 🌐 ${escH(r.source)} · 📍 ${escH(r.city)}</div></div>`).join('')
+      + (rows.length > 60 ? `<p class="hint">Показаны последние 60 из ${rows.length}. Все строки — в файле Excel.</p>` : '')
+    : '<p class="hint">Продаж за период нет</p>';
+}
+
+function renderAccCosts(){
+  const el = document.getElementById('accCosts');
+  if (!el) return;
+  if (el.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return; // не мешаем вводу
+  if (!allProducts.length){ el.innerHTML = '<p class="hint">Товаров пока нет</p>'; return; }
+  el.innerHTML = allProducts.map(p => {
+    const c = accCosts[p.id] || {};
+    return `<div class="acc-cost-row"><div class="nm">${escH(p.name || 'Без названия')}</div>
+      <div class="row">
+        <div><label>Закупка</label><input type="number" inputmode="numeric" value="${c.cost != null ? Number(c.cost) : ''}" placeholder="0" onchange="saveCost('${escH(p.id)}', this.parentNode.parentNode, this)"></div>
+        <div><label>Карго / ед.</label><input type="number" inputmode="numeric" value="${c.cargo != null ? Number(c.cargo) : ''}" placeholder="0" onchange="saveCost('${escH(p.id)}', this.parentNode.parentNode, this)"></div>
+      </div></div>`;
+  }).join('');
+}
+
+function saveCost(productId, rowEl){
+  const ins = rowEl.querySelectorAll('input');
+  const cost = Number(ins[0].value) || 0, cargo = Number(ins[1].value) || 0;
+  db.collection('product_costs').doc(productId).set({ cost, cargo, updatedAt: Date.now() }, { merge: true })
+    .then(() => adminToast('Себестоимость сохранена ✅'))
+    .catch(() => adminToast('Не удалось сохранить'));
+}
+
+function addExpense(){
+  const amount = Number(document.getElementById('expAmount').value);
+  const date = document.getElementById('expDate').value || new Date().toISOString().slice(0,10);
+  if (!(amount > 0)){ adminToast('Введи сумму расхода'); return; }
+  db.collection('expenses').add({
+    category: document.getElementById('expCat').value, amount, date,
+    ts: new Date(date + 'T12:00:00').getTime(),
+    note: document.getElementById('expNote').value.trim().slice(0,200), createdAt: Date.now()
+  }).then(() => {
+    document.getElementById('expAmount').value = ''; document.getElementById('expNote').value = '';
+    adminToast('Расход добавлен ✅');
+  }).catch(() => adminToast('Не удалось сохранить'));
+}
+function delExpense(id){ if (confirm('Удалить этот расход?')) db.collection('expenses').doc(id).delete(); }
+
+function csvCell(v){ return '"' + String(v == null ? '' : v).replace(/"/g,'""') + '"'; }
+function downloadCsv(name, lines){
+  const blob = new Blob(['﻿' + lines.map(l => l.map(csvCell).join(';')).join('\r\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function exportAccSales(){
+  const rows = accSalesRows();
+  downloadCsv('milaisss_prodazhi.csv', [['Дата','Покупатель','Телефон','Товар','Размер','Цвет','Кол-во','Сумма','Себестоимость','Прибыль','Оплата','Откуда','Город','Пункт БТС','Статус']]
+    .concat(rows.map(r => [new Date(r.ts).toLocaleString('ru-RU'), r.customer, r.phone, r.name, r.size, r.color, r.qty, r.revenue, r.cost == null ? '' : r.cost, r.profit == null ? '' : r.profit, r.pay, r.source, r.city, r.branch, r.status])));
+}
+function exportAccExpenses(){
+  const { fromTs, toTs } = accRange();
+  const ex = accExpenses.filter(e => (!fromTs || (e.ts||0) >= fromTs) && (!toTs || (e.ts||0) <= toTs));
+  downloadCsv('milaisss_rashody.csv', [['Дата','Категория','Сумма','Примечание']].concat(ex.map(e => [e.date, e.category, e.amount, e.note||''])));
+}
 </script>
 </body>
 </html>
