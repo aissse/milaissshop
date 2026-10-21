@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Публичная оферта — milaisss</title>
+<meta name="description" content="Публичная оферта интернет-магазина milaisss: условия заказа, оплаты, доставки и возврата.">
+<link rel="canonical" href="https://milaisss.com/oferta.html">
+<link rel="icon" href="favicon-192x192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#F6F5F2; --ink:#121212; --stone:#ECE9E3; --line:#E1DDD4; --accent:#7A1C1C; --muted:#857F75; --surface:#FBFAF8; }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#121212; --ink:#f2efe9; --stone:#1d1d1d; --line:#2c2c2c; --accent:#d1676b; --muted:#9a948a; --surface:#181818; }
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; line-height:1.65; }
+  .wrap{ max-width:760px; margin:0 auto; padding:20px 20px 60px; }
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; }
+  .back{ display:inline-flex; align-items:center; gap:6px; color:var(--ink); text-decoration:none; font-size:13px; font-weight:600; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:8px 14px; }
+  .langs{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+  .langs button{ font:inherit; font-size:12px; font-weight:700; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:7px 12px; cursor:pointer; }
+  .langs button.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  h1{ font-family:'Cormorant Garamond',serif; font-size:32px; line-height:1.15; margin-bottom:6px; }
+  .meta{ color:var(--muted); font-size:12px; margin-bottom:22px; }
+  .sec{ background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px 18px 8px; margin-bottom:14px; }
+  .sec h2{ font-size:15px; font-weight:700; margin-bottom:10px; }
+  .sec p{ font-size:14px; margin-bottom:10px; }
+  .req p{ margin-bottom:6px; }
+  .req b{ font-weight:600; color:var(--muted); }
+  .note{ font-size:12px; color:var(--muted); margin-top:18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="./" id="backLink">← milaisss</a>
+    <div class="langs" id="langs"></div>
+  </div>
+  <h1 id="ttl"></h1>
+  <div class="meta" id="meta"></div>
+  <div id="body"></div>
+  <div class="note" id="note"></div>
+</div>
+
+<script>
+/* ===== Реквизиты продавца — впиши свои данные, пустые строки на странице не показываются ===== */
+const REQUISITES = {
+  name:     "",   // например: ЯТТ «Фамилия Имя Отчество»
+  stir:     "",   // СТИР (ИНН)
+  address:  "",   // юридический адрес
+  phone:    "",   // телефон
+  telegram: "",   // Telegram для связи
+  email:    "",   // эл. почта
+  hours:    ""    // например: ежедневно 09:00–20:00
+};
+const EDITION = "21.10.2026";
+
+const LANGS = { ru:'RU', uz:'UZ', tr:'TR', az:'AZ', en:'EN' };
+
+const T = {
+  ru:{
+    title:"Публичная оферта", back:"← Магазин", ed:"Редакция от ", reqH:"Реквизиты продавца",
+    rq:{name:"Продавец", stir:"СТИР (ИНН)", address:"Адрес", phone:"Телефон", telegram:"Telegram", email:"Эл. почта", hours:"Время работы"},
+    note:"Документ опубликован на русском, узбекском, турецком, азербайджанском и английском языках. При расхождении текстов приоритет имеет русская версия.",
+    s:[
+     ["1. Общие положения",[
+       "Настоящий документ является публичной офертой интернет-магазина milaisss (далее — «Продавец») и определяет условия продажи товаров через сайт milaisss.com (далее — «Сайт»).",
+       "Оформление заказа на Сайте означает полное и безоговорочное принятие (акцепт) условий настоящей оферты. С этого момента договор купли-продажи между Продавцом и Покупателем считается заключённым.",
+       "Покупатель подтверждает, что ему исполнилось 18 лет либо что заказ оформляется с согласия законного представителя."]],
+     ["2. Основные понятия",[
+       "«Покупатель» — физическое лицо, оформляющее заказ на Сайте. «Товар» — обувь, одежда и аксессуары, представленные в каталоге Сайта. «Заказ» — выбор Товаров Покупателем с указанием номера телефона и пункта выдачи. «Пункт БТС» — пункт выдачи службы доставки, выбранный Покупателем."]],
+     ["3. Предмет договора",[
+       "Продавец обязуется передать Покупателю выбранный Товар, а Покупатель — оплатить его и принять на условиях настоящей оферты.",
+       "Описание, фотографии, цвета и размеры Товара указаны в карточке Товара. Цвет на экране может незначительно отличаться от реального."]],
+     ["4. Оформление заказа",[
+       "Для оформления заказа Покупатель выбирает Товар, размер и цвет, добавляет его в корзину, указывает номер телефона, пункт БТС и способ оплаты. При желании можно оставить примечание к заказу.",
+       "Покупатель отвечает за достоверность указанных данных. Номер телефона используется для связи по заказу.",
+       "Продавец вправе отказать в исполнении заказа или связаться с Покупателем для уточнения деталей, если Товара нет в наличии или данные заказа указаны неверно. В этом случае оплаченные средства возвращаются в полном объёме.",
+       "Статус заказа Покупатель может отслеживать в личном кабинете, а также получать уведомления через Telegram-бота магазина."]],
+     ["5. Цены и оплата",[
+       "Цены на Товары указаны в узбекских сумах (UZS). Продавец вправе изменять цены; цена уже оформленного заказа не меняется.",
+       "Оплата производится онлайн через платёжные сервисы Uzum Bank. Реквизиты банковской карты вводятся только на защищённой странице платёжного сервиса: Продавец не получает, не хранит и не обрабатывает данные карты Покупателя.",
+       "Доступность отдельных способов оплаты (Uzum Bank, Apple Pay, Google Pay) может меняться; актуальные способы указаны на странице оформления заказа.",
+       "Заказ передаётся в обработку после подтверждения платежа."]],
+     ["6. Доставка",[
+       "Доставка осуществляется по Узбекистану до выбранного Покупателем пункта БТС. Ориентировочный срок — от 2 до 5 дней в зависимости от региона; срок не является гарантированным.",
+       "Стоимость и условия доставки указываются при оформлении заказа или сообщаются Покупателем отдельно.",
+       "Получая заказ в пункте БТС, Покупатель обязан осмотреть упаковку и Товар. При обнаружении повреждений или несоответствия следует сразу сообщить Продавцу."]],
+     ["7. Возврат и обмен",[
+       "Покупатель вправе вернуть Товар надлежащего качества в течение 14 дней с момента получения, если Товар не был в употреблении, сохранены товарный вид, потребительские свойства, ярлыки и упаковка.",
+       "Расходы на обратную отправку несёт Покупатель, за исключением случаев, когда Товар оказался ненадлежащего качества или не соответствует заказу.",
+       "Для возврата или обмена необходимо связаться с Продавцом через чат на Сайте или Telegram и указать номер заказа.",
+       "Денежные средства возвращаются тем же способом, которым была произведена оплата, в течение 10 рабочих дней после получения и проверки возвращённого Товара. Фактический срок зачисления зависит от банка."]],
+     ["8. Качество товара",[
+       "Продавец отвечает за соответствие Товара описанию и за наличие в нём производственных дефектов. Права Покупателя при продаже Товара ненадлежащего качества определяются законодательством Республики Узбекистан о защите прав потребителей."]],
+     ["9. Персональные данные",[
+       "Оформляя заказ, Покупатель даёт согласие на обработку имени, номера телефона, Telegram-аккаунта и данных заказа в целях исполнения договора, доставки и связи с Покупателем.",
+       "Данные передаются третьим лицам только в объёме, необходимом для выполнения заказа (служба доставки, платёжный сервис, Telegram), и не продаются.",
+       "Покупатель может запросить удаление своих данных, написав Продавцу."]],
+     ["10. Ответственность сторон",[
+       "Стороны несут ответственность в соответствии с законодательством Республики Узбекистан. Продавец не отвечает за задержки доставки по вине службы доставки, перебои в работе платёжных систем и сети интернет, а также за убытки, возникшие из-за неверно указанных Покупателем данных."]],
+     ["11. Разрешение споров",[
+       "Споры решаются путём переговоров. Письменная претензия рассматривается в течение 15 рабочих дней. Если согласие не достигнуто, спор передаётся на рассмотрение суда в соответствии с законодательством Республики Узбекистан."]],
+     ["12. Изменение условий",[
+       "Продавец вправе изменять условия оферты. Новая редакция вступает в силу с момента публикации на Сайте и применяется к заказам, оформленным после этой даты."]]
+    ]
+  },
+  uz:{
+    title:"Ommaviy oferta", back:"← Do‘kon", ed:"Tahrir sanasi: ", reqH:"Sotuvchi rekvizitlari",
+    rq:{name:"Sotuvchi", stir:"STIR (INN)", address:"Manzil", phone:"Telefon", telegram:"Telegram", email:"E-pochta", hours:"Ish vaqti"},
+    note:"Hujjat rus, o‘zbek, turk, ozarbayjon va ingliz tillarida e’lon qilingan. Matnlar o‘rtasida farq bo‘lsa, rus tilidagi variant ustun hisoblanadi.",
+    s:[
+     ["1. Umumiy qoidalar",[
+       "Ushbu hujjat milaisss internet-do‘konining (keyingi o‘rinlarda — «Sotuvchi») ommaviy ofertasi bo‘lib, milaisss.com saytida (keyingi o‘rinlarda — «Sayt») tovarlarni sotish shartlarini belgilaydi.",
+       "Saytda buyurtma rasmiylashtirish ushbu oferta shartlarini to‘liq va so‘zsiz qabul qilishni (aksept) anglatadi. Shu paytdan boshlab Sotuvchi va Xaridor o‘rtasida oldi-sotdi shartnomasi tuzilgan hisoblanadi.",
+       "Xaridor 18 yoshga to‘lganini yoki buyurtma qonuniy vakilning roziligi bilan rasmiylashtirilayotganini tasdiqlaydi."]],
+     ["2. Asosiy tushunchalar",[
+       "«Xaridor» — Saytda buyurtma beruvchi jismoniy shaxs. «Tovar» — Sayt katalogida ko‘rsatilgan poyabzal, kiyim va aksessuarlar. «Buyurtma» — Xaridor tomonidan telefon raqami va topshirish punkti ko‘rsatilgan holda tanlangan tovarlar. «BTS punkti» — Xaridor tanlagan yetkazib berish xizmatining topshirish punkti."]],
+     ["3. Shartnoma predmeti",[
+       "Sotuvchi tanlangan Tovarni Xaridorga topshirish, Xaridor esa ushbu oferta shartlarida uni to‘lash va qabul qilib olish majburiyatini oladi.",
+       "Tovarning tavsifi, fotosuratlari, ranglari va o‘lchamlari tovar kartochkasida ko‘rsatilgan. Ekrandagi rang haqiqiy rangdan biroz farq qilishi mumkin."]],
+     ["4. Buyurtmani rasmiylashtirish",[
+       "Buyurtma berish uchun Xaridor Tovar, o‘lcham va rangni tanlaydi, savatga qo‘shadi, telefon raqami, BTS punkti va to‘lov usulini ko‘rsatadi. Xohlasa, buyurtmaga izoh qoldirishi mumkin.",
+       "Xaridor ko‘rsatilgan ma’lumotlarning to‘g‘riligi uchun javobgar. Telefon raqami buyurtma bo‘yicha bog‘lanish uchun ishlatiladi.",
+       "Tovar mavjud bo‘lmasa yoki ma’lumotlar noto‘g‘ri ko‘rsatilgan bo‘lsa, Sotuvchi buyurtmani bajarishdan bosh tortish yoki tafsilotlarni aniqlash uchun Xaridor bilan bog‘lanish huquqiga ega. Bunday holda to‘langan mablag‘ to‘liq qaytariladi.",
+       "Xaridor buyurtma holatini shaxsiy kabinetda kuzatishi va do‘konning Telegram-boti orqali xabarnomalar olishi mumkin."]],
+     ["5. Narxlar va to‘lov",[
+       "Tovar narxlari o‘zbek so‘mida (UZS) ko‘rsatiladi. Sotuvchi narxlarni o‘zgartirish huquqiga ega; rasmiylashtirilgan buyurtma narxi o‘zgarmaydi.",
+       "To‘lov Uzum Bank to‘lov xizmatlari orqali onlayn amalga oshiriladi. Bank kartasi ma’lumotlari faqat to‘lov xizmatining himoyalangan sahifasida kiritiladi: Sotuvchi Xaridorning karta ma’lumotlarini olmaydi, saqlamaydi va qayta ishlamaydi.",
+       "Ayrim to‘lov usullari (Uzum Bank, Apple Pay, Google Pay) mavjudligi o‘zgarishi mumkin; joriy usullar buyurtma sahifasida ko‘rsatiladi.",
+       "Buyurtma to‘lov tasdiqlangandan so‘ng ishlovga uzatiladi."]],
+     ["6. Yetkazib berish",[
+       "Yetkazib berish O‘zbekiston bo‘ylab Xaridor tanlagan BTS punktigacha amalga oshiriladi. Taxminiy muddat — hududga qarab 2 dan 5 kungacha; muddat kafolatlanmaydi.",
+       "Yetkazib berish narxi va shartlari buyurtma jarayonida ko‘rsatiladi yoki Xaridorga alohida xabar qilinadi.",
+       "Buyurtmani BTS punktida qabul qilayotganda Xaridor qadoq va Tovarni ko‘zdan kechirishi shart. Shikast yoki nomuvofiqlik aniqlansa, darhol Sotuvchiga xabar bering."]],
+     ["7. Qaytarish va almashtirish",[
+       "Xaridor sifatli Tovarni olgan kundan boshlab 14 kun ichida, Tovar ishlatilmagan, tovar ko‘rinishi, iste’mol xususiyatlari, yorliqlari va qadog‘i saqlangan bo‘lsa, qaytarishi mumkin.",
+       "Qaytarib jo‘natish xarajatlarini Xaridor ko‘taradi, Tovar sifatsiz yoki buyurtmaga mos kelmagan hollar bundan mustasno.",
+       "Qaytarish yoki almashtirish uchun Saytdagi chat yoki Telegram orqali Sotuvchiga murojaat qilib, buyurtma raqamini ko‘rsating.",
+       "Mablag‘ to‘lov amalga oshirilgan usulda, qaytarilgan Tovar qabul qilinib tekshirilgandan so‘ng 10 ish kuni ichida qaytariladi. Hisobga tushish muddati bankka bog‘liq."]],
+     ["8. Tovar sifati",[
+       "Sotuvchi Tovarning tavsifga mosligi va ishlab chiqarish nuqsonlari yo‘qligi uchun javob beradi. Sifatsiz Tovar sotilganda Xaridorning huquqlari O‘zbekiston Respublikasining iste’molchilar huquqlarini himoya qilish to‘g‘risidagi qonunchiligi bilan belgilanadi."]],
+     ["9. Shaxsiy ma’lumotlar",[
+       "Buyurtma berish orqali Xaridor shartnomani bajarish, yetkazib berish va bog‘lanish maqsadida ismi, telefon raqami, Telegram-akkaunti va buyurtma ma’lumotlarini qayta ishlashga rozilik beradi.",
+       "Ma’lumotlar uchinchi shaxslarga faqat buyurtmani bajarish uchun zarur doirada (yetkazib berish xizmati, to‘lov xizmati, Telegram) uzatiladi va sotilmaydi.",
+       "Xaridor Sotuvchiga yozib, ma’lumotlarini o‘chirishni so‘rashi mumkin."]],
+     ["10. Tomonlar javobgarligi",[
+       "Tomonlar O‘zbekiston Respublikasi qonunchiligiga muvofiq javob beradi. Sotuvchi yetkazib berish xizmati aybi bilan kechikishlar, to‘lov tizimlari va internet tarmog‘idagi uzilishlar, shuningdek Xaridor noto‘g‘ri ko‘rsatgan ma’lumotlar sabab yuzaga kelgan zararlar uchun javobgar emas."]],
+     ["11. Nizolarni hal etish",[
+       "Nizolar muzokaralar yo‘li bilan hal qilinadi. Yozma da’vo 15 ish kuni ichida ko‘rib chiqiladi. Kelishuvga erishilmasa, nizo O‘zbekiston Respublikasi qonunchiligiga muvofiq sudga topshiriladi."]],
+     ["12. Shartlarni o‘zgartirish",[
+       "Sotuvchi oferta shartlarini o‘zgartirish huquqiga ega. Yangi tahrir Saytda e’lon qilingan paytdan kuchga kiradi va shu sanadan keyin rasmiylashtirilgan buyurtmalarga nisbatan qo‘llaniladi."]]
+    ]
+  },
+  tr:{
+    title:"Genel Satış Teklifi (Ofert)", back:"← Mağaza", ed:"Revizyon tarihi: ", reqH:"Satıcı bilgileri",
+    rq:{name:"Satıcı", stir:"Vergi No (STIR)", address:"Adres", phone:"Telefon", telegram:"Telegram", email:"E-posta", hours:"Çalışma saatleri"},
+    note:"Belge Rusça, Özbekçe, Türkçe, Azerbaycanca ve İngilizce yayımlanmıştır. Metinler arasında fark olması halinde Rusça sürüm esas alınır.",
+    s:[
+     ["1. Genel hükümler",[
+       "Bu belge, milaisss çevrimiçi mağazasının (bundan sonra «Satıcı») genel satış teklifidir ve milaisss.com sitesi (bundan sonra «Site») üzerinden ürün satış koşullarını belirler.",
+       "Sitede sipariş vermek, bu teklifin koşullarının tam ve koşulsuz kabulü (akseptans) anlamına gelir. Bu andan itibaren Satıcı ile Alıcı arasında satış sözleşmesi kurulmuş sayılır.",
+       "Alıcı, 18 yaşını doldurduğunu veya siparişin yasal temsilcisinin izniyle verildiğini onaylar."]],
+     ["2. Temel tanımlar",[
+       "«Alıcı» — Sitede sipariş veren gerçek kişi. «Ürün» — Site kataloğunda sunulan ayakkabı, giyim ve aksesuarlar. «Sipariş» — Alıcının telefon numarası ve teslim noktası belirterek seçtiği ürünler. «BTS noktası» — Alıcının seçtiği kargo hizmetinin teslim noktası."]],
+     ["3. Sözleşmenin konusu",[
+       "Satıcı seçilen Ürünü Alıcıya teslim etmeyi, Alıcı ise bu teklifin koşullarında ödemeyi ve teslim almayı taahhüt eder.",
+       "Ürünün açıklaması, fotoğrafları, renkleri ve bedenleri ürün kartında belirtilmiştir. Ekrandaki renk gerçek renkten az da olsa farklı olabilir."]],
+     ["4. Sipariş verme",[
+       "Sipariş için Alıcı ürünü, bedeni ve rengi seçer, sepete ekler, telefon numarasını, BTS noktasını ve ödeme yöntemini belirtir. İsterse siparişe not bırakabilir.",
+       "Alıcı, verdiği bilgilerin doğruluğundan sorumludur. Telefon numarası sipariş hakkında iletişim için kullanılır.",
+       "Ürün stokta yoksa veya bilgiler hatalıysa Satıcı siparişi yerine getirmeyi reddedebilir veya ayrıntıları netleştirmek için Alıcıyla iletişime geçebilir. Bu durumda ödenen tutar tamamen iade edilir.",
+       "Alıcı sipariş durumunu hesabından takip edebilir ve mağazanın Telegram botu üzerinden bildirim alabilir."]],
+     ["5. Fiyatlar ve ödeme",[
+       "Fiyatlar Özbekistan somu (UZS) cinsinden belirtilir. Satıcı fiyatları değiştirme hakkına sahiptir; verilmiş siparişin fiyatı değişmez.",
+       "Ödeme, Uzum Bank ödeme hizmetleri üzerinden çevrimiçi yapılır. Banka kartı bilgileri yalnızca ödeme hizmetinin güvenli sayfasında girilir: Satıcı Alıcının kart bilgilerini almaz, saklamaz ve işlemez.",
+       "Bazı ödeme yöntemlerinin (Uzum Bank, Apple Pay, Google Pay) kullanılabilirliği değişebilir; güncel yöntemler sipariş sayfasında gösterilir.",
+       "Sipariş, ödeme onaylandıktan sonra işleme alınır."]],
+     ["6. Teslimat",[
+       "Teslimat, Özbekistan içinde Alıcının seçtiği BTS noktasına yapılır. Tahmini süre bölgeye göre 2 ila 5 gündür; süre garanti edilmez.",
+       "Teslimat ücreti ve koşulları sipariş sırasında belirtilir veya Alıcıya ayrıca bildirilir.",
+       "Siparişi BTS noktasında teslim alırken Alıcı ambalajı ve ürünü incelemekle yükümlüdür. Hasar veya uyumsuzluk varsa hemen Satıcıya bildirilmelidir."]],
+     ["7. İade ve değişim",[
+       "Alıcı, kusursuz ürünü teslim aldığı tarihten itibaren 14 gün içinde; ürün kullanılmamış, ticari görünümü, kullanım özellikleri, etiketleri ve ambalajı korunmuşsa iade edebilir.",
+       "İade kargo masrafları, ürünün kusurlu olması veya siparişe uygun olmaması haricinde Alıcıya aittir.",
+       "İade veya değişim için Sitedeki sohbet ya da Telegram üzerinden Satıcıyla iletişime geçip sipariş numarasını belirtin.",
+       "Ödeme, iade edilen ürün teslim alınıp kontrol edildikten sonra 10 iş günü içinde ödemenin yapıldığı yöntemle iade edilir. Hesaba geçiş süresi bankaya bağlıdır."]],
+     ["8. Ürün kalitesi",[
+       "Satıcı, ürünün açıklamaya uygunluğundan ve üretim hatası bulunmamasından sorumludur. Kusurlu ürün satışında Alıcının hakları Özbekistan Cumhuriyeti tüketici hakları mevzuatına göre belirlenir."]],
+     ["9. Kişisel veriler",[
+       "Sipariş vererek Alıcı; adının, telefon numarasının, Telegram hesabının ve sipariş verilerinin sözleşmenin ifası, teslimat ve iletişim amacıyla işlenmesine onay verir.",
+       "Veriler üçüncü kişilere yalnızca siparişin yerine getirilmesi için gerekli ölçüde (kargo hizmeti, ödeme hizmeti, Telegram) aktarılır ve satılmaz.",
+       "Alıcı, Satıcıya yazarak verilerinin silinmesini talep edebilir."]],
+     ["10. Tarafların sorumluluğu",[
+       "Taraflar Özbekistan Cumhuriyeti mevzuatına göre sorumludur. Satıcı; kargo hizmetinden kaynaklanan gecikmelerden, ödeme sistemleri ve internet ağındaki kesintilerden ve Alıcının yanlış verdiği bilgilerden doğan zararlardan sorumlu değildir."]],
+     ["11. Uyuşmazlıkların çözümü",[
+       "Uyuşmazlıklar görüşme yoluyla çözülür. Yazılı talep 15 iş günü içinde incelenir. Uzlaşma sağlanamazsa uyuşmazlık, Özbekistan Cumhuriyeti mevzuatına uygun olarak mahkemeye götürülür."]],
+     ["12. Koşulların değiştirilmesi",[
+       "Satıcı teklifin koşullarını değiştirme hakkına sahiptir. Yeni sürüm Sitede yayımlandığı andan itibaren yürürlüğe girer ve bu tarihten sonra verilen siparişlere uygulanır."]]
+    ]
+  },
+  az:{
+    title:"Ümumi satış təklifi (Oferta)", back:"← Mağaza", ed:"Redaksiya tarixi: ", reqH:"Satıcının rekvizitləri",
+    rq:{name:"Satıcı", stir:"VÖEN (STIR)", address:"Ünvan", phone:"Telefon", telegram:"Telegram", email:"E-poçt", hours:"İş saatları"},
+    note:"Sənəd rus, özbək, türk, azərbaycan və ingilis dillərində dərc olunub. Mətnlər arasında fərq olarsa, rus variantı üstünlük təşkil edir.",
+    s:[
+     ["1. Ümumi müddəalar",[
+       "Bu sənəd milaisss onlayn mağazasının (bundan sonra «Satıcı») ümumi satış təklifidir və milaisss.com saytı (bundan sonra «Sayt») üzərindən məhsulların satış şərtlərini müəyyən edir.",
+       "Saytda sifariş vermək bu təklifin şərtlərinin tam və qeyd-şərtsiz qəbul edilməsi (akseptı) deməkdir. Bu andan etibarən Satıcı ilə Alıcı arasında alqı-satqı müqaviləsi bağlanmış hesab olunur.",
+       "Alıcı 18 yaşına çatdığını və ya sifarişin qanuni nümayəndənin razılığı ilə verildiyini təsdiq edir."]],
+     ["2. Əsas anlayışlar",[
+       "«Alıcı» — Saytda sifariş verən fiziki şəxs. «Məhsul» — Sayt kataloqunda təqdim olunan ayaqqabı, geyim və aksesuarlar. «Sifariş» — Alıcının telefon nömrəsi və təhvil məntəqəsini göstərməklə seçdiyi məhsullar. «BTS məntəqəsi» — Alıcının seçdiyi çatdırılma xidmətinin təhvil məntəqəsi."]],
+     ["3. Müqavilənin predmeti",[
+       "Satıcı seçilmiş Məhsulu Alıcıya təhvil verməyi, Alıcı isə bu təklifin şərtləri ilə onu ödəməyi və qəbul etməyi öhdəsinə götürür.",
+       "Məhsulun təsviri, şəkilləri, rəngləri və ölçüləri məhsul kartında göstərilib. Ekrandakı rəng real rəngdən az fərqlənə bilər."]],
+     ["4. Sifarişin rəsmiləşdirilməsi",[
+       "Sifariş vermək üçün Alıcı məhsulu, ölçünü və rəngi seçir, səbətə əlavə edir, telefon nömrəsini, BTS məntəqəsini və ödəniş üsulunu göstərir. İstəsə, sifarişə qeyd yaza bilər.",
+       "Alıcı göstərilən məlumatların düzgünlüyünə görə məsuliyyət daşıyır. Telefon nömrəsi sifariş üzrə əlaqə üçün istifadə olunur.",
+       "Məhsul stokda olmadıqda və ya məlumatlar yanlış göstərildikdə Satıcı sifarişin icrasından imtina edə və ya təfərrüatları dəqiqləşdirmək üçün Alıcı ilə əlaqə saxlaya bilər. Bu halda ödənilmiş vəsait tam qaytarılır.",
+       "Alıcı sifarişin statusunu şəxsi kabinetdə izləyə və mağazanın Telegram botu vasitəsilə bildirişlər ala bilər."]],
+     ["5. Qiymətlər və ödəniş",[
+       "Qiymətlər Özbəkistan somu (UZS) ilə göstərilir. Satıcı qiymətləri dəyişmək hüququna malikdir; rəsmiləşdirilmiş sifarişin qiyməti dəyişmir.",
+       "Ödəniş Uzum Bank ödəniş xidmətləri vasitəsilə onlayn aparılır. Bank kartının məlumatları yalnız ödəniş xidmətinin qorunan səhifəsində daxil edilir: Satıcı Alıcının kart məlumatlarını almır, saxlamır və emal etmir.",
+       "Bəzi ödəniş üsullarının (Uzum Bank, Apple Pay, Google Pay) mövcudluğu dəyişə bilər; aktual üsullar sifariş səhifəsində göstərilir.",
+       "Sifariş ödəniş təsdiqləndikdən sonra emala verilir."]],
+     ["6. Çatdırılma",[
+       "Çatdırılma Özbəkistan daxilində Alıcının seçdiyi BTS məntəqəsinə qədər həyata keçirilir. Təxmini müddət bölgədən asılı olaraq 2–5 gündür; müddət zəmanət verilmir.",
+       "Çatdırılmanın qiyməti və şərtləri sifariş zamanı göstərilir və ya Alıcıya ayrıca bildirilir.",
+       "Sifarişi BTS məntəqəsində qəbul edərkən Alıcı qablaşdırmanı və məhsulu yoxlamağa borcludur. Zədə və ya uyğunsuzluq aşkarlanarsa, dərhal Satıcıya bildirin."]],
+     ["7. Geri qaytarma və dəyişdirmə",[
+       "Alıcı keyfiyyətli Məhsulu aldığı gündən 14 gün ərzində, məhsul istifadə olunmayıbsa, ticarət görünüşü, istehlak xüsusiyyətləri, etiketləri və qablaşdırması qorunubsa, geri qaytara bilər.",
+       "Geri göndərmə xərcləri Məhsulun keyfiyyətsiz olduğu və ya sifarişə uyğun gəlmədiyi hallar istisna olmaqla, Alıcıya aiddir.",
+       "Geri qaytarma və ya dəyişdirmə üçün Saytdakı çat və ya Telegram vasitəsilə Satıcı ilə əlaqə saxlayın və sifariş nömrəsini göstərin.",
+       "Vəsait geri qaytarılan Məhsul qəbul edilib yoxlandıqdan sonra 10 iş günü ərzində ödənişin edildiyi üsulla qaytarılır. Hesaba daxil olma müddəti banktan asılıdır."]],
+     ["8. Məhsulun keyfiyyəti",[
+       "Satıcı Məhsulun təsvirə uyğunluğuna və istehsal qüsurlarının olmamasına görə cavabdehdir. Keyfiyyətsiz məhsul satıldıqda Alıcının hüquqları Özbəkistan Respublikasının istehlakçı hüquqlarının müdafiəsi haqqında qanunvericiliyi ilə müəyyən edilir."]],
+     ["9. Şəxsi məlumatlar",[
+       "Sifariş verməklə Alıcı müqavilənin icrası, çatdırılma və əlaqə məqsədilə adının, telefon nömrəsinin, Telegram hesabının və sifariş məlumatlarının emalına razılıq verir.",
+       "Məlumatlar üçüncü şəxslərə yalnız sifarişin icrası üçün zəruri həddə (çatdırılma xidməti, ödəniş xidməti, Telegram) ötürülür və satılmır.",
+       "Alıcı Satıcıya yazaraq məlumatlarının silinməsini tələb edə bilər."]],
+     ["10. Tərəflərin məsuliyyəti",[
+       "Tərəflər Özbəkistan Respublikasının qanunvericiliyinə uyğun məsuliyyət daşıyır. Satıcı çatdırılma xidmətinin təqsiri ilə gecikmələrə, ödəniş sistemlərinin və internet şəbəkəsinin fasilələrinə, həmçinin Alıcının yanlış göstərdiyi məlumatlar nəticəsində yaranan zərərlərə görə məsuliyyət daşımır."]],
+     ["11. Mübahisələrin həlli",[
+       "Mübahisələr danışıqlar yolu ilə həll edilir. Yazılı iddia 15 iş günü ərzində baxılır. Razılığa gəlinmədikdə mübahisə Özbəkistan Respublikasının qanunvericiliyinə uyğun olaraq məhkəməyə verilir."]],
+     ["12. Şərtlərin dəyişdirilməsi",[
+       "Satıcı təklifin şərtlərini dəyişmək hüququna malikdir. Yeni redaksiya Saytda dərc olunduğu andan qüvvəyə minir və bu tarixdən sonra rəsmiləşdirilmiş sifarişlərə tətbiq olunur."]]
+    ]
+  },
+  en:{
+    title:"Public Offer", back:"← Shop", ed:"Last updated: ", reqH:"Seller details",
+    rq:{name:"Seller", stir:"Tax ID (STIR)", address:"Address", phone:"Phone", telegram:"Telegram", email:"Email", hours:"Working hours"},
+    note:"This document is published in Russian, Uzbek, Turkish, Azerbaijani and English. In case of any discrepancy, the Russian version prevails.",
+    s:[
+     ["1. General provisions",[
+       "This document is the public offer of the milaisss online store (the “Seller”) and sets out the terms of sale of goods through the website milaisss.com (the “Website”).",
+       "Placing an order on the Website means full and unconditional acceptance of the terms of this offer. From that moment a sale and purchase agreement between the Seller and the Buyer is deemed concluded.",
+       "The Buyer confirms that they are at least 18 years old or that the order is placed with the consent of a legal representative."]],
+     ["2. Definitions",[
+       "“Buyer” — an individual placing an order on the Website. “Goods” — footwear, clothing and accessories presented in the Website catalogue. “Order” — the Goods selected by the Buyer, with a phone number and a pickup point specified. “BTS point” — the courier service pickup point chosen by the Buyer."]],
+     ["3. Subject of the agreement",[
+       "The Seller undertakes to hand over the selected Goods to the Buyer, and the Buyer undertakes to pay for and accept them on the terms of this offer.",
+       "The description, photos, colours and sizes of the Goods are given on the product card. Colours on a screen may differ slightly from the real ones."]],
+     ["4. Placing an order",[
+       "To place an order the Buyer selects the product, size and colour, adds it to the cart, and provides a phone number, a BTS point and a payment method. The Buyer may also leave a note for the order.",
+       "The Buyer is responsible for the accuracy of the data provided. The phone number is used to contact the Buyer about the order.",
+       "If the Goods are out of stock or the order details are incorrect, the Seller may decline the order or contact the Buyer to clarify the details. In that case any amount paid is refunded in full.",
+       "The Buyer can track the order status in their account and receive notifications via the store's Telegram bot."]],
+     ["5. Prices and payment",[
+       "Prices are shown in Uzbek soum (UZS). The Seller may change prices; the price of an order already placed does not change.",
+       "Payment is made online through the Uzum Bank payment services. Bank card details are entered only on the payment service's secure page: the Seller does not receive, store or process the Buyer's card data.",
+       "The availability of individual payment methods (Uzum Bank, Apple Pay, Google Pay) may change; the current methods are shown on the checkout page.",
+       "The order is processed after the payment is confirmed."]],
+     ["6. Delivery",[
+       "Delivery is made within Uzbekistan to the BTS point chosen by the Buyer. The estimated time is 2 to 5 days depending on the region; it is not guaranteed.",
+       "The delivery cost and terms are shown when the order is placed or communicated to the Buyer separately.",
+       "When collecting the order at the BTS point, the Buyer must inspect the packaging and the Goods. If damage or a mismatch is found, notify the Seller immediately."]],
+     ["7. Returns and exchanges",[
+       "The Buyer may return Goods of proper quality within 14 days of receipt, provided they are unused and their appearance, consumer properties, tags and packaging are preserved.",
+       "Return shipping costs are borne by the Buyer, except where the Goods are defective or do not match the order.",
+       "To return or exchange an item, contact the Seller via the chat on the Website or on Telegram and state the order number.",
+       "The money is refunded by the same method used for payment within 10 business days after the returned Goods are received and checked. The actual crediting time depends on the bank."]],
+     ["8. Quality of Goods",[
+       "The Seller is responsible for the Goods matching their description and being free of manufacturing defects. The Buyer's rights when Goods of improper quality are sold are determined by the consumer protection legislation of the Republic of Uzbekistan."]],
+     ["9. Personal data",[
+       "By placing an order the Buyer consents to the processing of their name, phone number, Telegram account and order data for the purposes of performing the agreement, delivery and contacting the Buyer.",
+       "Data is passed to third parties only to the extent necessary to fulfil the order (courier service, payment service, Telegram) and is never sold.",
+       "The Buyer may ask for their data to be deleted by writing to the Seller."]],
+     ["10. Liability",[
+       "The parties are liable in accordance with the legislation of the Republic of Uzbekistan. The Seller is not liable for delivery delays caused by the courier service, for outages of payment systems or the internet, or for losses caused by incorrect data provided by the Buyer."]],
+     ["11. Dispute resolution",[
+       "Disputes are resolved through negotiation. A written claim is reviewed within 15 business days. If no agreement is reached, the dispute is referred to court in accordance with the legislation of the Republic of Uzbekistan."]],
+     ["12. Changes to the terms",[
+       "The Seller may amend the terms of this offer. The new version takes effect when it is published on the Website and applies to orders placed after that date."]]
+    ]
+  }
+};
+
+let cur = 'ru';
+try{ const s = localStorage.getItem('milaisss_lang'); if (s && T[s]) cur = s; }catch(e){}
+try{ const q = new URLSearchParams(location.search).get('lang'); if (q && T[q]) cur = q; }catch(e){}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function render(){
+  const d = T[cur];
+  document.documentElement.lang = cur;
+  document.title = d.title + ' — milaisss';
+  document.getElementById('ttl').textContent = d.title;
+  document.getElementById('meta').textContent = d.ed + EDITION;
+  document.getElementById('backLink').textContent = d.back;
+  document.getElementById('note').textContent = d.note;
+  document.getElementById('langs').innerHTML = Object.keys(LANGS).map(k =>
+    `<button class="${k===cur?'on':''}" onclick="setL('${k}')">${LANGS[k]}</button>`).join('');
+  let html = d.s.map(([h, ps]) => `<div class="sec"><h2>${esc(h)}</h2>${ps.map(p => `<p>${esc(p)}</p>`).join('')}</div>`).join('');
+  const rows = Object.keys(d.rq).filter(k => REQUISITES[k] && String(REQUISITES[k]).trim())
+    .map(k => `<p><b>${esc(d.rq[k])}:</b> ${esc(REQUISITES[k])}</p>`).join('');
+  if (rows) html += `<div class="sec req"><h2>${esc(d.reqH)}</h2>${rows}</div>`;
+  document.getElementById('body').innerHTML = html;
+}
+function setL(k){ cur = k; try{ localStorage.setItem('milaisss_lang', k); }catch(e){} render(); }
+render();
+</script>
+</body>
+</html>
