@@ -854,15 +854,24 @@ async function saveProduct(type){
   const overwrite = document.getElementById(`f_retranslate_${suf}`).checked;
   const failed = await fillTranslations(data, overwrite, (done, total) => { saveBtn.textContent = `Переводим ${done}/${total}...`; });
   saveBtn.textContent = 'Сохраняем...';
+  // Firestore не принимает undefined и функции — чистим данные перед записью
+  let cleanData;
+  try{ cleanData = JSON.parse(JSON.stringify(data)); }catch(e){ cleanData = data; }
   const savePromise = isEdit
-    ? db.collection('products').doc(editId).update(data)
-    : db.collection('products').add(data);
+    ? db.collection('products').doc(editId).update(cleanData)
+    : db.collection('products').add(cleanData);
   savePromise.then(() => {
     resetForm(suf);
     if (!isEdit) notifySubscribersNewProduct(name, price);
     if (failed) alert(`Товар сохранён, но ${failed} перевод(ов) не получилось сделать — проверь интернет. Можно открыть товар, поставить галочку «Перевести заново» и сохранить ещё раз.`);
-  }).catch(() => {
-    alert('Не удалось сохранить товар, проверь интернет');
+  }).catch(err => {
+    console.error('save product', err);
+    const code = (err && (err.code || err.message)) ? String(err.code || err.message).slice(0,160) : 'неизвестная ошибка';
+    let hint = 'проверь интернет';
+    if (/permission-denied/.test(code)) hint = 'нет доступа: выйди из админки и войди заново (почта milaisss.shop@gmail.com)';
+    else if (/invalid-argument|too large|exceeds|size/i.test(code)) hint = 'слишком большой товар (фото вставлено файлом?). Используй ссылку на фото';
+    else if (/unauthenticated/.test(code)) hint = 'сессия истекла: войди в админку заново';
+    alert('Не удалось сохранить товар: ' + hint + '\n\n[' + code + ']');
     saveBtn.textContent = btnText;
   }).finally(() => { saveBtn.disabled = false; });
 }
