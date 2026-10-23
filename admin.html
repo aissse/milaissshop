@@ -331,18 +331,9 @@
       </div>
 
       <div class="card collapsible" id="card-hero">
-        <div class="card-header" onclick="toggleCard('card-hero')"><h1>Главный баннер и витрина</h1><span class="card-chevron">▲</span></div>
+        <div class="card-header" onclick="toggleCard('card-hero')"><h1>Контакты сайта</h1><span class="card-chevron">▲</span></div>
         <div class="card-body">
-        <label>Фото-баннеры на главной (слайдер: листаются сами и свайпом)</label>
-        <div id="heroBannerRows"></div>
-        <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addHeroBannerRow()">+ Добавить баннер</button>
-        <button class="btn" onclick="saveHeroBanners()">Сохранить баннеры</button>
-        <label style="margin-top:14px;">Как часто листать, секунд</label>
-        <input type="number" id="f_heroInterval" min="2" max="30" placeholder="5">
-        <button class="btn secondary" onclick="saveSetting('heroInterval', Number(document.getElementById('f_heroInterval').value) || 5); alert('Сохранено')">Сохранить скорость</button>
-        <div class="hint">Баннеры показываются слайдером: каждый баннер — один слайд. Листаются автоматически и свайпом. Если баннер один — просто картинка. Текст и кнопка на слайде необязательны: оставь поля пустыми, и будет только фото.</div>
-
-        <label style="margin-top:20px;">Контакты для футера сайта (email, адрес — по одному на строке)</label>
+        <label>Контакты для футера сайта (email, адрес — по одному на строке)</label>
         <textarea id="f_shopContacts" rows="3" placeholder="hello@milaisss.uz&#10;Ташкент, Чиланзар" onchange="saveSetting('shopContacts', this.value)"></textarea>
         </div>
       </div>
@@ -1093,13 +1084,6 @@ function loadReviews(){
 function loadSettings(){
   db.collection('settings').doc('shop').onSnapshot(doc => {
     const data = doc.exists ? doc.data() : {};
-    let heroBanners = data.heroBanners || [];
-    if (!heroBanners.length && (data.heroImage || data.heroTag || data.heroTitle)){
-      // Миграция со старого формата (один баннер) на новый список.
-      heroBanners = [{ media: data.heroImage || '', tag: data.heroTag || '', title: data.heroTitle || '', btnText: data.heroBtnText || '', showBtn: !!data.heroBtnText }];
-    }
-    loadHeroBannerRows(heroBanners);
-    { const _i = document.getElementById('f_heroInterval'); if (_i) _i.value = data.heroInterval || ''; }
     if (data.shopContacts) document.getElementById('f_shopContacts').value = data.shopContacts;
     categoryImages = data.categoryImages || {};
     categoryIcons = data.categoryIcons || {};
@@ -1426,86 +1410,6 @@ function saveBlackDownItems(){
   });
   saveSetting('blackDownItems', items);
   alert('Сохранено');
-}
-
-function heroTranslationRows(fieldKey, dataObj){
-  dataObj = dataObj || {};
-  return `
-    <div class="row" style="margin-top:4px;">
-      <input type="text" class="hb-${fieldKey}-en" style="flex:1;" placeholder="English" value="${(dataObj.en||'').replace(/"/g,'&quot;')}">
-      <input type="text" class="hb-${fieldKey}-uz" style="flex:1;" placeholder="Oʻzbekcha" value="${(dataObj.uz||'').replace(/"/g,'&quot;')}">
-    </div>
-    <div class="row" style="margin-bottom:8px;">
-      <input type="text" class="hb-${fieldKey}-tr" style="flex:1;" placeholder="Türkçe" value="${(dataObj.tr||'').replace(/"/g,'&quot;')}">
-      <input type="text" class="hb-${fieldKey}-az" style="flex:1;" placeholder="Azərbaycan" value="${(dataObj.az||'').replace(/"/g,'&quot;')}">
-    </div>
-  `;
-}
-function addHeroBannerRow(data){
-  data = data || { media: '', mediaDesktop: '', tag: '', title: '', btnText: '', tagTranslations: {}, titleTranslations: {}, btnTextTranslations: {} };
-  const _vid = /\.(mp4|webm|mov|ogg)(\?.*)?$/i;
-  if (_vid.test(data.media||'') || _vid.test(data.mediaDesktop||'')){ data = Object.assign({}, data, { media: _vid.test(data.media||'') ? '' : data.media, mediaDesktop: _vid.test(data.mediaDesktop||'') ? '' : data.mediaDesktop }); }
-  const row = document.createElement('div');
-  row.className = 'faq-row';
-  row.innerHTML = `
-    <span class="rm" onclick="this.parentElement.remove()">✕ удалить баннер</span>
-    <label style="margin-top:6px;">Фото для телефона (ссылка)</label>
-    <input type="url" class="hb-media" placeholder="https://milaisss.com/banner1.jpg" value="${(data.media||'').replace(/"/g,'&quot;')}">
-    <div class="hint" style="margin-top:4px;">Фото лучше вертикальное или квадратное, JPG/WEBP, до 1 МБ. Загрузи в репозиторий GitHub и вставь ссылку https://milaisss.com/ИМЯ.jpg</div>
-
-    <label>Фото для компьютера (необязательно)</label>
-    <input type="url" class="hb-media-desktop" placeholder="https://milaisss.com/banner1-pc.jpg" value="${(data.mediaDesktop||'').replace(/"/g,'&quot;')}">
-    <div class="hint" style="margin-top:4px;">Горизонтальное, 16:9 или шире, лучше 1920×820 и больше. Если пусто — на компьютере покажется фото для телефона.</div>
-
-    <label>Метка над заголовком — рус.</label>
-    <input type="text" class="hb-tag" placeholder="НОВАЯ КОЛЛЕКЦИЯ" value="${(data.tag||'').replace(/"/g,'&quot;')}">
-    ${heroTranslationRows('tag', data.tagTranslations)}
-
-    <label>Заголовок баннера — рус.</label>
-    <input type="text" class="hb-title" placeholder="Скидка 20% на первую покупку" value="${(data.title||'').replace(/"/g,'&quot;')}">
-    ${heroTranslationRows('title', data.titleTranslations)}
-
-    <label style="display:flex; align-items:center; gap:8px; margin-top:12px;"><input type="checkbox" class="hb-showbtn" style="width:auto;" ${data.showBtn ? 'checked' : ''}> Показывать кнопку на этом баннере</label>
-    <label>Текст на кнопке — рус.</label>
-    <input type="text" class="hb-btn" placeholder="Смотреть" value="${(data.btnText||'').replace(/"/g,'&quot;')}">
-    ${heroTranslationRows('btn', data.btnTextTranslations)}
-  `;
-  document.getElementById('heroBannerRows').appendChild(row);
-}
-function loadHeroBannerRows(items){
-  document.getElementById('heroBannerRows').innerHTML = '';
-  (items && items.length ? items : []).forEach(b => addHeroBannerRow(b));
-  if (!items || !items.length) addHeroBannerRow();
-}
-function saveHeroBanners(){
-  const rows = document.querySelectorAll('#heroBannerRows .faq-row');
-  const banners = [];
-  rows.forEach(row => {
-    const media = row.querySelector('.hb-media').value.trim();
-    const mediaDesktop = row.querySelector('.hb-media-desktop').value.trim();
-    const tag = row.querySelector('.hb-tag').value.trim();
-    const title = row.querySelector('.hb-title').value.trim();
-    const btnText = row.querySelector('.hb-btn').value.trim();
-    const tagTranslations = {}, titleTranslations = {}, btnTextTranslations = {};
-    ['en','uz','tr','az'].forEach(l => {
-      const tv = row.querySelector(`.hb-tag-${l}`).value.trim();
-      if (tv) tagTranslations[l] = tv;
-      const ttv = row.querySelector(`.hb-title-${l}`).value.trim();
-      if (ttv) titleTranslations[l] = ttv;
-      const bv = row.querySelector(`.hb-btn-${l}`).value.trim();
-      if (bv) btnTextTranslations[l] = bv;
-    });
-    if (media || mediaDesktop || tag || title || btnText){
-      const banner = { media, tag, title, btnText, showBtn: !!row.querySelector('.hb-showbtn').checked };
-      if (mediaDesktop) banner.mediaDesktop = mediaDesktop;
-      if (Object.keys(tagTranslations).length) banner.tagTranslations = tagTranslations;
-      if (Object.keys(titleTranslations).length) banner.titleTranslations = titleTranslations;
-      if (Object.keys(btnTextTranslations).length) banner.btnTextTranslations = btnTextTranslations;
-      banners.push(banner);
-    }
-  });
-  saveSetting('heroBanners', banners);
-  alert('Баннеры сохранены');
 }
 
 function addFaqRow(data){
