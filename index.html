@@ -1264,7 +1264,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-136";
+  const CURRENT_VERSION = "20260908-137";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1960,11 +1960,12 @@ function renderHero(list){
   hp.querySelectorAll('.hero-slide').forEach(e => e.remove());
   heroSlides = items.map((b, i) => {
     const el = document.createElement('div'); el.className = 'hero-slide';
-    const img = b._default ? (isDesktopView() ? HERO_DEF_PC : HERO_DEF_MOBILE) : heroImgFor(b);
+    const defImg = isDesktopView() ? HERO_DEF_PC : HERO_DEF_MOBILE;
+    const img = b._default ? defImg : (heroImgFor(b) || defImg);
     const tag = b._default ? t('heroTag') : getHeroBannerText(b, 'tag');
     const title = b._default ? t('heroTitle') : getHeroBannerText(b, 'title');
     const btn = b._default ? t('heroCta') : ((b.showBtn) ? getHeroBannerText(b, 'btnText') : '');
-    const imgErr = b._default ? "if(!this.dataset.f){this.dataset.f=1;this.src='hero.jpg';}else{this.remove();}" : 'this.remove()';
+    const imgErr = "var f=+(this.dataset.f||0);this.dataset.f=f+1;if(f===0&&this.getAttribute('src')!=='" + defImg + "'){this.src='" + defImg + "';}else if(f<2){this.src='hero.jpg';}else{this.remove();}";
     let h = img ? `<div class="hero-blur"></div><img src="${heroEsc(img)}" alt="" draggable="false" decoding="async" onerror="${imgErr}"${i===0?'':' loading="lazy"'}>` : '';
     if (tag || title || btn){
       h += '<div class="hero-photo-text">' + (b._default ? '<div class="hero-mark">MILA<span>/</span>ISSS</div>' : '') + (tag ? `<div class="tag">${heroEsc(tag)}</div>` : '') + (title ? `<h2 class="display">${heroEsc(title)}</h2>` : '') +
