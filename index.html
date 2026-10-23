@@ -752,7 +752,7 @@
   .app{ min-height:100vh; min-height:100dvh; }
   @media (min-width:768px){
     /* экраны с формами и списками не растягиваем на всю ширину */
-    #cart, #checkoutFlow, #profile, #support, #settings, #reviewsScreen, #infoDetail{ max-width:760px; margin-left:auto; margin-right:auto; }
+    #cart, #checkoutFlow, #profile, #support, #settings, #reviewsScreen, #infoDetail{ max-width:none; margin-left:0; margin-right:0; }
     .bottomnav{ max-width:520px; }
     .support-fab{ right:max(24px, calc((100vw - 1500px) / 2 + 24px)); }
     .trk-card, .myrev{ margin-left:0; margin-right:0; }
@@ -761,7 +761,7 @@
   }
   @media (min-width:1100px){
     .bottomnav{ max-width:560px; }
-    #cart, #checkoutFlow, #profile, #support, #settings{ max-width:820px; }
+    #cart, #checkoutFlow, #profile, #support, #settings{ max-width:none; }
     .topbar{ padding-left:40px; padding-right:40px; }
     .cat-pills-row{ padding-left:40px; padding-right:40px; }
   }
@@ -838,6 +838,18 @@
   .hero-slide .hero-btn{ background:none; border:0; border-bottom:1px solid #fff; border-radius:0; -webkit-backdrop-filter:none; backdrop-filter:none; padding:6px 2px; letter-spacing:.32em; text-shadow:0 1px 10px rgba(0,0,0,.4); }
   .hero-slide .hero-btn:active{ background:none; opacity:.7; }
   .search-pop .search-box input{ font-size:16px; }
+  .hero-slide .hero-btn{ position:relative; isolation:isolate; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.85); border-radius:999px; padding:13px 28px; letter-spacing:.2em; text-shadow:none; cursor:pointer;
+    transition:color .5s cubic-bezier(.22,1,.36,1), border-color .5s ease, transform .2s ease, padding .55s cubic-bezier(.22,1,.36,1); }
+  .hero-slide .hero-btn::before{ content:""; position:absolute; inset:0; z-index:-1; background:#fff; border-radius:inherit; transform:scaleX(0); transform-origin:left center; transition:transform .55s cubic-bezier(.22,1,.36,1); }
+  .hero-slide .hero-btn::after{ content:"→" !important; display:inline-block; max-width:0; opacity:0; overflow:hidden; margin-left:0; letter-spacing:0; transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .45s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
+  @media (hover:hover){
+    .hero-slide .hero-btn:hover{ color:#121212; border-color:#fff; padding:13px 24px 13px 30px; }
+    .hero-slide .hero-btn:hover::before{ transform:scaleX(1); }
+    .hero-slide .hero-btn:hover::after{ max-width:1.4em; opacity:1; margin-left:10px; }
+  }
+  .hero-slide .hero-btn:active{ color:#121212; transform:scale(.97); opacity:1; background:none; }
+  .hero-slide .hero-btn:active::before{ transform:scaleX(1); }
+  .hero-slide .hero-btn:active::after{ max-width:1.4em; opacity:1; margin-left:10px; }
   .hero-slide img{ object-position:50% 50%; }
   .hero-slide::after{ background:linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.18) 90px, rgba(0,0,0,0) 190px), linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.25) 45%, rgba(0,0,0,.12) 100%); }
   .hero-mark{ font-family:var(--hero-font,'Playfair Display','Cormorant Garamond',serif); font-weight:400; text-transform:uppercase; font-size:clamp(46px,16vw,128px); line-height:.95; letter-spacing:-.02em; white-space:nowrap; text-shadow:0 2px 28px rgba(0,0,0,.45); }
@@ -1264,7 +1276,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-138";
+  const CURRENT_VERSION = "20260908-140";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1785,9 +1797,9 @@ const FLAG_CODES = { ru:"ru", uz:"uz", tr:"tr", az:"az", en:"gb" };
 function flagImg(code){ return `<img src="https://flagcdn.com/w40/${FLAG_CODES[code]}.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;">`; }
 const STR = {
   ru: { search:"Найти", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
-        buyNow:"Заказать сразу", inCartWord:"В корзине", addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
+        removeWord:"Убрать", deliveryAgreed:"По согласованию", buyNow:"Заказать сразу", inCartWord:"В корзине", addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
         sizeLabel:"Размер", descLabel:"Описание", colorLabelWord:"Цвет", allCat:"Все", outOfStock:"Товар закончился",
-        empty:"Корзина пуста", emptyCatalogHint:"Загляни в каталог", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Войти", heroTitle:"Ходи по-своему", 
+        empty:"Корзина пуста", emptyCatalogHint:"Загляни в каталог", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Смотреть", heroTitle:"Ходи по-своему", 
         goodsLabel:"Товары", deliveryLabel:"Доставка", totalLabel:"Итого", checkoutBtn:"Оформить заказ",
         allProducts:"Все товары", noProductsYet:"Товары скоро появятся 👟", noFav:"Пока нет избранных товаров 🤍",
         noOrders:"Заказов пока нет", noRating:"Нет оценок", stockRemain:"Осталось", inStockWord:"В наличии",
@@ -1796,9 +1808,9 @@ const STR = {
         faqQ1:"Как оформить заказ?", faqA1:"Добавьте товар в корзину, выберите способ оплаты и укажите ближайший пункт БТС для получения.", faqQ2:"Сколько идёт доставка?", faqA2:"Обычно 2–5 дней в зависимости от региона. Статус заказа виден в разделе «Профиль».", faqQ3:"Можно ли вернуть товар?", faqA3:"Да, если размер не подошёл — напишите в поддержку в течение 7 дней после получения.",
         policyReturn:"Возврат", policyReturnText:"У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии.", policyDelivery:"Доставка", policyDeliveryText:"Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона.", policyCare:"Уход за товаром", policyCareText:"Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке.", sizeGuide:"Гид по размерам", trustShippingTitle:"Бесплатная доставка", trustShippingSub:"от 300 000 сум", trustReturnTitle:"Лёгкий возврат", trustReturnSub:"14 дней на возврат", trustSecureTitle:"Безопасная оплата", trustSecureSub:"Uzum Bank, Apple Pay, Google Pay", checkoutTitle:"Оплата и доставка", paymentMethodLabel:"Способ оплаты", cardLabel:"Карта", cardSoonNote:"Оплата картой онлайн в разработке — скоро будет доступна", cardSoonToast:"Оплата картой пока в разработке", soonMethodToast:"Оплата в разработке — скоро будет доступна", phoneFieldLabel:"Ваш номер телефона", phoneFieldNote:"Нужен, чтобы курьер мог с вами связаться.", btsLabel:"Ближайший пункт БТС", btsPlaceholder:"Начните вводить город или улицу...",noteLabel:"Примечание к заказу",noteHint:"Не обязательно, но можно — например, пожелания по доставке",notePlaceholder:"Ваше примечание...", btsNoResults:"Ничего не найдено, попробуйте другой запрос", confirmTransferBtn:"Перейти к оплате", nextStepHint:"На следующем шаге — реквизиты для оплаты и подтверждение перевода.", confirmingText:"Оформляем заказ...", loginToSeeOrders:"Войти, чтобы видеть свои заказы на любом устройстве", loginByPhone:"По номеру", sizeWord:"Размер", orderSuccessTitle:"Покупка успешно совершена!", supportTitle:"Поддержка", supportPlaceholder:"Напишите сообщение...", supportEmpty:"Нет сообщений. Напишите нам, если есть вопросы 💬", btsSelected:"Выбрано", phoneLoginSoon:"Вход по номеру скоро появится — сейчас дорабатываем",  orderPlacedText:"Заказ оформлен. Продавец проверит поступление оплаты в своём приложении и подтвердит заказ. Если оплата не будет обнаружена, товар отправлен не будет. По всем вопросам обращайтесь в поддержку в вашем профиле.", gotItBtn:"Понятно", regTitle:"Регистрация", regSub:"Нужна, чтобы оформить заказ и получать уведомления о доставке", regSubSupport:"Зарегистрируйтесь, чтобы написать в поддержку — так мы сможем вам ответить", regFirstName:"Имя", regLastName:"Фамилия", regPhoneLabel:"Номер телефона", regAvatarLabel:"Выберите аватар", regSubmit:"Зарегистрироваться", regSaving:"Сохраняем...", regNoAvatars:"Аватары ещё не добавлены продавцом", offerA:"Оформляя заказ, вы принимаете условия",offerB:"публичной оферты",phoneErrLen:"Введите номер полностью: +998 XX XXX XX XX", regSaveFail:"Не удалось сохранить профиль, проверьте интернет" },
   uz: { search:"Qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
-        buyNow:"Hoziroq buyurtma", inCartWord:"Savatda", addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
+        removeWord:"Olib tashlash", deliveryAgreed:"Kelishuv bo‘yicha", buyNow:"Hoziroq buyurtma", inCartWord:"Savatda", addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
         sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
-        empty:"Savat bo‘sh", emptyCatalogHint:"Katalogga nazar tashlang", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Kirish", heroTitle:"Oʻz yoʻlingdan yur", 
+        empty:"Savat bo‘sh", emptyCatalogHint:"Katalogga nazar tashlang", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Ko‘rish", heroTitle:"Oʻz yoʻlingdan yur", 
         goodsLabel:"Mahsulotlar", deliveryLabel:"Yetkazib berish", totalLabel:"Jami", checkoutBtn:"Buyurtma berish",
         allProducts:"Barcha mahsulotlar", noProductsYet:"Mahsulotlar tez orada 👟", noFav:"Sevimlilar hali yo‘q 🤍",
         noOrders:"Buyurtmalar yo‘q", noRating:"Baho yo‘q", stockRemain:"Qoldi", inStockWord:"Mavjud",
@@ -1807,9 +1819,9 @@ const STR = {
         faqQ1:"Buyurtmani qanday rasmiylashtirish mumkin?", faqA1:"Mahsulotni savatga qo‘shing, to‘lov usulini tanlang va yaqin BTS punktini ko‘rsating.", faqQ2:"Yetkazib berish qancha davom etadi?", faqA2:"Odatda hududga qarab 2–5 kun. Buyurtma holatini «Profil» bo‘limida ko‘rish mumkin.", faqQ3:"Mahsulotni qaytarish mumkinmi?", faqA3:"Ha, o‘lcham mos kelmasa — olgandan keyin 7 kun ichida qo‘llab-quvvatlashga yozing.",
         policyReturn:"Qaytarish", policyReturnText:"Buyurtmani qaytarish uchun 14 kun vaqtingiz bor. Qaytarish xarajatlari xaridorga tegishli, mahsulot dastlabki holatida bo‘lishi kerak.", policyDelivery:"Yetkazib berish", policyDeliveryText:"Buyurtmani imkon qadar tez qayta ishlaymiz va yuboramiz. Odatda hududga qarab 2-5 kun.", policyCare:"Mahsulotga g‘amxo‘rlik", policyCareText:"Sovuq suvda yuving, mashinada quritmang, rasm/kashta ustiga to‘g‘ridan-to‘g‘ri dazmollamang.", sizeGuide:"O'lcham gidi", trustShippingTitle:"Bepul yetkazib berish", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Oson qaytarish", trustReturnSub:"14 kun ichida qaytarish", trustSecureTitle:"Xavfsiz to'lov", trustSecureSub:"Uzum Bank, Apple Pay, Google Pay", checkoutTitle:"To'lov va yetkazib berish", paymentMethodLabel:"To'lov usuli", cardLabel:"Karta", cardSoonNote:"Karta orqali onlayn to'lov ishlab chiqilmoqda — tez orada mavjud bo'ladi", cardSoonToast:"Karta orqali to'lov hali ishlab chiqilmoqda", soonMethodToast:"To'lov ishlab chiqilmoqda — tez orada mavjud bo'ladi", phoneFieldLabel:"Telefon raqamingiz", phoneFieldNote:"Kuryer siz bilan bog'lanishi uchun kerak.", btsLabel:"Eng yaqin BTS punkti", btsPlaceholder:"Shahar yoki ko'chani kiriting...",noteLabel:"Buyurtmaga izoh",noteHint:"Majburiy emas, lekin yozishingiz mumkin — masalan, yetkazib berish bo‘yicha istaklar",notePlaceholder:"Izohingiz...", btsNoResults:"Hech narsa topilmadi, boshqa so'rov kiriting", confirmTransferBtn:"To‘lovga o‘tish", nextStepHint:"Keyingi bosqichda — to'lov rekvizitlari va o'tkazmani tasdiqlash.", confirmingText:"Buyurtma rasmiylashtirilmoqda...", loginToSeeOrders:"Har qanday qurilmada buyurtmalaringizni ko'rish uchun kiring", loginByPhone:"Raqam orqali", sizeWord:"O'lcham", orderSuccessTitle:"Xarid muvaffaqiyatli amalga oshirildi!", supportTitle:"Yordam", supportPlaceholder:"Xabar yozing...", supportEmpty:"Xabarlar yo'q. Savollaringiz bo'lsa yozing 💬", btsSelected:"Tanlandi", phoneLoginSoon:"Raqam orqali kirish tez orada — hozir ishlab chiqilmoqda",  orderPlacedText:"Buyurtma rasmiylashtirildi. Sotuvchi to'lov tushganini o'z ilovasida tekshirib, buyurtmani tasdiqlaydi. Agar to'lov topilmasa, mahsulot yuborilmaydi. Barcha savollar bo'yicha profilingizdagi qo'llab-quvvatlashga murojaat qiling.", gotItBtn:"Tushunarli", regTitle:"Roʻyxatdan oʻtish", regSub:"Buyurtma berish va yetkazib berish haqida xabarnomalar olish uchun kerak", regSubSupport:"Qoʻllab-quvvatlashga yozish uchun roʻyxatdan oʻting — shunda sizga javob bera olamiz", regFirstName:"Ism", regLastName:"Familiya", regPhoneLabel:"Telefon raqami", regAvatarLabel:"Avatar tanlang", regSubmit:"Roʻyxatdan oʻtish", regSaving:"Saqlanmoqda...", regNoAvatars:"Avatarlar hali sotuvchi tomonidan qoʻshilmagan", offerA:"Buyurtma berish orqali siz quyidagi shartlarni qabul qilasiz:",offerB:"ommaviy oferta",phoneErrLen:"Raqamni to‘liq kiriting: +998 XX XXX XX XX", regSaveFail:"Profilni saqlab boʻlmadi, internetni tekshiring" },
   tr: { search:"Ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
-        buyNow:"Hemen sipariş ver", inCartWord:"Sepette", addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
+        removeWord:"Kaldır", deliveryAgreed:"Anlaşmaya göre", buyNow:"Hemen sipariş ver", inCartWord:"Sepette", addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
         sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
-        empty:"Sepet boş", emptyCatalogHint:"Kataloğa göz atın", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Gir", heroTitle:"Kendi yolunda yürü", 
+        empty:"Sepet boş", emptyCatalogHint:"Kataloğa göz atın", heroTag:"Sneakers · Streetwear · Custom",heroCta:"İncele", heroTitle:"Kendi yolunda yürü", 
         goodsLabel:"Ürünler", deliveryLabel:"Teslimat", totalLabel:"Toplam", checkoutBtn:"Sipariş ver",
         allProducts:"Tüm ürünler", noProductsYet:"Ürünler yakında 👟", noFav:"Favori yok 🤍",
         noOrders:"Sipariş yok", noRating:"Puan yok", stockRemain:"Kaldı", inStockWord:"Stokta",
@@ -1818,9 +1830,9 @@ const STR = {
         faqQ1:"Nasıl sipariş verilir?", faqA1:"Ürünü sepete ekleyin, ödeme yöntemini seçin ve en yakın BTS noktasını belirtin.", faqQ2:"Teslimat ne kadar sürer?", faqA2:"Genellikle bölgeye göre 2-5 gün. Sipariş durumu «Profil» bölümünde görünür.", faqQ3:"Ürün iade edilebilir mi?", faqA3:"Evet, beden uymazsa — teslim alındıktan sonra 7 gün içinde desteğe yazın.",
         policyReturn:"İade", policyReturnText:"Siparişi iade etmek için 14 gününüz var. İade kargo masrafları alıcıya aittir, ürün orijinal durumda olmalıdır.", policyDelivery:"Teslimat", policyDeliveryText:"Siparişi mümkün olan en kısa sürede hazırlayıp gönderiyoruz. Genellikle bölgeye göre 2-5 gün.", policyCare:"Ürün bakımı", policyCareText:"Soğuk suda yıkayın, makinede kurutmayın, baskı/nakış üzerine doğrudan ütü yapmayın.", sizeGuide:"Beden rehberi", trustShippingTitle:"Ücretsiz kargo", trustShippingSub:"300.000 so'mdan itibaren", trustReturnTitle:"Kolay iade", trustReturnSub:"14 gün iade hakkı", trustSecureTitle:"Güvenli ödeme", trustSecureSub:"Uzum Bank, Apple Pay, Google Pay", checkoutTitle:"Ödeme ve teslimat", paymentMethodLabel:"Ödeme yöntemi", cardLabel:"Kart", cardSoonNote:"Kartla online ödeme geliştiriliyor — yakında kullanılabilir olacak", cardSoonToast:"Kartla ödeme henüz geliştirme aşamasında", soonMethodToast:"Ödeme geliştirme aşamasında — yakında kullanılabilir olacak", phoneFieldLabel:"Telefon numaranız", phoneFieldNote:"Kuryerin sizinle iletişime geçebilmesi için gerekli.", btsLabel:"En yakın BTS noktası", btsPlaceholder:"Şehir veya sokak yazmaya başlayın...",noteLabel:"Sipariş notu",noteHint:"Zorunlu değil, ama yazabilirsiniz — örneğin teslimat isteği",notePlaceholder:"Notunuz...", btsNoResults:"Sonuç bulunamadı, başka bir arama deneyin", confirmTransferBtn:"Ödemeye geç", nextStepHint:"Bir sonraki adımda — ödeme bilgileri ve transfer onayı.", confirmingText:"Sipariş oluşturuluyor...", loginToSeeOrders:"Siparişlerinizi her cihazda görmek için giriş yapın", loginByPhone:"Numarayla", sizeWord:"Beden", orderSuccessTitle:"Satın alma başarıyla tamamlandı!", supportTitle:"Destek", supportPlaceholder:"Bir mesaj yazın...", supportEmpty:"Mesaj yok. Sorularınız varsa yazın 💬", btsSelected:"Seçildi", phoneLoginSoon:"Numarayla giriş yakında — şu an geliştiriliyor",  orderPlacedText:"Sipariş oluşturuldu. Satıcı ödemenin ulaştığını kendi uygulamasından kontrol edip siparişi onaylayacak. Ödeme bulunamazsa ürün gönderilmeyecektir. Tüm sorularınız için profilinizdeki destek bölümüne yazabilirsiniz.", gotItBtn:"Anladım", regTitle:"Kayıt", regSub:"Sipariş vermek ve teslimat bildirimleri almak için gereklidir", regSubSupport:"Desteğe yazmak için kayıt olun — böylece size yanıt verebiliriz", regFirstName:"Ad", regLastName:"Soyad", regPhoneLabel:"Telefon numarası", regAvatarLabel:"Avatar seçin", regSubmit:"Kayıt ol", regSaving:"Kaydediliyor...", regNoAvatars:"Avatarlar henüz satıcı tarafından eklenmedi", offerA:"Sipariş vererek şunu kabul etmiş olursunuz:",offerB:"genel satış teklifi (ofert)",phoneErrLen:"Numarayı eksiksiz girin: +998 XX XXX XX XX", regSaveFail:"Profil kaydedilemedi, internet bağlantınızı kontrol edin" },
   az: { search:"Axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
-        buyNow:"Dərhal sifariş et", inCartWord:"Səbətdə", addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
+        removeWord:"Sil", deliveryAgreed:"Razılaşma ilə", buyNow:"Dərhal sifariş et", inCartWord:"Səbətdə", addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
         sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
-        empty:"Səbət boşdur", emptyCatalogHint:"Kataloqa nəzər salın", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Daxil ol", heroTitle:"Öz yolunla get", 
+        empty:"Səbət boşdur", emptyCatalogHint:"Kataloqa nəzər salın", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Bax", heroTitle:"Öz yolunla get", 
         goodsLabel:"Mallar", deliveryLabel:"Çatdırılma", totalLabel:"Cəmi", checkoutBtn:"Sifariş et",
         allProducts:"Bütün mallar", noProductsYet:"Mallar tezliklə 👟", noFav:"Seçilmiş yoxdur 🤍",
         noOrders:"Sifariş yoxdur", noRating:"Reytinq yoxdur", stockRemain:"Qalıb", inStockWord:"Mövcuddur",
@@ -1829,9 +1841,9 @@ const STR = {
         faqQ1:"Sifarişi necə vermək olar?", faqA1:"Məhsulu səbətə əlavə edin, ödəniş üsulunu seçin və ən yaxın BTS məntəqəsini göstərin.", faqQ2:"Çatdırılma nə qədər çəkir?", faqA2:"Adətən bölgəyə görə 2-5 gün. Sifariş statusu «Profil» bölməsində görünür.", faqQ3:"Məhsulu qaytarmaq olarmı?", faqA3:"Bəli, ölçü uyğun gəlmirsə — aldıqdan sonra 7 gün ərzində dəstəyə yazın.",
         policyReturn:"Qaytarma", policyReturnText:"Sifarişi qaytarmaq üçün 14 gününüz var. Geri göndərmə xərcləri alıcıya aiddir, məhsul ilkin vəziyyətdə olmalıdır.", policyDelivery:"Çatdırılma", policyDeliveryText:"Sifarişi mümkün qədər tez hazırlayıb göndəririk. Adətən bölgəyə görə 2-5 gün.", policyCare:"Məhsula qulluq", policyCareText:"Soyuq suda yuyun, maşında qurutmayın, çap/naxış üzərinə birbaşa ütü etməyin.", sizeGuide:"Ölçü bələdçisi", trustShippingTitle:"Pulsuz çatdırılma", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Asan qaytarma", trustReturnSub:"14 gün qaytarma hüququ", trustSecureTitle:"Təhlükəsiz ödəniş", trustSecureSub:"Uzum Bank, Apple Pay, Google Pay", checkoutTitle:"Ödəniş və çatdırılma", paymentMethodLabel:"Ödəniş üsulu", cardLabel:"Kart", cardSoonNote:"Kartla onlayn ödəniş hazırlanır — tezliklə mövcud olacaq", cardSoonToast:"Kartla ödəniş hələ hazırlanma mərhələsindədir", soonMethodToast:"Ödəniş hazırlanır — tezliklə mövcud olacaq", phoneFieldLabel:"Telefon nömrəniz", phoneFieldNote:"Kuryerin sizinlə əlaqə saxlaması üçün lazımdır.", btsLabel:"Ən yaxın BTS məntəqəsi", btsPlaceholder:"Şəhər və ya küçə yazmağa başlayın...",noteLabel:"Sifariş qeydi",noteHint:"Məcburi deyil, amma yaza bilərsiniz — məsələn, çatdırılma istəyi",notePlaceholder:"Qeydiniz...", btsNoResults:"Heç nə tapılmadı, başqa sorğu sınayın", confirmTransferBtn:"Ödənişə keç", nextStepHint:"Növbəti addımda — ödəniş rekvizitləri və köçürmənin təsdiqi.", confirmingText:"Sifariş rəsmiləşdirilir...", loginToSeeOrders:"İstənilən cihazda sifarişlərinizi görmək üçün daxil olun", loginByPhone:"Nömrə ilə", sizeWord:"Ölçü", orderSuccessTitle:"Satın alma uğurla tamamlandı!", supportTitle:"Dəstək", supportPlaceholder:"Mesaj yazın...", supportEmpty:"Mesaj yoxdur. Sualınız varsa yazın 💬", btsSelected:"Seçildi", phoneLoginSoon:"Nömrə ilə giriş tezliklə — hazırda hazırlanır",  orderPlacedText:"Sifariş rəsmiləşdirildi. Satıcı ödənişin daxil olduğunu öz tətbiqində yoxlayıb sifarişi təsdiqləyəcək. Ödəniş tapılmasa, məhsul göndərilməyəcək. Bütün suallar üçün profilinizdəki dəstəyə yazın.", gotItBtn:"Anladım", regTitle:"Qeydiyyat", regSub:"Sifariş vermək və çatdırılma bildirişləri almaq üçün lazımdır", regSubSupport:"Dəstəyə yazmaq üçün qeydiyyatdan keçin — belə sizə cavab verə bilərik", regFirstName:"Ad", regLastName:"Soyad", regPhoneLabel:"Telefon nömrəsi", regAvatarLabel:"Avatar seçin", regSubmit:"Qeydiyyatdan keç", regSaving:"Saxlanılır...", regNoAvatars:"Avatarlar hələ satıcı tərəfindən əlavə edilməyib", offerA:"Sifariş verməklə siz bunları qəbul edirsiniz:",offerB:"ümumi satış təklifi (oferta)",phoneErrLen:"Nömrəni tam daxil edin: +998 XX XXX XX XX", regSaveFail:"Profil saxlanılmadı, interneti yoxlayın" },
   en: { search:"Search", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
-        buyNow:"Order now", inCartWord:"In cart", addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
+        removeWord:"Remove", deliveryAgreed:"By agreement", buyNow:"Order now", inCartWord:"In cart", addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
         sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
-        empty:"Cart is empty", emptyCatalogHint:"Take a look at the catalog", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Enter", heroTitle:"Walk your own way", 
+        empty:"Cart is empty", emptyCatalogHint:"Take a look at the catalog", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Shop", heroTitle:"Walk your own way", 
         goodsLabel:"Items", deliveryLabel:"Delivery", totalLabel:"Total", checkoutBtn:"Checkout",
         allProducts:"All products", noProductsYet:"Products coming soon 👟", noFav:"No favorites yet 🤍",
         noOrders:"No orders yet", noRating:"No ratings", stockRemain:"Left", inStockWord:"In stock",
@@ -4033,7 +4045,7 @@ function renderCart(){
           <div class="opts">${t('sizeWord')} ${item.size} · ${item.colorName} · ${item.qty} ${t('pcsWord')}</div>
           <div class="price">${oldP > item.price ? `<span class="old">${fmt(oldP * item.qty)}</span>` : ''}${fmt(item.price * item.qty)}</div>
         </div>
-        <div class="remove" onclick="removeFromCart(${idx})">Убрать</div>
+        <div class="remove" onclick="removeFromCart(${idx})">${t('removeWord')}</div>
       </div>`;
   }).join('');
 
@@ -4042,7 +4054,7 @@ function renderCart(){
     <div class="cart-summary">
       <div class="sum-row"><span>${t('goodsLabel')}</span><span>${fmt(totalOld)}</span></div>
       ${totalOld > total ? `<div class="sum-row"><span>${t('discountWord')}${(allDisc && discSet.size === 1) ? ' −' + [...discSet][0] + '%' : ''}</span><span>−${fmt(totalOld - total)}</span></div>` : ''}
-      <div class="sum-row"><span>${t('deliveryLabel')}</span><span>По согласованию</span></div>
+      <div class="sum-row"><span>${t('deliveryLabel')}</span><span>${t('deliveryAgreed')}</span></div>
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
     <button class="checkout-btn" onclick="requireRegistration(goToCheckoutFlow)">${t('checkoutBtn')}</button>
