@@ -1264,7 +1264,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-137";
+  const CURRENT_VERSION = "20260908-138";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2751,13 +2751,6 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   if (data.policyItems && data.policyItems.length){ policyItems = data.policyItems; policyCustomized = true; }
   socialLinks = data.socialLinks || {};
   renderSocialIcons();
-  let heroBanners = data.heroBanners || [];
-  if (!heroBanners.length && data.heroImage){
-    heroBanners = [{ media: data.heroImage, tag: data.heroTag || '', title: data.heroTitle || '', btnText: data.heroBtnText || '', showBtn: !!data.heroBtnText }];
-  }
-  heroSecs = Number(data.heroInterval) || 5;
-  const _sig = JSON.stringify(heroBanners) + '|' + heroSecs;
-  if (_sig !== heroSig){ heroSig = _sig; renderHero(heroBanners); }
   categoryImages = data.categoryImages || {};
   categoryTranslations = data.categoryTranslations || {};
   categoryInfo = data.categoryInfo || {};
