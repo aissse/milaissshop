@@ -47,7 +47,6 @@
   .row > div{ flex:1; }
   .btn{ background:var(--maroon); color:#fff; border:none; border-radius:12px; padding:12px 16px; font-weight:700; font-size:14px; cursor:pointer; margin-top:14px; width:100%; }
   .btn.secondary{ background:#2b2b2b; }
-  .btn.danger{ background:#a83232; }
   .prod-row{ display:flex; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
   .prod-row:last-child{ border-bottom:none; }
   .prod-row img, .prod-row .ph{ width:48px; height:48px; border-radius:10px; object-fit:cover; background:var(--pink); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
@@ -116,7 +115,6 @@
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; animation: adminTabFade .32s ease; }
   @keyframes adminTabFade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
-  .placeholder-box{ text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
   .stock-item{ display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-bottom:1px dashed var(--line); }
   .stock-item.zero{ color:#a83232; font-weight:700; }
   .order-admin-card{ border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
@@ -133,10 +131,6 @@
   .faq-row{ border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; }
   .faq-row input{ margin-bottom:6px; }
   .faq-row .rm{ float:right; color:#a83232; font-size:12px; cursor:pointer; font-weight:600; }
-  .support-font-preview{ margin-top:12px; padding:14px; border:1px dashed var(--line); border-radius:12px; display:flex; flex-direction:column; gap:8px; font-size:14px; }
-  .support-font-preview .sfp-msg{ max-width:85%; padding:9px 13px; border-radius:14px; line-height:1.4; }
-  .support-font-preview .sfp-cust{ align-self:flex-end; background:var(--maroon); color:#fff; border-bottom-right-radius:4px; }
-  .support-font-preview .sfp-admin{ align-self:flex-start; background:var(--pink); color:var(--maroon-dark); border-bottom-left-radius:4px; }
 </style>
 </head>
 <body>
@@ -1102,7 +1096,7 @@ function loadSettings(){
     let heroBanners = data.heroBanners || [];
     if (!heroBanners.length && (data.heroImage || data.heroTag || data.heroTitle)){
       // Миграция со старого формата (один баннер) на новый список.
-      heroBanners = [{ media: data.heroImage || '', tag: data.heroTag || '', title: data.heroTitle || '', btnText: data.heroBtnText || '' }];
+      heroBanners = [{ media: data.heroImage || '', tag: data.heroTag || '', title: data.heroTitle || '', btnText: data.heroBtnText || '', showBtn: !!data.heroBtnText }];
     }
     loadHeroBannerRows(heroBanners);
     { const _i = document.getElementById('f_heroInterval'); if (_i) _i.value = data.heroInterval || ''; }
@@ -1142,56 +1136,9 @@ function saveSetting(key, value){
 
 const COLOR_SETTING_MAP = { supportBgColor:'supportBgColor', supportCustBubble:'supportCustBubble', supportCustText:'supportCustText', supportAdminBubble:'supportAdminBubble', supportAdminText:'supportAdminText', btsAddressColor: 'btsAddressColor', orangeColor: 'orangeColor', catChipColor: 'categoryChipColor', navColor: 'navColor', bgColor: 'bgColor', langBtnBg: 'langBtnBg', menuBtnBg: 'menuBtnBg', pmrSelectedBg: 'pmrSelectedBg', iconBorderColor: 'iconBorderColor', blackDownColor: 'blackDownColor' };
 
-function syncHexInput(id, colorVal){
-  document.getElementById(`f_${id}Hex`).value = colorVal;
-  saveSetting(COLOR_SETTING_MAP[id], colorVal);
-}
 
-function saveHexColor(id, hexVal){
-  hexVal = hexVal.trim();
-  if (!/^#[0-9a-fA-F]{6}$/.test(hexVal)){
-    alert('Введите цвет в формате #ffffff (6 символов после #)');
-    return;
-  }
-  document.getElementById(`f_${id}`).value = hexVal;
-  saveSetting(COLOR_SETTING_MAP[id], hexVal);
-}
 
 /* ---------- шрифт чата поддержки ---------- */
-function loadSupportPreviewFont(fontName){
-  let link = document.getElementById('supportPreviewFontLink');
-  if (!link){ link = document.createElement('link'); link.id = 'supportPreviewFontLink'; link.rel = 'stylesheet'; document.head.appendChild(link); }
-  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g,'+')}:wght@400;500;600;700&display=swap`;
-}
-function previewSupportFont(fontName){
-  const preview = document.getElementById('supportFontPreview');
-  if (!preview) return;
-  if (!fontName){ preview.style.fontFamily = ''; return; }
-  loadSupportPreviewFont(fontName);
-  setTimeout(() => { preview.style.fontFamily = `'${fontName}', 'Inter', sans-serif`; }, 300);
-}
-function onSupportFontPreset(fontName){
-  document.getElementById('customSupportFontInput').value = fontName;
-  saveSetting('supportFont', fontName);
-  previewSupportFont(fontName);
-}
-function saveCustomSupportFont(){
-  const name = document.getElementById('customSupportFontInput').value.trim();
-  if (!name){ alert('Сначала впиши название шрифта'); return; }
-  const sel = document.getElementById('f_supportFont');
-  sel.value = Array.from(sel.options).some(o => o.value === name) ? name : '';
-  saveSetting('supportFont', name);
-  previewSupportFont(name);
-  showAdminToast('Шрифт чата сохранён — открой поддержку на сайте, чтобы проверить');
-}
-function syncSupportFontFields(fontName){
-  const sel = document.getElementById('f_supportFont');
-  const input = document.getElementById('customSupportFontInput');
-  if (!sel || !input) return;
-  sel.value = Array.from(sel.options).some(o => o.value === fontName) ? fontName : '';
-  if (document.activeElement !== input) input.value = fontName;
-  previewSupportFont(fontName);
-}
 
 let categoryImages = {};
 let categoryIcons = {};
@@ -1944,48 +1891,11 @@ function sendSupportReply(){
   input.value = '';
 }
 
-function loadGoogleFont(fontName){
-  const id = 'dynamicFontLink';
-  let link = document.getElementById(id);
-  if (!link){
-    link = document.createElement('link');
-    link.id = id;
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-  }
-  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g,'+')}:wght@600;700&display=swap`;
-}
 
-function previewFont(){
-  const name = document.getElementById('customFontInput').value.trim();
-  if (!name) return;
-  loadGoogleFont(name);
-  const preview = document.getElementById('fontPreview');
-  setTimeout(() => { preview.style.fontFamily = `'${name}', serif`; }, 300);
-}
 
-function saveCustomFont(){
-  const name = document.getElementById('customFontInput').value.trim();
-  if (!name) { alert('Сначала впиши название шрифта'); return; }
-  saveSetting('fontFamily', name);
-  showAdminToast('Шрифт сохранён — открой магазин, чтобы проверить');
-}
 
-function applyPresetFont(name){
-  document.getElementById('customFontInput').value = name;
-  previewFont();
-  saveSetting('fontFamily', name);
-}
 
-function saveCustomBlackDownFont(){
-  const name = document.getElementById('customBlackDownFontInput').value.trim();
-  if (!name) { alert('Сначала впиши название шрифта'); return; }
-  document.getElementById('f_blackDownFont').value = '';
-  saveSetting('blackDownFont', name);
-  showAdminToast('Шрифт BlackDown сохранён — открой магазин, чтобы проверить');
-}
 
-function showAdminToast(msg){ alert(msg); }
 
 /* ================= УЧЁТ: доходы, расходы, себестоимость ================= */
 let accCosts = {};      // productId -> { cost, cargo }
