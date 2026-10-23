@@ -214,7 +214,13 @@
 
   .desc{ font-size:13px; line-height:1.6; color:var(--text-soft); margin-top:6px; }
 
-  .buybar{ padding:18px 20px 28px; display:flex; gap:10px; }
+  .buybar{ padding:18px 20px 28px; display:flex; flex-wrap:wrap; gap:10px; }
+  .buybar .add-btn{ width:auto; flex:1 1 0; min-width:0; padding:16px 10px; font-size:14px; line-height:1.2; }
+  .buy-btn{ background:var(--ink) !important; color:var(--on-ink, #fff) !important; }
+  .buy-btn:disabled{ background:var(--muted) !important; }
+  .incart-note{ display:none; flex:0 0 100%; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--ink); }
+  .incart-note.show{ display:flex; animation:cardFadeIn .3s ease both; }
+  .incart-note b{ background:var(--orange); color:#fff; border-radius:999px; min-width:22px; height:22px; padding:0 7px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
   .add-btn{ flex:1; width:100%; background:var(--orange); color:#fff; border:none; border-radius:16px; padding:16px; font-weight:700; font-size:15px; cursor:pointer; }
   .add-btn:disabled{ background:var(--muted); cursor:not-allowed; }
   .wish-btn-desktop{ display:none; }
@@ -832,8 +838,7 @@
   .hero-slide .hero-btn{ background:none; border:0; border-bottom:1px solid #fff; border-radius:0; -webkit-backdrop-filter:none; backdrop-filter:none; padding:6px 2px; letter-spacing:.32em; text-shadow:0 1px 10px rgba(0,0,0,.4); }
   .hero-slide .hero-btn:active{ background:none; opacity:.7; }
   .search-pop .search-box input{ font-size:16px; }
-  .hero-slide img{ object-position:38% 50%; }
-  @media (min-width:768px){ .hero-slide img{ object-position:50% 50%; } }
+  .hero-slide img{ object-position:50% 50%; }
   .hero-slide::after{ background:linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.18) 90px, rgba(0,0,0,0) 190px), linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.25) 45%, rgba(0,0,0,.12) 100%); }
   .hero-mark{ font-family:var(--hero-font,'Playfair Display','Cormorant Garamond',serif); font-weight:400; text-transform:uppercase; font-size:clamp(46px,16vw,128px); line-height:.95; letter-spacing:-.02em; white-space:nowrap; text-shadow:0 2px 28px rgba(0,0,0,.45); }
   .hero-mark span{ font-style:italic; opacity:.9; }
@@ -971,7 +976,9 @@
           </div>
         </div>
         <div class="buybar" id="buyBar">
+          <div class="incart-note" id="inCartNote"></div>
           <button class="add-btn" id="addBtn" onclick="addToCart()" data-i18n="addToCart">Добавить в корзину</button>
+          <button class="add-btn buy-btn" id="buyNowBtn" onclick="buyNow()" data-i18n="buyNow">Заказать сразу</button>
           <div class="wish-btn-desktop" id="wishBtnDesktop" onclick="toggleCurrentFavorite()"></div>
         </div>
       </div>
@@ -1257,7 +1264,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-135";
+  const CURRENT_VERSION = "20260908-136";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1778,7 +1785,7 @@ const FLAG_CODES = { ru:"ru", uz:"uz", tr:"tr", az:"az", en:"gb" };
 function flagImg(code){ return `<img src="https://flagcdn.com/w40/${FLAG_CODES[code]}.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;">`; }
 const STR = {
   ru: { search:"Найти", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
-        addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
+        buyNow:"Заказать сразу", inCartWord:"В корзине", addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
         sizeLabel:"Размер", descLabel:"Описание", colorLabelWord:"Цвет", allCat:"Все", outOfStock:"Товар закончился",
         empty:"Корзина пуста", emptyCatalogHint:"Загляни в каталог", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Войти", heroTitle:"Ходи по-своему", 
         goodsLabel:"Товары", deliveryLabel:"Доставка", totalLabel:"Итого", checkoutBtn:"Оформить заказ",
@@ -1789,7 +1796,7 @@ const STR = {
         faqQ1:"Как оформить заказ?", faqA1:"Добавьте товар в корзину, выберите способ оплаты и укажите ближайший пункт БТС для получения.", faqQ2:"Сколько идёт доставка?", faqA2:"Обычно 2–5 дней в зависимости от региона. Статус заказа виден в разделе «Профиль».", faqQ3:"Можно ли вернуть товар?", faqA3:"Да, если размер не подошёл — напишите в поддержку в течение 7 дней после получения.",
         policyReturn:"Возврат", policyReturnText:"У вас есть 14 дней на возврат заказа. Расходы на обратную отправку — за счёт покупателя, товар должен быть в исходном состоянии.", policyDelivery:"Доставка", policyDeliveryText:"Обрабатываем заказ и отправляем как можно быстрее. Обычно 2-5 дней в зависимости от региона.", policyCare:"Уход за товаром", policyCareText:"Стирать в холодной воде, не сушить в машинке, не гладить напрямую по принту/вышивке.", sizeGuide:"Гид по размерам", trustShippingTitle:"Бесплатная доставка", trustShippingSub:"от 300 000 сум", trustReturnTitle:"Лёгкий возврат", trustReturnSub:"14 дней на возврат", trustSecureTitle:"Безопасная оплата", trustSecureSub:"Uzum Bank, Apple Pay, Google Pay", checkoutTitle:"Оплата и доставка", paymentMethodLabel:"Способ оплаты", cardLabel:"Карта", cardSoonNote:"Оплата картой онлайн в разработке — скоро будет доступна", cardSoonToast:"Оплата картой пока в разработке", soonMethodToast:"Оплата в разработке — скоро будет доступна", phoneFieldLabel:"Ваш номер телефона", phoneFieldNote:"Нужен, чтобы курьер мог с вами связаться.", btsLabel:"Ближайший пункт БТС", btsPlaceholder:"Начните вводить город или улицу...",noteLabel:"Примечание к заказу",noteHint:"Не обязательно, но можно — например, пожелания по доставке",notePlaceholder:"Ваше примечание...", btsNoResults:"Ничего не найдено, попробуйте другой запрос", confirmTransferBtn:"Перейти к оплате", nextStepHint:"На следующем шаге — реквизиты для оплаты и подтверждение перевода.", confirmingText:"Оформляем заказ...", loginToSeeOrders:"Войти, чтобы видеть свои заказы на любом устройстве", loginByPhone:"По номеру", sizeWord:"Размер", orderSuccessTitle:"Покупка успешно совершена!", supportTitle:"Поддержка", supportPlaceholder:"Напишите сообщение...", supportEmpty:"Нет сообщений. Напишите нам, если есть вопросы 💬", btsSelected:"Выбрано", phoneLoginSoon:"Вход по номеру скоро появится — сейчас дорабатываем",  orderPlacedText:"Заказ оформлен. Продавец проверит поступление оплаты в своём приложении и подтвердит заказ. Если оплата не будет обнаружена, товар отправлен не будет. По всем вопросам обращайтесь в поддержку в вашем профиле.", gotItBtn:"Понятно", regTitle:"Регистрация", regSub:"Нужна, чтобы оформить заказ и получать уведомления о доставке", regSubSupport:"Зарегистрируйтесь, чтобы написать в поддержку — так мы сможем вам ответить", regFirstName:"Имя", regLastName:"Фамилия", regPhoneLabel:"Номер телефона", regAvatarLabel:"Выберите аватар", regSubmit:"Зарегистрироваться", regSaving:"Сохраняем...", regNoAvatars:"Аватары ещё не добавлены продавцом", offerA:"Оформляя заказ, вы принимаете условия",offerB:"публичной оферты",phoneErrLen:"Введите номер полностью: +998 XX XXX XX XX", regSaveFail:"Не удалось сохранить профиль, проверьте интернет" },
   uz: { search:"Qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
-        addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
+        buyNow:"Hoziroq buyurtma", inCartWord:"Savatda", addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
         sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
         empty:"Savat bo‘sh", emptyCatalogHint:"Katalogga nazar tashlang", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Kirish", heroTitle:"Oʻz yoʻlingdan yur", 
         goodsLabel:"Mahsulotlar", deliveryLabel:"Yetkazib berish", totalLabel:"Jami", checkoutBtn:"Buyurtma berish",
@@ -1800,7 +1807,7 @@ const STR = {
         faqQ1:"Buyurtmani qanday rasmiylashtirish mumkin?", faqA1:"Mahsulotni savatga qo‘shing, to‘lov usulini tanlang va yaqin BTS punktini ko‘rsating.", faqQ2:"Yetkazib berish qancha davom etadi?", faqA2:"Odatda hududga qarab 2–5 kun. Buyurtma holatini «Profil» bo‘limida ko‘rish mumkin.", faqQ3:"Mahsulotni qaytarish mumkinmi?", faqA3:"Ha, o‘lcham mos kelmasa — olgandan keyin 7 kun ichida qo‘llab-quvvatlashga yozing.",
         policyReturn:"Qaytarish", policyReturnText:"Buyurtmani qaytarish uchun 14 kun vaqtingiz bor. Qaytarish xarajatlari xaridorga tegishli, mahsulot dastlabki holatida bo‘lishi kerak.", policyDelivery:"Yetkazib berish", policyDeliveryText:"Buyurtmani imkon qadar tez qayta ishlaymiz va yuboramiz. Odatda hududga qarab 2-5 kun.", policyCare:"Mahsulotga g‘amxo‘rlik", policyCareText:"Sovuq suvda yuving, mashinada quritmang, rasm/kashta ustiga to‘g‘ridan-to‘g‘ri dazmollamang.", sizeGuide:"O'lcham gidi", trustShippingTitle:"Bepul yetkazib berish", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Oson qaytarish", trustReturnSub:"14 kun ichida qaytarish", trustSecureTitle:"Xavfsiz to'lov", trustSecureSub:"Uzum Bank, Apple Pay, Google Pay", checkoutTitle:"To'lov va yetkazib berish", paymentMethodLabel:"To'lov usuli", cardLabel:"Karta", cardSoonNote:"Karta orqali onlayn to'lov ishlab chiqilmoqda — tez orada mavjud bo'ladi", cardSoonToast:"Karta orqali to'lov hali ishlab chiqilmoqda", soonMethodToast:"To'lov ishlab chiqilmoqda — tez orada mavjud bo'ladi", phoneFieldLabel:"Telefon raqamingiz", phoneFieldNote:"Kuryer siz bilan bog'lanishi uchun kerak.", btsLabel:"Eng yaqin BTS punkti", btsPlaceholder:"Shahar yoki ko'chani kiriting...",noteLabel:"Buyurtmaga izoh",noteHint:"Majburiy emas, lekin yozishingiz mumkin — masalan, yetkazib berish bo‘yicha istaklar",notePlaceholder:"Izohingiz...", btsNoResults:"Hech narsa topilmadi, boshqa so'rov kiriting", confirmTransferBtn:"To‘lovga o‘tish", nextStepHint:"Keyingi bosqichda — to'lov rekvizitlari va o'tkazmani tasdiqlash.", confirmingText:"Buyurtma rasmiylashtirilmoqda...", loginToSeeOrders:"Har qanday qurilmada buyurtmalaringizni ko'rish uchun kiring", loginByPhone:"Raqam orqali", sizeWord:"O'lcham", orderSuccessTitle:"Xarid muvaffaqiyatli amalga oshirildi!", supportTitle:"Yordam", supportPlaceholder:"Xabar yozing...", supportEmpty:"Xabarlar yo'q. Savollaringiz bo'lsa yozing 💬", btsSelected:"Tanlandi", phoneLoginSoon:"Raqam orqali kirish tez orada — hozir ishlab chiqilmoqda",  orderPlacedText:"Buyurtma rasmiylashtirildi. Sotuvchi to'lov tushganini o'z ilovasida tekshirib, buyurtmani tasdiqlaydi. Agar to'lov topilmasa, mahsulot yuborilmaydi. Barcha savollar bo'yicha profilingizdagi qo'llab-quvvatlashga murojaat qiling.", gotItBtn:"Tushunarli", regTitle:"Roʻyxatdan oʻtish", regSub:"Buyurtma berish va yetkazib berish haqida xabarnomalar olish uchun kerak", regSubSupport:"Qoʻllab-quvvatlashga yozish uchun roʻyxatdan oʻting — shunda sizga javob bera olamiz", regFirstName:"Ism", regLastName:"Familiya", regPhoneLabel:"Telefon raqami", regAvatarLabel:"Avatar tanlang", regSubmit:"Roʻyxatdan oʻtish", regSaving:"Saqlanmoqda...", regNoAvatars:"Avatarlar hali sotuvchi tomonidan qoʻshilmagan", offerA:"Buyurtma berish orqali siz quyidagi shartlarni qabul qilasiz:",offerB:"ommaviy oferta",phoneErrLen:"Raqamni to‘liq kiriting: +998 XX XXX XX XX", regSaveFail:"Profilni saqlab boʻlmadi, internetni tekshiring" },
   tr: { search:"Ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
-        addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
+        buyNow:"Hemen sipariş ver", inCartWord:"Sepette", addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
         sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
         empty:"Sepet boş", emptyCatalogHint:"Kataloğa göz atın", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Gir", heroTitle:"Kendi yolunda yürü", 
         goodsLabel:"Ürünler", deliveryLabel:"Teslimat", totalLabel:"Toplam", checkoutBtn:"Sipariş ver",
@@ -1811,7 +1818,7 @@ const STR = {
         faqQ1:"Nasıl sipariş verilir?", faqA1:"Ürünü sepete ekleyin, ödeme yöntemini seçin ve en yakın BTS noktasını belirtin.", faqQ2:"Teslimat ne kadar sürer?", faqA2:"Genellikle bölgeye göre 2-5 gün. Sipariş durumu «Profil» bölümünde görünür.", faqQ3:"Ürün iade edilebilir mi?", faqA3:"Evet, beden uymazsa — teslim alındıktan sonra 7 gün içinde desteğe yazın.",
         policyReturn:"İade", policyReturnText:"Siparişi iade etmek için 14 gününüz var. İade kargo masrafları alıcıya aittir, ürün orijinal durumda olmalıdır.", policyDelivery:"Teslimat", policyDeliveryText:"Siparişi mümkün olan en kısa sürede hazırlayıp gönderiyoruz. Genellikle bölgeye göre 2-5 gün.", policyCare:"Ürün bakımı", policyCareText:"Soğuk suda yıkayın, makinede kurutmayın, baskı/nakış üzerine doğrudan ütü yapmayın.", sizeGuide:"Beden rehberi", trustShippingTitle:"Ücretsiz kargo", trustShippingSub:"300.000 so'mdan itibaren", trustReturnTitle:"Kolay iade", trustReturnSub:"14 gün iade hakkı", trustSecureTitle:"Güvenli ödeme", trustSecureSub:"Uzum Bank, Apple Pay, Google Pay", checkoutTitle:"Ödeme ve teslimat", paymentMethodLabel:"Ödeme yöntemi", cardLabel:"Kart", cardSoonNote:"Kartla online ödeme geliştiriliyor — yakında kullanılabilir olacak", cardSoonToast:"Kartla ödeme henüz geliştirme aşamasında", soonMethodToast:"Ödeme geliştirme aşamasında — yakında kullanılabilir olacak", phoneFieldLabel:"Telefon numaranız", phoneFieldNote:"Kuryerin sizinle iletişime geçebilmesi için gerekli.", btsLabel:"En yakın BTS noktası", btsPlaceholder:"Şehir veya sokak yazmaya başlayın...",noteLabel:"Sipariş notu",noteHint:"Zorunlu değil, ama yazabilirsiniz — örneğin teslimat isteği",notePlaceholder:"Notunuz...", btsNoResults:"Sonuç bulunamadı, başka bir arama deneyin", confirmTransferBtn:"Ödemeye geç", nextStepHint:"Bir sonraki adımda — ödeme bilgileri ve transfer onayı.", confirmingText:"Sipariş oluşturuluyor...", loginToSeeOrders:"Siparişlerinizi her cihazda görmek için giriş yapın", loginByPhone:"Numarayla", sizeWord:"Beden", orderSuccessTitle:"Satın alma başarıyla tamamlandı!", supportTitle:"Destek", supportPlaceholder:"Bir mesaj yazın...", supportEmpty:"Mesaj yok. Sorularınız varsa yazın 💬", btsSelected:"Seçildi", phoneLoginSoon:"Numarayla giriş yakında — şu an geliştiriliyor",  orderPlacedText:"Sipariş oluşturuldu. Satıcı ödemenin ulaştığını kendi uygulamasından kontrol edip siparişi onaylayacak. Ödeme bulunamazsa ürün gönderilmeyecektir. Tüm sorularınız için profilinizdeki destek bölümüne yazabilirsiniz.", gotItBtn:"Anladım", regTitle:"Kayıt", regSub:"Sipariş vermek ve teslimat bildirimleri almak için gereklidir", regSubSupport:"Desteğe yazmak için kayıt olun — böylece size yanıt verebiliriz", regFirstName:"Ad", regLastName:"Soyad", regPhoneLabel:"Telefon numarası", regAvatarLabel:"Avatar seçin", regSubmit:"Kayıt ol", regSaving:"Kaydediliyor...", regNoAvatars:"Avatarlar henüz satıcı tarafından eklenmedi", offerA:"Sipariş vererek şunu kabul etmiş olursunuz:",offerB:"genel satış teklifi (ofert)",phoneErrLen:"Numarayı eksiksiz girin: +998 XX XXX XX XX", regSaveFail:"Profil kaydedilemedi, internet bağlantınızı kontrol edin" },
   az: { search:"Axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
-        addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
+        buyNow:"Dərhal sifariş et", inCartWord:"Səbətdə", addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
         sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
         empty:"Səbət boşdur", emptyCatalogHint:"Kataloqa nəzər salın", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Daxil ol", heroTitle:"Öz yolunla get", 
         goodsLabel:"Mallar", deliveryLabel:"Çatdırılma", totalLabel:"Cəmi", checkoutBtn:"Sifariş et",
@@ -1822,7 +1829,7 @@ const STR = {
         faqQ1:"Sifarişi necə vermək olar?", faqA1:"Məhsulu səbətə əlavə edin, ödəniş üsulunu seçin və ən yaxın BTS məntəqəsini göstərin.", faqQ2:"Çatdırılma nə qədər çəkir?", faqA2:"Adətən bölgəyə görə 2-5 gün. Sifariş statusu «Profil» bölməsində görünür.", faqQ3:"Məhsulu qaytarmaq olarmı?", faqA3:"Bəli, ölçü uyğun gəlmirsə — aldıqdan sonra 7 gün ərzində dəstəyə yazın.",
         policyReturn:"Qaytarma", policyReturnText:"Sifarişi qaytarmaq üçün 14 gününüz var. Geri göndərmə xərcləri alıcıya aiddir, məhsul ilkin vəziyyətdə olmalıdır.", policyDelivery:"Çatdırılma", policyDeliveryText:"Sifarişi mümkün qədər tez hazırlayıb göndəririk. Adətən bölgəyə görə 2-5 gün.", policyCare:"Məhsula qulluq", policyCareText:"Soyuq suda yuyun, maşında qurutmayın, çap/naxış üzərinə birbaşa ütü etməyin.", sizeGuide:"Ölçü bələdçisi", trustShippingTitle:"Pulsuz çatdırılma", trustShippingSub:"300 000 so'mdan", trustReturnTitle:"Asan qaytarma", trustReturnSub:"14 gün qaytarma hüququ", trustSecureTitle:"Təhlükəsiz ödəniş", trustSecureSub:"Uzum Bank, Apple Pay, Google Pay", checkoutTitle:"Ödəniş və çatdırılma", paymentMethodLabel:"Ödəniş üsulu", cardLabel:"Kart", cardSoonNote:"Kartla onlayn ödəniş hazırlanır — tezliklə mövcud olacaq", cardSoonToast:"Kartla ödəniş hələ hazırlanma mərhələsindədir", soonMethodToast:"Ödəniş hazırlanır — tezliklə mövcud olacaq", phoneFieldLabel:"Telefon nömrəniz", phoneFieldNote:"Kuryerin sizinlə əlaqə saxlaması üçün lazımdır.", btsLabel:"Ən yaxın BTS məntəqəsi", btsPlaceholder:"Şəhər və ya küçə yazmağa başlayın...",noteLabel:"Sifariş qeydi",noteHint:"Məcburi deyil, amma yaza bilərsiniz — məsələn, çatdırılma istəyi",notePlaceholder:"Qeydiniz...", btsNoResults:"Heç nə tapılmadı, başqa sorğu sınayın", confirmTransferBtn:"Ödənişə keç", nextStepHint:"Növbəti addımda — ödəniş rekvizitləri və köçürmənin təsdiqi.", confirmingText:"Sifariş rəsmiləşdirilir...", loginToSeeOrders:"İstənilən cihazda sifarişlərinizi görmək üçün daxil olun", loginByPhone:"Nömrə ilə", sizeWord:"Ölçü", orderSuccessTitle:"Satın alma uğurla tamamlandı!", supportTitle:"Dəstək", supportPlaceholder:"Mesaj yazın...", supportEmpty:"Mesaj yoxdur. Sualınız varsa yazın 💬", btsSelected:"Seçildi", phoneLoginSoon:"Nömrə ilə giriş tezliklə — hazırda hazırlanır",  orderPlacedText:"Sifariş rəsmiləşdirildi. Satıcı ödənişin daxil olduğunu öz tətbiqində yoxlayıb sifarişi təsdiqləyəcək. Ödəniş tapılmasa, məhsul göndərilməyəcək. Bütün suallar üçün profilinizdəki dəstəyə yazın.", gotItBtn:"Anladım", regTitle:"Qeydiyyat", regSub:"Sifariş vermək və çatdırılma bildirişləri almaq üçün lazımdır", regSubSupport:"Dəstəyə yazmaq üçün qeydiyyatdan keçin — belə sizə cavab verə bilərik", regFirstName:"Ad", regLastName:"Soyad", regPhoneLabel:"Telefon nömrəsi", regAvatarLabel:"Avatar seçin", regSubmit:"Qeydiyyatdan keç", regSaving:"Saxlanılır...", regNoAvatars:"Avatarlar hələ satıcı tərəfindən əlavə edilməyib", offerA:"Sifariş verməklə siz bunları qəbul edirsiniz:",offerB:"ümumi satış təklifi (oferta)",phoneErrLen:"Nömrəni tam daxil edin: +998 XX XXX XX XX", regSaveFail:"Profil saxlanılmadı, interneti yoxlayın" },
   en: { search:"Search", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
-        addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
+        buyNow:"Order now", inCartWord:"In cart", addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
         sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
         empty:"Cart is empty", emptyCatalogHint:"Take a look at the catalog", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Enter", heroTitle:"Walk your own way", 
         goodsLabel:"Items", deliveryLabel:"Delivery", totalLabel:"Total", checkoutBtn:"Checkout",
@@ -1945,6 +1952,7 @@ function heroImgFor(b){
   const pick = (isDesktopView() && b.mediaDesktop) ? b.mediaDesktop : (b.media || b.mediaDesktop || '');
   return (pick && !HERO_VIDEO_RE.test(pick)) ? pick : '';
 }
+const HERO_DEF_MOBILE = 'IMG_2832.jpeg', HERO_DEF_PC = 'milaisss%20office%20.jpeg';
 function renderHero(list){
   if (list) heroList = list;
   const hp = document.getElementById('heroPhoto'); if (!hp) return;
@@ -1952,11 +1960,12 @@ function renderHero(list){
   hp.querySelectorAll('.hero-slide').forEach(e => e.remove());
   heroSlides = items.map((b, i) => {
     const el = document.createElement('div'); el.className = 'hero-slide';
-    const img = b._default ? 'hero.jpg' : heroImgFor(b);
+    const img = b._default ? (isDesktopView() ? HERO_DEF_PC : HERO_DEF_MOBILE) : heroImgFor(b);
     const tag = b._default ? t('heroTag') : getHeroBannerText(b, 'tag');
     const title = b._default ? t('heroTitle') : getHeroBannerText(b, 'title');
     const btn = b._default ? t('heroCta') : ((b.showBtn) ? getHeroBannerText(b, 'btnText') : '');
-    let h = img ? `<div class="hero-blur"></div><img src="${heroEsc(img)}" alt="" draggable="false" decoding="async" onerror="this.remove()"${i===0?'':' loading="lazy"'}>` : '';
+    const imgErr = b._default ? "if(!this.dataset.f){this.dataset.f=1;this.src='hero.jpg';}else{this.remove();}" : 'this.remove()';
+    let h = img ? `<div class="hero-blur"></div><img src="${heroEsc(img)}" alt="" draggable="false" decoding="async" onerror="${imgErr}"${i===0?'':' loading="lazy"'}>` : '';
     if (tag || title || btn){
       h += '<div class="hero-photo-text">' + (b._default ? '<div class="hero-mark">MILA<span>/</span>ISSS</div>' : '') + (tag ? `<div class="tag">${heroEsc(tag)}</div>` : '') + (title ? `<h2 class="display">${heroEsc(title)}</h2>` : '') +
            (btn ? `<button class="hero-btn" onclick="openShopAll()">${heroEsc(btn)}</button>` : '') + '</div>';
@@ -2102,9 +2111,25 @@ let infoItems = [];
 let shopContacts = '';
 let gridView = 'grid';
 function setGridView(v){
+  if (v === gridView) return;
   gridView = v;
   document.querySelectorAll('.vt-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
-  renderMainGrid();
+  const wrap = document.getElementById('mainGrid');
+  const cards = wrap ? Array.from(wrap.querySelectorAll('.card')) : [];
+  const canAnim = cards.length && wrap.animate && !(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
+  if (!canAnim){ renderMainGrid(); return; }
+  const vh = window.innerHeight;
+  const before = cards.map(c => c.getBoundingClientRect());
+  wrap.classList.toggle('list-view', v === 'list');
+  cards.forEach((c, i) => {
+    const a = before[i], b = c.getBoundingClientRect();
+    if ((a.bottom < -100 && b.bottom < -100) || (a.top > vh + 100 && b.top > vh + 100) || !b.width || !b.height) return;
+    const dx = a.left - b.left, dy = a.top - b.top, sx = a.width / b.width, sy = a.height / b.height;
+    c.animate([
+      { transformOrigin:'0 0', transform:`translate(${dx}px,${dy}px) scale(${sx},${sy})`, opacity:.55 },
+      { transformOrigin:'0 0', transform:'none', opacity:1 }
+    ], { duration:480, easing:'cubic-bezier(.22,1,.36,1)' });
+  });
 }
 
 function catIconFor(key, idx){
@@ -2121,6 +2146,7 @@ function renderCatPills(){
   const wrap = document.getElementById('catPillsRow');
   if (!wrap) return;
   const items = [{ key: 'Все' }, ...allCats().map(c => ({ key: c }))];
+  _pillKeys = items.map(it => it.key);
   wrap.innerHTML = items.map((it, i) => {
     const iconColor = catIconColorFor(it.key);
     const borderStyle = '';
@@ -2135,9 +2161,16 @@ function renderCatPills(){
   }).join('');
 }
 
+let _pillKeys = [];
 function selectMainCategory(cat){
   activeCategory = cat;
-  renderCatPills();
+  if (searchQuery) { searchQuery = ''; const si = document.getElementById('searchInput'); if (si) si.value = ''; const sc = document.getElementById('searchClear'); if (sc) sc.classList.remove('show'); }
+  const pills = document.querySelectorAll('#catPillsRow .cat-pill');
+  if (pills.length && pills.length === _pillKeys.length){
+    pills.forEach((el, i) => el.classList.toggle('active', _pillKeys[i] === cat));
+    const act = document.querySelector('#catPillsRow .cat-pill.active');
+    if (act && act.scrollIntoView) { try{ act.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' }); }catch(e){} }
+  } else renderCatPills();
   renderMainGrid();
 }
 
@@ -2270,6 +2303,11 @@ function toggleFaq(i){
 renderFaq();
 
 function filteredProducts(){
+  const q = searchQuery.trim().toLowerCase();
+  if (q){
+    // поиск идёт по ВСЕМ товарам, независимо от выбранной категории
+    return products.filter(p => [p.name, p.sub, p.category, getTranslatedProductName(p)].some(x => (x||'').toString().toLowerCase().includes(q)));
+  }
   let list = products;
   if (activeCategory === 'До 500 000') list = list.filter(p => effPrice(p) <= 500000);
   else if (categoryAutoPopular[activeCategory]){
@@ -2277,10 +2315,6 @@ function filteredProducts(){
   }
   else if (activeCategory === SALE_CAT) list = list.filter(p => discOf(p) > 0);
   else if (activeCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === activeCategory.trim().toLowerCase());
-  if (searchQuery.trim()){
-    const q = searchQuery.trim().toLowerCase();
-    list = list.filter(p => (p.name||'').toLowerCase().includes(q) || (p.sub||'').toLowerCase().includes(q));
-  }
   return list;
 }
 
@@ -2292,7 +2326,9 @@ function updateHeaderState(){
 }
 function openSearch(){
   _searchOpen = true;
-  document.getElementById('searchPop').classList.add('open');
+  const _pop = document.getElementById('searchPop'), _hd = document.getElementById('siteHeader');
+  if (_hd) _pop.style.paddingTop = (Math.ceil(_hd.getBoundingClientRect().bottom) + 8) + 'px';
+  _pop.classList.add('open');
   updateHeaderState();
   try{ document.getElementById('searchInput').focus({preventScroll:true}); }catch(e){}
 }
@@ -3856,6 +3892,8 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
       stockNote.className = 'stock-note';
       addBtn.disabled = false; addBtn.textContent = t('addToCart');
     }
+    const _bb = document.getElementById('buyNowBtn'); if (_bb) _bb.disabled = addBtn.disabled;
+    refreshInCart();
   }
 
   function renderSizeRow(idx){
@@ -3930,7 +3968,21 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
 }
 
 /* ---------- cart ---------- */
-function addToCart(){
+function refreshInCart(){
+  const n = document.getElementById('inCartNote'); if (!n) return;
+  const q = currentProduct ? cart.filter(c => c.productId === currentProduct.id).reduce((a, c) => a + c.qty, 0) : 0;
+  n.classList.toggle('show', q > 0);
+  n.innerHTML = q > 0 ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>${t('inCartWord')}: <b>${q}</b> ${t('pcsWord')}` : '';
+}
+function buyNow(){
+  if (!currentProduct) return;
+  const chosen = currentColors[selectedColorIdx]; if (!chosen) return;
+  if (getSizeStock(currentProduct, chosen, selectedSize) <= 0) return;
+  const has = cart.some(c => c.productId === currentProduct.id && c.size === selectedSize && c.colorName === chosen.name);
+  if (!has) addToCart(true);
+  showScreen('cart');
+}
+function addToCart(silent){
   if (!currentProduct) return;
   const chosen = currentColors[selectedColorIdx];
   if (!chosen) return;
@@ -3950,7 +4002,7 @@ function addToCart(){
   }
   updateCartBadge();
   if (tg) tg.HapticFeedback.notificationOccurred('success');
-  showToast(t('addedCart'));
+  if (silent !== true) showToast(t('addedCart'));
 }
 
 function updateCartBadge(){
@@ -3960,6 +4012,7 @@ function updateCartBadge(){
     badge.textContent = count > 99 ? '99+' : count;
     badge.classList.toggle('show', count > 0);
   });
+  refreshInCart();
 }
 function removeFromCart(idx){ cart.splice(idx, 1); updateCartBadge(); renderCart(); }
 
