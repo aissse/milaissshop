@@ -1278,7 +1278,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-143";
+  const CURRENT_VERSION = "20260908-145";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1743,7 +1743,8 @@ function notifyLinkPayload(){
 }
 /* колокольчик: нажал → открылся бот магазина → «Старт» → уведомления приходят */
 function bellBtnHTML(){
-  if (isTelegramUser()) return '';
+  // колокольчик показываем, пока уведомления не подключены (даже если вход через Telegram, но «Старт» в боте не нажат); после подключения — скрываем
+  if (isTelegramUser() || notifyIsOn()) return '';
   const link = NOTIFY_BOT_LINK + '?start=' + notifyLinkPayload();
   return `<a class="bell-btn ${notifyIsOn() ? 'on' : ''}" href="${link}" target="_blank" rel="noopener" onclick="showToast(t('notifTap'))" aria-label="${t('notifTitle')}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="bell-body" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path class="bell-clap" d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
