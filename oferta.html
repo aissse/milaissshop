@@ -46,12 +46,12 @@
 <script>
 /* ===== Реквизиты продавца — впиши свои данные, пустые строки на странице не показываются ===== */
 const REQUISITES = {
-  name:     "",   // например: ISROILOV AZIZBEK UCHQUN OGLI»
+  name:     "",   // например: ЯТТ «Фамилия Имя Отчество»
   stir:     "",   // СТИР (ИНН)
   address:  "",   // юридический адрес
-  phone:    "",   // телефон:+998940128354
+  phone:    "",   // телефон
   telegram: "",   // Telegram для связи
-  email:    "",   // эл. почта:milaisss.shop@gmail.com
+  email:    "",   // эл. почта
   hours:    ""    // например: ежедневно 09:00–20:00
 };
 const EDITION = "21.10.2026";
@@ -80,8 +80,8 @@ const T = {
        "Статус заказа Покупатель может отслеживать в личном кабинете, а также получать уведомления через Telegram-бота магазина."]],
      ["5. Цены и оплата",[
        "Цены на Товары указаны в узбекских сумах (UZS). Продавец вправе изменять цены; цена уже оформленного заказа не меняется.",
-       "Оплата производится онлайн через платёжные сервисы Uzum Bank. Реквизиты банковской карты вводятся только на защищённой странице платёжного сервиса: Продавец не получает, не хранит и не обрабатывает данные карты Покупателя.",
-       "Доступность отдельных способов оплаты (Uzum Bank, Apple Pay, Google Pay) может меняться; актуальные способы указаны на странице оформления заказа.",
+       "Оплата производится онлайн через платёжные сервисы Uzum Bank и Click. Реквизиты банковской карты вводятся только на защищённой странице платёжного сервиса: Продавец не получает, не хранит и не обрабатывает данные карты Покупателя.",
+       "Доступность отдельных способов оплаты (Uzum Bank, Click, Apple Pay, Google Pay) может меняться; актуальные способы указаны на странице оформления заказа.",
        "Заказ передаётся в обработку после подтверждения платежа."]],
      ["6. Доставка",[
        "Доставка осуществляется по Узбекистану до выбранного Покупателем пункта БТС. Ориентировочный срок — от 2 до 5 дней в зависимости от региона; срок не является гарантированным.",
@@ -128,7 +128,7 @@ const T = {
      ["5. Narxlar va to‘lov",[
        "Tovar narxlari o‘zbek so‘mida (UZS) ko‘rsatiladi. Sotuvchi narxlarni o‘zgartirish huquqiga ega; rasmiylashtirilgan buyurtma narxi o‘zgarmaydi.",
        "To‘lov Uzum Bank to‘lov xizmatlari orqali onlayn amalga oshiriladi. Bank kartasi ma’lumotlari faqat to‘lov xizmatining himoyalangan sahifasida kiritiladi: Sotuvchi Xaridorning karta ma’lumotlarini olmaydi, saqlamaydi va qayta ishlamaydi.",
-       "Ayrim to‘lov usullari (Uzum Bank, Apple Pay, Google Pay) mavjudligi o‘zgarishi mumkin; joriy usullar buyurtma sahifasida ko‘rsatiladi.",
+       "Ayrim to‘lov usullari (Uzum Bank, Click, Apple Pay, Google Pay) mavjudligi o‘zgarishi mumkin; joriy usullar buyurtma sahifasida ko‘rsatiladi.",
        "Buyurtma to‘lov tasdiqlangandan so‘ng ishlovga uzatiladi."]],
      ["6. Yetkazib berish",[
        "Yetkazib berish O‘zbekiston bo‘ylab Xaridor tanlagan BTS punktigacha amalga oshiriladi. Taxminiy muddat — hududga qarab 2 dan 5 kungacha; muddat kafolatlanmaydi.",
@@ -175,7 +175,7 @@ const T = {
      ["5. Fiyatlar ve ödeme",[
        "Fiyatlar Özbekistan somu (UZS) cinsinden belirtilir. Satıcı fiyatları değiştirme hakkına sahiptir; verilmiş siparişin fiyatı değişmez.",
        "Ödeme, Uzum Bank ödeme hizmetleri üzerinden çevrimiçi yapılır. Banka kartı bilgileri yalnızca ödeme hizmetinin güvenli sayfasında girilir: Satıcı Alıcının kart bilgilerini almaz, saklamaz ve işlemez.",
-       "Bazı ödeme yöntemlerinin (Uzum Bank, Apple Pay, Google Pay) kullanılabilirliği değişebilir; güncel yöntemler sipariş sayfasında gösterilir.",
+       "Bazı ödeme yöntemlerinin (Uzum Bank, Click, Apple Pay, Google Pay) kullanılabilirliği değişebilir; güncel yöntemler sipariş sayfasında gösterilir.",
        "Sipariş, ödeme onaylandıktan sonra işleme alınır."]],
      ["6. Teslimat",[
        "Teslimat, Özbekistan içinde Alıcının seçtiği BTS noktasına yapılır. Tahmini süre bölgeye göre 2 ila 5 gündür; süre garanti edilmez.",
@@ -222,7 +222,7 @@ const T = {
      ["5. Qiymətlər və ödəniş",[
        "Qiymətlər Özbəkistan somu (UZS) ilə göstərilir. Satıcı qiymətləri dəyişmək hüququna malikdir; rəsmiləşdirilmiş sifarişin qiyməti dəyişmir.",
        "Ödəniş Uzum Bank ödəniş xidmətləri vasitəsilə onlayn aparılır. Bank kartının məlumatları yalnız ödəniş xidmətinin qorunan səhifəsində daxil edilir: Satıcı Alıcının kart məlumatlarını almır, saxlamır və emal etmir.",
-       "Bəzi ödəniş üsullarının (Uzum Bank, Apple Pay, Google Pay) mövcudluğu dəyişə bilər; aktual üsullar sifariş səhifəsində göstərilir.",
+       "Bəzi ödəniş üsullarının (Uzum Bank, Click, Apple Pay, Google Pay) mövcudluğu dəyişə bilər; aktual üsullar sifariş səhifəsində göstərilir.",
        "Sifariş ödəniş təsdiqləndikdən sonra emala verilir."]],
      ["6. Çatdırılma",[
        "Çatdırılma Özbəkistan daxilində Alıcının seçdiyi BTS məntəqəsinə qədər həyata keçirilir. Təxmini müddət bölgədən asılı olaraq 2–5 gündür; müddət zəmanət verilmir.",
@@ -269,7 +269,7 @@ const T = {
      ["5. Prices and payment",[
        "Prices are shown in Uzbek soum (UZS). The Seller may change prices; the price of an order already placed does not change.",
        "Payment is made online through the Uzum Bank payment services. Bank card details are entered only on the payment service's secure page: the Seller does not receive, store or process the Buyer's card data.",
-       "The availability of individual payment methods (Uzum Bank, Apple Pay, Google Pay) may change; the current methods are shown on the checkout page.",
+       "The availability of individual payment methods (Uzum Bank, Click, Apple Pay, Google Pay) may change; the current methods are shown on the checkout page.",
        "The order is processed after the payment is confirmed."]],
      ["6. Delivery",[
        "Delivery is made within Uzbekistan to the BTS point chosen by the Buyer. The estimated time is 2 to 5 days depending on the region; it is not guaranteed.",
