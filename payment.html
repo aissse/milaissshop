@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ru" data-cur="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Оплата, возврат и безопасность — milaisss</title>
+<meta name="description" content="Способы оплаты, условия возврата и защита платежей в интернет-магазине milaisss.">
+<style>
+  :root{--bg:#fff;--fg:#111;--muted:#666;--line:#e6e6e6;--soft:#f6f6f6}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+  header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+  .bar{max-width:760px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .logo{font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fg);text-decoration:none;font-size:18px}
+  .langs{display:flex;gap:4px;flex-wrap:wrap}
+  .langs button{border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:5px 9px;font-size:12px;font-weight:600;text-transform:uppercase;border-radius:0;cursor:pointer}
+  .langs button.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:26px;line-height:1.25;margin:0 0 6px;text-transform:uppercase;letter-spacing:.02em}
+  .sub{color:var(--muted);margin:0 0 24px;font-size:14px}
+  nav.toc{background:var(--soft);padding:12px 16px;margin:0 0 28px}
+  nav.toc a{display:block;color:var(--fg);padding:4px 0;font-size:15px}
+  h2{font-size:18px;text-transform:uppercase;letter-spacing:.03em;margin:32px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+  ul,ol{padding-left:20px;margin:8px 0}
+  li{margin:6px 0}
+  .note{border-left:3px solid var(--fg);background:var(--soft);padding:10px 14px;margin:14px 0;font-size:15px}
+  a{color:var(--fg)}
+  footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center;padding:20px 16px}
+  [data-lang]{display:none}
+  html[data-cur="ru"] [data-lang="ru"],html[data-cur="uz"] [data-lang="uz"],html[data-cur="tr"] [data-lang="tr"],html[data-cur="az"] [data-lang="az"],html[data-cur="en"] [data-lang="en"]{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="logo" href="index.html">milaisss</a>
+    <div class="langs" id="langs">
+      <button data-l="ru">ru</button><button data-l="uz">uz</button><button data-l="tr">tr</button><button data-l="az">az</button><button data-l="en">en</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ===================== RU ===================== -->
+<div data-lang="ru">
+<h1>Оплата, возврат и безопасность платежей</h1>
+<p class="sub">Интернет-магазин milaisss · milaisss.com</p>
+<nav class="toc">
+  <a href="#ru-pay">1. Способы оплаты</a>
+  <a href="#ru-how">2. Как проходит оплата</a>
+  <a href="#ru-sec">3. Безопасность и защита от мошенничества</a>
+  <a href="#ru-ret">4. Возврат и обмен товара</a>
+  <a href="#ru-ref">5. Возврат денежных средств</a>
+  <a href="#ru-con">6. Контакты</a>
+</nav>
+
+<h2 id="ru-pay">1. Способы оплаты</h2>
+<ul>
+  <li><b>Банковская карта Uzcard или Humo</b> — онлайн-оплата через платёжную страницу Uzum Bank.</li>
+  <li><b>Apple Pay и Google Pay</b> — в разработке, появятся после запуска сервисов в Узбекистане.</li>
+</ul>
+<p>Цены на сайте указаны в узбекских сумах (UZS). Оплата производится в сумах. Дополнительные комиссии с покупателя магазин не взимает.</p>
+
+<h2 id="ru-how">2. Как проходит оплата</h2>
+<ol>
+  <li>Выберите товары, размер и оформите заказ в корзине.</li>
+  <li>Нажмите «Перейти к оплате» — откроется защищённая платёжная страница Uzum Bank.</li>
+  <li>Введите номер и срок действия карты.</li>
+  <li>Подтвердите оплату одноразовым кодом из SMS, который пришлёт ваш банк.</li>
+  <li>После успешной оплаты вы вернётесь на сайт, заказ получит статус «Принято», а уведомление придёт в Telegram-бот <b>@milaisss_bot</b>.</li>
+</ol>
+<p>Если оплата не прошла, деньги с карты не списываются. Вы можете повторить попытку или написать нам.</p>
+
+<h2 id="ru-sec">3. Безопасность платежей и защита от мошенничества</h2>
+<p>Магазин применяет меры по ограничению и контролю рисков мошеннических операций, используя возможности Uzum Bank и ограничения, предусмотренные договором интернет-эквайринга:</p>
+<ul>
+  <li><b>Данные карты вводятся только на платёжной странице Uzum Bank</b> по защищённому соединению (HTTPS/TLS). Сайт milaisss не получает, не видит и не хранит номер карты и другие платёжные данные.</li>
+  <li><b>Каждая оплата подтверждается одноразовым SMS-кодом</b> от банка, выпустившего карту.</li>
+  <li><b>Лимиты операций.</b> Установлены ограничения на сумму одной оплаты, а также на сумму и количество операций в день и в месяц — согласно договору интернет-эквайринга с Uzum Bank.</li>
+  <li><b>Антифрод-мониторинг банка.</b> Все операции проверяются системой Uzum Bank; подозрительные платежи могут быть отклонены или приостановлены.</li>
+  <li><b>Проверка заказов магазином.</b> Мы можем связаться с вами для подтверждения заказа. Магазин вправе отменить заказ с признаками мошенничества (например, многократные попытки оплаты разными картами или несовпадение данных) и вернуть деньги на карту, с которой была оплата.</li>
+  <li><b>Возврат денег — только на ту же карту</b>, с которой был оплачен заказ. Возврат наличными или на другую карту не производится.</li>
+</ul>
+<div class="note">Мы <b>никогда</b> не просим сообщить код из SMS, пароль или полные данные карты — ни в чате, ни по телефону, ни в Telegram. Если вас об этом просят от имени milaisss — это мошенники.</div>
+<p>Если с вашей карты прошло списание, которого вы не совершали: сразу заблокируйте карту через приложение или колл-центр вашего банка и напишите нам — мы проверим заказ и поможем с возвратом.</p>
+
+<h2 id="ru-ret">4. Возврат и обмен товара</h2>
+<ul>
+  <li>Вернуть или обменять товар надлежащего качества можно в течение <b>14 дней</b> со дня получения.</li>
+  <li>Товар должен быть без следов носки, с сохранёнными бирками, товарным видом и упаковкой (для обуви — оригинальная коробка).</li>
+  <li>Для оформления напишите нам на <b>milaisss.shop@gmail.com</b> или в чат поддержки на сайте: номер заказа, какой товар и причина возврата/обмена.</li>
+  <li>Обратная доставка товара надлежащего качества оплачивается покупателем.</li>
+  <li><b>Если товар с браком</b> или прислан не тот товар/размер — мы заменим его или вернём деньги, а все расходы на доставку берём на себя.</li>
+  <li>После получения товара мы проверяем его состояние и сообщаем результат в течение 3 рабочих дней.</li>
+</ul>
+
+<h2 id="ru-ref">5. Возврат денежных средств</h2>
+<ul>
+  <li>Деньги возвращаются <b>на ту же карту</b>, с которой был оплачен заказ, через Uzum Bank.</li>
+  <li>Срок возврата — до <b>10 рабочих дней</b> после подтверждения возврата. Фактическое зачисление зависит от банка, выпустившего карту.</li>
+  <li>При отмене заказа до отправки деньги возвращаются в полном объёме.</li>
+  <li>Если заказ отменён из-за отсутствия товара или по решению магазина — возвращаем полную сумму.</li>
+</ul>
+
+<h2 id="ru-con">6. Контакты</h2>
+<ul>
+  <li>Email: <a href="mailto:milaisss.shop@gmail.com">milaisss.shop@gmail.com</a></li>
+  <li>Чат поддержки на сайте <a href="index.html">milaisss.com</a></li>
+  <li>Реквизиты продавца — в <a href="oferta.html">Публичной оферте</a>.</li>
+</ul>
+</div>
+
+<!-- ===================== UZ ===================== -->
+<div data-lang="uz">
+<h1>To‘lov, qaytarish va to‘lovlar xavfsizligi</h1>
+<p class="sub">milaisss internet-do‘koni · milaisss.com</p>
+<nav class="toc">
+  <a href="#uz-pay">1. To‘lov usullari</a>
+  <a href="#uz-how">2. To‘lov qanday amalga oshiriladi</a>
+  <a href="#uz-sec">3. Xavfsizlik va firibgarlikdan himoya</a>
+  <a href="#uz-ret">4. Tovarni qaytarish va almashtirish</a>
+  <a href="#uz-ref">5. Pulni qaytarish</a>
+  <a href="#uz-con">6. Aloqa</a>
+</nav>
+
+<h2 id="uz-pay">1. To‘lov usullari</h2>
+<ul>
+  <li><b>Uzcard yoki Humo bank kartasi</b> — Uzum Bank to‘lov sahifasi orqali onlayn to‘lov.</li>
+  <li><b>Apple Pay va Google Pay</b> — ishlab chiqilmoqda, xizmatlar O‘zbekistonda ishga tushgach paydo bo‘ladi.</li>
+</ul>
+<p>Saytdagi narxlar o‘zbek so‘mida (UZS) ko‘rsatilgan. To‘lov so‘mda amalga oshiriladi. Do‘kon xaridordan qo‘shimcha komissiya olmaydi.</p>
+
+<h2 id="uz-how">2. To‘lov qanday amalga oshiriladi</h2>
+<ol>
+  <li>Tovar va o‘lchamni tanlang, savatda buyurtmani rasmiylashtiring.</li>
+  <li>«To‘lovga o‘tish» tugmasini bosing — Uzum Bankning himoyalangan to‘lov sahifasi ochiladi.</li>
+  <li>Karta raqami va amal qilish muddatini kiriting.</li>
+  <li>Bankingiz yuborgan bir martalik SMS-kod bilan to‘lovni tasdiqlang.</li>
+  <li>Muvaffaqiyatli to‘lovdan so‘ng saytga qaytasiz, buyurtma «Qabul qilindi» holatini oladi, xabarnoma esa <b>@milaisss_bot</b> Telegram-botiga keladi.</li>
+</ol>
+<p>Agar to‘lov o‘tmasa, kartadan pul yechilmaydi. Qayta urinib ko‘rishingiz yoki bizga yozishingiz mumkin.</p>
+
+<h2 id="uz-sec">3. To‘lovlar xavfsizligi va firibgarlikdan himoya</h2>
+<p>Do‘kon Uzum Bank imkoniyatlari va internet-ekvayring shartnomasida nazarda tutilgan cheklovlardan foydalangan holda firibgarlik operatsiyalari xavfini cheklash va nazorat qilish choralarini qo‘llaydi:</p>
+<ul>
+  <li><b>Karta ma’lumotlari faqat Uzum Bank to‘lov sahifasida</b> himoyalangan ulanish (HTTPS/TLS) orqali kiritiladi. milaisss sayti karta raqami va boshqa to‘lov ma’lumotlarini olmaydi, ko‘rmaydi va saqlamaydi.</li>
+  <li><b>Har bir to‘lov kartani chiqargan bankning bir martalik SMS-kodi</b> bilan tasdiqlanadi.</li>
+  <li><b>Operatsiya limitlari.</b> Bitta to‘lov summasiga, shuningdek kunlik va oylik operatsiyalar summasi va soniga Uzum Bank bilan tuzilgan internet-ekvayring shartnomasiga muvofiq cheklovlar o‘rnatilgan.</li>
+  <li><b>Bankning antifrod monitoringi.</b> Barcha operatsiyalar Uzum Bank tizimi tomonidan tekshiriladi; shubhali to‘lovlar rad etilishi yoki to‘xtatilishi mumkin.</li>
+  <li><b>Buyurtmalarni do‘kon tomonidan tekshirish.</b> Buyurtmani tasdiqlash uchun siz bilan bog‘lanishimiz mumkin. Do‘kon firibgarlik belgilari bo‘lgan buyurtmani (masalan, turli kartalar bilan ko‘p marta to‘lashga urinish yoki ma’lumotlar mos kelmasligi) bekor qilish va pulni to‘lov qilingan kartaga qaytarish huquqiga ega.</li>
+  <li><b>Pul faqat o‘sha kartaga qaytariladi</b>, qaysi karta bilan buyurtma to‘langan bo‘lsa. Naqd pulda yoki boshqa kartaga qaytarilmaydi.</li>
+</ul>
+<div class="note">Biz <b>hech qachon</b> SMS-kod, parol yoki kartaning to‘liq ma’lumotlarini so‘ramaymiz — na chatda, na telefonda, na Telegramda. Agar milaisss nomidan buni so‘rashsa — bular firibgarlar.</div>
+<p>Agar kartangizdan siz amalga oshirmagan pul yechilgan bo‘lsa: darhol bankingiz ilovasi yoki call-markazi orqali kartani bloklang va bizga yozing — buyurtmani tekshirib, qaytarishda yordam beramiz.</p>
+
+<h2 id="uz-ret">4. Tovarni qaytarish va almashtirish</h2>
+<ul>
+  <li>Sifatli tovarni olingan kundan boshlab <b>14 kun</b> ichida qaytarish yoki almashtirish mumkin.</li>
+  <li>Tovar kiyilmagan, yorliqlari, tovar ko‘rinishi va qadog‘i saqlangan bo‘lishi kerak (poyabzal uchun — asl quti).</li>
+  <li>Rasmiylashtirish uchun <b>milaisss.shop@gmail.com</b> pochtasiga yoki saytdagi qo‘llab-quvvatlash chatiga yozing: buyurtma raqami, qaysi tovar va qaytarish/almashtirish sababi.</li>
+  <li>Sifatli tovarni qaytarib yuborish xarajatini xaridor to‘laydi.</li>
+  <li><b>Agar tovar nuqsonli bo‘lsa</b> yoki boshqa tovar/o‘lcham yuborilgan bo‘lsa — uni almashtiramiz yoki pulni qaytaramiz, barcha yetkazib berish xarajatlarini o‘zimiz qoplaymiz.</li>
+  <li>Tovarni olganimizdan so‘ng uning holatini tekshirib, natijani 3 ish kuni ichida xabar qilamiz.</li>
+</ul>
+
+<h2 id="uz-ref">5. Pulni qaytarish</h2>
+<ul>
+  <li>Pul Uzum Bank orqali buyurtma to‘langan <b>o‘sha kartaga</b> qaytariladi.</li>
+  <li>Qaytarish muddati — qaytarish tasdiqlangandan so‘ng <b>10 ish kunigacha</b>. Haqiqiy tushish muddati kartani chiqargan bankka bog‘liq.</li>
+  <li>Buyurtma jo‘natilishidan oldin bekor qilinsa, pul to‘liq qaytariladi.</li>
+  <li>Agar buyurtma tovar yo‘qligi sababli yoki do‘kon qarori bilan bekor qilinsa — to‘liq summani qaytaramiz.</li>
+</ul>
+
+<h2 id="uz-con">6. Aloqa</h2>
+<ul>
+  <li>Email: <a href="mailto:milaisss.shop@gmail.com">milaisss.shop@gmail.com</a></li>
+  <li><a href="index.html">milaisss.com</a> saytidagi qo‘llab-quvvatlash chati</li>
+  <li>Sotuvchi rekvizitlari — <a href="oferta.html">Ommaviy ofertada</a>.</li>
+</ul>
+</div>
+
+<!-- ===================== TR ===================== -->
+<div data-lang="tr">
+<h1>Ödeme, iade ve ödeme güvenliği</h1>
+<p class="sub">milaisss online mağaza · milaisss.com</p>
+<nav class="toc">
+  <a href="#tr-pay">1. Ödeme yöntemleri</a>
+  <a href="#tr-how">2. Ödeme nasıl yapılır</a>
+  <a href="#tr-sec">3. Güvenlik ve dolandırıcılığa karşı koruma</a>
+  <a href="#tr-ret">4. Ürün iadesi ve değişimi</a>
+  <a href="#tr-ref">5. Para iadesi</a>
+  <a href="#tr-con">6. İletişim</a>
+</nav>
+
+<h2 id="tr-pay">1. Ödeme yöntemleri</h2>
+<ul>
+  <li><b>Uzcard veya Humo banka kartı</b> — Uzum Bank ödeme sayfası üzerinden online ödeme.</li>
+  <li><b>Apple Pay ve Google Pay</b> — geliştirme aşamasında; hizmetler Özbekistan’da başlatıldıktan sonra eklenecek.</li>
+</ul>
+<p>Sitedeki fiyatlar Özbek somu (UZS) cinsindendir. Ödeme som ile yapılır. Mağaza alıcıdan ek komisyon almaz.</p>
+
+<h2 id="tr-how">2. Ödeme nasıl yapılır</h2>
+<ol>
+  <li>Ürünü ve bedeni seçin, sepette siparişi oluşturun.</li>
+  <li>«Ödemeye geç» düğmesine basın — Uzum Bank’ın güvenli ödeme sayfası açılır.</li>
+  <li>Kart numarasını ve son kullanma tarihini girin.</li>
+  <li>Bankanızın gönderdiği tek kullanımlık SMS kodu ile ödemeyi onaylayın.</li>
+  <li>Başarılı ödemeden sonra siteye dönersiniz, sipariş «Kabul edildi» durumunu alır ve bildirim <b>@milaisss_bot</b> Telegram botuna gelir.</li>
+</ol>
+<p>Ödeme gerçekleşmezse karttan para çekilmez. Tekrar deneyebilir veya bize yazabilirsiniz.</p>
+
+<h2 id="tr-sec">3. Ödeme güvenliği ve dolandırıcılığa karşı koruma</h2>
+<p>Mağaza, Uzum Bank’ın imkanlarını ve internet acquiring sözleşmesinde öngörülen sınırlamaları kullanarak dolandırıcılık işlemleri risklerini sınırlamak ve kontrol etmek için önlemler uygular:</p>
+<ul>
+  <li><b>Kart bilgileri yalnızca Uzum Bank ödeme sayfasında</b> güvenli bağlantı (HTTPS/TLS) üzerinden girilir. milaisss sitesi kart numarasını ve diğer ödeme bilgilerini almaz, görmez ve saklamaz.</li>
+  <li><b>Her ödeme, kartı veren bankanın tek kullanımlık SMS kodu</b> ile onaylanır.</li>
+  <li><b>İşlem limitleri.</b> Tek ödeme tutarı ile günlük ve aylık işlem tutarı ve sayısı için Uzum Bank ile yapılan internet acquiring sözleşmesine uygun sınırlar belirlenmiştir.</li>
+  <li><b>Bankanın dolandırıcılık izleme sistemi.</b> Tüm işlemler Uzum Bank sistemi tarafından kontrol edilir; şüpheli ödemeler reddedilebilir veya askıya alınabilir.</li>
+  <li><b>Mağaza tarafından sipariş kontrolü.</b> Siparişi onaylamak için sizinle iletişime geçebiliriz. Mağaza, dolandırıcılık belirtileri olan bir siparişi (örneğin farklı kartlarla çok sayıda ödeme denemesi veya bilgilerin uyuşmaması) iptal etme ve parayı ödeme yapılan karta iade etme hakkına sahiptir.</li>
+  <li><b>Para yalnızca aynı karta iade edilir</b>, yani siparişin ödendiği karta. Nakit veya başka karta iade yapılmaz.</li>
+</ul>
+<div class="note">SMS kodunu, şifrenizi veya kartın tam bilgilerini <b>asla</b> istemeyiz — ne sohbette, ne telefonda, ne Telegram’da. milaisss adına bunu isteyen olursa — bunlar dolandırıcıdır.</div>
+<p>Kartınızdan sizin yapmadığınız bir çekim olduysa: kartı hemen bankanızın uygulaması veya çağrı merkezi üzerinden bloke edin ve bize yazın — siparişi kontrol edip iadede yardımcı oluruz.</p>
+
+<h2 id="tr-ret">4. Ürün iadesi ve değişimi</h2>
+<ul>
+  <li>Kusursuz ürün, teslim alındığı günden itibaren <b>14 gün</b> içinde iade edilebilir veya değiştirilebilir.</li>
+  <li>Ürün giyilmemiş olmalı; etiketleri, görünümü ve ambalajı korunmuş olmalıdır (ayakkabı için — orijinal kutu).</li>
+  <li>İşlem için <b>milaisss.shop@gmail.com</b> adresine veya sitedeki destek sohbetine yazın: sipariş numarası, hangi ürün ve iade/değişim nedeni.</li>
+  <li>Kusursuz ürünün geri gönderim ücretini alıcı öder.</li>
+  <li><b>Ürün kusurluysa</b> veya yanlış ürün/beden gönderildiyse — ürünü değiştirir veya parayı iade ederiz, tüm kargo masraflarını biz karşılarız.</li>
+  <li>Ürünü teslim aldıktan sonra durumunu kontrol eder ve sonucu 3 iş günü içinde bildiririz.</li>
+</ul>
+
+<h2 id="tr-ref">5. Para iadesi</h2>
+<ul>
+  <li>Para, Uzum Bank üzerinden siparişin ödendiği <b>aynı karta</b> iade edilir.</li>
+  <li>İade süresi — iade onaylandıktan sonra <b>10 iş gününe kadar</b>. Paranın hesaba geçme süresi kartı veren bankaya bağlıdır.</li>
+  <li>Sipariş gönderilmeden önce iptal edilirse para tamamen iade edilir.</li>
+  <li>Sipariş stok yokluğu veya mağaza kararıyla iptal edilirse — tutarın tamamını iade ederiz.</li>
+</ul>
+
+<h2 id="tr-con">6. İletişim</h2>
+<ul>
+  <li>Email: <a href="mailto:milaisss.shop@gmail.com">milaisss.shop@gmail.com</a></li>
+  <li><a href="index.html">milaisss.com</a> sitesindeki destek sohbeti</li>
+  <li>Satıcı bilgileri — <a href="oferta.html">Kamu Teklifi</a> sayfasında.</li>
+</ul>
+</div>
+
+<!-- ===================== AZ ===================== -->
+<div data-lang="az">
+<h1>Ödəniş, geri qaytarma və ödənişlərin təhlükəsizliyi</h1>
+<p class="sub">milaisss onlayn mağazası · milaisss.com</p>
+<nav class="toc">
+  <a href="#az-pay">1. Ödəniş üsulları</a>
+  <a href="#az-how">2. Ödəniş necə həyata keçirilir</a>
+  <a href="#az-sec">3. Təhlükəsizlik və fırıldaqçılıqdan qorunma</a>
+  <a href="#az-ret">4. Malın geri qaytarılması və dəyişdirilməsi</a>
+  <a href="#az-ref">5. Pulun geri qaytarılması</a>
+  <a href="#az-con">6. Əlaqə</a>
+</nav>
+
+<h2 id="az-pay">1. Ödəniş üsulları</h2>
+<ul>
+  <li><b>Uzcard və ya Humo bank kartı</b> — Uzum Bank ödəniş səhifəsi vasitəsilə onlayn ödəniş.</li>
+  <li><b>Apple Pay və Google Pay</b> — hazırlanır, xidmətlər Özbəkistanda işə düşdükdən sonra əlavə olunacaq.</li>
+</ul>
+<p>Saytdakı qiymətlər özbək somu (UZS) ilə göstərilib. Ödəniş somla aparılır. Mağaza alıcıdan əlavə komissiya tutmur.</p>
+
+<h2 id="az-how">2. Ödəniş necə həyata keçirilir</h2>
+<ol>
+  <li>Malı və ölçünü seçin, səbətdə sifarişi rəsmiləşdirin.</li>
+  <li>«Ödənişə keç» düyməsini basın — Uzum Bankın qorunan ödəniş səhifəsi açılacaq.</li>
+  <li>Kartın nömrəsini və etibarlılıq müddətini daxil edin.</li>
+  <li>Bankınızın göndərdiyi birdəfəlik SMS-kodla ödənişi təsdiqləyin.</li>
+  <li>Uğurlu ödənişdən sonra sayta qayıdacaqsınız, sifariş «Qəbul edildi» statusunu alacaq, bildiriş isə <b>@milaisss_bot</b> Telegram-botuna gələcək.</li>
+</ol>
+<p>Ödəniş keçməsə, kartdan pul silinmir. Yenidən cəhd edə və ya bizə yaza bilərsiniz.</p>
+
+<h2 id="az-sec">3. Ödənişlərin təhlükəsizliyi və fırıldaqçılıqdan qorunma</h2>
+<p>Mağaza Uzum Bankın imkanlarından və internet-ekvayrinq müqaviləsində nəzərdə tutulmuş məhdudiyyətlərdən istifadə edərək fırıldaqçılıq əməliyyatları risklərini məhdudlaşdırmaq və nəzarət etmək üçün tədbirlər görür:</p>
+<ul>
+  <li><b>Kart məlumatları yalnız Uzum Bank ödəniş səhifəsində</b> qorunan bağlantı (HTTPS/TLS) ilə daxil edilir. milaisss saytı kart nömrəsini və digər ödəniş məlumatlarını almır, görmür və saxlamır.</li>
+  <li><b>Hər ödəniş kartı buraxan bankın birdəfəlik SMS-kodu</b> ilə təsdiqlənir.</li>
+  <li><b>Əməliyyat limitləri.</b> Bir ödənişin məbləğinə, həmçinin gündəlik və aylıq əməliyyatların məbləğinə və sayına Uzum Bank ilə bağlanmış internet-ekvayrinq müqaviləsinə uyğun məhdudiyyətlər qoyulub.</li>
+  <li><b>Bankın antifrod monitorinqi.</b> Bütün əməliyyatlar Uzum Bank sistemi tərəfindən yoxlanılır; şübhəli ödənişlər rədd edilə və ya dayandırıla bilər.</li>
+  <li><b>Sifarişlərin mağaza tərəfindən yoxlanılması.</b> Sifarişi təsdiqləmək üçün sizinlə əlaqə saxlaya bilərik. Mağaza fırıldaqçılıq əlamətləri olan sifarişi (məsələn, müxtəlif kartlarla çoxsaylı ödəniş cəhdləri və ya məlumatların uyğun gəlməməsi) ləğv etmək və pulu ödəniş edilən karta qaytarmaq hüququna malikdir.</li>
+  <li><b>Pul yalnız həmin karta qaytarılır</b>, sifarişin ödənildiyi karta. Nağd və ya başqa karta qaytarılmır.</li>
+</ul>
+<div class="note">Biz <b>heç vaxt</b> SMS-kodu, parolu və ya kartın tam məlumatlarını soruşmuruq — nə çatda, nə telefonla, nə Telegramda. Əgər milaisss adından bunu soruşurlarsa — bunlar fırıldaqçılardır.</div>
+<p>Kartınızdan sizin etmədiyiniz pul silinibsə: dərhal bankınızın tətbiqi və ya çağrı mərkəzi vasitəsilə kartı bloklayın və bizə yazın — sifarişi yoxlayıb geri qaytarmada kömək edəcəyik.</p>
+
+<h2 id="az-ret">4. Malın geri qaytarılması və dəyişdirilməsi</h2>
+<ul>
+  <li>Keyfiyyətli malı alındığı gündən <b>14 gün</b> ərzində qaytarmaq və ya dəyişdirmək olar.</li>
+  <li>Mal geyinilməmiş, etiketləri, əmtəə görünüşü və qablaşdırması saxlanılmış olmalıdır (ayaqqabı üçün — orijinal qutu).</li>
+  <li>Rəsmiləşdirmək üçün <b>milaisss.shop@gmail.com</b> ünvanına və ya saytdakı dəstək çatına yazın: sifariş nömrəsi, hansı mal və qaytarma/dəyişmə səbəbi.</li>
+  <li>Keyfiyyətli malın geri göndərilməsini alıcı ödəyir.</li>
+  <li><b>Mal qüsurludursa</b> və ya başqa mal/ölçü göndərilibsə — onu dəyişdirəcəyik və ya pulu qaytaracağıq, bütün çatdırılma xərclərini öz üzərimizə götürürük.</li>
+  <li>Malı aldıqdan sonra vəziyyətini yoxlayır və nəticəni 3 iş günü ərzində bildiririk.</li>
+</ul>
+
+<h2 id="az-ref">5. Pulun geri qaytarılması</h2>
+<ul>
+  <li>Pul Uzum Bank vasitəsilə sifarişin ödənildiyi <b>həmin karta</b> qaytarılır.</li>
+  <li>Qaytarma müddəti — qaytarma təsdiqləndikdən sonra <b>10 iş gününədək</b>. Faktiki köçürmə müddəti kartı buraxan bankdan asılıdır.</li>
+  <li>Sifariş göndərilməzdən əvvəl ləğv edilərsə, pul tam qaytarılır.</li>
+  <li>Sifariş malın olmaması səbəbindən və ya mağazanın qərarı ilə ləğv edilərsə — tam məbləği qaytarırıq.</li>
+</ul>
+
+<h2 id="az-con">6. Əlaqə</h2>
+<ul>
+  <li>Email: <a href="mailto:milaisss.shop@gmail.com">milaisss.shop@gmail.com</a></li>
+  <li><a href="index.html">milaisss.com</a> saytındakı dəstək çatı</li>
+  <li>Satıcının rekvizitləri — <a href="oferta.html">Ümumi ofertada</a>.</li>
+</ul>
+</div>
+
+<!-- ===================== EN ===================== -->
+<div data-lang="en">
+<h1>Payment, returns and payment security</h1>
+<p class="sub">milaisss online store · milaisss.com</p>
+<nav class="toc">
+  <a href="#en-pay">1. Payment methods</a>
+  <a href="#en-how">2. How payment works</a>
+  <a href="#en-sec">3. Security and fraud protection</a>
+  <a href="#en-ret">4. Returns and exchanges</a>
+  <a href="#en-ref">5. Refunds</a>
+  <a href="#en-con">6. Contacts</a>
+</nav>
+
+<h2 id="en-pay">1. Payment methods</h2>
+<ul>
+  <li><b>Uzcard or Humo bank card</b> — online payment via the Uzum Bank payment page.</li>
+  <li><b>Apple Pay and Google Pay</b> — in development; will be added once these services launch in Uzbekistan.</li>
+</ul>
+<p>Prices on the site are in Uzbek sum (UZS). Payment is made in sum. The store does not charge buyers any extra fees.</p>
+
+<h2 id="en-how">2. How payment works</h2>
+<ol>
+  <li>Choose items and size, then place the order in the cart.</li>
+  <li>Tap “Proceed to payment” — the secure Uzum Bank payment page opens.</li>
+  <li>Enter the card number and expiry date.</li>
+  <li>Confirm the payment with the one-time SMS code sent by your bank.</li>
+  <li>After a successful payment you return to the site, the order gets the status “Accepted”, and a notification arrives in the Telegram bot <b>@milaisss_bot</b>.</li>
+</ol>
+<p>If a payment fails, no money is charged to your card. You can try again or contact us.</p>
+
+<h2 id="en-sec">3. Payment security and fraud protection</h2>
+<p>The store applies measures to limit and control the risk of fraudulent transactions, using Uzum Bank’s anti-fraud capabilities and the restrictions set out in the internet acquiring agreement:</p>
+<ul>
+  <li><b>Card details are entered only on the Uzum Bank payment page</b> over a secure connection (HTTPS/TLS). The milaisss site does not receive, see or store the card number or any other payment data.</li>
+  <li><b>Every payment is confirmed with a one-time SMS code</b> from the card’s issuing bank.</li>
+  <li><b>Transaction limits.</b> Limits apply to the amount of a single payment and to the amount and number of transactions per day and per month, in line with the internet acquiring agreement with Uzum Bank.</li>
+  <li><b>Bank anti-fraud monitoring.</b> All transactions are screened by Uzum Bank’s system; suspicious payments may be declined or put on hold.</li>
+  <li><b>Order verification by the store.</b> We may contact you to confirm an order. The store may cancel an order showing signs of fraud (for example, repeated payment attempts with different cards or mismatched details) and refund the money to the card it was paid from.</li>
+  <li><b>Refunds go only to the same card</b> the order was paid with. No cash refunds or refunds to another card.</li>
+</ul>
+<div class="note">We will <b>never</b> ask for your SMS code, password or full card details — not in chat, not by phone, not in Telegram. Anyone asking for this on behalf of milaisss is a scammer.</div>
+<p>If you see a charge you did not make: block the card right away through your bank’s app or call centre, then contact us — we will check the order and help with the refund.</p>
+
+<h2 id="en-ret">4. Returns and exchanges</h2>
+<ul>
+  <li>Items in proper condition can be returned or exchanged within <b>14 days</b> of receipt.</li>
+  <li>Items must be unworn, with tags, original appearance and packaging kept (for shoes — the original box).</li>
+  <li>To start a return, email <b>milaisss.shop@gmail.com</b> or use the support chat on the site with your order number, the item and the reason for return/exchange.</li>
+  <li>Return shipping for items in proper condition is paid by the buyer.</li>
+  <li><b>If the item is defective</b> or the wrong item/size was sent, we will replace it or refund you, and cover all shipping costs.</li>
+  <li>Once we receive the item, we check its condition and let you know the result within 3 business days.</li>
+</ul>
+
+<h2 id="en-ref">5. Refunds</h2>
+<ul>
+  <li>Money is refunded via Uzum Bank <b>to the same card</b> the order was paid with.</li>
+  <li>Refunds are made within <b>10 business days</b> after the return is approved. The actual crediting time depends on the card’s issuing bank.</li>
+  <li>If an order is cancelled before it ships, the full amount is refunded.</li>
+  <li>If an order is cancelled because an item is out of stock or by the store’s decision, we refund the full amount.</li>
+</ul>
+
+<h2 id="en-con">6. Contacts</h2>
+<ul>
+  <li>Email: <a href="mailto:milaisss.shop@gmail.com">milaisss.shop@gmail.com</a></li>
+  <li>Support chat on <a href="index.html">milaisss.com</a></li>
+  <li>Seller details are in the <a href="oferta.html">Public Offer</a>.</li>
+</ul>
+</div>
+
+</main>
+
+<footer>© milaisss · <a href="oferta.html">Оферта / Oferta / Offer</a></footer>
+
+<script>
+(function(){
+  var L=['ru','uz','tr','az','en'], cur='ru';
+  try{
+    var q=new URLSearchParams(location.search).get('lang');
+    var s=localStorage.getItem('milaisss_lang')||localStorage.getItem('lang');
+    cur = L.indexOf(q)>-1 ? q : (L.indexOf(s)>-1 ? s : cur);
+  }catch(e){}
+  function set(l){
+    cur=l;
+    document.documentElement.setAttribute('data-cur',l);
+    document.documentElement.lang=l;
+    var b=document.querySelectorAll('#langs button');
+    for(var i=0;i<b.length;i++) b[i].classList.toggle('on', b[i].getAttribute('data-l')===l);
+    var h=document.querySelector('[data-lang="'+l+'"] h1');
+    if(h) document.title=h.textContent+' — milaisss';
+    try{localStorage.setItem('lang',l);localStorage.setItem('milaisss_lang',l);}catch(e){}
+  }
+  document.getElementById('langs').addEventListener('click',function(e){
+    var l=e.target.getAttribute && e.target.getAttribute('data-l');
+    if(l) set(l);
+  });
+  set(cur);
+})();
+</script>
+</body>
+</html>
