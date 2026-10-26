@@ -861,6 +861,19 @@
   .hero-slide .hero-btn:active::after{ max-width:1.4em; opacity:1; margin-left:10px; }
   .hero-slide img{ object-position:50% 50%; }
   .hero-slide::after{ background:linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.18) 90px, rgba(0,0,0,0) 190px), linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.25) 45%, rgba(0,0,0,.12) 100%); }
+  .hero-slide.def img{ object-position:74% 28%; }
+  @media (max-width:767px){ .hero-slide.def::after{ background:linear-gradient(to right, rgba(8,8,8,.92) 0, rgba(8,8,8,.7) 12%, rgba(8,8,8,0) 30%), linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.18) 90px, rgba(0,0,0,0) 190px), linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.25) 45%, rgba(0,0,0,.12) 100%); } }
+  @media (min-width:768px){ .hero-slide.def img{ object-position:50% 10%; } }
+  .hero-slide.def .hero-photo-text h2{ font-family:var(--hero-font,'Playfair Display','Cormorant Garamond',serif); font-style:italic; font-weight:400; color:#f3e8d6; letter-spacing:0; line-height:1.18; font-size:clamp(26px,7.4vw,44px); max-width:14em; }
+  .hero-slide.def .hero-photo-text .tag{ color:#e6d6bb; }
+  .hero-feats{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px 20px; margin:2px 0 4px; color:#f3e8d6; font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; text-shadow:0 1px 10px rgba(0,0,0,.5); }
+  .hero-feats span{ display:inline-flex; align-items:center; gap:7px; }
+  .hero-feats svg{ width:17px; height:17px; flex-shrink:0; }
+  @media (min-width:900px){
+    .hero-slide.def{ justify-content:flex-start; }
+    .hero-slide.def .hero-photo-text{ align-items:flex-start; text-align:left; padding-left:max(48px,6vw); padding-right:0; width:min(560px,48%); }
+    .hero-slide.def .hero-feats{ justify-content:flex-start; flex-direction:column; gap:10px; }
+  }
   .hero-mark{ font-family:var(--logofont); font-weight:800; text-transform:none; font-size:clamp(52px,19vw,150px); line-height:1; letter-spacing:-.035em; white-space:nowrap; color:#fff; text-shadow:0 2px 28px rgba(0,0,0,.45); }
   .hero-mark span{ opacity:.65; font-style:normal; }
   .hero-dots{ bottom:max(36px, calc(28px + 1.5vh)); }
@@ -1278,7 +1291,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-145";
+  const CURRENT_VERSION = "20260908-146";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1802,7 +1815,7 @@ const STR = {
   ru: { search:"Найти", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
         removeWord:"Убрать", deliveryAgreed:"По согласованию", buyNow:"Заказать сразу", inCartWord:"В корзине", addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
         sizeLabel:"Размер", descLabel:"Описание", colorLabelWord:"Цвет", allCat:"Все", outOfStock:"Товар закончился",
-        empty:"Корзина пуста", emptyCatalogHint:"Загляни в каталог", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Смотреть", heroTitle:"Ходи по-своему", 
+        empty:"Корзина пуста", emptyCatalogHint:"Загляни в каталог", heroTag:"Искренний стиль · Духовные ценности",heroCta:"Смотреть", heroTitle:"Простая красота, изящная элегантность…", heroF1:"Качественные вещи", heroF2:"Свободный крой", heroF3:"С тобой каждый день", 
         goodsLabel:"Товары", deliveryLabel:"Доставка", totalLabel:"Итого", checkoutBtn:"Оформить заказ",
         allProducts:"Все товары", noProductsYet:"Товары скоро появятся 👟", noFav:"Пока нет избранных товаров 🤍",
         noOrders:"Заказов пока нет", noRating:"Нет оценок", stockRemain:"Осталось", inStockWord:"В наличии",
@@ -1813,7 +1826,7 @@ const STR = {
   uz: { search:"Qidirish", navHome:"Bosh sahifa", navFav:"Sevimlilar", navCart:"Savat", navProfile:"Profil",
         removeWord:"Olib tashlash", deliveryAgreed:"Kelishuv bo‘yicha", buyNow:"Hoziroq buyurtma", inCartWord:"Savatda", addToCart:"Savatga qo‘shish", cartTitle:"Savat", favTitle:"Sevimlilar", profileTitle:"Buyurtmalarim",
         sizeLabel:"O‘lcham", descLabel:"Tavsif", colorLabelWord:"Rang", allCat:"Barchasi", outOfStock:"Mahsulot tugagan",
-        empty:"Savat bo‘sh", emptyCatalogHint:"Katalogga nazar tashlang", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Ko‘rish", heroTitle:"Oʻz yoʻlingdan yur", 
+        empty:"Savat bo‘sh", emptyCatalogHint:"Katalogga nazar tashlang", heroTag:"Samimiy uslub · Ma’naviy qadriyatlar",heroCta:"Ko‘rish", heroTitle:"Oddiy go‘zallik, nafis nazokat…", heroF1:"Sifatli kiyim", heroF2:"Qulay kesim", heroF3:"Har kuni sen bilan", 
         goodsLabel:"Mahsulotlar", deliveryLabel:"Yetkazib berish", totalLabel:"Jami", checkoutBtn:"Buyurtma berish",
         allProducts:"Barcha mahsulotlar", noProductsYet:"Mahsulotlar tez orada 👟", noFav:"Sevimlilar hali yo‘q 🤍",
         noOrders:"Buyurtmalar yo‘q", noRating:"Baho yo‘q", stockRemain:"Qoldi", inStockWord:"Mavjud",
@@ -1824,7 +1837,7 @@ const STR = {
   tr: { search:"Ara", navHome:"Anasayfa", navFav:"Favoriler", navCart:"Sepet", navProfile:"Profil",
         removeWord:"Kaldır", deliveryAgreed:"Anlaşmaya göre", buyNow:"Hemen sipariş ver", inCartWord:"Sepette", addToCart:"Sepete ekle", cartTitle:"Sepet", favTitle:"Favoriler", profileTitle:"Siparişlerim",
         sizeLabel:"Beden", descLabel:"Açıklama", colorLabelWord:"Renk", allCat:"Tümü", outOfStock:"Ürün tükendi",
-        empty:"Sepet boş", emptyCatalogHint:"Kataloğa göz atın", heroTag:"Sneakers · Streetwear · Custom",heroCta:"İncele", heroTitle:"Kendi yolunda yürü", 
+        empty:"Sepet boş", emptyCatalogHint:"Kataloğa göz atın", heroTag:"Samimi stil · Manevi değerler",heroCta:"İncele", heroTitle:"Sade güzellik, zarif incelik…", heroF1:"Kaliteli parça", heroF2:"Rahat kesim", heroF3:"Her gün seninle", 
         goodsLabel:"Ürünler", deliveryLabel:"Teslimat", totalLabel:"Toplam", checkoutBtn:"Sipariş ver",
         allProducts:"Tüm ürünler", noProductsYet:"Ürünler yakında 👟", noFav:"Favori yok 🤍",
         noOrders:"Sipariş yok", noRating:"Puan yok", stockRemain:"Kaldı", inStockWord:"Stokta",
@@ -1835,7 +1848,7 @@ const STR = {
   az: { search:"Axtar", navHome:"Əsas", navFav:"Seçilmiş", navCart:"Səbət", navProfile:"Profil",
         removeWord:"Sil", deliveryAgreed:"Razılaşma ilə", buyNow:"Dərhal sifariş et", inCartWord:"Səbətdə", addToCart:"Səbətə əlavə et", cartTitle:"Səbət", favTitle:"Seçilmiş", profileTitle:"Sifarişlərim",
         sizeLabel:"Ölçü", descLabel:"Təsvir", colorLabelWord:"Rəng", allCat:"Hamısı", outOfStock:"Məhsul bitib",
-        empty:"Səbət boşdur", emptyCatalogHint:"Kataloqa nəzər salın", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Bax", heroTitle:"Öz yolunla get", 
+        empty:"Səbət boşdur", emptyCatalogHint:"Kataloqa nəzər salın", heroTag:"Səmimi stil · Mənəvi dəyərlər",heroCta:"Bax", heroTitle:"Sadə gözəllik, gözəl zəriflik…", heroF1:"Keyfiyyətli parça", heroF2:"Rahat kəsim", heroF3:"Hər gün sənin ilə", 
         goodsLabel:"Mallar", deliveryLabel:"Çatdırılma", totalLabel:"Cəmi", checkoutBtn:"Sifariş et",
         allProducts:"Bütün mallar", noProductsYet:"Mallar tezliklə 👟", noFav:"Seçilmiş yoxdur 🤍",
         noOrders:"Sifariş yoxdur", noRating:"Reytinq yoxdur", stockRemain:"Qalıb", inStockWord:"Mövcuddur",
@@ -1846,7 +1859,7 @@ const STR = {
   en: { search:"Search", navHome:"Home", navFav:"Favorites", navCart:"Cart", navProfile:"Profile",
         removeWord:"Remove", deliveryAgreed:"By agreement", buyNow:"Order now", inCartWord:"In cart", addToCart:"Add to cart", cartTitle:"Cart", favTitle:"Favorites", profileTitle:"My orders",
         sizeLabel:"Size", descLabel:"Description", colorLabelWord:"Color", allCat:"All", outOfStock:"Out of stock",
-        empty:"Cart is empty", emptyCatalogHint:"Take a look at the catalog", heroTag:"Sneakers · Streetwear · Custom",heroCta:"Shop", heroTitle:"Walk your own way", 
+        empty:"Cart is empty", emptyCatalogHint:"Take a look at the catalog", heroTag:"Sincere style · Spiritual values",heroCta:"Shop", heroTitle:"Simple beauty, graceful elegance…", heroF1:"Quality pieces", heroF2:"Comfortable cut", heroF3:"With you every day", 
         goodsLabel:"Items", deliveryLabel:"Delivery", totalLabel:"Total", checkoutBtn:"Checkout",
         allProducts:"All products", noProductsYet:"Products coming soon 👟", noFav:"No favorites yet 🤍",
         noOrders:"No orders yet", noRating:"No ratings", stockRemain:"Left", inStockWord:"In stock",
@@ -1967,14 +1980,22 @@ function heroImgFor(b){
   const pick = (isDesktopView() && b.mediaDesktop) ? b.mediaDesktop : (b.media || b.mediaDesktop || '');
   return (pick && !HERO_VIDEO_RE.test(pick)) ? pick : '';
 }
-const HERO_DEF_MOBILE = 'IMG_2832.jpeg', HERO_DEF_PC = 'milaisss%20office%20.jpeg';
+function heroFeatsHTML(){
+  const ic = [
+    '<path d="M12 7V6a2 2 0 1 1 2 2l-9.5 6.2A1.4 1.4 0 0 0 5.2 17h13.6a1.4 1.4 0 0 0 .7-2.6L12 9.5"/>',
+    '<path d="M11 20A7 7 0 0 1 4 13c0-6 7-9 16-9 0 9-3 16-9 16z"/><path d="M4 21c2-6 5-9 9-11"/>',
+    '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.800-8 11-8 11z"/>'
+  ];
+  return '<div class="hero-feats">' + ['heroF1','heroF2','heroF3'].map((k,i) => `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic[i]}</svg>${heroEsc(t(k))}</span>`).join('') + '</div>';
+}
+const HERO_DEF_MOBILE = 'banner.jpg', HERO_DEF_PC = 'banner.jpg';
 function renderHero(list){
   if (list) heroList = list;
   const hp = document.getElementById('heroPhoto'); if (!hp) return;
   const items = heroList.length ? heroList : [{ _default:true }];
   hp.querySelectorAll('.hero-slide').forEach(e => e.remove());
   heroSlides = items.map((b, i) => {
-    const el = document.createElement('div'); el.className = 'hero-slide';
+    const el = document.createElement('div'); el.className = 'hero-slide' + (b._default ? ' def' : '');
     const defImg = isDesktopView() ? HERO_DEF_PC : HERO_DEF_MOBILE;
     const img = b._default ? defImg : (heroImgFor(b) || defImg);
     const tag = b._default ? t('heroTag') : getHeroBannerText(b, 'tag');
@@ -1983,7 +2004,7 @@ function renderHero(list){
     const imgErr = "var f=+(this.dataset.f||0);this.dataset.f=f+1;if(f===0&&this.getAttribute('src')!=='" + defImg + "'){this.src='" + defImg + "';}else if(f<2){this.src='hero.jpg';}else{this.remove();}";
     let h = img ? `<div class="hero-blur"></div><img src="${heroEsc(img)}" alt="" draggable="false" decoding="async" onerror="${imgErr}"${i===0?'':' loading="lazy"'}>` : '';
     if (tag || title || btn){
-      h += '<div class="hero-photo-text">' + (b._default ? '<div class="hero-mark">mila<span>/</span>isss</div>' : '') + (tag ? `<div class="tag">${heroEsc(tag)}</div>` : '') + (title ? `<h2 class="display">${heroEsc(title)}</h2>` : '') +
+      h += '<div class="hero-photo-text">' + (tag ? `<div class="tag">${heroEsc(tag)}</div>` : '') + (title ? `<h2 class="display">${heroEsc(title)}</h2>` : '') + (b._default ? heroFeatsHTML() : '') +
            (btn ? `<button class="hero-btn" onclick="openShopAll()">${heroEsc(btn)}</button>` : '') + '</div>';
     }
     el.innerHTML = h;
