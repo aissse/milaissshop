@@ -1313,7 +1313,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-152";
+  const CURRENT_VERSION = "20260908-153";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2205,6 +2205,7 @@ function setGridView(v){
 
 function catIconFor(key, idx){
   if (key === 'Все') return categoryIcons['Все'] || '';
+  if (!_settingsReady && !categoryIcons[key]) return '';
   if (key === SALE_CAT) return categoryIcons[key] || SALE_ICON;
   return categoryIcons[key] || DEFAULT_CAT_ICONS[idx % DEFAULT_CAT_ICONS.length];
 }
@@ -2795,9 +2796,15 @@ function applySupportFont(fontName){
   if (screen) screen.classList.add('custom-font');
 }
 
+let _settingsReady = false;
 db.collection('settings').doc('shop').onSnapshot(doc => {
-  if (!doc.exists){ markLoaded('settings'); return; }
+  if (!doc.exists){ _settingsReady = true; markLoaded('settings'); return; }
   const data = doc.data();
+  try{ localStorage.setItem('milaisss_settings_cache', JSON.stringify(data)); }catch(e){}
+  applyShopSettings(data);
+}, err => { _settingsReady = true; renderCatPills(); });
+function applyShopSettings(data){
+  _settingsReady = true;
   // цвета и шрифты задаются только в коде (CSS в index.html); старые значения из админки игнорируем
   ['navColor','bgColor','categoryChipColor','orangeColor','pmrSelectedBg','langBtnBg','menuBtnBg','iconBorderColor','blackDownColor','blackDownFont','fontFamily','categoryFont','colorBorder','btsAddressColor','supportBgColor','supportCustBubble','supportCustText','supportAdminBubble','supportAdminText','supportFont'].forEach(k => { delete data[k]; });
   if (data.navColor) document.getElementById('bottomNav').style.background = data.navColor;
@@ -2853,7 +2860,7 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   shopContacts = data.shopContacts || '';
   renderFooterContacts();
   markLoaded('settings');
-});
+}
 
 /* ---------- liquid glass: бегунок нижней панели ---------- */
 let _glassX = null;
@@ -4713,6 +4720,10 @@ try{
   const _pc = JSON.parse(localStorage.getItem('milaisss_products_cache') || 'null');
   if (_pc && Array.isArray(_pc.p) && _pc.p.length && Date.now() - _pc.t < 7 * 86400000){ products = _pc.p; markLoaded('products'); }
 }catch(e){}
+try{
+  const _sc = JSON.parse(localStorage.getItem('milaisss_settings_cache') || 'null');
+  if (_sc && typeof _sc === 'object') applyShopSettings(_sc);
+}catch(e){ console.warn('settings cache', e); }
 applyLang();
 updateThemeButtons();
 renderRatingSummary();
