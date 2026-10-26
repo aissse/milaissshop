@@ -1053,7 +1053,7 @@
         </div>
         <div class="pay-card soon" onclick="showSoonPopup()">
           <span class="pay-card-logo">
-            <svg viewBox="0 0 120 40" width="52" height="22" role="img" aria-label="Click"><text x="60" y="29" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="30" letter-spacing="-1" fill="#00AEEF">click</text></svg>
+            <img src="click-logo.svg" alt="Click" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='click.svg';}else{this.outerHTML='&lt;svg viewBox=&quot;0 0 120 40&quot; width=&quot;52&quot; height=&quot;22&quot; role=&quot;img&quot; aria-label=&quot;Click&quot;&gt;&lt;text x=&quot;60&quot; y=&quot;29&quot; text-anchor=&quot;middle&quot; font-family=&quot;Arial,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;30&quot; letter-spacing=&quot;-1&quot; fill=&quot;#00AEEF&quot;&gt;click&lt;/text&gt;&lt;/svg&gt;';}">
           </span>
           <span class="pay-card-name">Click</span>
         </div>
@@ -1298,7 +1298,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-148";
+  const CURRENT_VERSION = "20260908-149";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
