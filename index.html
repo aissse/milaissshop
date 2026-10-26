@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" id="vpMeta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,9 +48,9 @@
   input, textarea, select{ color:var(--ink); -webkit-text-fill-color:var(--ink); caret-color:var(--orange); }
   input::placeholder, textarea::placeholder{ color:var(--muted); -webkit-text-fill-color:var(--muted); opacity:1; }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-  html, body{ -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; }
+  html, body{ -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; touch-action:manipulation; }
   body{ font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; }
-  .app{ width:100%; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; overflow-x:hidden; padding-bottom:84px; transition:opacity .35s ease; }
+  .app{ width:100%; margin:0 auto; min-height:100vh; background:transparent; position:relative; overflow-x:hidden; padding-bottom:84px; transition:opacity .35s ease; }
 
   .app-loader{ position:fixed; inset:0; background:var(--bg); z-index:500; display:flex; align-items:center; justify-content:center; }
   .app-loader-logo{ font-family:var(--logofont); font-size:38px; font-weight:800; letter-spacing:-.035em; color:var(--ink); animation:pulseLogo 1.4s ease-in-out infinite; }
@@ -884,9 +884,26 @@
     .site-header{ padding-left:32px; padding-right:28px; }
   }
   @media (min-width:1100px){ .hero-photo{ aspect-ratio:auto; max-height:none; } }
+
+  /* ===== фон-грани (пробный вариант). Чтобы вернуть простой фон — убери class="bg-facets" у <body> ===== */
+  body.bg-facets::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      linear-gradient(118deg, rgba(122,28,28,.075) 0%, rgba(122,28,28,0) 34%),
+      linear-gradient(242deg, rgba(18,18,18,.06) 0%, rgba(18,18,18,0) 38%),
+      linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 30%),
+      repeating-linear-gradient(45deg, rgba(122,28,28,.055) 0 1px, transparent 1px 46px),
+      repeating-linear-gradient(-45deg, rgba(18,18,18,.04) 0 1px, transparent 1px 46px); }
+  body.bg-facets .app{ position:relative; z-index:1; }
+  body.bg-facets .card{ background:var(--surface); box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 6px 18px rgba(30,20,20,.06); }
+  html[data-theme="dark"] body.bg-facets::before{ background:
+      linear-gradient(118deg, rgba(179,54,58,.16) 0%, rgba(179,54,58,0) 36%),
+      linear-gradient(242deg, rgba(255,255,255,.05) 0%, rgba(255,255,255,0) 40%),
+      repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 1px, transparent 1px 46px),
+      repeating-linear-gradient(-45deg, rgba(179,54,58,.07) 0 1px, transparent 1px 46px); }
+  html[data-theme="dark"] body.bg-facets .card{ background:var(--surface); box-shadow:0 6px 18px rgba(0,0,0,.35); }
 </style>
 </head>
-<body>
+<body class="bg-facets">
 <div class="app-loader" id="appLoader">
   <div class="app-loader-logo">mila<span class="slash">/</span>isss</div>
 </div>
@@ -1298,7 +1315,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20260908-149";
+  const CURRENT_VERSION = "20260908-151";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1995,7 +2012,7 @@ function heroFeatsHTML(){
   ];
   return '<div class="hero-feats">' + ['heroF1','heroF2','heroF3'].map((k,i) => `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic[i]}</svg>${heroEsc(t(k))}</span>`).join('') + '</div>';
 }
-const HERO_DEF_MOBILE = 'banner.jpg', HERO_DEF_PC = 'banner.jpg';
+const HERO_DEF_MOBILE = 'banner.jpg', HERO_DEF_PC = 'banner-pc.jpg';
 function renderHero(list){
   if (list) heroList = list;
   const hp = document.getElementById('heroPhoto'); if (!hp) return;
@@ -2118,7 +2135,19 @@ function showToast(msg){
 
 /* ---------- lightbox (swipe left/right + swipe down to close) ---------- */
 let lbImages = [];
+/* приближать можно только фото товара (lightbox); на остальном сайте щипок и двойной тап отключены */
+let _zoomOK = false;
+function setZoomAllowed(on){
+  _zoomOK = !!on;
+  const m = document.getElementById('vpMeta');
+  if (m) m.setAttribute('content', on ? 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover' : 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+}
+['gesturestart','gesturechange','gestureend'].forEach(ev => document.addEventListener(ev, e => { if (!_zoomOK) e.preventDefault(); }, { passive:false }));
+document.addEventListener('touchmove', e => { if (!_zoomOK && e.touches.length > 1) e.preventDefault(); }, { passive:false });
+let _lastTap = 0;
+document.addEventListener('touchend', e => { const n = Date.now(); if (!_zoomOK && n - _lastTap < 320 && e.target.closest && !e.target.closest('input,textarea,select')) e.preventDefault(); _lastTap = n; }, { passive:false });
 function openLightbox(images, startIdx){
+  setZoomAllowed(true);
   lbImages = images.filter(Boolean);
   if (lbImages.length === 0) return;
   const wrap = document.getElementById('lightboxCarousel');
@@ -2135,7 +2164,7 @@ function openLightbox(images, startIdx){
     if (dy > 60 && dx < 40){ closeLightbox(); startY = null; }
   };
 }
-function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); setZoomAllowed(false); }
 
 /* ---------- categories (dynamic from settings) ---------- */
 const SALE_CAT = 'Скидки';
@@ -4057,7 +4086,7 @@ function removeFromCart(idx){ cart.splice(idx, 1); updateCartBadge(); renderCart
 function renderCart(){
   const content = document.getElementById('cartContent');
   if (cart.length === 0){
-    content.innerHTML = `<div class="cart-empty">${t('empty')}<br>${t('emptyCatalogHint')} 👟</div>`;
+    content.innerHTML = `<div class="cart-empty">${t('empty')}</div>`;
     return;
   }
   let total = 0, totalOld = 0, discSet = new Set(), allDisc = true;
