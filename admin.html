@@ -137,9 +137,6 @@
 
 <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</div>
 
-
-<div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</div>
-
 <div id="lockScreen" class="lock-screen">
   <div class="logo">milaisss</div>
   <p class="sub">Вход для владельца</p>
@@ -584,23 +581,6 @@ const PRODUCT_TYPES = [
   { key: 'set', title: 'Товары: Двойка', sizeMode: 'select' }
 ];
 const TYPE_LABELS = { top: 'Верх', shoes: 'Обувь', bottom: 'Низ', set: 'Двойка' };
-/* ИКПУ (tasnif.soliq.uz) и код упаковки «1 шт / 1 пара» — нужны для фискального чека при онлайн-оплате */
-const IKPU_LIST = [
-  { code:'06401002004000000', pkg:'1506106', label:'Кроссовки (спортивная обувь)' },
-  { code:'06112001001000000', pkg:'1292466', label:'Двойка / спортивный костюм' },
-  { code:'06109001001000000', pkg:'1372884', label:'Футболка' },
-  { code:'06212001012000000', pkg:'1238867', label:'Худи' },
-  { code:'06212001019000000', pkg:'1190255', label:'Брюки / штаны спортивные мужские' },
-  { code:'06201003001000000', pkg:'1209790', label:'Куртка мужская (ткань)' },
-  { code:'06202001005000000', pkg:'1189957', label:'Куртка женская (ткань)' },
-  { code:'06101003001000000', pkg:'1097870', label:'Куртка трикотажная (флис)' },
-  { code:'04203001004000000', pkg:'1342785', label:'Кожаная куртка мужская' },
-  { code:'04203001005000000', pkg:'1370807', label:'Кожаная куртка женская' }
-];
-const IKPU_DEFAULT_BY_TYPE = { shoes:'06401002004000000', set:'06112001001000000', bottom:'06212001019000000' };
-function ikpuSelectHTML(suf){
-  return `<select id="f_ikpu_${suf}"><option value="">— не выбран —</option>${IKPU_LIST.map(x => `<option value="${x.code}">${x.label} · ${x.code}</option>`).join('')}</select>`;
-}
 const SIZE_OPTIONS = ['S','M','L','XL','XXL'];
 
 function sizeFieldHTML(suf, mode){
@@ -640,10 +620,6 @@ function productFormCardHTML(type){
       <label>Категория (для фильтров на сайте)</label>
       <select id="f_category_${suf}"><option value="Все">Все (по умолчанию)</option></select>
       <div class="hint">Если не выбрать категорию, товар автоматически попадёт в категорию «Все».</div>
-
-      <label>ИКПУ для чека (налоговый код товара)</label>
-      ${ikpuSelectHTML(suf)}
-      <div class="hint">Нужен для фискального чека при оплате через Click. Выбери, что это за товар. Если нужного вида нет в списке — напиши, добавим код.</div>
 
       <label>Цена (сум)</label>
       <input type="number" id="f_price_${suf}" placeholder="250000" oninput="updateDiscPreview('${suf}')">
@@ -711,7 +687,6 @@ function productFormCardHTML(type){
 
 function initProductFormCards(){
   document.getElementById('productFormCards').innerHTML = PRODUCT_TYPES.map(productFormCardHTML).join('');
-  PRODUCT_TYPES.forEach(t => { const el = document.getElementById(`f_ikpu_${t.key}`); if (el) el.value = IKPU_DEFAULT_BY_TYPE[t.key] || ''; });
 }
 initProductFormCards();
 
@@ -821,9 +796,6 @@ async function saveProduct(type){
   const price = Number(document.getElementById(`f_price_${suf}`).value) || 0;
   const image = document.getElementById(`f_image_${suf}`).value.trim();
   const discount = Math.min(90, Math.max(0, Math.round(Number(document.getElementById(`f_discount_${suf}`).value) || 0)));
-  const ikpu = (document.getElementById(`f_ikpu_${suf}`) || {}).value || '';
-  const ikpuItem = IKPU_LIST.find(x => x.code === ikpu);
-  const ikpuPackage = ikpuItem ? ikpuItem.pkg : '';
 
   const sizes = getCurrentSizeLabels(suf);
 
@@ -853,7 +825,7 @@ async function saveProduct(type){
 
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
-  const data = { name, nameTranslations, sub, category, price, discount, ikpu, ikpuPackage, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
+  const data = { name, nameTranslations, sub, category, price, discount, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
   const saveBtn = document.getElementById(`saveBtn_${suf}`);
   if (saveBtn.disabled) return;
   const isEdit = !!(editingId && editingType === suf);
@@ -906,7 +878,6 @@ function resetForm(type){
   document.getElementById(`f_price_${suf}`).value = '';
   document.getElementById(`f_discount_${suf}`).value = '';
   updateDiscPreview(suf);
-  document.getElementById(`f_ikpu_${suf}`).value = IKPU_DEFAULT_BY_TYPE[suf] || '';
   document.getElementById(`f_image_${suf}`).value = '';
   if (typeConfig.sizeMode === 'free'){ document.getElementById(`f_sizes_${suf}`).value = ''; }
   else { document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => cb.checked = false); }
@@ -940,7 +911,6 @@ function editProduct(id, p){
   document.getElementById(`f_price_${suf}`).value = p.price || '';
   document.getElementById(`f_discount_${suf}`).value = p.discount || '';
   updateDiscPreview(suf);
-  document.getElementById(`f_ikpu_${suf}`).value = IKPU_LIST.some(x => x.code === p.ikpu) ? p.ikpu : (p.ikpu ? '' : (IKPU_DEFAULT_BY_TYPE[suf] || ''));
   document.getElementById(`f_image_${suf}`).value = p.image || '';
 
   // поддержка старого формата sizes (массив объектов {size, stock}) — переносим как общий ориентир для новых цветов
@@ -1013,7 +983,7 @@ function loadProducts(){
         ${thumb}
         <div class="meta">
           <div class="name">${p.name}${p.hidden ? '<span class="hidden-badge">скрыт</span>' : ''}</div>
-          <div class="info">${TYPE_LABELS[p.type] || 'Обувь'} · ${Number(p.price||0).toLocaleString('ru-RU')} сум${p.discount ? ' · скидка −' + p.discount + '%' : ''} · в наличии: ${p.stock||0}${(p.ikpu || IKPU_DEFAULT_BY_TYPE[p.type || 'shoes']) ? '' : ' · <b style="color:#b3261e;">нет ИКПУ</b>'}</div>
+          <div class="info">${TYPE_LABELS[p.type] || 'Обувь'} · ${Number(p.price||0).toLocaleString('ru-RU')} сум${p.discount ? ' · скидка −' + p.discount + '%' : ''} · в наличии: ${p.stock||0}</div>
         </div>
         <div class="acts">
           <span class="vis">${p.hidden ? 'Показать' : 'Скрыть'}</span>
@@ -1095,7 +1065,7 @@ function loadReviews(){
       row.className = 'review-row';
       row.innerHTML = `
         <span class="rdel" data-id="${doc.id}">Удалить</span>
-        <div class="rmeta">${escH(r.productName || '')}${r.colorName ? ' · цвет: '+escH(r.colorName) : ''}${r.rating ? ' · ' + '★'.repeat(r.rating) : ''}</div>
+        <div class="rmeta">${escH(r.productName || '')}${r.colorName ? ' · цвет: '+escH(r.colorName) : ''}${r.rating ? ' · ' + '★'.repeat(Math.min(5, Math.max(0, Number(r.rating)|0))) : ''}</div>
         <div class="rmeta">${r.anonymous ? '👤 Аноним' : '👤 ' + escH(r.authorName || 'Покупатель')}</div>
         <div class="rtext">${escH(r.text)}</div>
         ${/^https?:\/\//i.test(r.photo||'') ? `<img src="${escH(r.photo)}" style="max-width:140px; border-radius:8px; margin-bottom:8px; display:block;">` : ''}
@@ -1570,7 +1540,7 @@ function loadSubscribers(){
     wrap.innerHTML = snap.docs.map(doc => {
       const d = doc.data();
       const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ru-RU') : '';
-      return `<div class="prod-row"><div class="meta"><div class="name">${d.email || ''}</div><div class="info">${date}</div></div><div class="acts"><span class="del" onclick="deleteSubscriber('${doc.id}')">Удал.</span></div></div>`;
+      return `<div class="prod-row"><div class="meta"><div class="name">${escH(d.email || '')}</div><div class="info">${date}</div></div><div class="acts"><span class="del" onclick="deleteSubscriber('${doc.id}')">Удал.</span></div></div>`;
     }).join('');
   }, () => {
     // Если orderBy требует индекс, который ещё не создан — покажем без сортировки.
@@ -1583,7 +1553,7 @@ function loadSubscribers(){
       wrap.innerHTML = snap.docs.map(doc => {
         const d = doc.data();
         const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ru-RU') : '';
-        return `<div class="prod-row"><div class="meta"><div class="name">${d.email || ''}</div><div class="info">${date}</div></div><div class="acts"><span class="del" onclick="deleteSubscriber('${doc.id}')">Удал.</span></div></div>`;
+        return `<div class="prod-row"><div class="meta"><div class="name">${escH(d.email || '')}</div><div class="info">${date}</div></div><div class="acts"><span class="del" onclick="deleteSubscriber('${doc.id}')">Удал.</span></div></div>`;
       }).join('');
     });
   });
@@ -1665,7 +1635,7 @@ function renderAnalytics(){
     <div class="prod-row">
       <div class="ph">👤</div>
       <div class="meta">
-        <div class="name">${b.name}</div>
+        <div class="name">${escH(b.name)}</div>
         <div class="info">${b.phone ? escH(b.phone) + ' · ' : ''}заказов: ${b.count} · ${b.total.toLocaleString('ru-RU')} сум</div>
       </div>
     </div>
@@ -1731,13 +1701,12 @@ function filterAndRenderOrders(){
     card.innerHTML = `
       <div class="who">${escH(o.customerName || 'Покупатель')}</div>
       <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
-      ${o.items.map(it => `<div class="oline">${escH(it.name)} (${escH(it.size)}, ${escH(it.colorName)}) × ${Number(it.qty)||0} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
+      ${(o.items||[]).map(it => `<div class="oline">${escH(it.name)} (${escH(it.size)}, ${escH(it.colorName)}) × ${Number(it.qty)||0} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
       <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
       ${o.phone ? `<div class="oline">📞 ${escH(o.phone)}</div>` : ''}
       ${o.btsBranch ? `<div class="oline">📍 ${escH(o.btsBranch)}</div>` : ''}
       ${o.note ? `<div class="oline">📝 ${escH(o.note)}</div>` : ''}
       ${o.paymentMethod ? `<div class="oline" style="font-weight:700;">💰 Способ оплаты: ${escH(o.paymentMethod)}</div>` : ''}
-      ${o.paid === true ? `<div class="oline" style="font-weight:700; color:#1f7a4d;">✅ Оплачен онлайн${o.paidAt ? ' · ' + (o.paidAt.toDate ? o.paidAt.toDate() : new Date(o.paidAt)).toLocaleString('ru-RU') : ''}${o.clickTransId ? ' · Click №' + escH(o.clickTransId) : ''}${o.uzumTransId ? ' · Uzum №' + escH(o.uzumTransId) : ''}</div>` : (o.paymentStatus === 'REVERSED' ? `<div class="oline" style="font-weight:700; color:#b3261e;">↩️ Оплата отменена банком</div>` : '')}
       <select class="status-select">
         ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
       </select>
