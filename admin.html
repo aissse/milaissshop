@@ -1498,7 +1498,7 @@ function saveSocialLink(key, value){
   saveSetting('socialLinks', socialLinks);
 }
 
-const STATUS_OPTIONS = ['Проверяется оплата','Принято','Собирается','В пути','В ПВЗ','Доставлен'];
+const STATUS_OPTIONS = ['Проверяется оплата','Принято','Собирается','В пути','В ПВЗ','Доставлен','Отменён'];
 
 /* ---------- уведомления клиентам в Telegram (от бота магазина) ---------- */
 async function tgSend(customerId, text){
@@ -1517,7 +1517,8 @@ const STATUS_TXT = {
   'Собирается':{ ru:'Собирается', uz:'Yig‘ilmoqda', tr:'Hazırlanıyor', az:'Yığılır', en:'Being packed' },
   'В пути':{ ru:'В пути', uz:'Yo‘lda', tr:'Yolda', az:'Yoldadır', en:'On the way' },
   'В ПВЗ':{ ru:'В пункте выдачи', uz:'Topshirish punktida', tr:'Teslim noktasında', az:'Çatdırılma məntəqəsində', en:'At the pickup point' },
-  'Доставлен':{ ru:'Доставлен', uz:'Yetkazildi', tr:'Teslim edildi', az:'Çatdırıldı', en:'Delivered' }
+  'Доставлен':{ ru:'Доставлен', uz:'Yetkazildi', tr:'Teslim edildi', az:'Çatdırıldı', en:'Delivered' },
+  'Отменён':{ ru:'Отменён', uz:'Bekor qilindi', tr:'İptal edildi', az:'Ləğv edildi', en:'Cancelled' }
 };
 const STATUS_HEAD = {
   ru:{ title:'📦 Статус вашего заказа обновлён', st:'Статус', pickup:'Заберите заказ в пункте БТС', thanks:'Спасибо за покупку! 🤍' },
@@ -1644,6 +1645,7 @@ function renderAnalytics(){
   if (fromTs) orders = orders.filter(o => (o.createdAt||0) >= fromTs);
   if (toTs) orders = orders.filter(o => (o.createdAt||0) <= toTs);
 
+  orders = orders.filter(o => o.status !== 'Отменён');
   const revenue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
   const buyersMap = {};
@@ -1742,7 +1744,7 @@ function filterAndRenderOrders(){
     card.querySelector('.status-select').onchange = async (e) => {
       const st = e.target.value;
       const upd = { status: st };
-      if (st !== 'Проверяется оплата' && !o.unitCosts){
+      if (st !== 'Проверяется оплата' && st !== 'Отменён' && !o.unitCosts){
         const uc = (o.items || []).map(it => unitCostFromTable(it.productId));
         if (uc.some(x => x != null)) upd.unitCosts = uc.map(x => x == null ? null : x);
       }
@@ -1885,7 +1887,7 @@ function accSalesRows(){
   const { fromTs, toTs } = accRange();
   const rows = [];
   allOrders.forEach(o => {
-    if (o.status === NOT_SALE_STATUS) return;
+    if (o.status === NOT_SALE_STATUS || o.status === 'Отменён') return;
     const ts = o.createdAt || 0;
     if (fromTs && ts < fromTs) return;
     if (toTs && ts > toTs) return;
