@@ -404,6 +404,7 @@
   .pay-card.soon > *{ opacity:.7; }
   .trk-pay{ display:block; width:100%; margin:12px 0 4px; padding:12px 14px; border:0; border-radius:12px; background:var(--ink); color:var(--surface, #fff); font:inherit; font-weight:700; font-size:14px; cursor:pointer; }
   .trk-pay:active{ opacity:.85; }
+  .trk-expired{ margin:12px 0 4px; padding:11px 14px; border-radius:12px; background:rgba(192,57,43,.1); color:#c0392b; font-size:13px; font-weight:600; line-height:1.35; }
   .pay-card-logo{ width:64px; height:36px; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--line); border-radius:8px; padding:5px 8px; box-sizing:border-box; }
   .pay-card-logo img, .pay-card-logo svg{ max-width:100%; max-height:100%; object-fit:contain; }
   .pay-card-name{ font-size:13px; font-weight:700; color:var(--ink); }
@@ -1329,7 +1330,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261030-160";
+  const CURRENT_VERSION = "20261030-161";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1967,11 +1968,11 @@ const STR_PAY = {
 };
 Object.keys(STR_PAY).forEach(l => Object.assign(STR[l], STR_PAY[l]));
 const STR_PAY2 = {
-  ru:{ paySuccessTitle:"Платёж успешно выполнен!", payChecking:"Проверяем оплату…" },
-  uz:{ paySuccessTitle:"To‘lov muvaffaqiyatli amalga oshirildi!", payChecking:"To‘lov tekshirilmoqda…" },
-  tr:{ paySuccessTitle:"Ödeme başarıyla tamamlandı!", payChecking:"Ödeme kontrol ediliyor…" },
-  az:{ paySuccessTitle:"Ödəniş uğurla tamamlandı!", payChecking:"Ödəniş yoxlanılır…" },
-  en:{ paySuccessTitle:"Payment successful!", payChecking:"Checking your payment…" }
+  ru:{ paySuccessTitle:"Платёж успешно выполнен!", payChecking:"Проверяем оплату…", statusCancelled:"Отменён", payExpired:"Время на оплату (15 минут) истекло — заказ отменён, товар вернулся в наличие. Оформите заказ заново." },
+  uz:{ paySuccessTitle:"To‘lov muvaffaqiyatli amalga oshirildi!", payChecking:"To‘lov tekshirilmoqda…", statusCancelled:"Bekor qilindi", payExpired:"To‘lov vaqti (15 daqiqa) tugadi — buyurtma bekor qilindi, mahsulot omborga qaytdi. Buyurtmani qayta rasmiylashtiring." },
+  tr:{ paySuccessTitle:"Ödeme başarıyla tamamlandı!", payChecking:"Ödeme kontrol ediliyor…", statusCancelled:"İptal edildi", payExpired:"Ödeme süresi (15 dakika) doldu — sipariş iptal edildi, ürün stoğa geri döndü. Lütfen siparişi yeniden verin." },
+  az:{ paySuccessTitle:"Ödəniş uğurla tamamlandı!", payChecking:"Ödəniş yoxlanılır…", statusCancelled:"Ləğv edildi", payExpired:"Ödəniş vaxtı (15 dəqiqə) bitdi — sifariş ləğv edildi, məhsul yenidən stokdadır. Sifarişi yenidən verin." },
+  en:{ paySuccessTitle:"Payment successful!", payChecking:"Checking your payment…", statusCancelled:"Cancelled", payExpired:"The 15-minute payment window has passed — the order was cancelled and the items are back in stock. Please place the order again." }
 };
 Object.keys(STR_PAY2).forEach(l => Object.assign(STR[l], STR_PAY2[l]));
 
@@ -4288,11 +4289,23 @@ function goToClickPay(orderId, total){
 function payOrderAgain(orderId){
   const o = (_lastOrders || []).find(x => x.id === orderId);
   if (!o || o.paid) return;
+  if (payLeftMs(o) <= 0){ showToast(t('payExpired')); return; }
   goToClickPay(o.id, o.total);
 }
+const PAY_WINDOW_MS = 15 * 60 * 1000; // сколько минут клиенту даётся на оплату, потом заказ отменяется, товар возвращается в наличие
+function payLeftMs(o){ return (Number(o && o.createdAt) || 0) + PAY_WINDOW_MS - Date.now(); }
+function fmtLeft(ms){ const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 function isUnpaidOnline(o){
-  return o && o.status === 'Проверяется оплата' && o.paid !== true && (o.paymentMethod === 'Click' || o.paymentMethod === 'Карта');
+  return o && o.status === 'Проверяется оплата' && o.paid !== true && (o.paymentMethod === 'Click' || o.paymentMethod === 'Карта') && payLeftMs(o) > 0;
 }
+// обратный отсчёт на кнопке «Оплатить»; когда время вышло — кнопка заменяется пояснением
+setInterval(() => {
+  document.querySelectorAll('.trk-pay[data-exp]').forEach(b => {
+    const left = Number(b.dataset.exp) - Date.now();
+    if (left <= 0){ const n = document.createElement('div'); n.className = 'trk-expired'; n.textContent = t('payExpired'); b.replaceWith(n); }
+    else { const c = b.querySelector('.cd'); if (c) c.textContent = fmtLeft(left); }
+  });
+}, 1000);
 // возврат со страницы Click: убираем ?paid= из адреса, ждём подтверждения оплаты от сервера и показываем эффект «Платёж успешно»
 (function(){
   try{
@@ -4631,7 +4644,7 @@ function closePaymentModal(goProfile){
 
 /* ---------- profile / orders / reviews ---------- */
 function translateStatus(status){
-  const map = { 'Проверяется оплата':'statusPaying', 'Собирается':'statusPacking', 'В пути':'statusShipping', 'Доставлен':'statusDelivered', 'Принято':'trkAccepted', 'В ПВЗ':'trkPickup' };
+  const map = { 'Проверяется оплата':'statusPaying', 'Собирается':'statusPacking', 'В пути':'statusShipping', 'Доставлен':'statusDelivered', 'Принято':'trkAccepted', 'В ПВЗ':'trkPickup', 'Отменён':'statusCancelled' };
   return map[status] ? t(map[status]) : status;
 }
 
@@ -4681,8 +4694,8 @@ function renderStatusList(orders){
       }).join('')}
       ${o.status === 'Доставлен' ? (o.items||[]).map((it, ii) => reviewFormHTML(o, it, ii)).join('') : ''}
       <div class="trk-state"><span>${new Date(o.createdAt).toLocaleDateString('ru-RU')}</span><b>${translateStatus(o.status)}</b></div>
-      ${isUnpaidOnline(o) ? `<button class="trk-pay" type="button" onclick="payOrderAgain('${String(o.id).replace(/[^A-Za-z0-9_-]/g,'')}')">${t('payNow')} · ${fmt(o.total)}</button>` : ''}
-      ${trackHTML(o.status)}
+      ${isUnpaidOnline(o) ? `<button class="trk-pay" type="button" data-exp="${(Number(o.createdAt)||0) + PAY_WINDOW_MS}" onclick="payOrderAgain('${String(o.id).replace(/[^A-Za-z0-9_-]/g,'')}')">${t('payNow')} · ${fmt(o.total)} · <span class="cd">${fmtLeft(payLeftMs(o))}</span></button>` : ''}
+      ${o.status === 'Отменён' ? `<div class="trk-expired">${t('payExpired')}</div>` : trackHTML(o.status)}
     </div>`).join('');
 }
 function renderMyReviews(){
