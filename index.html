@@ -1329,7 +1329,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261030-159";
+  const CURRENT_VERSION = "20261030-160";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1966,6 +1966,14 @@ const STR_PAY = {
        cardClickNote:"After checkout, Click’s secure page opens: you enter your Uzcard or Humo card and the SMS code there. The site never sees your card details." }
 };
 Object.keys(STR_PAY).forEach(l => Object.assign(STR[l], STR_PAY[l]));
+const STR_PAY2 = {
+  ru:{ paySuccessTitle:"Платёж успешно выполнен!", payChecking:"Проверяем оплату…" },
+  uz:{ paySuccessTitle:"To‘lov muvaffaqiyatli amalga oshirildi!", payChecking:"To‘lov tekshirilmoqda…" },
+  tr:{ paySuccessTitle:"Ödeme başarıyla tamamlandı!", payChecking:"Ödeme kontrol ediliyor…" },
+  az:{ paySuccessTitle:"Ödəniş uğurla tamamlandı!", payChecking:"Ödəniş yoxlanılır…" },
+  en:{ paySuccessTitle:"Payment successful!", payChecking:"Checking your payment…" }
+};
+Object.keys(STR_PAY2).forEach(l => Object.assign(STR[l], STR_PAY2[l]));
 
 /* ---------- тема: светлая / тёмная ---------- */
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
@@ -4285,14 +4293,28 @@ function payOrderAgain(orderId){
 function isUnpaidOnline(o){
   return o && o.status === 'Проверяется оплата' && o.paid !== true && (o.paymentMethod === 'Click' || o.paymentMethod === 'Карта');
 }
-// возврат со страницы Click: убираем ?paid= из адреса и показываем сообщение
+// возврат со страницы Click: убираем ?paid= из адреса, ждём подтверждения оплаты от сервера и показываем эффект «Платёж успешно»
 (function(){
   try{
     const q = new URLSearchParams(location.search);
-    if (q.get('paid')){
-      history.replaceState(null, '', location.pathname);
-      setTimeout(() => showToast(t('payReturn')), 900);
-    }
+    const oid = q.get('paid');
+    if (!oid) return;
+    history.replaceState(null, '', location.pathname);
+    let shown = false;
+    const showOk = () => { if (shown) return; shown = true; showSuccessAnimation(() => { showScreen('home'); try{ afterOrderNotice(); }catch(e){} }, 'paySuccessTitle', 'payChecking'); };
+    authReady.then(() => {
+      let tries = 0;
+      const check = () => {
+        if (shown) return;
+        db.collection('orders').doc(oid).get().then(d => {
+          const o = d.exists ? d.data() : null;
+          if (o && o.paid === true){ showOk(); return; }
+          if (++tries < 10){ setTimeout(check, 1500); }
+          else { showToast(t('payReturn')); }
+        }).catch(() => { if (++tries < 10) setTimeout(check, 1500); else showToast(t('payReturn')); });
+      };
+      setTimeout(check, 600);
+    });
   }catch(e){}
 })();
 // Apple Pay — только на устройствах Apple (iOS/Mac), Google Pay — на Android и остальных
@@ -4529,15 +4551,15 @@ function playWhoosh(flyStartSec){
   } catch(e){}
 }
 
-function showSuccessAnimation(onDone){
+function showSuccessAnimation(onDone, doneKey, loadKey){
   const overlay = document.getElementById('successOverlay');
   const glow = document.getElementById('successGlow');
   const core = document.getElementById('successCore');
   const loading = document.getElementById('successLoading');
   const done = document.getElementById('successDone');
   const tick = document.getElementById('successTick');
-  document.getElementById('successLoadingText').textContent = t('confirmingText');
-  document.getElementById('successDoneText').textContent = t('orderSuccessTitle');
+  document.getElementById('successLoadingText').textContent = t(loadKey || 'confirmingText');
+  document.getElementById('successDoneText').textContent = t(doneKey || 'orderSuccessTitle');
 
   const D = 2200;          // общая длительность, мс
   const PEAK_END = 0.52;   // до этого момента сияние внизу набирает яркость, потом — полёт вверх
