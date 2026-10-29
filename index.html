@@ -31,16 +31,20 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"milaisss","url":"https://milaisss.com/","logo":"https://milaisss.com/favicon-192x192.png","image":"https://milaisss.com/og.png","areaServed":"UZ","description":"Кроссовки и одежда с доставкой по Узбекистану"}</script>
 <meta property="og:url" content="https://milaisss.com/">
 <meta name="google-site-verification" content="QLeo5HznJQ2owHKI2oFHkqQVdqxb7G_StqUlit7m_HU" />
+<link rel="preload" as="image" href="banner.webp" media="(max-width:767px)" fetchpriority="high">
+<link rel="preload" as="image" href="banner-pc.webp" media="(min-width:768px)" fetchpriority="high">
+<script>setTimeout(function(){try{var r=document.getElementById("appRoot"),l=document.getElementById("appLoader");if(r&&r.style.opacity!=="1"){r.style.opacity="1";if(l)l.style.display="none";}}catch(e){}},4500);</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&display=swap" rel="stylesheet"></noscript>
 <style>
   :root{
     --bg:#F6F5F2; --ink:#121212; --stone:#ECE9E3; --line:#E1DDD4;
-    --orange:#7A1C1C; --orange-dark:#5F1515; --muted:#857F75; --navbg:#121212;
+    --orange:#7A1C1C; --orange-dark:#5F1515; --muted:#6B655B; --navbg:#121212;
     --logofont:'Inter','Helvetica Neue',Arial,sans-serif; --colordot-border:#121212;
     --icon-cat:#5A1414; --surface:#FBFAF8; --text-soft:#555; --on-ink:#ffffff;
   }
@@ -50,7 +54,7 @@
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
   html, body{ -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; touch-action:manipulation; }
   body{ font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; }
-  .app{ width:100%; margin:0 auto; min-height:100vh; background:transparent; position:relative; overflow-x:hidden; padding-bottom:84px; transition:opacity .35s ease; }
+  .app{ width:100%; margin:0 auto; min-height:100vh; background:transparent; position:relative; overflow-x:hidden; padding-bottom:calc(96px + env(safe-area-inset-bottom)); transition:opacity .35s ease; }
 
   .app-loader{ position:fixed; inset:0; background:var(--bg); z-index:500; display:flex; align-items:center; justify-content:center; }
   .app-loader-logo{ font-family:var(--logofont); font-size:38px; font-weight:800; letter-spacing:-.035em; color:var(--ink); animation:pulseLogo 1.4s ease-in-out infinite; }
@@ -397,9 +401,7 @@
   .pay-card{ border:1.5px solid var(--line); border-radius:14px; padding:14px; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:14px; cursor:pointer; min-height:82px; text-align:left; transition:border-color .2s ease, background .2s ease; }
   .pay-card.selected{ border-color:var(--ink); border-width:2px; background:var(--pmr-selected-bg, var(--stone)); }
   .pay-card:active{ border-color:var(--ink); }
-  .pay-card.soon{ opacity:.7; }
-  .trk-pay{ display:block; width:100%; margin:12px 0 4px; padding:12px 14px; border:0; border-radius:12px; background:var(--ink); color:var(--surface, #fff); font:inherit; font-weight:700; font-size:14px; cursor:pointer; }
-  .trk-pay:active{ opacity:.85; }
+  .pay-card.soon > *{ opacity:.7; }
   .pay-card-logo{ width:64px; height:36px; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--line); border-radius:8px; padding:5px 8px; box-sizing:border-box; }
   .pay-card-logo img, .pay-card-logo svg{ max-width:100%; max-height:100%; object-fit:contain; }
   .pay-card-name{ font-size:13px; font-weight:700; color:var(--ink); }
@@ -780,7 +782,7 @@
     .bottomnav{ bottom:8px; padding:4px 8px; }
     .navitem{ padding:4px 12px; }
     .navitem span{ font-size:9px; }
-    .app{ padding-bottom:64px; }
+    .app{ padding-bottom:calc(96px + env(safe-area-inset-bottom)); }
   }
   .field-bad{ border-color:var(--orange) !important; box-shadow:0 0 0 3px rgba(122,28,28,.14); }
   html[data-theme="dark"] .field-bad{ box-shadow:0 0 0 3px rgba(179,54,58,.25); }
@@ -853,7 +855,7 @@
   .hero-slide .hero-btn::before{ content:""; position:absolute; inset:0; z-index:-1; background:#fff; border-radius:inherit; transform:scaleX(0); transform-origin:left center; transition:transform .55s cubic-bezier(.22,1,.36,1); }
   .hero-slide .hero-btn::after{ content:"→" !important; display:inline-block; max-width:0; opacity:0; overflow:hidden; margin-left:0; letter-spacing:0; transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .45s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
   @media (hover:hover){
-    .hero-slide .hero-btn:hover{ color:#121212; border-color:#fff; padding:13px 24px 13px 30px; }
+    .hero-slide .hero-btn:hover{ color:#121212; border-color:#fff; }
     .hero-slide .hero-btn:hover::before{ transform:scaleX(1); }
     .hero-slide .hero-btn:hover::after{ max-width:1.4em; opacity:1; margin-left:10px; }
   }
@@ -886,22 +888,32 @@
   }
   @media (min-width:1100px){ .hero-photo{ aspect-ratio:auto; max-height:none; } }
 
-  /* ===== фон-грани (пробный вариант). Чтобы вернуть простой фон — убери class="bg-facets" у <body> ===== */
+  /* ===== фон «бутик»: тёплая стена, мягкие складки портьеры, пятна света от трековых светильников.
+     Чтобы вернуть простой фон — убери class="bg-facets" у <body> ===== */
+  body.bg-facets{ background:#EDE6DA; }
   body.bg-facets::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
-      linear-gradient(118deg, rgba(122,28,28,.075) 0%, rgba(122,28,28,0) 34%),
-      linear-gradient(242deg, rgba(18,18,18,.06) 0%, rgba(18,18,18,0) 38%),
-      linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 30%),
-      repeating-linear-gradient(45deg, rgba(122,28,28,.055) 0 1px, transparent 1px 46px),
-      repeating-linear-gradient(-45deg, rgba(18,18,18,.04) 0 1px, transparent 1px 46px); }
+      radial-gradient(ellipse 46% 34% at 14% -4%, rgba(255,236,200,.85), rgba(255,236,200,0) 70%),
+      radial-gradient(ellipse 46% 34% at 50% -6%, rgba(255,236,200,.70), rgba(255,236,200,0) 70%),
+      radial-gradient(ellipse 46% 34% at 86% -4%, rgba(255,236,200,.85), rgba(255,236,200,0) 70%),
+      linear-gradient(180deg, rgba(0,0,0,0) 62%, rgba(70,48,30,.20) 100%),
+      repeating-linear-gradient(90deg, rgba(120,92,62,.075) 0, rgba(255,250,240,.20) 34px, rgba(120,92,62,.075) 68px, rgba(120,92,62,.11) 84px, rgba(120,92,62,.075) 100px),
+      linear-gradient(180deg, #F1EBE0 0%, #E6DDCD 100%); }
+  body.bg-facets::after{ content:""; position:fixed; left:0; right:0; top:0; height:2px; z-index:0; pointer-events:none;
+    background:linear-gradient(90deg, rgba(190,150,80,0), rgba(190,150,80,.55) 20%, rgba(190,150,80,.55) 80%, rgba(190,150,80,0)); }
   body.bg-facets .app{ position:relative; z-index:1; }
-  body.bg-facets .card{ background:var(--surface); box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 6px 18px rgba(30,20,20,.06); }
+  body.bg-facets .card{ background:var(--surface); box-shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 8px 22px rgba(70,48,30,.10); }
+  body.bg-facets .pay-card, body.bg-facets .cart-item, body.bg-facets .pmr-wrap{ background:var(--surface); }
+  html[data-theme="dark"] body.bg-facets{ background:#17120e; }
   html[data-theme="dark"] body.bg-facets::before{ background:
-      linear-gradient(118deg, rgba(179,54,58,.16) 0%, rgba(179,54,58,0) 36%),
-      linear-gradient(242deg, rgba(255,255,255,.05) 0%, rgba(255,255,255,0) 40%),
-      repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 1px, transparent 1px 46px),
-      repeating-linear-gradient(-45deg, rgba(179,54,58,.07) 0 1px, transparent 1px 46px); }
-  html[data-theme="dark"] body.bg-facets .card{ background:var(--surface); box-shadow:0 6px 18px rgba(0,0,0,.35); }
+      radial-gradient(ellipse 44% 32% at 14% -4%, rgba(255,205,140,.26), rgba(255,205,140,0) 70%),
+      radial-gradient(ellipse 44% 32% at 50% -6%, rgba(255,205,140,.20), rgba(255,205,140,0) 70%),
+      radial-gradient(ellipse 44% 32% at 86% -4%, rgba(255,205,140,.26), rgba(255,205,140,0) 70%),
+      linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,.40) 100%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0, rgba(190,160,120,.07) 34px, rgba(0,0,0,.22) 68px, rgba(0,0,0,.30) 84px, rgba(0,0,0,.22) 100px),
+      linear-gradient(180deg, #2a2119 0%, #14100c 100%); }
+  html[data-theme="dark"] body.bg-facets::after{ background:linear-gradient(90deg, rgba(210,170,100,0), rgba(210,170,100,.5) 20%, rgba(210,170,100,.5) 80%, rgba(210,170,100,0)); }
+  html[data-theme="dark"] body.bg-facets .card{ background:var(--surface); box-shadow:0 8px 22px rgba(0,0,0,.45); }
 </style>
 </head>
 <body class="bg-facets">
@@ -917,13 +929,13 @@
       <div class="sh-actions">
         <button type="button" class="sh-btn" id="searchBtn" onclick="openSearch()" aria-label="Search" data-i18n-aria="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
         <div class="sh-btn sh-lang" id="langBtn" onclick="toggleLangMenu(event)" role="button" aria-label="Language">
-          <span id="langFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;"></span><span style="font-size:10px; line-height:1; display:inline-flex; align-items:center;">⌄</span>
+          <span id="langFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;" loading="lazy" decoding="async"></span><span style="font-size:10px; line-height:1; display:inline-flex; align-items:center;">⌄</span>
           <div class="lang-menu" id="langMenu" onclick="event.stopPropagation()">
-          <div onclick="setLang('ru')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/ru.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Русский</div>
-          <div onclick="setLang('uz')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Oʻzbek</div>
-          <div onclick="setLang('tr')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/tr.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Türkçe</div>
-          <div onclick="setLang('az')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/az.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> Azərbaycan</div>
-          <div onclick="setLang('en')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;"> English</div>
+          <div onclick="setLang('ru')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/ru.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;" loading="lazy" decoding="async"> Русский</div>
+          <div onclick="setLang('uz')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;" loading="lazy" decoding="async"> Oʻzbek</div>
+          <div onclick="setLang('tr')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/tr.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;" loading="lazy" decoding="async"> Türkçe</div>
+          <div onclick="setLang('az')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/az.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;" loading="lazy" decoding="async"> Azərbaycan</div>
+          <div onclick="setLang('en')" style="display:flex; align-items:center; gap:8px;"><img src="https://flagcdn.com/w40/gb.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px;" loading="lazy" decoding="async"> English</div>
         </div>
         </div>
         <button type="button" class="sh-btn" id="cartBtn" onclick="showScreen('cart')" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="cart-badge js-cart-count" id="cartCount">0</span></button>
@@ -1069,7 +1081,7 @@
           <span class="pay-card-logo"><img src="uzum-bank-icon-logo.svg" alt="Uzum Bank"></span>
           <span class="pay-card-name">Uzum Bank</span>
         </div>
-        <div class="pay-card" data-pay="click" onclick="selectPayMethod('click')">
+        <div class="pay-card soon" onclick="showSoonPopup()">
           <span class="pay-card-logo">
             <img src="click-logo.svg" alt="Click" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='click.svg';}else{this.outerHTML='&lt;svg viewBox=&quot;0 0 120 40&quot; width=&quot;52&quot; height=&quot;22&quot; role=&quot;img&quot; aria-label=&quot;Click&quot;&gt;&lt;text x=&quot;60&quot; y=&quot;29&quot; text-anchor=&quot;middle&quot; font-family=&quot;Arial,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;30&quot; letter-spacing=&quot;-1&quot; fill=&quot;#00AEEF&quot;&gt;click&lt;/text&gt;&lt;/svg&gt;';}">
           </span>
@@ -1090,7 +1102,7 @@
       </div>
 
       <div class="pmr-wrap" id="pmrwrap-card" style="margin-top:12px; border:1px solid var(--line); border-radius:16px; overflow:hidden;">
-        <div class="pmr" data-pay="card" onclick="selectPayMethod('card')">
+        <div class="pmr" onclick="toggleCardPreview()">
           <span class="pmr-radio"></span><span class="pmr-label" data-i18n="cardLabel">Карта</span>
           <span class="pmr-cards">
             <img src="Logo_white.png" alt="Uzcard" style="width:34px; height:21px; object-fit:contain; border-radius:4px; background:#1a1a6c; padding:2px; box-sizing:border-box;" onerror="this.style.display='none'">
@@ -1098,7 +1110,12 @@
           </span>
         </div>
         <div class="pmr-details">
-          <div class="pmr-soon-note" data-i18n="cardClickNote">После оформления откроется защищённая страница Click: там вы введёте карту Uzcard или Humo и код из SMS. Сайт данные карты не видит.</div>
+          <input type="text" placeholder="Номер карты" disabled>
+          <div class="row" style="display:flex; gap:8px;">
+            <input type="text" placeholder="ММ/ГГ" disabled>
+            <input type="text" placeholder="Секретный код" disabled>
+          </div>
+          <div class="pmr-soon-note" data-i18n="cardSoonNote">Оплата картой онлайн в разработке — скоро будет доступна</div>
         </div>
       </div>
     </div>
@@ -1271,7 +1288,7 @@
     <label class="block-label" data-i18n="regPhoneLabel">Номер телефона</label>
     <div style="display:flex; gap:8px; margin-bottom:6px;">
       <div class="icon-btn" id="regCountryBtn" style="width:auto; padding:0 10px; gap:5px; background:var(--surface); color:var(--ink);" onclick="toggleRegCountryMenu(event)">
-        <span id="regCountryFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;"></span>
+        <span id="regCountryFlag" style="display:inline-flex; align-items:center;"><img src="https://flagcdn.com/w40/uz.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;" loading="lazy" decoding="async"></span>
         <span id="regCountryCodeLabel" style="font-size:13px; font-weight:700; white-space:nowrap;">+998</span>
         <span style="font-size:10px; line-height:1;">⌄</span>
         <div class="country-menu" id="regCountryMenu"></div>
@@ -1309,7 +1326,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261030-155";
+  const CURRENT_VERSION = "20260908-157";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1468,7 +1485,7 @@ function initRegCountryMenu(){
   const wrap = document.getElementById('regCountryMenu');
   if (!wrap) return;
   wrap.innerHTML = PHONE_COUNTRIES.map(([code, calling]) => `
-    <div class="country-opt" onclick="setRegCountry('${code}','${calling}')"><img src="https://flagcdn.com/w40/${code}.png"> +${calling}</div>
+    <div class="country-opt" onclick="setRegCountry('${code}','${calling}')"><img src="https://flagcdn.com/w40/${code}.png" loading="lazy" decoding="async"> +${calling}</div>
   `).join('');
 }
 initRegCountryMenu();
@@ -1478,7 +1495,7 @@ function toggleRegCountryMenu(e){
 }
 function setRegCountry(code, calling){
   regCountry = { code, calling };
-  document.getElementById('regCountryFlag').innerHTML = `<img src="https://flagcdn.com/w40/${code}.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;">`;
+  document.getElementById('regCountryFlag').innerHTML = `<img src="https://flagcdn.com/w40/${code}.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;" loading="lazy" decoding="async">`;
   document.getElementById('regCountryCodeLabel').textContent = '+' + calling;
   document.getElementById('regCountryMenu').classList.remove('open');
 }
@@ -1796,7 +1813,7 @@ const firebaseConfig = {
   messagingSenderId: "785104008182",
   appId: "1:785104008182:web:25d36e5c69aa7b71050dd7"
 };
-firebase.initializeApp(firebaseConfig);
+try{ firebase.initializeApp(firebaseConfig); }catch(e){ console.error('firebase init', e); }
 const db = firebase.firestore();
 
 /* ---------- вход (Firebase Auth) ----------
@@ -1828,7 +1845,7 @@ function fmt(n){ return Number(n||0).toLocaleString('ru-RU') + " сум"; }
 
 /* ---------- i18n ---------- */
 const FLAG_CODES = { ru:"ru", uz:"uz", tr:"tr", az:"az", en:"gb" };
-function flagImg(code){ return `<img src="https://flagcdn.com/w40/${FLAG_CODES[code]}.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;">`; }
+function flagImg(code){ return `<img src="https://flagcdn.com/w40/${FLAG_CODES[code]}.png" style="width:20px; height:14px; object-fit:cover; border-radius:2px; display:block;" loading="lazy" decoding="async">`; }
 const STR = {
   ru: { search:"Найти", navHome:"Главная", navFav:"Избранное", navCart:"Корзина", navProfile:"Профиль",
         payReturnLink:"Оплата, возврат и безопасность платежей", offerLink:"Публичная оферта", removeWord:"Убрать", deliveryAgreed:"По согласованию", buyNow:"Заказать сразу", inCartWord:"В корзине", addToCart:"Добавить в корзину", cartTitle:"Корзина", favTitle:"Избранное", profileTitle:"Мои заказы",
@@ -1933,19 +1950,6 @@ const STR_NEW3 = {
   en:{ notifTap:"Tap “Start” in the bot — order updates will arrive there", revAnon:"Hide my name", revAnonName:"Anonymous", revBuyer:"Customer", revColor:"color", netErr:"No connection to the shop", netRetry:"Retry", tgOpenFail:"Couldn’t open Telegram login, please try again in a few seconds", badEmail:"Enter a valid email", subThanks:"Thanks for subscribing! ✓", noMoreStock:"No more in stock", addedCart:"Added to cart ✓", outOfStockToast:"Sorry, someone just took the last item. Please refresh your cart.", orderFail:"Couldn’t place the order, please try again", revSent:"Thanks! Your review was sent for moderation", revFail:"Couldn’t send the review, please try again", revNoPhotoCfg:"Photo upload isn’t set up yet — the review was sent without a photo", photoFail:"Couldn’t upload the photo, please try again", logoutTxt:"Log out", revFromBuyers:"customer reviews", socialSoon:"Social links are coming soon", rmPhoto:"Remove photo", sendBtn:"Send" }
 };
 Object.keys(STR_NEW3).forEach(l => Object.assign(STR[l], STR_NEW3[l]));
-const STR_PAY = {
-  ru:{ choosePay:"Выберите способ оплаты", toPayment:"Переходим к оплате…", payReturn:"Спасибо! Оплата обрабатывается — статус заказа обновится через минуту", payNow:"Оплатить",
-       cardClickNote:"После оформления откроется защищённая страница Click: там вы введёте карту Uzcard или Humo и код из SMS. Сайт данные карты не видит." },
-  uz:{ choosePay:"To‘lov usulini tanlang", toPayment:"To‘lovga o‘tilmoqda…", payReturn:"Rahmat! To‘lov qayta ishlanmoqda — buyurtma holati bir daqiqada yangilanadi", payNow:"To‘lash",
-       cardClickNote:"Rasmiylashtirgandan so‘ng Click’ning himoyalangan sahifasi ochiladi: u yerda Uzcard yoki Humo kartasini va SMS-kodni kiritasiz. Sayt karta ma’lumotlarini ko‘rmaydi." },
-  tr:{ choosePay:"Ödeme yöntemini seçin", toPayment:"Ödemeye geçiliyor…", payReturn:"Teşekkürler! Ödeme işleniyor — sipariş durumu bir dakika içinde güncellenecek", payNow:"Öde",
-       cardClickNote:"Siparişten sonra Click’in güvenli sayfası açılır: Uzcard veya Humo kartınızı ve SMS kodunu orada girersiniz. Site kart bilgilerinizi görmez." },
-  az:{ choosePay:"Ödəniş üsulunu seçin", toPayment:"Ödənişə keçilir…", payReturn:"Təşəkkürlər! Ödəniş emal olunur — sifarişin statusu bir dəqiqəyə yenilənəcək", payNow:"Ödə",
-       cardClickNote:"Sifarişdən sonra Click-in qorunan səhifəsi açılacaq: orada Uzcard və ya Humo kartını və SMS-kodu daxil edəcəksiniz. Sayt kart məlumatlarını görmür." },
-  en:{ choosePay:"Choose a payment method", toPayment:"Going to payment…", payReturn:"Thank you! Your payment is being processed — the order status will update in a minute", payNow:"Pay",
-       cardClickNote:"After checkout, Click’s secure page opens: you enter your Uzcard or Humo card and the SMS code there. The site never sees your card details." }
-};
-Object.keys(STR_PAY).forEach(l => Object.assign(STR[l], STR_PAY[l]));
 
 /* ---------- тема: светлая / тёмная ---------- */
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
@@ -2019,7 +2023,7 @@ function heroFeatsHTML(){
   ];
   return '<div class="hero-feats">' + ['heroF1','heroF2','heroF3'].map((k,i) => `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic[i]}</svg>${heroEsc(t(k))}</span>`).join('') + '</div>';
 }
-const HERO_DEF_MOBILE = 'banner.jpg', HERO_DEF_PC = 'banner-pc.jpg';
+const HERO_DEF_MOBILE = 'banner.webp', HERO_DEF_PC = 'banner-pc.webp';
 function renderHero(list){
   if (list) heroList = list;
   const hp = document.getElementById('heroPhoto'); if (!hp) return;
@@ -2172,6 +2176,18 @@ function openLightbox(images, startIdx){
   };
 }
 function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); setZoomAllowed(false); }
+
+/* ---------- ленивая загрузка фото карточек: грузим только то, что рядом с экраном ---------- */
+const _lazyIO = ('IntersectionObserver' in window) ? new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting){ const el = e.target; _lazyIO.unobserve(el); const u = el.getAttribute('data-bg'); if (u) el.style.backgroundImage = 'url("' + u + '")'; } });
+}, { rootMargin:'400px 0px' }) : null;
+function lazyBgScan(root){
+  (root || document).querySelectorAll('[data-bg]:not([data-lz])').forEach(el => {
+    el.setAttribute('data-lz', '1');
+    if (_lazyIO) _lazyIO.observe(el); else el.style.backgroundImage = 'url("' + el.getAttribute('data-bg') + '")';
+  });
+}
+new MutationObserver(() => lazyBgScan()).observe(document.documentElement, { childList:true, subtree:true });
 
 /* ---------- categories (dynamic from settings) ---------- */
 const SALE_CAT = 'Скидки';
@@ -2640,7 +2656,7 @@ let currentDetailImages = [];
 const favGrid = document.getElementById('favGrid');
 
 function productCardHTML(p){
-  const imgStyle = p.image ? `style="background-image:url('${p.image}')"` : '';
+  const imgStyle = p.image ? `data-bg="${String(p.image).replace(/"/g,'%22')}"` : '';
   const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${p.image ? '' : (p.emoji || '👟')}
@@ -2688,7 +2704,7 @@ function favoriteCardHTML(p, fav){
   }
   if (fav.size) colorLine += (colorLine ? ' · ' : '') + fav.size;
   if (fav.image) displayImage = fav.image;
-  const imgStyle = displayImage ? `style="background-image:url('${displayImage}')"` : '';
+  const imgStyle = displayImage ? `data-bg="${String(displayImage).replace(/"/g,'%22')}"` : '';
   const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${displayImage ? '' : (p.emoji || '👟')}
@@ -2811,7 +2827,7 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   const data = doc.data();
   try{ localStorage.setItem('milaisss_settings_cache', JSON.stringify(data)); }catch(e){}
   applyShopSettings(data);
-}, err => { _settingsReady = true; renderCatPills(); });
+}, err => { _settingsReady = true; renderCatPills(); markLoaded('settings'); });
 function applyShopSettings(data){
   _settingsReady = true;
   // цвета и шрифты задаются только в коде (CSS в index.html); старые значения из админки игнорируем
@@ -4140,7 +4156,8 @@ function renderCart(){
 
 function goToCheckoutFlow(){
   if (cart.length === 0) return;
-  selectPayMethod('');
+  selectedPayMethod = '';
+  document.querySelectorAll('.pmr-wrap').forEach(w => w.classList.remove('open'));
 
   selectedBtsBranch = '';
   document.getElementById('btsSearchInput').value = '';
@@ -4219,50 +4236,11 @@ function confirmPayment(){
   if (phEl) phEl.classList.toggle('field-bad', phoneBad);
   if (phoneBad){ showToast(t('phoneErrLen')); if (phEl) phEl.focus(); return; }
   if (!branch){ showToast(t('errBts')); return; }
-  if (!selectedPayMethod){ showToast(t('choosePay')); return; }
 
   finalizeOrder(phone, branch);
 }
 
 const PAY_METHOD_LABELS = { uzum:'Uzum Bank', click:'Click', card:'Карта' };
-/* ---------- онлайн-оплата через Click ---------- */
-const CLICK_SERVICE_ID = '114488';
-const CLICK_MERCHANT_ID = '66057';
-const ONLINE_PAY_METHODS = ['click', 'card'];
-function selectPayMethod(m){
-  selectedPayMethod = m || '';
-  document.querySelectorAll('.pay-card[data-pay]').forEach(el => el.classList.toggle('selected', el.dataset.pay === selectedPayMethod));
-  const row = document.querySelector('.pmr[data-pay="card"]'); if (row) row.classList.toggle('selected', selectedPayMethod === 'card');
-  const wrap = document.getElementById('pmrwrap-card'); if (wrap) wrap.classList.toggle('open', selectedPayMethod === 'card');
-}
-function clickPayUrl(orderId, total){
-  const ret = location.origin + location.pathname + '?paid=' + encodeURIComponent(orderId);
-  return 'https://my.click.uz/services/pay?service_id=' + CLICK_SERVICE_ID + '&merchant_id=' + CLICK_MERCHANT_ID
-    + '&amount=' + Math.round(Number(total) || 0) + '&transaction_param=' + encodeURIComponent(orderId)
-    + '&return_url=' + encodeURIComponent(ret);
-}
-function goToClickPay(orderId, total){
-  showToast(t('toPayment'));
-  setTimeout(() => { location.href = clickPayUrl(orderId, total); }, 1200);
-}
-function payOrderAgain(orderId){
-  const o = (_lastOrders || []).find(x => x.id === orderId);
-  if (!o || o.paid) return;
-  goToClickPay(o.id, o.total);
-}
-function isUnpaidOnline(o){
-  return o && o.status === 'Проверяется оплата' && o.paid !== true && (o.paymentMethod === 'Click' || o.paymentMethod === 'Карта');
-}
-// возврат со страницы Click: убираем ?paid= из адреса и показываем сообщение
-(function(){
-  try{
-    const q = new URLSearchParams(location.search);
-    if (q.get('paid')){
-      history.replaceState(null, '', location.pathname);
-      setTimeout(() => showToast(t('payReturn')), 900);
-    }
-  }catch(e){}
-})();
 // Apple Pay — только на устройствах Apple (iOS/Mac), Google Pay — на Android и остальных
 (function(){
   const ua = navigator.userAgent || '';
@@ -4404,18 +4382,15 @@ function finalizeOrder(phone, branch){
       status: 'Проверяется оплата', createdAt: Date.now(),
       lang, notifyChatId
     });
-  }).then(ref => {
-    const orderId = ref && ref.id;
-    const payOnline = ONLINE_PAY_METHODS.includes(selectedPayMethod) && orderId;
+  }).then(() => {
     workerNotify('customer', buildOrderNotifyText(orderItems, total, branch));
     cart = []; updateCartBadge();
     document.getElementById('phoneInput').value = '';
     const _n2 = document.getElementById('orderNoteInput'); if (_n2) _n2.value = '';
     notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text);
     try{ sendNotifyEmail(ADMIN_EMAIL, `Новый заказ от ${customerName}`, text).catch(()=>{}); }catch(e){}
-    _ordering = false;
-    if (payOnline){ goToClickPay(orderId, total); return; }
     showSuccessAnimation(() => { showScreen('home'); afterOrderNotice(); });
+    _ordering = false;
   }).catch(err => {
     _ordering = false;
     if (stockTaken) restoreStockForOrder(orderItems);
@@ -4627,7 +4602,6 @@ function renderStatusList(orders){
       }).join('')}
       ${o.status === 'Доставлен' ? (o.items||[]).map((it, ii) => reviewFormHTML(o, it, ii)).join('') : ''}
       <div class="trk-state"><span>${new Date(o.createdAt).toLocaleDateString('ru-RU')}</span><b>${translateStatus(o.status)}</b></div>
-      ${isUnpaidOnline(o) ? `<button class="trk-pay" type="button" onclick="payOrderAgain('${String(o.id).replace(/[^A-Za-z0-9_-]/g,'')}')">${t('payNow')} · ${fmt(o.total)}</button>` : ''}
       ${trackHTML(o.status)}
     </div>`).join('');
 }
