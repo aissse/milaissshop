@@ -1330,7 +1330,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261030-162";
+  const CURRENT_VERSION = "20261030-163";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1685,13 +1685,32 @@ function showPhoneLoginSoon(){
   showToast(t('phoneLoginSoon'));
 }
 
+/* объединение аккаунтов: заказы, сделанные гостем, переносятся на Telegram-аккаунт (делает платёжный Worker) */
+const ACCOUNT_MERGE_URL = 'https://milaisss-uzum.24sb7kyvfp.workers.dev/account/merge';
+async function mergeGuestAccount(guestToken){
+  try{
+    const u = firebase.auth().currentUser;
+    if (!guestToken || !u || u.isAnonymous) return;
+    const to = await u.getIdToken();
+    const r = await fetch(ACCOUNT_MERGE_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ from: guestToken, to }) });
+    const j = await r.json().catch(() => null);
+    if (j && j.ok && j.moved && j.moved.profile){ try{ loadCustomerProfile && loadCustomerProfile(); }catch(e){} }
+  }catch(e){ console.warn('account merge failed', e); }
+}
+
 async function onTelegramAuth(user){
+  let guestToken = null;
+  try{
+    const prev = firebase.auth().currentUser;
+    if (prev && prev.isAnonymous) guestToken = await prev.getIdToken();
+  }catch(e){}
   try{
     const r = await fetch(WORKER_URL + '/auth/telegram', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ user }) });
     const j = await r.json();
     if (!j || !j.ok || !j.token) throw new Error('auth');
     await firebase.auth().signInWithCustomToken(j.token);
   }catch(e){ showToast(t('tgOpenFail')); return; }
+  mergeGuestAccount(guestToken);
   localStorage.setItem('milaisss_linked_tg_name', (user.first_name||'') + (user.last_name ? (' '+user.last_name) : ''));
   if (user.username) localStorage.setItem('milaisss_linked_tg_username', user.username);
   else localStorage.removeItem('milaisss_linked_tg_username');
