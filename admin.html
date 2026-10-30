@@ -1739,10 +1739,13 @@ function filterAndRenderOrders(){
       ${o.note ? `<div class="oline">📝 ${escH(o.note)}</div>` : ''}
       ${o.paymentMethod ? `<div class="oline" style="font-weight:700;">💰 Способ оплаты: ${escH(o.paymentMethod)}</div>` : ''}
       ${o.paid === true ? `<div class="oline" style="font-weight:700; color:#1f7a4d;">✅ Оплачен онлайн${o.paidAt ? ' · ' + (o.paidAt.toDate ? o.paidAt.toDate() : new Date(o.paidAt)).toLocaleString('ru-RU') : ''}${o.clickTransId ? ' · Click №' + escH(o.clickTransId) : ''}${o.uzumTransId ? ' · Uzum №' + escH(o.uzumTransId) : ''}</div>` : (o.paymentStatus === 'REVERSED' ? `<div class="oline" style="font-weight:700; color:#b3261e;">↩️ Оплата отменена банком</div>` : '')}
+      ${o.paid === true ? `<label class="oline" style="display:flex; align-items:center; gap:8px; cursor:pointer;${o.testOrder ? ' color:#b3261e; font-weight:700;' : ''}"><input type="checkbox" class="test-order-cb" ${o.testOrder ? 'checked' : ''} style="width:auto;"> 🧪 Тестовый заказ — не считать в учёте</label>` : ''}
       <select class="status-select">
         ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
       </select>
     `;
+    const tcb = card.querySelector('.test-order-cb');
+    if (tcb) tcb.onchange = (e) => toggleTestOrder(o.id, e.target.checked);
     card.querySelector('.status-select').onchange = async (e) => {
       const st = e.target.value;
       const upd = { status: st };
@@ -1834,15 +1837,20 @@ function sendSupportReply(){
 let accCosts = {};      // productId -> { cost, cargo }
 let accExpenses = [];   // { id, date, ts, category, amount, note }
 const NOT_SALE_STATUS = 'Проверяется оплата';
-/* Оплачен ли заказ — только такие заказы считаются в учёте и доходе.
-   Онлайн (Click/Uzum): только если платёж реально прошёл (paid = true, ставит платёжный Worker).
-   Старые/ручные заказы без онлайн-оплаты: если ты сам перевёл их дальше «Проверяется оплата». */
-const ONLINE_PAY_LABELS = ['Click', 'Uzum Bank'];
+/* В учёт и доход попадают ТОЛЬКО заказы, реально оплаченные онлайн (paid = true ставит платёжный Worker
+   после подтверждения Click/Uzum), не отменённые и не отмеченные как тестовые. */
 function isPaidOrder(o){
   if (!o || o.status === 'Отменён' || o.paymentStatus === 'REVERSED') return false;
-  if (o.paid === true) return true;
-  if (ONLINE_PAY_LABELS.includes(o.paymentMethod)) return false;
-  return o.status !== NOT_SALE_STATUS;
+  if (o.testOrder === true) return false;
+  return o.paid === true;
+}
+async function toggleTestOrder(id, val){
+  try{
+    await db.collection('orders').doc(id).update({ testOrder: !!val });
+    const o = allOrders.find(x => x.id === id); if (o) o.testOrder = !!val;
+    adminToast(val ? 'Заказ отмечен как тестовый — в учёте не считается' : 'Заказ снова считается в учёте');
+    try{ renderAccounting(); renderAnalytics(); }catch(e){}
+  }catch(e){ adminToast('Не удалось сохранить: ' + (e.code || e.message || 'ошибка')); }
 }
 const fmtN = n => Math.round(Number(n)||0).toLocaleString('ru-RU');
 
