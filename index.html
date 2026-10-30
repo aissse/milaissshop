@@ -1111,7 +1111,7 @@
       </div>
 
       <div class="pmr-wrap" id="pmrwrap-card" style="margin-top:12px; border:1px solid var(--line); border-radius:16px; overflow:hidden;">
-        <div class="pmr" data-pay="card" onclick="selectPayMethod('card')">
+        <div class="pmr soon" onclick="toggleCardPreview()">
           <span class="pmr-radio"></span><span class="pmr-label" data-i18n="cardLabel">Карта</span>
           <span class="pmr-cards">
             <img src="Logo_white.png" alt="Uzcard" style="width:34px; height:21px; object-fit:contain; border-radius:4px; background:#1a1a6c; padding:2px; box-sizing:border-box;" onerror="this.style.display='none'">
@@ -1119,7 +1119,7 @@
           </span>
         </div>
         <div class="pmr-details">
-          <div class="pmr-soon-note" data-i18n="cardClickNote">После оформления откроется защищённая страница Click: там вы введёте карту Uzcard или Humo и код из SMS. Сайт данные карты не видит.</div>
+          <div class="pmr-soon-note" data-i18n="cardSoonNote">Оплата картой онлайн в разработке — скоро будет доступна</div>
         </div>
       </div>
     </div>
@@ -1330,7 +1330,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261030-161";
+  const CURRENT_VERSION = "20261030-162";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -4269,7 +4269,7 @@ const PAY_METHOD_LABELS = { uzum:'Uzum Bank', click:'Click', card:'Карта' }
 /* ---------- онлайн-оплата через Click ---------- */
 const CLICK_SERVICE_ID = '114488';
 const CLICK_MERCHANT_ID = '66057';
-const ONLINE_PAY_METHODS = ['click', 'card'];
+const ONLINE_PAY_METHODS = ['click']; // карты будут через Uzum — пока в разработке
 function selectPayMethod(m){
   selectedPayMethod = m || '';
   document.querySelectorAll('.pay-card[data-pay]').forEach(el => el.classList.toggle('selected', el.dataset.pay === selectedPayMethod));
@@ -4296,7 +4296,7 @@ const PAY_WINDOW_MS = 15 * 60 * 1000; // сколько минут клиент�
 function payLeftMs(o){ return (Number(o && o.createdAt) || 0) + PAY_WINDOW_MS - Date.now(); }
 function fmtLeft(ms){ const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 function isUnpaidOnline(o){
-  return o && o.status === 'Проверяется оплата' && o.paid !== true && (o.paymentMethod === 'Click' || o.paymentMethod === 'Карта') && payLeftMs(o) > 0;
+  return o && o.status === 'Проверяется оплата' && o.paid !== true && o.paymentMethod === 'Click' && payLeftMs(o) > 0;
 }
 // обратный отсчёт на кнопке «Оплатить»; когда время вышло — кнопка заменяется пояснением
 setInterval(() => {
