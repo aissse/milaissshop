@@ -1330,7 +1330,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261030-163";
+  const CURRENT_VERSION = "20261101-164";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1987,11 +1987,11 @@ const STR_PAY = {
 };
 Object.keys(STR_PAY).forEach(l => Object.assign(STR[l], STR_PAY[l]));
 const STR_PAY2 = {
-  ru:{ paySuccessTitle:"Платёж успешно выполнен!", payChecking:"Проверяем оплату…", statusCancelled:"Отменён", payExpired:"Время на оплату (15 минут) истекло — заказ отменён, товар вернулся в наличие. Оформите заказ заново." },
-  uz:{ paySuccessTitle:"To‘lov muvaffaqiyatli amalga oshirildi!", payChecking:"To‘lov tekshirilmoqda…", statusCancelled:"Bekor qilindi", payExpired:"To‘lov vaqti (15 daqiqa) tugadi — buyurtma bekor qilindi, mahsulot omborga qaytdi. Buyurtmani qayta rasmiylashtiring." },
-  tr:{ paySuccessTitle:"Ödeme başarıyla tamamlandı!", payChecking:"Ödeme kontrol ediliyor…", statusCancelled:"İptal edildi", payExpired:"Ödeme süresi (15 dakika) doldu — sipariş iptal edildi, ürün stoğa geri döndü. Lütfen siparişi yeniden verin." },
-  az:{ paySuccessTitle:"Ödəniş uğurla tamamlandı!", payChecking:"Ödəniş yoxlanılır…", statusCancelled:"Ləğv edildi", payExpired:"Ödəniş vaxtı (15 dəqiqə) bitdi — sifariş ləğv edildi, məhsul yenidən stokdadır. Sifarişi yenidən verin." },
-  en:{ paySuccessTitle:"Payment successful!", payChecking:"Checking your payment…", statusCancelled:"Cancelled", payExpired:"The 15-minute payment window has passed — the order was cancelled and the items are back in stock. Please place the order again." }
+  ru:{ paySuccessTitle:"Платёж успешно выполнен!", payChecking:"Проверяем оплату…", statusCancelled:"Отменён", payExpired:"Время на оплату (15 минут) истекло — заказ отменён. Оформите заказ заново." },
+  uz:{ paySuccessTitle:"To‘lov muvaffaqiyatli amalga oshirildi!", payChecking:"To‘lov tekshirilmoqda…", statusCancelled:"Bekor qilindi", payExpired:"To‘lov vaqti (15 daqiqa) tugadi — buyurtma bekor qilindi. Buyurtmani qayta rasmiylashtiring." },
+  tr:{ paySuccessTitle:"Ödeme başarıyla tamamlandı!", payChecking:"Ödeme kontrol ediliyor…", statusCancelled:"İptal edildi", payExpired:"Ödeme süresi (15 dakika) doldu — sipariş iptal edildi. Lütfen siparişi yeniden verin." },
+  az:{ paySuccessTitle:"Ödəniş uğurla tamamlandı!", payChecking:"Ödəniş yoxlanılır…", statusCancelled:"Ləğv edildi", payExpired:"Ödəniş vaxtı (15 dəqiqə) bitdi — sifariş ləğv edildi. Sifarişi yenidən verin." },
+  en:{ paySuccessTitle:"Payment successful!", payChecking:"Checking your payment…", statusCancelled:"Cancelled", payExpired:"The 15-minute payment window has passed — the order was cancelled. Please place the order again." }
 };
 Object.keys(STR_PAY2).forEach(l => Object.assign(STR[l], STR_PAY2[l]));
 
