@@ -151,6 +151,7 @@
     <div class="tab active" data-tab="products" onclick="switchTab('products')">Товары</div>
     <div class="tab" data-tab="reviews" onclick="switchTab('reviews')">Отзывы</div>
     <div class="tab" data-tab="stock" onclick="switchTab('stock')">Склад</div>
+    <div class="tab" data-tab="restock" onclick="switchTab('restock')">Ждут поступления <span id="restockBadge"></span></div>
     <div class="tab" data-tab="delivery" onclick="switchTab('delivery')">Доставка</div>
     <div class="tab" data-tab="support" onclick="switchTab('support')">Чат с клиентами</div>
     <div class="tab" data-tab="accounting" onclick="switchTab('accounting')">Учёт</div>
@@ -186,6 +187,14 @@
         <h1>Остатки по складу</h1>
         <p class="hint" style="margin-top:0;">Наличие по каждому цвету всех товаров.</p>
         <div id="stockList"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-restock">
+      <div class="card">
+        <h1>Ждут поступления</h1>
+        <p class="hint" style="margin-top:0;">Клиенты, которые нажали «Сообщить о поступлении» на закончившемся размере. Как только ты добавишь этот размер в наличие (в форме товара или на складе), клиентам автоматически уйдёт сообщение в Telegram со ссылкой на товар. Сообщения отправляются, пока открыта админка.</p>
+        <div id="restockList"><p class="hint">Загружаем…</p></div>
       </div>
     </div>
 
@@ -549,7 +558,7 @@ function openAdmin(){
   if (_adminOpened) return; _adminOpened = true;
   document.getElementById('lockScreen').style.display = 'none';
   document.getElementById('adminWrap').style.display = 'block';
-  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSupport(); loadSubscribers(); loadVisits(); loadAccounting();
+  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSupport(); loadSubscribers(); loadVisits(); loadAccounting(); loadRestock();
   PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
 }
 function checkPassword(){
@@ -997,6 +1006,7 @@ function loadProducts(){
   db.collection('products').onSnapshot(snap => {
     allProducts = [];
     setTimeout(()=>{ try{ renderAccCosts(); }catch(e){} }, 0);
+    setTimeout(()=>{ try{ _productsLoaded = true; renderRestock(); autoNotifyRestock(); }catch(e){} }, 0);
     const list = document.getElementById('prodList');
     if (snap.empty){ list.innerHTML = '<p class="hint">Товаров пока нет</p>'; renderStockList(); return; }
     list.innerHTML = '';
@@ -1061,6 +1071,114 @@ async function translateAllProducts(){
   btn.disabled = false;
   btn.textContent = btnText;
   alert(failed ? `Готово, но ${failed} перевод(ов) не получилось — проверь интернет и нажми ещё раз.` : 'Готово! Все товары переведены.');
+}
+
+/* ---------- «Сообщить о поступлении» ---------- */
+let restockReqs = [];
+let _productsLoaded = false, _restockLoaded = false;
+const _restockSending = new Set();
+const RESTOCK_MSG = {
+  ru:{ title:'🔔 Товар снова в наличии!', color:'Цвет', size:'Размер', go:'Успейте заказать:' },
+  uz:{ title:'🔔 Mahsulot yana sotuvda!', color:'Rang', size:'O‘lcham', go:'Buyurtma berishga ulguring:' },
+  tr:{ title:'🔔 Ürün tekrar stokta!', color:'Renk', size:'Beden', go:'Kaçırmadan sipariş verin:' },
+  az:{ title:'🔔 Məhsul yenidən satışdadır!', color:'Rəng', size:'Ölçü', go:'Sifariş verməyə tələsin:' },
+  en:{ title:'🔔 Back in stock!', color:'Color', size:'Size', go:'Order before it’s gone:' }
+};
+function restockStockOf(r){
+  const p = allProducts.find(x => x.id === r.productId);
+  if (!p || p.hidden) return 0;
+  if (!p.colors || !p.colors.length) return Number(p.stock || 0);
+  const c = p.colors.find(x => x.name === r.colorName);
+  if (!c) return 0;
+  if (c.sizeStocks && Object.prototype.hasOwnProperty.call(c.sizeStocks, r.size)) return Number(c.sizeStocks[r.size]) || 0;
+  if (typeof c.stock === 'number') return c.stock;
+  return Number(p.stock || 0);
+}
+function buildRestockText(r){
+  const L = RESTOCK_MSG[r.lang] ? r.lang : 'ru';
+  const H = RESTOCK_MSG[L];
+  const p = allProducts.find(x => x.id === r.productId) || {};
+  const name = (p.nameTranslations && p.nameTranslations[L]) || p.name || r.productName || '';
+  const c = (p.colors || []).find(x => x.name === r.colorName);
+  const colorName = (c && c.nameTranslations && c.nameTranslations[L]) || r.colorName || '';
+  const link = SHOP_URL + '?product=' + encodeURIComponent(r.productId) + '&color=' + encodeURIComponent(r.colorName || '') + '&size=' + encodeURIComponent(r.size || '');
+  return `${H.title}\n\n${name}\n${H.color}: ${colorName} · ${H.size}: ${r.size}\n\n${H.go}\n${link}`;
+}
+async function sendRestock(r){
+  if (_restockSending.has(r.id)) return false;
+  _restockSending.add(r.id);
+  try{
+    // сначала помечаем «оповещён» — чтобы при двух открытых админках клиент не получил два сообщения
+    await db.collection('restock_requests').doc(r.id).update({ notified: true, notifiedAt: Date.now() });
+    const ok = await tgSend(r.customerId, buildRestockText(r));
+    await db.collection('restock_requests').doc(r.id).update({ notifyOk: !!ok }).catch(() => {});
+    return ok;
+  }catch(e){ return false; }
+  finally{ _restockSending.delete(r.id); }
+}
+async function autoNotifyRestock(){
+  if (!_productsLoaded || !_restockLoaded) return;
+  const ready = restockReqs.filter(r => !r.notified && !_restockSending.has(r.id) && restockStockOf(r) > 0);
+  if (!ready.length) return;
+  let ok = 0;
+  for (const r of ready){ if (await sendRestock(r)) ok++; }
+  adminToast(`🔔 Сообщили о поступлении: ${ok} из ${ready.length}` + (ok < ready.length ? ' (у кого-то не подключён бот — позвони по номеру)' : ''));
+}
+function deleteRestock(id){
+  if (confirm('Убрать эту заявку из списка?')) db.collection('restock_requests').doc(id).delete();
+}
+function loadRestock(){
+  db.collection('restock_requests').onSnapshot(snap => {
+    restockReqs = [];
+    snap.forEach(d => restockReqs.push({ id: d.id, ...d.data() }));
+    _restockLoaded = true;
+    renderRestock();
+    autoNotifyRestock();
+  }, err => {
+    console.warn('restock', err);
+    const w = document.getElementById('restockList');
+    if (w) w.innerHTML = '<p class="hint">Нет доступа к списку. Опубликуй новые правила Firestore (в них есть блок restock_requests).</p>';
+  });
+}
+function renderRestock(){
+  const wrap = document.getElementById('restockList'); if (!wrap) return;
+  const pending = restockReqs.filter(r => !r.notified);
+  const badge = document.getElementById('restockBadge');
+  if (badge) badge.textContent = pending.length ? `(${pending.length})` : '';
+  const groups = {};
+  pending.forEach(r => {
+    const k = r.productId + '|' + r.colorName + '|' + r.size;
+    (groups[k] = groups[k] || { r, list: [] }).list.push(r);
+  });
+  const fmtD = ts => ts ? new Date(ts).toLocaleDateString('ru-RU') : '';
+  const person = r => `<div style="display:flex; justify-content:space-between; gap:8px; font-size:12px; padding:5px 0; border-top:1px solid var(--line);">
+      <span>${escH(r.customerName || 'Клиент')}${r.phone ? ' · <a href="tel:' + escH(r.phone) + '">' + escH(r.phone) + '</a>' : ''} <span style="color:var(--muted);">${fmtD(r.createdAt)}</span></span>
+      <span style="color:var(--muted); cursor:pointer;" onclick="deleteRestock('${escH(r.id)}')">✕</span></div>`;
+  let html = '';
+  const keys = Object.keys(groups).sort((a, b) => groups[b].list.length - groups[a].list.length);
+  if (!keys.length) html += '<p class="hint">Пока никто не ждёт поступления.</p>';
+  keys.forEach(k => {
+    const g = groups[k]; const r = g.r;
+    const p = allProducts.find(x => x.id === r.productId);
+    const st = restockStockOf(r);
+    html += `<div style="border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; gap:8px; align-items:baseline;">
+        <div style="font-weight:700; font-size:13px;">${escH((p && p.name) || r.productName || '')}</div>
+        <div style="font-weight:800; font-size:13px; white-space:nowrap;">ждут: ${g.list.length}</div>
+      </div>
+      <div class="hint" style="margin:2px 0 6px;">Цвет: ${escH(r.colorName || '—')} · Размер: <b>${escH(r.size || '—')}</b> · сейчас в наличии: ${st} шт${!p ? ' · товар удалён' : (p.hidden ? ' · товар скрыт' : '')}</div>
+      ${g.list.map(person).join('')}
+    </div>`;
+  });
+  const done = restockReqs.filter(r => r.notified).sort((a, b) => (b.notifiedAt || 0) - (a.notifiedAt || 0)).slice(0, 30);
+  if (done.length){
+    html += `<div style="font-weight:700; font-size:13px; margin:16px 0 6px;">Уже оповещены</div>`;
+    html += done.map(r => `<div style="display:flex; justify-content:space-between; gap:8px; font-size:12px; padding:5px 0; border-top:1px solid var(--line);">
+      <span>${r.notifyOk === false ? '⚠️' : '✅'} ${escH(r.productName || '')} · ${escH(r.colorName || '')} · ${escH(r.size || '')} — ${escH(r.customerName || '')}${r.phone ? ' · <a href="tel:' + escH(r.phone) + '">' + escH(r.phone) + '</a>' : ''}</span>
+      <span style="color:var(--muted); cursor:pointer;" onclick="deleteRestock('${escH(r.id)}')">✕</span></div>`).join('');
+    html += '<p class="hint">⚠️ — Telegram не доставил (клиент не подключил бота). Позвони или напиши ему по номеру.</p>';
+  }
+  wrap.innerHTML = html;
 }
 
 function renderStockList(){
