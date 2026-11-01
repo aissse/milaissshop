@@ -1639,11 +1639,11 @@ const STATUS_TXT = {
   'Отменён':{ ru:'Отменён', uz:'Bekor qilindi', tr:'İptal edildi', az:'Ləğv edildi', en:'Cancelled' }
 };
 const STATUS_HEAD = {
-  ru:{ title:'📦 Статус вашего заказа обновлён', st:'Статус', pickup:'Заберите заказ в пункте БТС', thanks:'Спасибо за покупку! 🤍' },
-  uz:{ title:'📦 Buyurtmangiz holati yangilandi', st:'Holati', pickup:'Buyurtmani BTS punktidan oling', thanks:'Xaridingiz uchun rahmat! 🤍' },
-  tr:{ title:'📦 Sipariş durumunuz güncellendi', st:'Durum', pickup:'Siparişinizi BTS noktasından alın', thanks:'Alışverişiniz için teşekkürler! 🤍' },
-  az:{ title:'📦 Sifarişinizin statusu yeniləndi', st:'Status', pickup:'Sifarişi BTS məntəqəsindən götürün', thanks:'Alış-verişiniz üçün təşəkkür edirik! 🤍' },
-  en:{ title:'📦 Your order status was updated', st:'Status', pickup:'Pick up your order at the BTS point', thanks:'Thank you for your purchase! 🤍' }
+  ru:{ title:'📦 Статус вашего заказа обновлён', st:'Статус', pickup:'Заберите заказ в пункте БТС', thanks:'Спасибо за покупку! 🤍', review:'⭐ Не забудьте оставить отзыв — нам очень важно ваше мнение:', shop:'🛍 Наш магазин:' },
+  uz:{ title:'📦 Buyurtmangiz holati yangilandi', st:'Holati', pickup:'Buyurtmani BTS punktidan oling', thanks:'Xaridingiz uchun rahmat! 🤍', review:'⭐ Fikr qoldirishni unutmang — siz uchun bu bir daqiqa, biz uchun juda muhim:', shop:'🛍 Bizning do‘kon:' },
+  tr:{ title:'📦 Sipariş durumunuz güncellendi', st:'Durum', pickup:'Siparişinizi BTS noktasından alın', thanks:'Alışverişiniz için teşekkürler! 🤍', review:'⭐ Yorum bırakmayı unutmayın — fikriniz bizim için çok önemli:', shop:'🛍 Mağazamız:' },
+  az:{ title:'📦 Sifarişinizin statusu yeniləndi', st:'Status', pickup:'Sifarişi BTS məntəqəsindən götürün', thanks:'Alış-verişiniz üçün təşəkkür edirik! 🤍', review:'⭐ Rəy yazmağı unutmayın — fikriniz bizim üçün çox önəmlidir:', shop:'🛍 Mağazamız:' },
+  en:{ title:'📦 Your order status was updated', st:'Status', pickup:'Pick up your order at the BTS point', thanks:'Thank you for your purchase! 🤍', review:'⭐ Don’t forget to leave a review — your opinion means a lot to us:', shop:'🛍 Our shop:' }
 };
 function buildStatusText(o, status){
   const L = (o.lang && STATUS_HEAD[o.lang]) ? o.lang : 'ru';
@@ -1652,7 +1652,7 @@ function buildStatusText(o, status){
   const items = (o.items || []).map(i => `• ${i.name} (${i.size}) × ${i.qty}`).join('\n');
   let txt = `${H.title}\n\n${items}\n\n${H.st}: ${label}`;
   if (status === 'В ПВЗ') txt += `\n📍 ${H.pickup}${o.btsBranch ? ': ' + o.btsBranch : ''}`;
-  if (status === 'Доставлен') txt += `\n\n${H.thanks}`;
+  if (status === 'Доставлен') txt += `\n\n${H.thanks}\n\n${H.review}\n${SHOP_URL}?review=${encodeURIComponent(o.id)}\n\n${H.shop}\n${SHOP_URL}`;
   return txt;
 }
 function adminToast(msg){
