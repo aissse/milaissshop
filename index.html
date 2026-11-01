@@ -1340,7 +1340,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261102-165";
+  const CURRENT_VERSION = "20261102-166";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2012,6 +2012,14 @@ const STR_RESTOCK = {
   en:{ restockReg:"Sign up so we can let you know when the item is back", restockBtn:"Notify me when available", restockDone:"We’ll notify you", restockHint:"This size is out of stock. Tap and we’ll message you on Telegram when it’s back.", restockDoneNote:"You’re on the waiting list. We’ll message you as soon as the size is back.", restockNeedBot:"To get the message, connect the shop bot:", restockBotLink:"open the bot", restockToast:"Done! We’ll let you know when the size is back" }
 };
 Object.keys(STR_RESTOCK).forEach(l => Object.assign(STR[l], STR_RESTOCK[l]));
+const STR_REVLINK = {
+  ru:{ revLinkLogin:"Не нашли этот заказ. Войдите через Telegram тем же аккаунтом, с которого оформляли заказ" },
+  uz:{ revLinkLogin:"Bu buyurtma topilmadi. Buyurtma bergan Telegram akkauntingiz orqali kiring" },
+  tr:{ revLinkLogin:"Bu sipariş bulunamadı. Siparişi verdiğiniz Telegram hesabıyla giriş yapın" },
+  az:{ revLinkLogin:"Bu sifariş tapılmadı. Sifariş verdiyiniz Telegram hesabı ilə daxil olun" },
+  en:{ revLinkLogin:"We couldn’t find this order. Log in with the same Telegram account you ordered from" }
+};
+Object.keys(STR_REVLINK).forEach(l => Object.assign(STR[l], STR_REVLINK[l]));
 
 /* ---------- тема: светлая / тёмная ---------- */
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
@@ -2833,6 +2841,7 @@ db.collection('products').onSnapshot(snap => {
   markLoaded('products');
   showNetBanner(false);
   openDeepLinkProduct();
+  openDeepLinkReview();
 }, err => { console.warn(err); showNetBanner(true); markLoaded('products'); });
 
 /* отзывы: все одобренные + свои (ещё на модерации). Чужие неодобренные не загружаем — меньше чтений и приватнее */
@@ -4127,6 +4136,33 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
   }
 }
 
+/* ссылка из сообщения «Доставлен»: milaisss.com/?review=ORDER_ID — открывает профиль и форму отзыва этого заказа */
+let pendingReviewOrder = '';
+try{ pendingReviewOrder = (new URLSearchParams(location.search).get('review') || '').replace(/[^A-Za-z0-9_-]/g, ''); }catch(e){}
+function openDeepLinkReview(){
+  if (!pendingReviewOrder || openDeepLinkReview._shown) return;
+  openDeepLinkReview._shown = true;
+  try{ const q = new URLSearchParams(location.search); q.delete('review'); const qs = q.toString(); history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash); }catch(e){}
+  try{ showScreen('profile'); }catch(e){}
+  // заказ не нашёлся за 8 секунд (вошли с другого устройства / не тем аккаунтом) — просто подскажем
+  setTimeout(() => { if (pendingReviewOrder){ pendingReviewOrder = ''; showToast(t('revLinkLogin')); } }, 8000);
+}
+function applyPendingReview(orders){
+  if (!pendingReviewOrder) return;
+  const o = orders.find(x => x.id === pendingReviewOrder);
+  if (!o) return;
+  pendingReviewOrder = '';
+  if (o.status !== 'Доставлен') return;
+  requestAnimationFrame(() => {
+    const list = document.getElementById('statusList');
+    const coll = list && list.closest('.orders-collapse');
+    if (coll && !coll.classList.contains('open')) toggleSec(coll.previousElementSibling);
+    const forms = document.querySelectorAll(`[id^="rf-${o.id}-"]`);
+    forms.forEach(f => f.classList.add('open'));
+    if (forms[0]) setTimeout(() => forms[0].scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
+  });
+}
+
 /* ссылка из сообщения «товар поступил»: milaisss.com/?product=ID&color=...&size=... — сразу открывает товар */
 function openDeepLinkProduct(){
   if (openDeepLinkProduct._done) return;
@@ -4855,6 +4891,7 @@ function renderOrders(){
     snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
     orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     _lastOrders = orders; renderStatusList(orders);
+    applyPendingReview(orders);
   });
 }
 
