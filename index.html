@@ -210,7 +210,8 @@
   .block-label{ font-size:12px; font-weight:700; margin:20px 0 10px; color:var(--muted); }
   .sizes{ display:flex; gap:8px; flex-wrap:wrap; }
   .size-pill{ width:44px; height:40px; border-radius:12px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; cursor:pointer; background:var(--bg); }
-  .size-pill.oos{ opacity:.4; text-decoration:line-through; cursor:not-allowed; }
+  .size-pill.oos{ opacity:.4; text-decoration:line-through; cursor:pointer; }
+  .size-pill.oos.active{ opacity:.75; }
   .size-pill.active{ background:var(--ink); color:var(--on-ink); border-color:var(--ink); }
 
   .colors{ display:flex; gap:10px; }
@@ -231,6 +232,13 @@
   .add-btn{ flex:1; width:100%; background:var(--orange); color:#fff; border:none; border-radius:16px; padding:16px; font-weight:700; font-size:15px; cursor:pointer; }
   .add-btn:disabled{ background:var(--muted); cursor:not-allowed; }
   .wish-btn-desktop{ display:none; }
+  .buybar .restock-btn{ flex:0 0 100%; display:none; align-items:center; justify-content:center; gap:8px; background:var(--ink); color:var(--on-ink, #fff); }
+  .buybar .restock-btn.show{ display:flex; }
+  .buybar .restock-btn.done{ background:var(--stone); color:var(--ink); cursor:default; }
+  .buybar .restock-btn svg{ width:18px; height:18px; flex-shrink:0; }
+  .restock-note{ display:none; flex:0 0 100%; font-size:12px; line-height:1.45; color:var(--muted); text-align:center; }
+  .restock-note.show{ display:block; }
+  .restock-note a{ color:var(--ink); font-weight:700; }
 
   .detail-badge{ display:none; background:var(--stone); color:var(--muted); font-size:11px; font-weight:700; padding:6px 12px; border-radius:100px; margin-bottom:10px; letter-spacing:.02em; }
   .size-guide-link{ display:none; font-size:12px; font-weight:700; color:var(--muted); text-decoration:underline; cursor:pointer; margin:10px 0 2px; }
@@ -1050,6 +1058,8 @@
         </div>
         <div class="buybar" id="buyBar">
           <div class="incart-note" id="inCartNote"></div>
+          <button class="add-btn restock-btn" id="restockBtn" onclick="subscribeRestock()"></button>
+          <div class="restock-note" id="restockNote"></div>
           <button class="add-btn" id="addBtn" onclick="addToCart()" data-i18n="addToCart">Добавить в корзину</button>
           <button class="add-btn buy-btn" id="buyNowBtn" onclick="buyNow()" data-i18n="buyNow">Заказать сразу</button>
           <div class="wish-btn-desktop" id="wishBtnDesktop" onclick="toggleCurrentFavorite()"></div>
@@ -1330,7 +1340,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261101-164";
+  const CURRENT_VERSION = "20261102-165";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1511,7 +1521,7 @@ document.addEventListener('click', () => {
 function openRegisterModal(context){
   const btn = document.getElementById('regSubmitBtn');
   if (btn){ btn.disabled = false; btn.textContent = t('regSubmit'); }
-  document.getElementById('regSubText').textContent = t(context === 'support' ? 'regSubSupport' : 'regSub');
+  document.getElementById('regSubText').textContent = t(context === 'support' ? 'regSubSupport' : (context === 'restock' ? 'restockReg' : 'regSub'));
   document.getElementById('regFirstName').value = customerProfile ? (customerProfile.firstName||'') : '';
   document.getElementById('regLastName').value = customerProfile ? (customerProfile.lastName||'') : '';
   document.querySelectorAll('#registerModal .field-bad').forEach(x=>x.classList.remove('field-bad'));
@@ -1994,6 +2004,14 @@ const STR_PAY2 = {
   en:{ paySuccessTitle:"Payment successful!", payChecking:"Checking your payment…", statusCancelled:"Cancelled", payExpired:"The 15-minute payment window has passed — the order was cancelled. Please place the order again." }
 };
 Object.keys(STR_PAY2).forEach(l => Object.assign(STR[l], STR_PAY2[l]));
+const STR_RESTOCK = {
+  ru:{ restockReg:"Зарегистрируйтесь, чтобы мы могли сообщить вам о поступлении товара", restockBtn:"Сообщить о поступлении", restockDone:"Сообщим о поступлении", restockHint:"Этого размера сейчас нет. Нажмите — и мы напишем вам в Telegram, когда он появится.", restockDoneNote:"Вы в списке ожидания. Напишем, как только размер появится.", restockNeedBot:"Чтобы получить сообщение, подключите бота магазина:", restockBotLink:"открыть бота", restockToast:"Готово! Сообщим, когда размер появится" },
+  uz:{ restockReg:"Mahsulot kelganda xabar berishimiz uchun roʻyxatdan oʻting", restockBtn:"Kelganda xabar berish", restockDone:"Kelganda xabar beramiz", restockHint:"Bu o‘lcham hozir yo‘q. Bosing — u paydo bo‘lganda sizga Telegramda yozamiz.", restockDoneNote:"Siz kutish ro‘yxatidasiz. O‘lcham paydo bo‘lishi bilan yozamiz.", restockNeedBot:"Xabar olish uchun do‘kon botini ulang:", restockBotLink:"botni ochish", restockToast:"Tayyor! O‘lcham kelganda xabar beramiz" },
+  tr:{ restockReg:"Ürün gelince size haber verebilmemiz için kayıt olun", restockBtn:"Gelince haber ver", restockDone:"Gelince haber vereceğiz", restockHint:"Bu beden şu an yok. Dokunun — geldiğinde size Telegram’dan yazalım.", restockDoneNote:"Bekleme listesindesiniz. Beden gelir gelmez yazacağız.", restockNeedBot:"Mesaj almak için mağaza botunu bağlayın:", restockBotLink:"botu aç", restockToast:"Tamam! Beden gelince haber vereceğiz" },
+  az:{ restockReg:"Məhsul gələndə sizə xəbər verə bilməyimiz üçün qeydiyyatdan keçin", restockBtn:"Gələndə xəbər ver", restockDone:"Gələndə xəbər verəcəyik", restockHint:"Bu ölçü hazırda yoxdur. Toxunun — gələndə sizə Telegram-da yazaq.", restockDoneNote:"Gözləmə siyahısındasınız. Ölçü gələn kimi yazacağıq.", restockNeedBot:"Mesaj almaq üçün mağaza botunu qoşun:", restockBotLink:"botu aç", restockToast:"Hazırdır! Ölçü gələndə xəbər verəcəyik" },
+  en:{ restockReg:"Sign up so we can let you know when the item is back", restockBtn:"Notify me when available", restockDone:"We’ll notify you", restockHint:"This size is out of stock. Tap and we’ll message you on Telegram when it’s back.", restockDoneNote:"You’re on the waiting list. We’ll message you as soon as the size is back.", restockNeedBot:"To get the message, connect the shop bot:", restockBotLink:"open the bot", restockToast:"Done! We’ll let you know when the size is back" }
+};
+Object.keys(STR_RESTOCK).forEach(l => Object.assign(STR[l], STR_RESTOCK[l]));
 
 /* ---------- тема: светлая / тёмная ---------- */
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
@@ -2701,7 +2719,7 @@ const favGrid = document.getElementById('favGrid');
 
 function productCardHTML(p){
   const imgStyle = p.image ? `data-bg="${String(p.image).replace(/"/g,'%22')}"` : '';
-  const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
+  const oosClass = ''; // без пометки на карточке: внутри товара — кнопка «Сообщить о поступлении»
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${p.image ? '' : (p.emoji || '👟')}
       ${discBadge(p)}<div class="heart-btn" data-fav="${p.id}">${heartIcon(isFavorite(p.id))}</div>
@@ -2749,7 +2767,7 @@ function favoriteCardHTML(p, fav){
   if (fav.size) colorLine += (colorLine ? ' · ' : '') + fav.size;
   if (fav.image) displayImage = fav.image;
   const imgStyle = displayImage ? `data-bg="${String(displayImage).replace(/"/g,'%22')}"` : '';
-  const oosClass = (Number(p.stock||0) <= 0) ? ' oos' : '';
+  const oosClass = ''; // без пометки на карточке: внутри товара — кнопка «Сообщить о поступлении»
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${displayImage ? '' : (p.emoji || '👟')}
       ${discBadge(p)}<div class="heart-btn" data-fav="${p.id}">${heartIcon(true)}</div>
@@ -2814,6 +2832,7 @@ db.collection('products').onSnapshot(snap => {
   try{ localStorage.setItem('milaisss_products_cache', JSON.stringify({ t: Date.now(), p: products })); }catch(e){}
   markLoaded('products');
   showNetBanner(false);
+  openDeepLinkProduct();
 }, err => { console.warn(err); showNetBanner(true); markLoaded('products'); });
 
 /* отзывы: все одобренные + свои (ещё на модерации). Чужие неодобренные не загружаем — меньше чтений и приватнее */
@@ -4024,7 +4043,7 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
     if (colorStock <= 0){
       stockNote.textContent = `${t('outOfStock')} (${getTranslatedColorName(colors[idx])})`;
       stockNote.className = 'stock-note out';
-      addBtn.disabled = true; addBtn.textContent = t('outOfStock');
+      addBtn.disabled = true; addBtn.textContent = t('addToCart');
     } else if (colorStock <= 3){
       stockNote.textContent = `🔥 ${t('stockRemain')} ${colorStock} ${t('pcsWord')} (${getTranslatedColorName(colors[idx])})`;
       stockNote.className = 'stock-note low';
@@ -4036,6 +4055,7 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
     }
     const _bb = document.getElementById('buyNowBtn'); if (_bb) _bb.disabled = addBtn.disabled;
     refreshInCart();
+    updateRestockBtn();
   }
 
   function renderSizeRow(idx){
@@ -4047,14 +4067,12 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
       const oos = stockForSize <= 0;
       el.className = 'size-pill' + (label === selectedSize ? ' active' : '') + (oos ? ' oos' : '');
       el.textContent = label;
-      if (!oos){
-        el.onclick = () => {
-          selectedSize = label;
-          document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active'));
-          el.classList.add('active');
-          refreshStockUI(selectedColorIdx);
-        };
-      }
+      el.onclick = () => {
+        selectedSize = label;
+        document.querySelectorAll('.size-pill').forEach(x=>x.classList.remove('active'));
+        el.classList.add('active');
+        refreshStockUI(selectedColorIdx);
+      };
       sizeRow.appendChild(el);
     });
   }
@@ -4107,6 +4125,89 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
       updateActivePhoto(photoIdx);
     });
   }
+}
+
+/* ссылка из сообщения «товар поступил»: milaisss.com/?product=ID&color=...&size=... — сразу открывает товар */
+function openDeepLinkProduct(){
+  if (openDeepLinkProduct._done) return;
+  let q; try{ q = new URLSearchParams(location.search); }catch(e){ return; }
+  const id = q.get('product'); if (!id){ openDeepLinkProduct._done = true; return; }
+  if (!products.some(p => p.id === id)) return;
+  openDeepLinkProduct._done = true;
+  try{ openProduct(id, q.get('color') || undefined, q.get('size') || undefined); }catch(e){}
+  try{ ['product','color','size'].forEach(k => q.delete(k)); const qs = q.toString(); history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash); }catch(e){}
+}
+/* ---------- «Сообщить о поступлении» ---------- */
+let myRestock = {};            // ключи размеров, на которые клиент уже подписан (ещё не оповещён)
+let _restockUnsub = null, _restockUid = '';
+function restockKey(pid, color, size){ return pid + '|' + color + '|' + size; }
+function restockDocId(cid, pid, color, size){
+  let h = 5381; const str = color + '|' + size;
+  for (let i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+  return (cid + '_' + pid + '_' + h.toString(36)).replace(/[^A-Za-z0-9_-]/g, '');
+}
+function subscribeMyRestock(){
+  const cid = getCustomerId();
+  if (!cid || cid === 'pending' || _restockUid === cid) return;
+  if (_restockUnsub){ _restockUnsub(); _restockUnsub = null; }
+  _restockUid = cid;
+  _restockUnsub = db.collection('restock_requests').where('customerId', '==', cid).onSnapshot(snap => {
+    myRestock = {};
+    snap.forEach(d => { const r = d.data(); if (!r.notified) myRestock[restockKey(r.productId, r.colorName, r.size)] = true; });
+    updateRestockBtn();
+  }, () => {});
+}
+const BELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
+function updateRestockBtn(){
+  const btn = document.getElementById('restockBtn'), note = document.getElementById('restockNote');
+  if (!btn || !note) return;
+  const chosen = currentProduct && currentColors[selectedColorIdx];
+  const out = !!chosen && getSizeStock(currentProduct, chosen, selectedSize) <= 0;
+  btn.classList.toggle('show', out);
+  if (!out){ note.classList.remove('show'); return; }
+  const done = !!myRestock[restockKey(currentProduct.id, chosen.name, selectedSize)];
+  btn.classList.toggle('done', done);
+  btn.disabled = false;
+  btn.innerHTML = (done ? CHECK_SVG : BELL_SVG) + `<span>${t(done ? 'restockDone' : 'restockBtn')}</span>`;
+  if (done && !isTelegramUser() && !notifyIsOn()){
+    note.innerHTML = `${t('restockNeedBot')} <a href="${NOTIFY_BOT_LINK + '?start=' + notifyLinkPayload()}" target="_blank" rel="noopener" onclick="showToast(t('notifTap'))">${t('restockBotLink')}</a>`;
+    note.classList.add('show');
+  } else if (done){
+    note.textContent = t('restockDoneNote'); note.classList.add('show');
+  } else {
+    note.textContent = t('restockHint'); note.classList.add('show');
+  }
+}
+function subscribeRestock(){
+  if (!currentProduct) return;
+  const chosen = currentColors[selectedColorIdx]; if (!chosen) return;
+  if (getSizeStock(currentProduct, chosen, selectedSize) > 0) return;
+  const product = currentProduct, size = selectedSize;
+  const key = restockKey(product.id, chosen.name, size);
+  if (myRestock[key]){ showToast(t('restockDoneNote')); return; }
+  requireRegistration(async () => {
+    await authReady;
+    const cid = getCustomerId(); if (!cid || cid === 'pending') return;
+    const btn = document.getElementById('restockBtn'); if (btn) btn.disabled = true;
+    const phone = (customerProfile && customerProfile.phone) || '';
+    const data = {
+      customerId: cid, customerName: String(getCustomerName() || '').slice(0, 200), phone: String(phone).slice(0, 40),
+      productId: product.id, productName: String(product.name || '').slice(0, 200),
+      colorName: String(chosen.name || '').slice(0, 100), size: String(size || '').slice(0, 40),
+      lang: lang, createdAt: Date.now(), notified: false
+    };
+    try{
+      await db.collection('restock_requests').doc(restockDocId(cid, product.id, data.colorName, data.size)).set(data);
+      myRestock[key] = true;
+      subscribeMyRestock();
+      showToast('🔔 ' + t('restockToast'));
+      try{ if (typeof notifyAdmin === 'function') notifyAdmin(`🔔 Ждут поступления: ${data.productName} · ${data.colorName} · ${data.size}\n${data.customerName}${data.phone ? ' · ' + data.phone : ''}`); }catch(e){}
+    }catch(e){
+      showToast(t('netErr'));
+    }
+    updateRestockBtn();
+  }, 'restock');
 }
 
 /* ---------- cart ---------- */
@@ -4846,6 +4947,7 @@ function logVisit(){
 function afterAuth(){
   afterAuth._done = true;
   subscribeMyReviews();
+  subscribeMyRestock();
   _supUnsub && _supUnsub(); _supUnsub = null; setupSupportListener._admin = undefined;
   setupSupportListener();
   loadCustomerProfile();
