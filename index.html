@@ -1343,7 +1343,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261104-170";
+  const CURRENT_VERSION = "20261104-171";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -4452,8 +4452,8 @@ function goToUzumPay(orderId, total){
   try{ localStorage.setItem('milaisss_uzum_wait', JSON.stringify({ id: orderId, t: Date.now() })); }catch(e){}
   _uzumUrl = uzumPayUrl(orderId, total);
   if (Date.now() - (window._payTapAt || 0) < UZUM_TAP_WINDOW_MS){
+    try{ showScreen('home'); }catch(e){}
     openUzumLink(_uzumUrl);
-    setTimeout(closeUzumModal, 1500); // вернётся на сайт — увидит заказ с таймером в «Моих заказах»
     return;
   }
   // интернет медленный и заказ создавался дольше — тогда одна кнопка «Оплатить в Uzum Bank»
@@ -4465,7 +4465,7 @@ function openUzumLink(url){
   if (isTelegramUser() && tg && typeof tg.openLink === 'function'){ try{ tg.openLink(url); return; }catch(e){} }
   location.href = url;
 }
-function openUzumFromModal(){ document.getElementById('uzumPayModal').classList.remove('open'); openUzumLink(_uzumUrl); setTimeout(closeUzumModal, 1500); }
+function openUzumFromModal(){ document.getElementById('uzumPayModal').classList.remove('open'); try{ showScreen('home'); }catch(e){} openUzumLink(_uzumUrl); }
 function copyUzumLink(){
   const done = () => showToast(t('uzumCopied'));
   try{ navigator.clipboard.writeText(_uzumUrl).then(done, () => { prompt('', _uzumUrl); }); }
@@ -4487,6 +4487,7 @@ function checkUzumReturn(){
   if (!w || !w.id) return;
   if (Date.now() - (w.t || 0) > 20 * 60 * 1000){ try{ localStorage.removeItem('milaisss_uzum_wait'); }catch(e){} return; }
   if (checkUzumReturn._busy) return; checkUzumReturn._busy = true;
+  try{ document.getElementById('uzumPayModal').classList.remove('open'); showScreen('home'); }catch(e){}
   authReady.then(() => {
     let tries = 0;
     const tick = () => {
@@ -4501,7 +4502,7 @@ function checkUzumReturn(){
           return;
         }
         if (o && o.status === 'Отменён'){ try{ localStorage.removeItem('milaisss_uzum_wait'); }catch(e){} checkUzumReturn._busy = false; return; }
-        if (++tries < 8) setTimeout(tick, 2000); else checkUzumReturn._busy = false;
+        if (++tries < 8) setTimeout(tick, 2000); else { checkUzumReturn._busy = false; showToast(t('payReturn')); }
       }).catch(() => { if (++tries < 8) setTimeout(tick, 2000); else checkUzumReturn._busy = false; });
     };
     setTimeout(tick, 800);
@@ -4722,7 +4723,8 @@ function finalizeOrder(phone, branch){
     cart = []; updateCartBadge();
     document.getElementById('phoneInput').value = '';
     const _n2 = document.getElementById('orderNoteInput'); if (_n2) _n2.value = '';
-    const _admNote = notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text);
+    // онлайн-заказы: продавцу в Telegram приходит только сообщение об ОПЛАТЕ (его шлёт платёжный Worker)
+    const _admNote = payOnline ? Promise.resolve(true) : notifyAdmin(`🛍️ Новый заказ от ${customerName}\n\n` + text);
     try{ sendNotifyEmail(ADMIN_EMAIL, `Новый заказ от ${customerName}`, text).catch(()=>{}); }catch(e){}
     _ordering = false;
     // сначала дожидаемся отправки уведомлений (не дольше 4 сек), потом уходим на Click — иначе браузер обрывает отправку
