@@ -328,6 +328,11 @@
   .cart-item .meta .name{ font-size:13px; font-weight:600; }
   .cart-item .meta .opts{ font-size:11px; color:var(--muted); margin:2px 0 6px; }
   .cart-item .meta .price{ font-family:'Space Grotesk'; font-weight:700; font-size:14px; }
+  .cart-item.is-oos{ border-color:#c0392b; }
+  .cart-item.is-oos .thumb{ opacity:.5; }
+  .cart-oos{ color:#c0392b; font-size:12px; font-weight:700; margin-top:4px; }
+  .cart-oos-banner{ margin:14px 20px 0; padding:10px 14px; border-radius:12px; background:rgba(192,57,43,.1); color:#c0392b; font-size:13px; font-weight:600; line-height:1.4; }
+  .checkout-btn:disabled{ opacity:.45; cursor:not-allowed; }
   .cart-item .remove{ align-self:flex-start; color:var(--muted); font-size:12px; cursor:pointer; }
   .cart-empty{ padding:60px 20px; text-align:center; color:var(--muted); font-size:13px; }
 
@@ -1080,7 +1085,7 @@
       <div class="back-circle" onclick="goBack('detail')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
       <div></div>
     </div>
-    <div class="cart-title"><h2 class="display">Отзывы</h2></div>
+    <div class="cart-title"><h2 class="display" data-i18n="revTitle">Отзывы</h2></div>
     <div class="reviews-list" id="reviewsList"></div>
   </div>
 
@@ -1165,12 +1170,12 @@
     <div class="cart-title"><h2 class="display" data-i18n="allProducts">Все товары</h2></div>
     <div class="cats" id="shopAllCats"></div>
     <div class="filter-panel" id="filterPanel">
-      <label class="block-label" style="margin-top:0;">Цена, сум</label>
+      <label class="block-label" style="margin-top:0;" data-i18n="fltPrice">Цена, сум</label>
       <div class="row" style="display:flex; gap:8px;">
-        <input type="number" id="filterMin" placeholder="От" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
-        <input type="number" id="filterMax" placeholder="До" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
+        <input type="number" id="filterMin" data-i18n-ph="fltFrom" placeholder="От" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
+        <input type="number" id="filterMax" data-i18n-ph="fltTo" placeholder="До" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
       </div>
-      <button class="btn-apply-filter" onclick="applyPriceFilter()">Применить</button>
+      <button class="btn-apply-filter" onclick="applyPriceFilter()" data-i18n="fltApply">Применить</button>
     </div>
     <div class="grid" id="shopAllGrid"></div>
   </div>
@@ -1328,8 +1333,8 @@
 <div class="modal-overlay" id="tgAvatarModal" onclick="closeTelegramAvatarModal()">
   <div class="modal-box" style="text-align:left; max-width:360px; position:relative;" onclick="event.stopPropagation()">
     <span class="modal-close-x" onclick="closeTelegramAvatarModal()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
-    <h3 class="display" style="text-align:center; margin-bottom:4px;">Выберите аватар</h3>
-    <p style="text-align:center; font-size:12px; color:#777; margin-bottom:16px;">Можно сменить в любой момент</p>
+    <h3 class="display" style="text-align:center; margin-bottom:4px;" data-i18n="regAvatarLabel">Выберите аватар</h3>
+    <p style="text-align:center; font-size:12px; color:#777; margin-bottom:16px;" data-i18n="avChangeAny">Можно сменить в любой момент</p>
     <div class="avatar-grid" id="tgAvatarGrid"></div>
   </div>
 </div>
@@ -1343,7 +1348,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261104-171";
+  const CURRENT_VERSION = "20261104-172";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1742,13 +1747,13 @@ function openTelegramAvatarModal(retriesLeft){
   const wrap = document.getElementById('tgAvatarGrid');
   if (avatarOptions.length === 0 && retriesLeft > 0){
     // Список аватаров может ещё не успеть подгрузиться с сервера сразу после входа — ждём и пробуем ещё раз.
-    wrap.innerHTML = '<p class="hint">Загружаем аватары...</p>';
+    wrap.innerHTML = `<p class="hint">${t('avLoading')}</p>`;
     document.getElementById('tgAvatarModal').classList.add('open');
     setTimeout(() => openTelegramAvatarModal(retriesLeft - 1), 400);
     return;
   }
   const current = localStorage.getItem('milaisss_linked_tg_avatar') || '';
-  if (avatarOptions.length === 0){ wrap.innerHTML = '<p class="hint">Аватары ещё не добавлены продавцом</p>'; }
+  if (avatarOptions.length === 0){ wrap.innerHTML = `<p class="hint">${t('regNoAvatars')}</p>`; }
   else {
     wrap.innerHTML = avatarOptions.map(url => `
       <div class="avatar-opt ${url===current?'selected':''}" onclick="selectTelegramAvatar('${url.replace(/'/g,"\\'")}')">
@@ -2031,6 +2036,22 @@ const STR_UZUM = {
   en:{ uzumModalTitle:"Order created — now pay for it", uzumModalText:"Tap the button and the Uzum Bank app opens with the amount and order number filled in. You have 15 minutes to pay.", uzumOpenBtn:"Pay in Uzum Bank", uzumCopyBtn:"Copy payment link", uzumHelp:"If a website or the App Store opens instead of the app, copy the link and paste it into Safari or Chrome.", uzumLaterBtn:"I’ll pay later", uzumCopied:"Link copied — paste it into Safari or Chrome" }
 };
 Object.keys(STR_UZUM).forEach(l => Object.assign(STR[l], STR_UZUM[l]));
+const STR_CARTOOS = {
+  ru:{ cartItemOut:"Закончился — удалите из корзины", cartItemLeft:"Осталось только {n} шт — удалите и добавьте заново", cartFixItems:"Некоторых товаров из корзины уже нет в наличии. Удалите их, чтобы оформить заказ." },
+  uz:{ cartItemOut:"Tugagan — savatdan olib tashlang", cartItemLeft:"Faqat {n} dona qoldi — olib tashlab, qayta qo‘shing", cartFixItems:"Savatdagi ba’zi mahsulotlar tugagan. Buyurtma berish uchun ularni olib tashlang." },
+  tr:{ cartItemOut:"Tükendi — sepetten çıkarın", cartItemLeft:"Sadece {n} adet kaldı — çıkarıp yeniden ekleyin", cartFixItems:"Sepetteki bazı ürünler tükendi. Sipariş vermek için onları çıkarın." },
+  az:{ cartItemOut:"Bitib — səbətdən silin", cartItemLeft:"Yalnız {n} ədəd qalıb — silib yenidən əlavə edin", cartFixItems:"Səbətdəki bəzi məhsullar bitib. Sifariş vermək üçün onları silin." },
+  en:{ cartItemOut:"Sold out — remove it from the cart", cartItemLeft:"Only {n} left — remove it and add again", cartFixItems:"Some items in your cart are no longer in stock. Remove them to place the order." }
+};
+Object.keys(STR_CARTOOS).forEach(l => Object.assign(STR[l], STR_CARTOOS[l]));
+const STR_FIX172 = {
+  ru:{ revLeave:"Оставить отзыв", revDoneLbl:"Отзыв отправлен", revPlaceholder:"Расскажите о товаре...", revAddPhoto:"Добавить фото (необязательно)", revReplacePhoto:"Заменить фото", revUploading:"Загружаем фото...", revSending:"Отправка...", revNeedText:"Напишите пару слов о товаре", revNone:"Пока нет отзывов по этому товару", revTitle:"Отзывы", fltPrice:"Цена, сум", fltFrom:"От", fltTo:"До", fltApply:"Применить", avChangeAny:"Можно сменить в любой момент", avLoading:"Загружаем аватары..." },
+  uz:{ revLeave:"Sharh qoldirish", revDoneLbl:"Sharh yuborildi", revPlaceholder:"Mahsulot haqida yozing...", revAddPhoto:"Rasm qo‘shish (ixtiyoriy)", revReplacePhoto:"Rasmni almashtirish", revUploading:"Rasm yuklanmoqda...", revSending:"Yuborilmoqda...", revNeedText:"Mahsulot haqida bir-ikki so‘z yozing", revNone:"Bu mahsulot haqida hali sharhlar yo‘q", revTitle:"Sharhlar", fltPrice:"Narx, so‘m", fltFrom:"Dan", fltTo:"Gacha", fltApply:"Qo‘llash", avChangeAny:"Istalgan vaqtda o‘zgartirish mumkin", avLoading:"Avatarlar yuklanmoqda..." },
+  tr:{ revLeave:"Yorum yap", revDoneLbl:"Yorum gönderildi", revPlaceholder:"Ürün hakkında yazın...", revAddPhoto:"Fotoğraf ekle (isteğe bağlı)", revReplacePhoto:"Fotoğrafı değiştir", revUploading:"Fotoğraf yükleniyor...", revSending:"Gönderiliyor...", revNeedText:"Ürün hakkında birkaç kelime yazın", revNone:"Bu ürün için henüz yorum yok", revTitle:"Yorumlar", fltPrice:"Fiyat, sum", fltFrom:"En az", fltTo:"En çok", fltApply:"Uygula", avChangeAny:"İstediğiniz zaman değiştirebilirsiniz", avLoading:"Avatarlar yükleniyor..." },
+  az:{ revLeave:"Rəy yaz", revDoneLbl:"Rəy göndərildi", revPlaceholder:"Məhsul haqqında yazın...", revAddPhoto:"Foto əlavə et (istəyə görə)", revReplacePhoto:"Fotonu dəyiş", revUploading:"Foto yüklənir...", revSending:"Göndərilir...", revNeedText:"Məhsul haqqında bir-iki söz yazın", revNone:"Bu məhsul üçün hələ rəy yoxdur", revTitle:"Rəylər", fltPrice:"Qiymət, sum", fltFrom:"Min", fltTo:"Maks", fltApply:"Tətbiq et", avChangeAny:"İstənilən vaxt dəyişmək olar", avLoading:"Avatarlar yüklənir..." },
+  en:{ revLeave:"Leave a review", revDoneLbl:"Review sent", revPlaceholder:"Tell us about the item...", revAddPhoto:"Add a photo (optional)", revReplacePhoto:"Replace photo", revUploading:"Uploading photo...", revSending:"Sending...", revNeedText:"Write a few words about the item", revNone:"No reviews for this item yet", revTitle:"Reviews", fltPrice:"Price, UZS", fltFrom:"From", fltTo:"To", fltApply:"Apply", avChangeAny:"You can change it any time", avLoading:"Loading avatars..." }
+};
+Object.keys(STR_FIX172).forEach(l => Object.assign(STR[l], STR_FIX172[l]));
 
 /* ---------- тема: светлая / тёмная ---------- */
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
@@ -2080,6 +2101,8 @@ function applyLang(){
     document.getElementById('detailDesc').textContent = getTranslatedDesc(currentProduct);
     if (currentColors[selectedColorIdx]) document.getElementById('colorLabel').textContent = getTranslatedColorName(currentColors[selectedColorIdx]);
     updateReviewsSummary();
+    try{ document.getElementById('detailPrice').innerHTML = priceHTML(currentProduct) + (discOf(currentProduct) ? `<div class="disc-line">${t('discountWord')} −${discOf(currentProduct)}%</div>` : ''); }catch(e){}
+    try{ if (typeof window._refreshDetailStock === 'function') window._refreshDetailStock(); }catch(e){}
   }
 }
 /* ---------- главный баннер: карусель фото ---------- */
@@ -2239,9 +2262,9 @@ document.addEventListener('touchmove', e => { if (!_zoomOK && e.touches.length >
 let _lastTap = 0;
 document.addEventListener('touchend', e => { const n = Date.now(); if (!_zoomOK && n - _lastTap < 320 && e.target.closest && !e.target.closest('input,textarea,select')) e.preventDefault(); _lastTap = n; }, { passive:false });
 function openLightbox(images, startIdx){
-  setZoomAllowed(true);
-  lbImages = images.filter(Boolean);
+  lbImages = (images || []).filter(Boolean);
   if (lbImages.length === 0) return;
+  setZoomAllowed(true);
   const wrap = document.getElementById('lightboxCarousel');
   wrap.innerHTML = lbImages.map(url => `<div class="lb-slide" style="background-image:url('${url}')"></div>`).join('');
   document.getElementById('lightbox').classList.add('open');
@@ -2778,9 +2801,9 @@ function favoriteCardHTML(p, fav){
     if (c){
       if (c.images && c.images.length) displayImage = c.images[0];
       else if (c.image) displayImage = c.image;
-      colorLine = getTranslatedColorName(c);
+      colorLine = escH(getTranslatedColorName(c));
     } else {
-      colorLine = fav.colorName;
+      colorLine = escH(fav.colorName);
     }
   }
   if (fav.size) colorLine += (colorLine ? ' · ' : '') + fav.size;
@@ -2848,6 +2871,7 @@ db.collection('products').onSnapshot(snap => {
   renderCatPills(); if (typeof renderDrawer === 'function') renderDrawer();
   renderMainGrid(); renderFavGrid();
   if (document.getElementById('shopAll').classList.contains('active')) renderShopAllGrid();
+  try{ if (document.getElementById('cart').classList.contains('active')) renderCart(); }catch(e){}
   try{ localStorage.setItem('milaisss_products_cache', JSON.stringify({ t: Date.now(), p: products })); }catch(e){}
   markLoaded('products');
   showNetBanner(false);
@@ -2862,6 +2886,7 @@ function mergeReviews(){
   if (currentProduct) updateReviewsSummary();
   renderRatingSummary();
   renderMyReviews();
+  try{ if (Array.isArray(_lastOrders) && _lastOrders.length) renderStatusList(_lastOrders); }catch(e){}
 }
 db.collection('reviews').where('approved', '==', true).onSnapshot(snap => {
   _revPublic = {};
@@ -3913,9 +3938,60 @@ function getTranslatedProductName(p){
 
 function getSizeStock(product, color, sizeLabel){
   if (!color) return Number((product && product.stock) || 0);
-  if (color.sizeStocks && Object.prototype.hasOwnProperty.call(color.sizeStocks, sizeLabel)) return color.sizeStocks[sizeLabel];
+  if (color.sizeStocks && Object.prototype.hasOwnProperty.call(color.sizeStocks, sizeLabel)) return Number(color.sizeStocks[sizeLabel]) || 0;
+  if (color.sizeStocks && Object.keys(color.sizeStocks).length) return 0; // такого размера в наличии нет
   if (typeof color.stock === 'number') return color.stock;
   return Number((product && product.stock) || 0);
+}
+/* ---------- корзина сверяется с актуальным наличием и ценами ---------- */
+function cartItemStock(item){
+  const p = products.find(x => x.id === item.productId);   // скрытые и удалённые товары сюда не попадают
+  if (!p) return 0;
+  const hasColors = p.colors && p.colors.length;
+  const c = hasColors ? p.colors.find(x => x.name === item.colorName) : null;
+  if (hasColors && !c) return 0;
+  return Math.max(0, Number(getSizeStock(p, c, item.size)) || 0);
+}
+function syncCartWithProducts(){
+  if (!cart.length || !products.length) return false;
+  let changed = false;
+  cart.forEach(item => {
+    const p = products.find(x => x.id === item.productId);
+    if (!p) return;
+    const price = effPrice(p), old = Number(p.price || 0), disc = discOf(p);
+    if (item.price !== price || item.oldPrice !== old || (item.discount || 0) !== disc){ item.price = price; item.oldPrice = old; item.discount = disc; changed = true; }
+  });
+  if (changed){ try{ localStorage.setItem('milaisss_cart', JSON.stringify(cart)); }catch(e){} }
+  return changed;
+}
+// где остаток общий (товар без цветов или цвет без таблицы размеров), разные размеры делят один остаток
+function cartStockBucket(item){
+  const p = products.find(x => x.id === item.productId);
+  if (!p) return item.productId + '|' + item.colorName + '|' + item.size;
+  const hasColors = p.colors && p.colors.length;
+  const c = hasColors ? p.colors.find(x => x.name === item.colorName) : null;
+  if (!hasColors) return item.productId;
+  if (c && !(c.sizeStocks && Object.keys(c.sizeStocks).length)) return item.productId + '|' + item.colorName;
+  return item.productId + '|' + item.colorName + '|' + item.size;
+}
+function cartProblems(){
+  const need = {};
+  cart.forEach(i => { const k = cartStockBucket(i); need[k] = (need[k] || 0) + (i.qty || 0); });
+  return cart.filter(item => cartItemStock(item) < need[cartStockBucket(item)]);
+}
+// перед оформлением: свежие остатки прямо с сервера (а не из памяти страницы)
+async function verifyCartWithServer(){
+  const ids = [...new Set(cart.map(i => i.productId).filter(Boolean))];
+  const docs = await Promise.all(ids.map(id => db.collection('products').doc(id).get({ source: 'server' }).catch(() => db.collection('products').doc(id).get())));
+  docs.forEach((d, i) => {
+    const idx = products.findIndex(p => p.id === ids[i]);
+    const data = d && d.exists ? d.data() : null;
+    if (!data || data.hidden){ if (idx > -1) products.splice(idx, 1); return; }
+    const fresh = { id: ids[i], ...data };
+    if (idx > -1) products[idx] = fresh; else products.push(fresh);
+  });
+  syncCartWithProducts();
+  return cartProblems().length === 0;
 }
 
 function updateReviewsSummary(){
@@ -3938,10 +4014,10 @@ function openReviews(){
   const rated = approved.filter(r => typeof r.rating === 'number');
   const avg = rated.length ? (rated.reduce((s,r)=>s+r.rating,0)/rated.length).toFixed(1) : '—';
 
-  let html = `<div class="reviews-summary-head"><span class="rs-avg">${avg}</span><span class="rs-sub">${approved.length} отзывов</span></div>`;
+  let html = `<div class="reviews-summary-head"><span class="rs-avg">${avg}</span><span class="rs-sub">${approved.length} ${t('reviewsWord')}</span></div>`;
 
   if (approved.length === 0){
-    html += '<p class="hint">Пока нет отзывов по этому товару</p>';
+    html += `<p class="hint">${t('revNone')}</p>`;
   } else {
     html += approved.map(r => {
       const name = r.anonymous ? t('revAnonName') : (String(r.authorName||'').replace(/\s*\(@[^)]*\)/g,'').trim() || t('revBuyer'));
@@ -3970,7 +4046,7 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
   renderPolicyAccordion();
   const rawSizes = (currentProduct.sizes && currentProduct.sizes.length) ? currentProduct.sizes : ["38","39","40","41","42","43"];
   const sizeLabels = rawSizes.map(s => (s && typeof s === 'object') ? s.size : s);
-  const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", hex:"#f4f1ec", stock: currentProduct.stock || 0}];
+  const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", nameTranslations:{ en:"Standard", uz:"Standart", tr:"Standart", az:"Standart" }, hex:"#f4f1ec", stock: currentProduct.stock || 0}];
   currentColors = colors;
   selectedColorIdx = 0;
 
@@ -4110,6 +4186,7 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
   renderColorGallery(0);
   renderSizeRow(0);
   refreshStockUI(0);
+  window._refreshDetailStock = () => refreshStockUI(selectedColorIdx);
 
   const colorRow = document.getElementById('colorRow');
   colorRow.innerHTML = '';
@@ -4312,6 +4389,9 @@ function renderCart(){
     content.innerHTML = `<div class="cart-empty">${t('empty')}</div>`;
     return;
   }
+  syncCartWithProducts();
+  const _probs = cartProblems();
+  let cartBad = false;
   let total = 0, totalOld = 0, discSet = new Set(), allDisc = true;
   const itemsHtml = cart.map((item, idx) => {
     total += item.price * item.qty;
@@ -4321,13 +4401,18 @@ function renderCart(){
     const thumbStyle = item.image ? `style="background-image:url('${item.image}')"` : '';
     const product = products.find(pr => pr.id === item.productId);
     const displayName = product ? getTranslatedProductName(product) : item.name;
+    const left = cartItemStock(item);
+    const bad = _probs.includes(item);
+    if (bad) cartBad = true;
+    const badNote = bad ? `<div class="cart-oos">${left <= 0 ? t('cartItemOut') : t('cartItemLeft').replace('{n}', left)}</div>` : '';
     return `
-      <div class="cart-item">
+      <div class="cart-item${bad ? ' is-oos' : ''}">
         <div class="thumb" ${thumbStyle}>${item.image ? '' : item.emoji}</div>
         <div class="meta">
           <div class="name">${displayName}</div>
           <div class="opts">${t('sizeWord')} ${item.size} · ${item.colorName} · ${item.qty} ${t('pcsWord')}</div>
           <div class="price">${oldP > item.price ? `<span class="old">${fmt(oldP * item.qty)}</span>` : ''}${fmt(item.price * item.qty)}</div>
+          ${badNote}
         </div>
         <div class="remove" onclick="removeFromCart(${idx})">${t('removeWord')}</div>
       </div>`;
@@ -4341,13 +4426,15 @@ function renderCart(){
       <div class="sum-row"><span>${t('deliveryLabel')}</span><span>${t('deliveryAgreed')}</span></div>
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
-    <button class="checkout-btn" onclick="requireRegistration(goToCheckoutFlow)">${t('checkoutBtn')}</button>
+    ${cartBad ? `<div class="cart-oos-banner">${t('cartFixItems')}</div>` : ''}
+    <button class="checkout-btn" ${cartBad ? 'disabled' : ''} onclick="requireRegistration(goToCheckoutFlow)">${t('checkoutBtn')}</button>
     <div class="hint">${t('nextStepHint')}</div>
   `;
 }
 
 function goToCheckoutFlow(){
   if (cart.length === 0) return;
+  if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
   selectPayMethod('');
 
   selectedBtsBranch = '';
@@ -4430,6 +4517,7 @@ function confirmPayment(){
   if (!selectedPayMethod){ showToast(t('choosePay')); return; }
 
   window._payTapAt = Date.now(); // момент нажатия «Перейти к оплате» — нужен, чтобы сразу открыть приложение Uzum
+  if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
   finalizeOrder(phone, branch);
 }
 
@@ -4486,6 +4574,7 @@ function checkUzumReturn(){
   let w = null; try{ w = JSON.parse(localStorage.getItem('milaisss_uzum_wait') || 'null'); }catch(e){}
   if (!w || !w.id) return;
   if (Date.now() - (w.t || 0) > 20 * 60 * 1000){ try{ localStorage.removeItem('milaisss_uzum_wait'); }catch(e){} return; }
+  if (document.getElementById('uzumPayModal').classList.contains('open')) return; // клиент ещё не нажал «Оплатить»
   if (checkUzumReturn._busy) return; checkUzumReturn._busy = true;
   try{ document.getElementById('uzumPayModal').classList.remove('open'); showScreen('home'); }catch(e){}
   authReady.then(() => {
@@ -4595,12 +4684,13 @@ function decrementStockForOrder(orderItems){
       const updates = {};
       for (const productId of productIds){
         const data = dataById[productId];
-        if (!data) continue;
+        if (!data || data.hidden) throw new Error('OUT_OF_STOCK');
         const items = orderItems.filter(it => it.productId === productId);
         const colors = data.colors || [];
         if (colors.length){
           items.forEach(it => {
             const qty = it.qty || 0;
+            if (!(qty > 0)) throw new Error('OUT_OF_STOCK');
             const color = colors.find(c => c.name === it.colorName);
             if (!color) throw new Error('OUT_OF_STOCK');
             if (color.sizeStocks && Object.prototype.hasOwnProperty.call(color.sizeStocks, it.size)){
@@ -4608,6 +4698,8 @@ function decrementStockForOrder(orderItems){
               if (cur < qty) throw new Error('OUT_OF_STOCK');
               color.sizeStocks[it.size] = cur - qty;
               color.stock = Object.values(color.sizeStocks).reduce((a,b) => a + (Number(b)||0), 0);
+            } else if (color.sizeStocks && Object.keys(color.sizeStocks).length){
+              throw new Error('OUT_OF_STOCK'); // такого размера нет в таблице наличия
             } else {
               const cur = Number(color.stock) || 0;
               if (cur < qty) throw new Error('OUT_OF_STOCK');
@@ -4684,6 +4776,7 @@ try{ detectSource(); }catch(e){}
 
 function finalizeOrder(phone, branch){
   if (_ordering || !cart.length) return;
+  syncCartWithProducts(); // актуальные цены (если ты изменил цену, пока клиент был на оформлении)
   _ordering = true;
   const _payMethod = selectedPayMethod;
   let total = 0;
@@ -4708,6 +4801,7 @@ function finalizeOrder(phone, branch){
 
   const notifyChatId = '';
   let stockTaken = false;
+  // проверка наличия идёт внутри транзакции по свежим данным сервера (decrementStockForOrder)
   decrementStockForOrder(orderItems).then(() => {
     stockTaken = true;
     return db.collection('orders').add({
@@ -4741,7 +4835,8 @@ function finalizeOrder(phone, branch){
     _ordering = false;
     if (stockTaken) restoreStockForOrder(orderItems);
     if (err && err.message === 'OUT_OF_STOCK'){
-      showToast(t('outOfStockToast'));
+      showToast(t('cartFixItems'));
+      verifyCartWithServer().catch(() => {}).then(() => { try{ showScreen('cart'); }catch(e){} });
     } else {
       showToast(t('orderFail'));
     }
@@ -4933,8 +5028,23 @@ function trackHTML(status){
   }).join('');
   return `<div class="trk"><div class="trk-bar"><div class="trk-fill" style="width:${pct}%; background:${fillBg}"></div></div>${cols}</div>`;
 }
+const _revDrafts = {}; // недописанные отзывы переживают перерисовку списка заказов
 function renderStatusList(orders){
   const wrap = document.getElementById('statusList'); if (!wrap) return;
+  wrap.querySelectorAll('.review-form').forEach(f => {
+    const key = f.id.slice(3), ta = document.getElementById('rt-' + key);
+    if (f.classList.contains('open') || (ta && ta.value)) _revDrafts[key] = { open: f.classList.contains('open'), text: ta ? ta.value : '' };
+  });
+  try{ _renderStatusListInner(wrap, orders); } finally {
+    Object.keys(_revDrafts).forEach(key => {
+      const f = document.getElementById('rf-' + key), ta = document.getElementById('rt-' + key);
+      if (f && _revDrafts[key].open) f.classList.add('open');
+      if (ta && _revDrafts[key].text) ta.value = _revDrafts[key].text;
+      const n = reviewStars[key]; if (n) document.querySelectorAll(`#stars-${key} span`).forEach(sp => sp.classList.toggle('on', Number(sp.getAttribute('data-n')) <= n));
+    });
+  }
+}
+function _renderStatusListInner(wrap, orders){
   if (!orders.length){ wrap.innerHTML = `<div class="trk-empty">${t('noOrdersYet')}</div>`; return; }
   wrap.innerHTML = orders.map(o => `
     <div class="trk-card">
@@ -4962,19 +5072,24 @@ function renderMyReviews(){
     <div class="mr-text">${escH(r.text)}</div>${safeUrl(r.photo) ? `<img src="${safeUrl(r.photo)}" alt="">` : ''}</div>`).join('');
 }
 
+function alreadyReviewed(order, it){
+  const mine = Object.values(typeof _revMine !== 'undefined' ? _revMine : {});
+  return mine.some(r => r.productId === it.productId && (r.orderId ? r.orderId === order.id : (r.colorName || '') === (it.colorName || '')));
+}
 function reviewFormHTML(order, it, ii){
+  if (alreadyReviewed(order, it)) return `<div class="review-btn" style="cursor:default; opacity:.6;">✓ ${t('revDoneLbl')}</div>`;
   return `
-            <div class="review-btn" onclick="toggleReviewForm('${order.id}',${ii})">Оставить отзыв</div>
+            <div class="review-btn" onclick="toggleReviewForm('${order.id}',${ii})">${t('revLeave')}</div>
             <div class="review-form" id="rf-${order.id}-${ii}">
               <div class="stars" id="stars-${order.id}-${ii}">
                 ${[1,2,3,4,5].map(n => `<span data-n="${n}" onclick="setStar('${order.id}',${ii},${n})">★</span>`).join('')}
               </div>
-              <textarea id="rt-${order.id}-${ii}" placeholder="Расскажите о товаре..." rows="2"></textarea>
-              <label class="review-photo-btn" for="rp-${order.id}-${ii}">📷 <span id="rpLabel-${order.id}-${ii}">Добавить фото (необязательно)</span></label>
+              <textarea id="rt-${order.id}-${ii}" placeholder="${escH(t('revPlaceholder'))}" rows="2"></textarea>
+              <label class="review-photo-btn" for="rp-${order.id}-${ii}">📷 <span id="rpLabel-${order.id}-${ii}">${t('revAddPhoto')}</span></label>
               <input type="file" id="rp-${order.id}-${ii}" accept="image/*" onchange="previewReviewPhoto('${order.id}',${ii})" style="display:none;">
               <div class="review-photo-preview" id="rpPreview-${order.id}-${ii}"></div>
               <label class="anon-sw"><input type="checkbox" id="ra-${order.id}-${ii}"><span class="anon-track"><i></i></span><span class="anon-txt">${t('revAnon')}</span></label>
-              <button id="rsBtn-${order.id}-${ii}" onclick="submitReview('${order.id}',${ii},'${it.productId}','${(it.name||'').replace(/'/g,"")}','${(it.colorName||'').replace(/'/g,"")}')">Отправить</button>
+              <button id="rsBtn-${order.id}-${ii}" onclick="submitReview('${order.id}',${ii})">${t('sendBtn')}</button>
             </div>`;
 }
 
@@ -4984,7 +5099,7 @@ function renderOrders(){
   if (window._ordersUnsub) window._ordersUnsub();
   window._ordersCid = customerId;
   window._ordersUnsub = db.collection('orders').where('customerId','==',customerId).onSnapshot(snap => {
-    if (snap.empty){ renderStatusList([]); return; }
+    if (snap.empty){ _lastOrders = []; renderStatusList([]); return; }
     const orders = [];
     snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
     orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
@@ -5007,40 +5122,45 @@ function previewReviewPhoto(orderId, ii){
   const preview = document.getElementById(`rpPreview-${orderId}-${ii}`);
   const label = document.getElementById(`rpLabel-${orderId}-${ii}`);
   const file = input.files && input.files[0];
-  if (!file){ preview.innerHTML = ''; if (label) label.textContent = 'Добавить фото (необязательно)'; return; }
+  if (!file){ preview.innerHTML = ''; if (label) label.textContent = t('revAddPhoto'); return; }
   const url = URL.createObjectURL(file);
   preview.innerHTML = `<img src="${url}"><span class="rp-remove" onclick="removeReviewPhoto('${orderId}',${ii})">${t('rmPhoto')}</span>`;
-  if (label) label.textContent = 'Заменить фото';
+  if (label) label.textContent = t('revReplacePhoto');
 }
 function removeReviewPhoto(orderId, ii){
   const input = document.getElementById(`rp-${orderId}-${ii}`);
   input.value = '';
   document.getElementById(`rpPreview-${orderId}-${ii}`).innerHTML = '';
   const label = document.getElementById(`rpLabel-${orderId}-${ii}`);
-  if (label) label.textContent = 'Добавить фото (необязательно)';
+  if (label) label.textContent = t('revAddPhoto');
 }
 
-function submitReview(orderId, ii, productId, productName, colorName){
+function submitReview(orderId, ii){
+  const _o = (_lastOrders || []).find(x => x.id === orderId);
+  const _it = _o && (_o.items || [])[ii];
+  if (!_it) return;
+  const productId = _it.productId, productName = _it.name || '', colorName = _it.colorName || '';
   const text = document.getElementById(`rt-${orderId}-${ii}`).value.trim();
   const rating = reviewStars[`${orderId}-${ii}`] || null;
   const fileInput = document.getElementById(`rp-${orderId}-${ii}`);
   const file = fileInput && fileInput.files && fileInput.files[0];
   const anonymous = document.getElementById(`ra-${orderId}-${ii}`).checked;
-  if (!text) return;
+  if (!text){ showToast(t('revNeedText')); const ta = document.getElementById(`rt-${orderId}-${ii}`); if (ta) ta.focus(); return; }
 
   const btn = document.getElementById(`rsBtn-${orderId}-${ii}`);
   if (btn && btn.disabled) return;
-  if (btn){ btn.disabled = true; btn.textContent = file ? 'Загружаем фото...' : 'Отправка...'; }
+  if (btn){ btn.disabled = true; btn.textContent = file ? t('revUploading') : t('revSending'); }
 
   const finish = (photoUrl) => {
     const payload = {
-      productId, productName, colorName: colorName || '', text, approved: false, createdAt: Date.now(),
+      productId, productName, colorName: colorName || '', orderId, text, approved: false, createdAt: Date.now(),
       anonymous, authorName: anonymous ? '' : String(getCustomerName()||'').replace(/\s*\(@[^)]*\)/g,'').trim(), customerId: getCustomerId()
     };
     if (rating) payload.rating = rating;
     if (photoUrl) payload.photo = photoUrl;
     db.collection('reviews').add(payload).then(() => {
       showToast(t('revSent'));
+      delete _revDrafts[`${orderId}-${ii}`];
       document.getElementById(`rf-${orderId}-${ii}`).classList.remove('open');
     }).catch(() => {
       showToast(t('revFail'));
