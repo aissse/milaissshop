@@ -131,6 +131,13 @@
   .faq-row{ border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; }
   .faq-row input{ margin-bottom:6px; }
   .faq-row .rm{ float:right; color:#a83232; font-size:12px; cursor:pointer; font-weight:600; }
+  /* поля переводов на en/uz/tr/az скрыты — их заполняет автоперевод при сохранении */
+  textarea[id^="f_name_"][id*="_en_"], textarea[id^="f_name_"][id*="_uz_"], textarea[id^="f_name_"][id*="_tr_"], textarea[id^="f_name_"][id*="_az_"],
+  textarea[id^="f_desc_"][id*="_en_"], textarea[id^="f_desc_"][id*="_uz_"], textarea[id^="f_desc_"][id*="_tr_"], textarea[id^="f_desc_"][id*="_az_"],
+  textarea[id^="f_returnPolicy_"][id*="_en_"], textarea[id^="f_returnPolicy_"][id*="_uz_"], textarea[id^="f_returnPolicy_"][id*="_tr_"], textarea[id^="f_returnPolicy_"][id*="_az_"],
+  textarea[id^="f_deliveryPolicy_"][id*="_en_"], textarea[id^="f_deliveryPolicy_"][id*="_uz_"], textarea[id^="f_deliveryPolicy_"][id*="_tr_"], textarea[id^="f_deliveryPolicy_"][id*="_az_"],
+  textarea[id^="f_careInstructions_"][id*="_en_"], textarea[id^="f_careInstructions_"][id*="_uz_"], textarea[id^="f_careInstructions_"][id*="_tr_"], textarea[id^="f_careInstructions_"][id*="_az_"],
+  .color-row-block .c-name-tr{ display:none !important; }
 </style>
 </head>
 <body>
@@ -638,7 +645,7 @@ function productFormCardHTML(type){
       <textarea id="f_name_uz_${suf}" rows="1" placeholder="Oʻzbekcha" style="margin-top:6px;"></textarea>
       <textarea id="f_name_tr_${suf}" rows="1" placeholder="Türkçe" style="margin-top:6px;"></textarea>
       <textarea id="f_name_az_${suf}" rows="1" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
-      <div class="hint">Переводы необязательны — без них название будет одинаковым на всех языках.</div>
+      <div class="hint">Переводы на другие языки сайт делает сам при сохранении.</div>
 
       <label>Подзаголовок / бейдж (необязательно)</label>
       <input type="text" id="f_sub_${suf}" placeholder="Например: New Arrival">
@@ -664,10 +671,10 @@ function productFormCardHTML(type){
 
       ${sizeFieldHTML(suf, type.sizeMode)}
 
-      <label>Цвета: фото, перевод названия и наличие по размерам</label>
+      <label>Цвета: фото и наличие по размерам</label>
       <div id="colorRows_${suf}"></div>
       <button type="button" class="btn secondary" style="margin-top:10px;" onclick="addColorRow('colorRows_${suf}', null, '${suf}')">+ Добавить цвет</button>
-      <div class="hint">Наличие указывается по каждому цвету отдельно. Переводы названия цвета заполнятся сами при сохранении. Если перевод не нравится — исправь его в строке переводов в формате en:Gray, uz:..., tr:..., az:...</div>
+      <div class="hint">Наличие указывается по каждому цвету отдельно. Переводы названия цвета заполнятся сами при сохранении.</div>
 
       <label>Цвет карточки товара (фон, если нет фото)</label>
       <input type="color" id="f_cardcolor_${suf}" value="#f4f1ec">
@@ -675,12 +682,10 @@ function productFormCardHTML(type){
       <label>Описание</label>
       <textarea id="f_desc_${suf}" placeholder="Короткое описание товара"></textarea>
 
-      <label>Переводы описания (необязательно)</label>
       <textarea id="f_desc_en_${suf}" rows="2" placeholder="English description"></textarea>
       <textarea id="f_desc_uz_${suf}" rows="2" placeholder="O'zbekcha tavsif" style="margin-top:6px;"></textarea>
       <textarea id="f_desc_tr_${suf}" rows="2" placeholder="Türkçe açıklama" style="margin-top:6px;"></textarea>
       <textarea id="f_desc_az_${suf}" rows="2" placeholder="Azərbaycan təsviri" style="margin-top:6px;"></textarea>
-      <div class="hint">Оставь пустым, если перевод не нужен — покупатель увидит основное описание.</div>
 
       <label>Возврат (для этого товара; пусто = общий текст из "Оформление")</label>
       <textarea id="f_returnPolicy_${suf}" rows="2" placeholder="Например: этот товар не подлежит возврату"></textarea>
@@ -688,7 +693,6 @@ function productFormCardHTML(type){
       <textarea id="f_returnPolicy_uz_${suf}" rows="2" placeholder="Oʻzbekcha" style="margin-top:6px;"></textarea>
       <textarea id="f_returnPolicy_tr_${suf}" rows="2" placeholder="Türkçe" style="margin-top:6px;"></textarea>
       <textarea id="f_returnPolicy_az_${suf}" rows="2" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
-      <div class="hint">Переводы необязательны — без них покупатель на других языках увидит общий (переведённый) текст из "Оформление".</div>
 
       <label>Доставка (для этого товара; пусто = общий текст)</label>
       <textarea id="f_deliveryPolicy_${suf}" rows="2" placeholder="Особые условия доставки этого товара"></textarea>
@@ -696,7 +700,6 @@ function productFormCardHTML(type){
       <textarea id="f_deliveryPolicy_uz_${suf}" rows="2" placeholder="Oʻzbekcha" style="margin-top:6px;"></textarea>
       <textarea id="f_deliveryPolicy_tr_${suf}" rows="2" placeholder="Türkçe" style="margin-top:6px;"></textarea>
       <textarea id="f_deliveryPolicy_az_${suf}" rows="2" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
-      <div class="hint">Переводы необязательны — без них покупатель на других языках увидит общий (переведённый) текст из "Оформление".</div>
 
       <label>Уход за товаром (для этого товара; пусто = общий текст)</label>
       <textarea id="f_careInstructions_${suf}" rows="2" placeholder="Как ухаживать именно за этим товаром"></textarea>
@@ -704,7 +707,6 @@ function productFormCardHTML(type){
       <textarea id="f_careInstructions_uz_${suf}" rows="2" placeholder="Oʻzbekcha" style="margin-top:6px;"></textarea>
       <textarea id="f_careInstructions_tr_${suf}" rows="2" placeholder="Türkçe" style="margin-top:6px;"></textarea>
       <textarea id="f_careInstructions_az_${suf}" rows="2" placeholder="Azərbaycan" style="margin-top:6px;"></textarea>
-      <div class="hint">Переводы необязательны — без них покупатель на других языках увидит общий (переведённый) текст из "Оформление".</div>
 
       <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--maroon-dark); margin-top:18px;"><input type="checkbox" id="f_retranslate_${suf}" style="width:auto; accent-color:var(--maroon);"> Перевести заново все переводы</label>
       <div class="hint" style="margin-top:4px;">Пустые переводы на en, uz, tr, az (название, описание, политики, цвета) заполняются автоматически при сохранении — вручную писать не нужно. Галочка нужна, если ты поменял русский текст и хочешь обновить все переводы.</div>
