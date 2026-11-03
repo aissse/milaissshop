@@ -1262,6 +1262,17 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="uzumPayModal">
+  <div class="modal-box">
+    <p style="font-weight:700; margin-bottom:6px;" data-i18n="uzumModalTitle">Заказ создан — осталось оплатить</p>
+    <p id="uzumModalText" style="font-size:13px;" data-i18n="uzumModalText">Нажмите кнопку — откроется приложение Uzum Bank, сумма и номер заказа уже будут заполнены. На оплату даётся 15 минут.</p>
+    <button type="button" onclick="openUzumFromModal()" data-i18n="uzumOpenBtn">Оплатить в Uzum Bank</button>
+    <button type="button" class="modal-sec" onclick="copyUzumLink()" data-i18n="uzumCopyBtn">Скопировать ссылку на оплату</button>
+    <p style="font-size:11px; opacity:.75; margin-top:8px;" data-i18n="uzumHelp">Если вместо приложения открылся сайт или App Store — скопируйте ссылку и вставьте её в Safari или Chrome.</p>
+    <button type="button" class="modal-sec" onclick="closeUzumModal()" data-i18n="uzumLaterBtn">Оплачу позже</button>
+  </div>
+</div>
+
 <div class="success-overlay" id="successOverlay">
   <div class="success-status" role="status" aria-live="polite">
     <div class="success-state loading" id="successLoading"><span class="success-spinner"></span><span id="successLoadingText">Оформляем заказ...</span></div>
@@ -1326,7 +1337,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261103-168";
+  const CURRENT_VERSION = "20261104-169";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2006,6 +2017,14 @@ const STR_REVLINK = {
   en:{ revLinkLogin:"We couldn’t find this order. Log in with the same Telegram account you ordered from" }
 };
 Object.keys(STR_REVLINK).forEach(l => Object.assign(STR[l], STR_REVLINK[l]));
+const STR_UZUM = {
+  ru:{ uzumModalTitle:"Заказ создан — осталось оплатить", uzumModalText:"Нажмите кнопку — откроется приложение Uzum Bank, сумма и номер заказа уже будут заполнены. На оплату даётся 15 минут.", uzumOpenBtn:"Оплатить в Uzum Bank", uzumCopyBtn:"Скопировать ссылку на оплату", uzumHelp:"Если вместо приложения открылся сайт или App Store — скопируйте ссылку и вставьте её в Safari или Chrome.", uzumLaterBtn:"Оплачу позже", uzumCopied:"Ссылка скопирована — вставьте её в Safari или Chrome" },
+  uz:{ uzumModalTitle:"Buyurtma yaratildi — to‘lash qoldi", uzumModalText:"Tugmani bosing — Uzum Bank ilovasi ochiladi, summa va buyurtma raqami to‘ldirilgan bo‘ladi. To‘lov uchun 15 daqiqa beriladi.", uzumOpenBtn:"Uzum Bank orqali to‘lash", uzumCopyBtn:"To‘lov havolasini nusxalash", uzumHelp:"Agar ilova o‘rniga sayt yoki App Store ochilsa — havolani nusxalab, Safari yoki Chrome’ga qo‘ying.", uzumLaterBtn:"Keyinroq to‘layman", uzumCopied:"Havola nusxalandi — uni Safari yoki Chrome’ga qo‘ying" },
+  tr:{ uzumModalTitle:"Sipariş oluşturuldu — ödeme kaldı", uzumModalText:"Butona dokunun — Uzum Bank uygulaması açılacak, tutar ve sipariş numarası hazır olacak. Ödeme için 15 dakikanız var.", uzumOpenBtn:"Uzum Bank ile öde", uzumCopyBtn:"Ödeme bağlantısını kopyala", uzumHelp:"Uygulama yerine site veya App Store açılırsa — bağlantıyı kopyalayıp Safari veya Chrome’a yapıştırın.", uzumLaterBtn:"Sonra öderim", uzumCopied:"Bağlantı kopyalandı — Safari veya Chrome’a yapıştırın" },
+  az:{ uzumModalTitle:"Sifariş yaradıldı — ödəmək qaldı", uzumModalText:"Düyməyə toxunun — Uzum Bank tətbiqi açılacaq, məbləğ və sifariş nömrəsi doldurulmuş olacaq. Ödəniş üçün 15 dəqiqə verilir.", uzumOpenBtn:"Uzum Bank ilə ödə", uzumCopyBtn:"Ödəniş linkini kopyala", uzumHelp:"Tətbiq əvəzinə sayt və ya App Store açılsa — linki kopyalayıb Safari və ya Chrome-a yapışdırın.", uzumLaterBtn:"Sonra ödəyərəm", uzumCopied:"Link kopyalandı — Safari və ya Chrome-a yapışdırın" },
+  en:{ uzumModalTitle:"Order created — now pay for it", uzumModalText:"Tap the button and the Uzum Bank app opens with the amount and order number filled in. You have 15 minutes to pay.", uzumOpenBtn:"Pay in Uzum Bank", uzumCopyBtn:"Copy payment link", uzumHelp:"If a website or the App Store opens instead of the app, copy the link and paste it into Safari or Chrome.", uzumLaterBtn:"I’ll pay later", uzumCopied:"Link copied — paste it into Safari or Chrome" }
+};
+Object.keys(STR_UZUM).forEach(l => Object.assign(STR[l], STR_UZUM[l]));
 
 /* ---------- тема: светлая / тёмная ---------- */
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
@@ -4418,10 +4437,31 @@ function uzumPayUrl(orderId, total){
   return 'https://uzumbank.uz/open-service?serviceId=' + UZUM_SERVICE_ID
     + '&order_id=' + encodeURIComponent(orderId) + '&amount=' + Math.round((Number(total) || 0) * 100); // сумма в тийинах
 }
+/* Приложение Uzum открывается только по нажатию самого клиента (iPhone не открывает приложения
+   по ссылке, которую сайт открыл сам), поэтому сначала показываем окно с кнопкой. */
+let _uzumUrl = '';
 function goToUzumPay(orderId, total){
   try{ localStorage.setItem('milaisss_uzum_wait', JSON.stringify({ id: orderId, t: Date.now() })); }catch(e){}
-  showToast(t('toPayment'));
-  setTimeout(() => { location.href = uzumPayUrl(orderId, total); }, 1200);
+  _uzumUrl = uzumPayUrl(orderId, total);
+  document.getElementById('uzumPayModal').classList.add('open');
+}
+function openUzumLink(url){
+  if (!url) return;
+  // внутри Telegram открываем во внешнем браузере — из встроенного браузера Telegram приложение Uzum не запускается
+  if (isTelegramUser() && tg && typeof tg.openLink === 'function'){ try{ tg.openLink(url); return; }catch(e){} }
+  location.href = url;
+}
+function openUzumFromModal(){ openUzumLink(_uzumUrl); }
+function copyUzumLink(){
+  const done = () => showToast(t('uzumCopied'));
+  try{ navigator.clipboard.writeText(_uzumUrl).then(done, () => { prompt('', _uzumUrl); }); }
+  catch(e){ prompt('', _uzumUrl); }
+}
+function closeUzumModal(){
+  document.getElementById('uzumPayModal').classList.remove('open');
+  showScreen('profile');
+  const hd = document.querySelector('#profile .orders-toggle');
+  if (hd && !hd.classList.contains('is-open')) toggleSec(hd);
 }
 function goToOnlinePay(method, orderId, total){
   if (method === 'uzum') goToUzumPay(orderId, total); else goToClickPay(orderId, total);
@@ -4441,6 +4481,7 @@ function checkUzumReturn(){
         if (o && o.paid === true){
           try{ localStorage.removeItem('milaisss_uzum_wait'); }catch(e){}
           checkUzumReturn._busy = false;
+          try{ document.getElementById('uzumPayModal').classList.remove('open'); }catch(e){}
           showSuccessAnimation(() => { showScreen('home'); try{ afterOrderNotice(); }catch(e){} }, 'paySuccessTitle', 'payChecking');
           return;
         }
@@ -4473,7 +4514,11 @@ function payOrderAgain(orderId){
   const o = (_lastOrders || []).find(x => x.id === orderId);
   if (!o || o.paid) return;
   if (payLeftMs(o) <= 0){ showToast(t('payExpired')); return; }
-  goToOnlinePay(o.paymentMethod === 'Uzum Bank' ? 'uzum' : 'click', o.id, o.total);
+  if (o.paymentMethod === 'Uzum Bank'){
+    try{ localStorage.setItem('milaisss_uzum_wait', JSON.stringify({ id: o.id, t: Date.now() })); }catch(e){}
+    _uzumUrl = uzumPayUrl(o.id, o.total); openUzumLink(_uzumUrl); return;
+  }
+  goToOnlinePay('click', o.id, o.total);
 }
 const PAY_WINDOW_MS = 15 * 60 * 1000; // сколько минут клиенту даётся на оплату, потом заказ отменяется, товар возвращается в наличие
 function payLeftMs(o){ return (Number(o && o.createdAt) || 0) + PAY_WINDOW_MS - Date.now(); }
