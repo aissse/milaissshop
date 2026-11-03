@@ -398,6 +398,14 @@
   .phone-pill:focus-within{ border-color:var(--orange); box-shadow:0 0 0 3px rgba(122,28,28,.10); }
   .phone-pill:has(.field-bad){ border-color:var(--orange); box-shadow:0 0 0 3px rgba(122,28,28,.14); }
   .phone-pill-ico{ flex:0 0 auto; width:34px; height:34px; border-radius:50%; background:var(--stone); color:var(--orange); display:flex; align-items:center; justify-content:center; }
+  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, select:-webkit-autofill{
+    -webkit-text-fill-color:var(--ink) !important; caret-color:var(--orange);
+    -webkit-box-shadow:0 0 0 1000px var(--bg) inset !important; box-shadow:0 0 0 1000px var(--bg) inset !important;
+    transition:background-color 99999s ease-out 0s;
+  }
+  .phone-pill input#phoneInput:-webkit-autofill, .phone-pill input#phoneInput:-webkit-autofill:hover, .phone-pill input#phoneInput:-webkit-autofill:focus{
+    -webkit-box-shadow:0 0 0 1000px var(--surface) inset !important; box-shadow:0 0 0 1000px var(--surface) inset !important;
+  }
   .phone-pill input#phoneInput{ flex:1; min-width:0; border:0 !important; background:transparent !important; box-shadow:none !important; outline:none; padding:9px 0; font-size:15px; font-weight:600; letter-spacing:.02em; border-radius:0; }
   .pay-field textarea{ font-family:inherit !important; font-size:14px !important; border-radius:20px !important; background:var(--surface) !important; padding:12px 16px !important; }
   .pay-field textarea:focus{ outline:none; border-color:var(--orange); box-shadow:0 0 0 3px rgba(122,28,28,.10); }
@@ -1263,13 +1271,11 @@
 </div>
 
 <div class="modal-overlay" id="uzumPayModal">
-  <div class="modal-box">
+  <div class="modal-box" style="position:relative;">
     <p style="font-weight:700; margin-bottom:6px;" data-i18n="uzumModalTitle">Заказ создан — осталось оплатить</p>
     <p id="uzumModalText" style="font-size:13px;" data-i18n="uzumModalText">Нажмите кнопку — откроется приложение Uzum Bank, сумма и номер заказа уже будут заполнены. На оплату даётся 15 минут.</p>
+    <span onclick="closeUzumModal()" style="position:absolute; top:10px; right:14px; font-size:20px; opacity:.5; cursor:pointer;" aria-label="close">×</span>
     <button type="button" onclick="openUzumFromModal()" data-i18n="uzumOpenBtn">Оплатить в Uzum Bank</button>
-    <button type="button" class="modal-sec" onclick="copyUzumLink()" data-i18n="uzumCopyBtn">Скопировать ссылку на оплату</button>
-    <p style="font-size:11px; opacity:.75; margin-top:8px;" data-i18n="uzumHelp">Если вместо приложения открылся сайт или App Store — скопируйте ссылку и вставьте её в Safari или Chrome.</p>
-    <button type="button" class="modal-sec" onclick="closeUzumModal()" data-i18n="uzumLaterBtn">Оплачу позже</button>
   </div>
 </div>
 
@@ -1337,7 +1343,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261104-169";
+  const CURRENT_VERSION = "20261104-170";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -4423,6 +4429,7 @@ function confirmPayment(){
   if (!branch){ showToast(t('errBts')); return; }
   if (!selectedPayMethod){ showToast(t('choosePay')); return; }
 
+  window._payTapAt = Date.now(); // момент нажатия «Перейти к оплате» — нужен, чтобы сразу открыть приложение Uzum
   finalizeOrder(phone, branch);
 }
 
@@ -4440,9 +4447,16 @@ function uzumPayUrl(orderId, total){
 /* Приложение Uzum открывается только по нажатию самого клиента (iPhone не открывает приложения
    по ссылке, которую сайт открыл сам), поэтому сначала показываем окно с кнопкой. */
 let _uzumUrl = '';
+const UZUM_TAP_WINDOW_MS = 1000; // iPhone открывает приложение по ссылке только ~1 сек после нажатия клиента
 function goToUzumPay(orderId, total){
   try{ localStorage.setItem('milaisss_uzum_wait', JSON.stringify({ id: orderId, t: Date.now() })); }catch(e){}
   _uzumUrl = uzumPayUrl(orderId, total);
+  if (Date.now() - (window._payTapAt || 0) < UZUM_TAP_WINDOW_MS){
+    openUzumLink(_uzumUrl);
+    setTimeout(closeUzumModal, 1500); // вернётся на сайт — увидит заказ с таймером в «Моих заказах»
+    return;
+  }
+  // интернет медленный и заказ создавался дольше — тогда одна кнопка «Оплатить в Uzum Bank»
   document.getElementById('uzumPayModal').classList.add('open');
 }
 function openUzumLink(url){
@@ -4451,7 +4465,7 @@ function openUzumLink(url){
   if (isTelegramUser() && tg && typeof tg.openLink === 'function'){ try{ tg.openLink(url); return; }catch(e){} }
   location.href = url;
 }
-function openUzumFromModal(){ openUzumLink(_uzumUrl); }
+function openUzumFromModal(){ document.getElementById('uzumPayModal').classList.remove('open'); openUzumLink(_uzumUrl); setTimeout(closeUzumModal, 1500); }
 function copyUzumLink(){
   const done = () => showToast(t('uzumCopied'));
   try{ navigator.clipboard.writeText(_uzumUrl).then(done, () => { prompt('', _uzumUrl); }); }
@@ -4459,6 +4473,7 @@ function copyUzumLink(){
 }
 function closeUzumModal(){
   document.getElementById('uzumPayModal').classList.remove('open');
+  if (document.getElementById('profile').classList.contains('active')) return;
   showScreen('profile');
   const hd = document.querySelector('#profile .orders-toggle');
   if (hd && !hd.classList.contains('is-open')) toggleSec(hd);
@@ -4711,6 +4726,13 @@ function finalizeOrder(phone, branch){
     try{ sendNotifyEmail(ADMIN_EMAIL, `Новый заказ от ${customerName}`, text).catch(()=>{}); }catch(e){}
     _ordering = false;
     // сначала дожидаемся отправки уведомлений (не дольше 4 сек), потом уходим на Click — иначе браузер обрывает отправку
+    if (payOnline && _payMethod === 'uzum'){
+      // уведомления уходят в фоне (keepalive), а приложение Uzum открываем сразу, без ожидания
+      const left = UZUM_TAP_WINDOW_MS - (Date.now() - (window._payTapAt || 0)) - 150;
+      if (left > 0) Promise.race([Promise.all([_admNote, _custNote]), new Promise(r => setTimeout(r, left))]).then(() => goToUzumPay(orderId, total));
+      else goToUzumPay(orderId, total);
+      return;
+    }
     if (payOnline){ Promise.race([Promise.all([_admNote, _custNote]), new Promise(r => setTimeout(r, 4000))]).then(() => goToOnlinePay(_payMethod, orderId, total)); return; }
     showSuccessAnimation(() => { showScreen('home'); afterOrderNotice(); });
   }).catch(err => {
