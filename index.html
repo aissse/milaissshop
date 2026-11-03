@@ -456,7 +456,8 @@
   .drawer-chevron{ padding:8px; color:var(--muted); cursor:pointer; transition:transform .2s; }
   .drawer-chevron.open{ transform:rotate(180deg); }
   .drawer-info{ max-height:0; overflow:hidden; transition:max-height .25s ease; font-size:11px; color:var(--muted); line-height:1.5; }
-  .drawer-info.open{ max-height:150px; padding:4px 4px 10px; }
+  .drawer-info{ white-space:pre-line; }
+  .drawer-info.open{ padding:4px 4px 10px; } /* высота считается по тексту — длинный текст больше не обрезается */
 
   .faq-section{ padding:10px 20px 30px; }
   .faq-item{ border-bottom:1px solid var(--line); }
@@ -1348,7 +1349,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261104-172";
+  const CURRENT_VERSION = "20261104-173";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2683,7 +2684,10 @@ function openSettings(){
 }
 function toggleDrawerInfo(id){
   const el = document.getElementById(`drawer-info-${id}`);
-  el.classList.toggle('open');
+  if (!el) return;
+  const open = !el.classList.contains('open');
+  el.classList.toggle('open', open);
+  el.style.maxHeight = open ? (el.scrollHeight + 20) + 'px' : '0px';
 }
 function translateCategory(cat){
   if (cat === 'Все') return t('allCat');
