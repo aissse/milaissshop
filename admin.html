@@ -1953,13 +1953,71 @@ function filterAndRenderOrders(){
         const uc = (o.items || []).map(it => unitCostFromTable(it.productId));
         if (uc.some(x => x != null)) upd.unitCosts = uc.map(x => x == null ? null : x);
       }
-      await db.collection('orders').doc(o.id).update(upd);
+      if (st !== 'Отменён'){
+        // свежие данные: заказ мог только что отменить автоматический воркер
+        try{ const fr = await db.collection('orders').doc(o.id).get(); if (fr.exists) Object.assign(o, { status: fr.data().status, stockRestored: fr.data().stockRestored }); }catch(_){}
+      }
+      if (o.status === 'Отменён' && st !== 'Отменён' && o.stockRestored === true
+          && !confirm('Товар этого заказа уже возвращён в наличие. При смене статуса он НЕ спишется снова — поправьте остаток вручную. Продолжить?')){
+        e.target.value = o.status; return;
+      }
+      let restocked = false;
+      try{
+        if (st === 'Отменён' && o.status !== 'Отменён' && o.stockRestored !== true
+            && confirm('Вернуть товар из этого заказа в наличие?')){
+          restocked = await cancelAndRestock(o.id);
+          if (restocked){ upd.stockRestored = true; }
+        }
+        if (!restocked) await db.collection('orders').doc(o.id).update(upd);
+      }catch(err){
+        console.error(err); e.target.value = o.status || '';
+        adminToast('Не удалось сохранить статус: ' + (err && err.message || err));
+        return;
+      }
       Object.assign(o, upd);
       const chat = await resolveChatId(o.customerId);
       const ok = await tgSend(chat, buildStatusText(o, st));
       adminToast(ok ? 'Статус сохранён, клиенту отправлено в Telegram ✅' : 'Статус сохранён, но Telegram не доставил (клиент не запускал бота?)');
     };
     wrap.appendChild(card);
+  });
+}
+
+// ручная отмена: статус «Отменён» и возврат остатков — одной транзакцией и только один раз (stockRestored).
+// Ту же отметку ставит автоотмена в платёжном воркере, поэтому двойного возврата не будет.
+function cancelAndRestock(orderId){
+  const ref = db.collection('orders').doc(orderId);
+  return db.runTransaction(async tx => {
+    const od = await tx.get(ref);
+    if (!od.exists) return false;
+    const o = od.data();
+    if (o.stockRestored === true) return false;
+    const items = (Array.isArray(o.items) ? o.items : []).filter(it => it && it.productId && Number(it.qty) > 0);
+    const ids = [...new Set(items.map(it => it.productId))];
+    const prefs = ids.map(id => db.collection('products').doc(id));
+    const pdocs = await Promise.all(prefs.map(r => tx.get(r)));
+    pdocs.forEach((pd, i) => {
+      if (!pd.exists) return;
+      const d = JSON.parse(JSON.stringify(pd.data()));
+      const its = items.filter(it => it.productId === ids[i]);
+      const colors = Array.isArray(d.colors) ? d.colors : [];
+      if (colors.length){
+        its.forEach(it => {
+          const qty = Number(it.qty);
+          const c = colors.find(x => x && x.name === it.colorName); if (!c) return;
+          if (c.sizeStocks && Object.prototype.hasOwnProperty.call(c.sizeStocks, it.size)){
+            c.sizeStocks[it.size] = (Number(c.sizeStocks[it.size]) || 0) + qty;
+            c.stock = Object.values(c.sizeStocks).reduce((a, b) => a + (Number(b) || 0), 0);
+          } else if (!(c.sizeStocks && Object.keys(c.sizeStocks).length)) c.stock = (Number(c.stock) || 0) + qty;
+          // размера больше нет в таблице — не прибавляем, чтобы не появился «фантомный» остаток
+        });
+        tx.update(prefs[i], { colors, stock: colors.reduce((s, c) => s + (Number(c && c.stock) || 0), 0) });
+      } else {
+        tx.update(prefs[i], { stock: (Number(d.stock) || 0) + its.reduce((a, b) => a + Number(b.qty), 0) });
+      }
+    });
+    tx.update(ref, { status: 'Отменён', stockRestored: true, cancelledAt: Date.now() });
+    return true;
   });
 }
 

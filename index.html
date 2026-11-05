@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" id="vpMeta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta name="color-scheme" content="light dark">
@@ -38,7 +39,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -425,6 +426,10 @@
   .pay-card.soon > *{ opacity:.7; }
   .trk-pay{ display:block; width:100%; margin:12px 0 4px; padding:12px 14px; border:0; border-radius:12px; background:var(--ink); color:var(--surface, #fff); font:inherit; font-weight:700; font-size:14px; cursor:pointer; }
   .trk-pay:active{ opacity:.85; }
+  .orders-wait{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; padding:28px 12px; color:var(--muted, #888); font-size:14px; text-align:center; }
+  .orders-wait button{ border:0; border-radius:10px; padding:8px 14px; font:inherit; font-weight:600; background:var(--ink, #111); color:var(--bg, #fff); cursor:pointer; }
+  .orders-spin{ width:18px; height:18px; border-radius:50%; border:2px solid currentColor; border-right-color:transparent; animation:ordSpin .8s linear infinite; flex:none; }
+  @keyframes ordSpin{ to{ transform:rotate(360deg); } }
   .trk-expired{ margin:12px 0 4px; padding:11px 14px; border-radius:12px; background:rgba(192,57,43,.1); color:#c0392b; font-size:13px; font-weight:600; line-height:1.35; }
   .pay-card-logo{ width:64px; height:36px; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--line); border-radius:8px; padding:5px 8px; box-sizing:border-box; }
   .pay-card-logo img, .pay-card-logo svg{ max-width:100%; max-height:100%; object-fit:contain; }
@@ -1349,7 +1354,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261104-173";
+  const CURRENT_VERSION = "20261106-174";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1857,21 +1862,28 @@ const firebaseConfig = {
 };
 try{ firebase.initializeApp(firebaseConfig); }catch(e){ console.error('firebase init', e); }
 const db = firebase.firestore();
+// кэш базы в браузере (IndexedDB): повторный заход показывает товары, настройки и «Мои заказы» сразу,
+// а свежие данные с сервера подменяют их через долю секунды. Если браузер не умеет — просто работаем без кэша.
+try{ db.enablePersistence({ synchronizeTabs: true }).catch(() => {}); }catch(e){}
 
 /* ---------- вход (Firebase Auth) ----------
    Гость = анонимный пользователь. Telegram = подписанный токен из воркера (uid = Telegram ID). */
 let authUser = null, authUid = '';
 let _authResolve; const authReady = new Promise(r => { _authResolve = r; });
+// вход по умолчанию (и повтор из «Мои заказы»): внутри Telegram — через воркер по initData, иначе гостем
+async function signInDefault(){
+  if (isTelegramUser()){
+    try{
+      const r = await fetch(WORKER_URL + '/auth/telegram', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ initData: tg.initData }) });
+      const j = await r.json();
+      if (j && j.ok && j.token){ await firebase.auth().signInWithCustomToken(j.token); return true; }
+    }catch(e){}
+  }
+  try{ await firebase.auth().signInAnonymously(); return true; }catch(e){ console.warn('anon auth failed', e); return false; }
+}
 firebase.auth().onAuthStateChanged(async u => {
   if (!u){
-    if (isTelegramUser()){
-      try{
-        const r = await fetch(WORKER_URL + '/auth/telegram', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ initData: tg.initData }) });
-        const j = await r.json();
-        if (j && j.ok && j.token){ await firebase.auth().signInWithCustomToken(j.token); return; }
-      }catch(e){}
-    }
-    try{ await firebase.auth().signInAnonymously(); }catch(e){ console.warn('anon auth failed', e); _authResolve(); }
+    if (!(await signInDefault())) _authResolve();
     return;
   }
   const changed = authUid && authUid !== u.uid;
@@ -2045,6 +2057,12 @@ const STR_CARTOOS = {
   en:{ cartItemOut:"Sold out — remove it from the cart", cartItemLeft:"Only {n} left — remove it and add again", cartFixItems:"Some items in your cart are no longer in stock. Remove them to place the order." }
 };
 Object.keys(STR_CARTOOS).forEach(l => Object.assign(STR[l], STR_CARTOOS[l]));
+const STR_ORDLOAD = {
+  ru:{ ordersLoading:"Загружаем ваши заказы…" }, uz:{ ordersLoading:"Buyurtmalaringiz yuklanmoqda…" },
+  tr:{ ordersLoading:"Siparişleriniz yükleniyor…" }, az:{ ordersLoading:"Sifarişləriniz yüklənir…" },
+  en:{ ordersLoading:"Loading your orders…" }
+};
+Object.keys(STR_ORDLOAD).forEach(l => Object.assign(STR[l], STR_ORDLOAD[l]));
 const STR_FIX172 = {
   ru:{ revLeave:"Оставить отзыв", revDoneLbl:"Отзыв отправлен", revPlaceholder:"Расскажите о товаре...", revAddPhoto:"Добавить фото (необязательно)", revReplacePhoto:"Заменить фото", revUploading:"Загружаем фото...", revSending:"Отправка...", revNeedText:"Напишите пару слов о товаре", revNone:"Пока нет отзывов по этому товару", revTitle:"Отзывы", fltPrice:"Цена, сум", fltFrom:"От", fltTo:"До", fltApply:"Применить", avChangeAny:"Можно сменить в любой момент", avLoading:"Загружаем аватары..." },
   uz:{ revLeave:"Sharh qoldirish", revDoneLbl:"Sharh yuborildi", revPlaceholder:"Mahsulot haqida yozing...", revAddPhoto:"Rasm qo‘shish (ixtiyoriy)", revReplacePhoto:"Rasmni almashtirish", revUploading:"Rasm yuklanmoqda...", revSending:"Yuborilmoqda...", revNeedText:"Mahsulot haqida bir-ikki so‘z yozing", revNone:"Bu mahsulot haqida hali sharhlar yo‘q", revTitle:"Sharhlar", fltPrice:"Narx, so‘m", fltFrom:"Dan", fltTo:"Gacha", fltApply:"Qo‘llash", avChangeAny:"Istalgan vaqtda o‘zgartirish mumkin", avLoading:"Avatarlar yuklanmoqda..." },
@@ -4676,9 +4694,11 @@ setInterval(() => {
   });
 })();
 
-function decrementStockForOrder(orderItems){
+// списание остатка и запись заказа — одна транзакция: либо и то и другое, либо ничего
+// (раньше при сбое записи заказа товар списывался «в никуда» — вернуть его покупателю не дают правила)
+function decrementStockForOrder(orderItems, orderRef, orderData){
   const productIds = [...new Set(orderItems.map(it => it.productId).filter(Boolean))];
-  if (!productIds.length) return Promise.resolve();
+  if (!productIds.length) return orderRef.set(orderData);
   const refs = productIds.map(id => db.collection('products').doc(id));
   return db.runTransaction(tx => {
     return Promise.all(refs.map(ref => tx.get(ref))).then(docs => {
@@ -4726,31 +4746,12 @@ function decrementStockForOrder(orderItems){
       productIds.forEach(id => {
         if (updates[id]) tx.update(db.collection('products').doc(id), updates[id]);
       });
+      tx.set(orderRef, orderData);
     });
   });
 }
 
 let _ordering = false;
-function restoreStockForOrder(orderItems){
-  try{
-    const ids = [...new Set(orderItems.map(it => it.productId).filter(Boolean))];
-    ids.forEach(id => {
-      const ref = db.collection('products').doc(id);
-      db.runTransaction(tx => tx.get(ref).then(doc => {
-        if (!doc.exists) return;
-        const d = JSON.parse(JSON.stringify(doc.data())); const its = orderItems.filter(it => it.productId === id);
-        const colors = d.colors || [];
-        if (colors.length){
-          its.forEach(it => { const c = colors.find(x => x.name === it.colorName); if (!c) return;
-            if (c.sizeStocks && Object.prototype.hasOwnProperty.call(c.sizeStocks, it.size)){ c.sizeStocks[it.size] = (Number(c.sizeStocks[it.size])||0) + it.qty; c.stock = Object.values(c.sizeStocks).reduce((a,b)=>a+(Number(b)||0),0); }
-            else c.stock = (Number(c.stock)||0) + it.qty; });
-          tx.update(ref, { colors, stock: colors.reduce((s,c) => s + (Number(c.stock)||0), 0) });
-        } else { tx.update(ref, { stock: (Number(d.stock)||0) + its.reduce((a,b)=>a+b.qty,0) }); }
-      })).catch(()=>{});
-    });
-  }catch(e){}
-}
-
 /* Откуда пришёл покупатель: запоминаем первый источник (UTM, реферер или Telegram) */
 function detectSource(){
   try{
@@ -4804,18 +4805,15 @@ function finalizeOrder(phone, branch){
   if (confirmBtn){ confirmBtn.disabled = true; confirmBtn.textContent = t('confirmingText'); }
 
   const notifyChatId = '';
-  let stockTaken = false;
-  // проверка наличия идёт внутри транзакции по свежим данным сервера (decrementStockForOrder)
-  decrementStockForOrder(orderItems).then(() => {
-    stockTaken = true;
-    return db.collection('orders').add({
-      customerId, customerName, items: orderItems, total,
-      btsBranch: branch, phone, paymentMethod: methodLabel, note: orderNote, source: detectSource(),
-      status: 'Проверяется оплата', createdAt: Date.now(),
-      lang, notifyChatId
-    });
-  }).then(ref => {
-    const orderId = ref && ref.id;
+  // проверка наличия, списание и запись заказа — одна транзакция по свежим данным сервера
+  const orderRef = db.collection('orders').doc();
+  decrementStockForOrder(orderItems, orderRef, {
+    customerId, customerName, items: orderItems, total,
+    btsBranch: branch, phone, paymentMethod: methodLabel, note: orderNote, source: detectSource(),
+    status: 'Проверяется оплата', createdAt: Date.now(),
+    lang, notifyChatId
+  }).then(() => {
+    const orderId = orderRef.id;
     const payOnline = ONLINE_PAY_METHODS.includes(selectedPayMethod) && orderId;
     const _custNote = workerNotify('customer', buildOrderNotifyText(orderItems, total, branch));
     cart = []; updateCartBadge();
@@ -4837,7 +4835,6 @@ function finalizeOrder(phone, branch){
     showSuccessAnimation(() => { showScreen('home'); afterOrderNotice(); });
   }).catch(err => {
     _ordering = false;
-    if (stockTaken) restoreStockForOrder(orderItems);
     if (err && err.message === 'OUT_OF_STOCK'){
       showToast(t('cartFixItems'));
       verifyCartWithServer().catch(() => {}).then(() => { try{ showScreen('cart'); }catch(e){} });
@@ -5097,18 +5094,55 @@ function reviewFormHTML(order, it, ii){
             </div>`;
 }
 
+function ordersPlaceholder(msg, retry){
+  const wrap = document.getElementById('statusList'); if (!wrap) return;
+  wrap.innerHTML = `<div class="orders-wait">${retry ? '' : '<span class="orders-spin"></span>'}<span>${escH(msg)}</span>${retry ? `<button type="button" onclick="retryOrders()">${escH(t('netRetry'))}</button>` : ''}</div>`;
+}
+function retryOrders(){
+  // вход не состоялся (например, сайт открыли без сети) — пробуем войти гостем ещё раз; afterAuth() перерисует заказы
+  if (!authUid){ ordersPlaceholder(t('ordersLoading')); signInDefault().then(ok => { if (!ok) ordersPlaceholder(t('netErr'), true); }); return; }
+  if (window._ordersUnsub) window._ordersUnsub();
+  window._ordersUnsub = null; window._ordersCid = '';
+  renderOrders();
+}
 function renderOrders(){
   const customerId = getCustomerId();
+  // вход ещё не завершён: не делаем запрос с чужим id (его отклонят правила) — afterAuth() вызовет нас снова
+  if (customerId === 'pending'){
+    if (!_lastOrders.length) ordersPlaceholder(t('ordersLoading'));
+    clearTimeout(window._ordersSlow);
+    window._ordersSlow = setTimeout(() => { if (!authUid && !_lastOrders.length) ordersPlaceholder(t('netErr'), true); }, 12000);
+    return;
+  }
   if (window._ordersUnsub && window._ordersCid === customerId) return;
   if (window._ordersUnsub) window._ordersUnsub();
   window._ordersCid = customerId;
-  window._ordersUnsub = db.collection('orders').where('customerId','==',customerId).onSnapshot(snap => {
-    if (snap.empty){ _lastOrders = []; renderStatusList([]); return; }
+  if (!_lastOrders.length) ordersPlaceholder(t('ordersLoading'));
+  // нет ответа сервера 12 сек (плохая сеть) — показываем «Нет связи» с кнопкой «Повторить», подписка продолжает ждать
+  clearTimeout(window._ordersSlow);
+  window._ordersSlow = setTimeout(() => { if (!_lastOrders.length) ordersPlaceholder(t('netErr'), true); }, 12000);
+  let shown = false;
+  // includeMetadataChanges: иначе подтверждение сервера «заказов нет» (без изменения документов) не приходит
+  window._ordersUnsub = db.collection('orders').where('customerId','==',customerId).onSnapshot({ includeMetadataChanges: true }, snap => {
+    if (!snap.metadata.fromCache) clearTimeout(window._ordersSlow);
+    if (snap.empty){
+      // пустой ответ из кэша браузера ещё не значит «заказов нет» — ждём ответа сервера
+      if (snap.metadata.fromCache) return;
+      shown = true; _lastOrders = []; renderStatusList([]); return;
+    }
+    if (shown && !snap.docChanges().length) return; // изменились только служебные метки — перерисовывать нечего
+    shown = true;
     const orders = [];
     snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
     orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     _lastOrders = orders; renderStatusList(orders);
     applyPendingReview(orders);
+  }, err => {
+    console.warn('orders', err);
+    clearTimeout(window._ordersSlow);
+    if (window._ordersUnsub) window._ordersUnsub();
+    window._ordersUnsub = null; window._ordersCid = '';
+    if (!_lastOrders.length) ordersPlaceholder(t('netErr'), true);
   });
 }
 
