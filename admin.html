@@ -1799,8 +1799,12 @@ function loadOrders(){
 }
 
 let allVisits = [];
+// визиты грузим только за последние 31 день: раньше админка при каждом открытии читала ВСЕ визиты за всё время
+// (документ на каждого посетителя в день) — это быстро съедало суточный лимит чтений Firebase.
+// Поэтому «Всё время» в аналитике показывает визиты максимум за 31 день (заказы — по-прежнему за всё время).
+const VISITS_DAYS = 31;
 function loadVisits(){
-  db.collection('analytics_visits').onSnapshot(snap => {
+  db.collection('analytics_visits').where('createdAt', '>=', Date.now() - VISITS_DAYS * 86400000).onSnapshot(snap => {
     allVisits = [];
     snap.forEach(doc => allVisits.push(doc.data()));
     renderAnalytics();
