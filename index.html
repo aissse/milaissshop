@@ -527,6 +527,13 @@
 
   .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
   .modal-overlay.open{ display:flex; }
+  /* «потяни вниз — обновить» (телефоны и планшеты) */
+  .ptr{ position:fixed; top:0; left:50%; z-index:600; width:40px; height:40px; margin-left:-20px; border-radius:50%; background:var(--bg); color:var(--ink); border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.15); display:flex; align-items:center; justify-content:center; opacity:0; transform:translateY(-50px); pointer-events:none; }
+  .ptr svg{ width:20px; height:20px; transition:color .2s ease; }
+  .ptr.ready svg{ color:var(--orange, #7A1C1C); }
+  .ptr.back{ transition:transform .25s ease, opacity .25s ease; }
+  .ptr.spin svg{ animation:ptrSpin .7s linear infinite; }
+  @keyframes ptrSpin{ to{ transform:rotate(360deg); } }
   .modal-box{ background:var(--surface); border-radius:18px; padding:24px; max-width:340px; text-align:center; }
   .modal-box p{ font-size:13px; line-height:1.6; margin-bottom:18px; color:var(--text-soft); }
   .modal-box button{ background:var(--ink); color:var(--on-ink); border:none; border-radius:12px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; width:100%; }
@@ -1354,7 +1361,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261106-174";
+  const CURRENT_VERSION = "20261108-175";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1372,7 +1379,7 @@
 })();
 
 const tg = window.Telegram ? window.Telegram.WebApp : null;
-if (tg) { tg.ready(); tg.expand(); }
+if (tg) { tg.ready(); tg.expand(); try{ if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); }catch(e){} } // свайп вниз в Telegram = обновить страницу, а не свернуть
 
 // Настройки бота, который присылает тебе уведомления о заказах.
 // Как получить — см. инструкцию после обновления файла.
@@ -5260,6 +5267,59 @@ applyLang();
 updateThemeButtons();
 renderRatingSummary();
 authReady.then(() => { afterAuth(); logVisit(); });
+</script>
+<script>
+/* «Потяни вниз — обновить»: на телефонах и планшетах, когда страница прокручена в самый верх.
+   Не срабатывает в открытых окнах (меню, фото, модальные окна) и при горизонтальном свайпе (баннер). */
+(function(){
+  if (!('ontouchstart' in window) && !(navigator.maxTouchPoints > 0)) return;
+  const TRIGGER = 70, MAX = 110;
+  const ind = document.createElement('div');
+  ind.className = 'ptr';
+  ind.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
+  document.body.appendChild(ind);
+  const overlayOpen = () => !!document.querySelector('.modal-overlay.open, .drawer-panel.open, .lightbox.open');
+  const skip = el => el && el.closest && el.closest('input, textarea, select, .modal-overlay, .drawer-panel, .lightbox, [data-no-ptr]');
+  let x0 = null, y0 = 0, d = 0, pulling = false, busy = false;
+  const show = () => {
+    ind.classList.remove('back');
+    ind.style.opacity = Math.min(1, d / TRIGGER);
+    ind.style.transform = `translateY(${d - 44}px) rotate(${d * 3}deg)`;
+    ind.classList.toggle('ready', d >= TRIGGER);
+  };
+  const hide = () => { ind.classList.add('back'); ind.classList.remove('ready'); ind.style.opacity = 0; ind.style.transform = 'translateY(-50px)'; };
+  window.addEventListener('touchstart', e => {
+    x0 = null;
+    if (busy || e.touches.length !== 1 || window.scrollY > 0 || overlayOpen() || skip(e.target)) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; d = 0; pulling = false;
+  }, { passive: true });
+  window.addEventListener('touchmove', e => {
+    if (x0 === null) return;
+    const dx = e.touches[0].clientX - x0, dy = e.touches[0].clientY - y0;
+    if (!pulling){
+      if (Math.abs(dx) > Math.abs(dy) || dy <= 0 || window.scrollY > 0){ if (Math.abs(dx) > 8 || dy < -8) x0 = null; return; }
+      if (dy < 8) return;
+      pulling = true;
+    }
+    if (e.cancelable) e.preventDefault();       // вместо стандартного «пружинящего» скролла
+    d = Math.min(MAX, Math.max(0, dy * 0.5));
+    show();
+  }, { passive: false });
+  const end = () => {
+    if (x0 === null) return;
+    x0 = null;
+    if (!pulling) return;
+    pulling = false;
+    if (d >= TRIGGER){
+      busy = true;
+      ind.classList.add('back', 'spin');
+      ind.style.transform = 'translateY(30px)';
+      setTimeout(() => location.reload(), 250);
+    } else hide();
+  };
+  window.addEventListener('touchend', end, { passive: true });
+  window.addEventListener('touchcancel', end, { passive: true });
+})();
 </script>
 </body>
 </html>
