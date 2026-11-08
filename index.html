@@ -565,7 +565,24 @@
   .support-fab{ position:fixed; right:20px; bottom:110px; width:52px; height:52px; border-radius:50%; background:var(--orange); display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.2); z-index:60; transition:transform .35s ease, opacity .35s ease; }
   .support-fab.hidden{ transform:translateX(90px); opacity:0; }
   .support-fab svg{ width:28px; height:28px; }
-  #supportFab{ background:#25D366; } /* поддержка теперь в WhatsApp Business */
+  /* кнопка поддержки → раскрывается на WhatsApp и Telegram */
+  .support-fab .sf-ico{ position:absolute; display:flex; transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .2s ease; }
+  .support-fab .sf-ico svg{ width:24px; height:24px; }
+  .support-fab .sf-x{ opacity:0; transform:rotate(-90deg) scale(.6); }
+  body.sf-open .support-fab .sf-chat{ opacity:0; transform:rotate(90deg) scale(.6); }
+  body.sf-open .support-fab .sf-x{ opacity:1; transform:none; }
+  .sf-opt{ position:fixed; right:20px; bottom:110px; display:none; align-items:center; gap:10px; z-index:59; cursor:pointer;
+    opacity:0; transform:translateY(0) scale(.5); transform-origin:right center; pointer-events:none;
+    transition:transform .42s cubic-bezier(.34,1.56,.64,1), opacity .22s ease; }
+  .sf-opt.on{ display:flex; }
+  .sf-opt .sf-c{ width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px rgba(0,0,0,.2); }
+  .sf-opt .sf-c svg{ width:28px; height:28px; }
+  .sf-wa .sf-c{ background:#25D366; } .sf-tg .sf-c{ background:#229ED9; }
+  .sf-opt .sf-l{ background:var(--surface); color:var(--ink); font-weight:700; font-size:14px; padding:9px 14px; border-radius:22px; box-shadow:0 6px 16px rgba(0,0,0,.14); white-space:nowrap; }
+  body.sf-open .sf-opt{ opacity:1; pointer-events:auto; }
+  body.sf-open .sf-tg{ transform:translateY(-68px) scale(1); }
+  body.sf-open .sf-wa{ transform:translateY(-136px) scale(1); transition-delay:.04s; }
+  @media (min-width:768px){ .sf-opt{ right:max(24px, calc((100vw - 1500px) / 2 + 24px)); } }
   #support{ background:var(--support-bg, var(--bg)); min-height:100vh; }
   .support-msgs{ padding:12px 20px 170px; display:flex; flex-direction:column; gap:10px; min-height:40vh; }
   .msg{ overflow-wrap:anywhere; white-space:pre-wrap; max-width:78%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.4; }
@@ -1221,8 +1238,11 @@
     </div>
   </div>
 
-  <div class="support-fab" id="supportFab" onclick="openWhatsApp()" aria-label="WhatsApp">
-    <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35zM12.04 21.5h-.01a9.45 9.45 0 0 1-4.82-1.32l-.35-.21-3.58.94.96-3.49-.23-.36A9.44 9.44 0 0 1 2.56 12C2.56 6.78 6.8 2.54 12.04 2.54c2.53 0 4.91.99 6.7 2.78a9.4 9.4 0 0 1 2.77 6.7c0 5.22-4.25 9.48-9.47 9.48zm8.07-17.55A11.33 11.33 0 0 0 12.04.6C5.75.6.63 5.72.63 12c0 2.01.52 3.97 1.52 5.7L.53 23.6l6.04-1.59a11.4 11.4 0 0 0 5.46 1.39h.01c6.29 0 11.41-5.12 11.41-11.4 0-3.05-1.19-5.91-3.34-8.06z"/></svg>
+  <!-- поддержка: кнопка раскрывается на две — WhatsApp и Telegram -->
+  <div class="sf-opt sf-wa" id="sfWa" onclick="pickSupport('wa')"><span class="sf-l">WhatsApp</span><span class="sf-c"><svg viewBox="0 0 24 24" fill="#fff"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35zM12.04 21.5h-.01a9.45 9.45 0 0 1-4.82-1.32l-.35-.21-3.58.94.96-3.49-.23-.36A9.44 9.44 0 0 1 2.56 12C2.56 6.78 6.8 2.54 12.04 2.54c2.53 0 4.91.99 6.7 2.78a9.4 9.4 0 0 1 2.77 6.7c0 5.22-4.25 9.48-9.47 9.48zm8.07-17.55A11.33 11.33 0 0 0 12.04.6C5.75.6.63 5.72.63 12c0 2.01.52 3.97 1.52 5.7L.53 23.6l6.04-1.59a11.4 11.4 0 0 0 5.46 1.39h.01c6.29 0 11.41-5.12 11.41-11.4 0-3.05-1.19-5.91-3.34-8.06z"/></svg></span></div>
+  <div class="sf-opt sf-tg" id="sfTg" onclick="pickSupport('tg')"><span class="sf-l">Telegram</span><span class="sf-c"><svg viewBox="0 0 24 24" fill="#fff"><path d="M21.94 4.3 18.7 19.6c-.24 1.07-.88 1.34-1.78.83l-4.93-3.63-2.38 2.29c-.26.26-.48.48-.99.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.62-.2L6.2 13.2l-4.86-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 2.8c.88-.32 1.65.2 1.39 1.5z"/></svg></span></div>
+  <div class="support-fab" id="supportFab" onclick="toggleSupportMenu(event)" aria-label="Support">
+    <span class="sf-ico sf-chat"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg></span><span class="sf-ico sf-x"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
   </div>
 
   <div class="screen" id="support">
@@ -1362,7 +1382,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261108-176";
+  const CURRENT_VERSION = "20261109-177";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2974,10 +2994,11 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   try{ localStorage.setItem('milaisss_settings_cache', JSON.stringify(data)); }catch(e){}
   applyShopSettings(data);
 }, err => { _settingsReady = true; renderCatPills(); markLoaded('settings'); });
-let WHATSAPP_NUMBER = '';
+let WHATSAPP_NUMBER = '', TG_SUPPORT = 'milaisss_Support';
 function applyShopSettings(data){
   _settingsReady = true;
   WHATSAPP_NUMBER = String(data.whatsappNumber || '').replace(/\D/g, '');
+  TG_SUPPORT = String(data.telegramSupport || 'milaisss_Support').replace(/^@/, '').replace(/[^A-Za-z0-9_]/g, '') || 'milaisss_Support';
   // цвета и шрифты задаются только в коде (CSS в index.html); старые значения из админки игнорируем
   ['navColor','bgColor','categoryChipColor','orangeColor','pmrSelectedBg','langBtnBg','menuBtnBg','iconBorderColor','blackDownColor','blackDownFont','fontFamily','categoryFont','colorBorder','btsAddressColor','supportBgColor','supportCustBubble','supportCustText','supportAdminBubble','supportAdminText','supportFont'].forEach(k => { delete data[k]; });
   if (data.navColor) document.getElementById('bottomNav').style.background = data.navColor;
@@ -3129,6 +3150,8 @@ function showScreen(name, fromPop){
   if (name === 'favorites') renderFavGrid();
   if (name === 'profile'){ renderOrders(); renderMyReviews(); const _pn = document.querySelector('#bottomNav .navitem[data-screen="profile"]'); if (_pn) _pn.classList.remove('has-new'); }
   document.getElementById('supportFab').style.display = (name === 'profile') ? 'flex' : 'none';
+  closeSupportMenu();
+  document.querySelectorAll('.sf-opt').forEach(o => o.classList.toggle('on', name === 'profile'));
   document.body.classList.toggle('on-home', name === 'home');
   if (name !== 'home') closeSearch(true);
   window.scrollTo(0,0);
@@ -3215,6 +3238,7 @@ let fabScrollTimer = null;
 window.addEventListener('scroll', () => {
   const fab = document.getElementById('supportFab');
   if (fab.style.display === 'none') return;
+  if (document.body.classList.contains('sf-open')) return; // меню открыто — кнопку не прячем
   fab.classList.add('hidden');
   clearTimeout(fabScrollTimer);
   fabScrollTimer = setTimeout(() => fab.classList.remove('hidden'), 400);
@@ -3247,6 +3271,26 @@ function openWhatsApp(){
   try{ if (isTelegramUser() && tg && typeof tg.openLink === 'function'){ tg.openLink(url); return; } }catch(e){}
   const w = window.open(url, '_blank'); if (!w) location.href = url;
 }
+
+function openTelegramSupport(){
+  const url = 'https://t.me/' + TG_SUPPORT;
+  try{ if (isTelegramUser() && tg && typeof tg.openTelegramLink === 'function'){ tg.openTelegramLink(url); return; } }catch(e){}
+  const w = window.open(url, '_blank'); if (!w) location.href = url;
+}
+function toggleSupportMenu(e){
+  if (e) e.stopPropagation();
+  document.body.classList.toggle('sf-open');
+}
+function closeSupportMenu(){ document.body.classList.remove('sf-open'); }
+function pickSupport(kind){
+  closeSupportMenu();
+  if (kind === 'wa') openWhatsApp(); else openTelegramSupport();
+}
+document.addEventListener('click', e => {
+  if (!document.body.classList.contains('sf-open')) return;
+  if (e.target.closest && (e.target.closest('.sf-opt') || e.target.closest('#supportFab'))) return;
+  closeSupportMenu();
+});
 
 /* ---------- support chat (старый, отключён) ---------- */
 let _supUnsub = null;
