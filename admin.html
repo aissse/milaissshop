@@ -217,6 +217,7 @@
           <div><label>До</label><input type="date" id="dateTo" onchange="filterAndRenderOrders()"></div>
         </div>
         <button type="button" class="btn secondary" onclick="clearDateRange()">Сбросить фильтр</button>
+        <div id="ordersTabs" style="display:flex; gap:8px; margin-top:14px;"></div>
         <div style="margin:14px 0; font-weight:700; font-size:14px;" id="ordersCount"></div>
         <div id="ordersAdminList"></div>
       </div>
@@ -1909,6 +1910,13 @@ function clearDateRange(){
   filterAndRenderOrders();
 }
 
+let ordersView = 'paid';
+function orderReason(o){  // почему заказ не среди оплаченных
+  if (o.paymentStatus === 'REVERSED') return ['↩️ Возврат денег', '#b3261e'];
+  if (o.status === 'Отменён') return ['❌ Отменён', '#b3261e'];
+  if (o.testOrder === true) return ['🧪 Тестовый заказ', '#8a5a00'];
+  return ['⏳ Не оплачен', '#8a5a00'];
+}
 function filterAndRenderOrders(){
   const fromVal = document.getElementById('dateFrom').value;
   const toVal = document.getElementById('dateTo').value;
@@ -1922,14 +1930,24 @@ function filterAndRenderOrders(){
     orders = orders.filter(o => (o.createdAt||0) <= toTs);
   }
 
+  // две категории: оплаченные (их нужно отправлять) и всё остальное — не оплачены, отмены, возвраты, тестовые
+  const paidList = orders.filter(isPaidOrder), otherList = orders.filter(o => !isPaidOrder(o));
+  const tabs = document.getElementById('ordersTabs');
+  tabs.innerHTML = `
+    <button type="button" class="btn ${ordersView === 'paid' ? '' : 'secondary'}" style="margin-top:0; flex:1;" data-ov="paid">✅ Оплаченные (${paidList.length})</button>
+    <button type="button" class="btn ${ordersView === 'other' ? '' : 'secondary'}" style="margin-top:0; flex:1;" data-ov="other">Не оплаченные, отмены, тесты (${otherList.length})</button>`;
+  tabs.querySelectorAll('[data-ov]').forEach(b => { b.onclick = () => { ordersView = b.dataset.ov; filterAndRenderOrders(); }; });
+  orders = ordersView === 'paid' ? paidList : otherList;
   document.getElementById('ordersCount').textContent = `Заказов: ${orders.length}`;
   const wrap = document.getElementById('ordersAdminList');
-  if (orders.length === 0){ wrap.innerHTML = '<p class="hint">Заказов за этот период нет</p>'; return; }
+  if (orders.length === 0){ wrap.innerHTML = `<p class="hint">${ordersView === 'paid' ? 'Оплаченных заказов за этот период нет' : 'Здесь пусто'}</p>`; return; }
   wrap.innerHTML = '';
   orders.forEach(o => {
     const card = document.createElement('div');
     card.className = 'order-admin-card';
+    const _rs = isPaidOrder(o) ? null : orderReason(o);
     card.innerHTML = `
+      ${_rs ? `<div style="display:inline-block; font-size:12px; font-weight:700; color:${_rs[1]}; border:1px solid ${_rs[1]}; border-radius:20px; padding:3px 10px; margin-bottom:6px;">${_rs[0]}</div>` : ''}
       <div class="who">${escH(o.customerName || 'Покупатель')}</div>
       <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
       ${(o.items||[]).map(it => `<div class="oline">${escH(it.name)} (${escH(it.size)}, ${escH(it.colorName)}) × ${Number(it.qty)||0} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
