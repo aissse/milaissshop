@@ -564,7 +564,8 @@
   .review-item .rphoto{ width:100%; max-width:200px; border-radius:10px; margin-top:8px; display:block; cursor:zoom-in; }
   .support-fab{ position:fixed; right:20px; bottom:110px; width:52px; height:52px; border-radius:50%; background:var(--orange); display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.2); z-index:60; transition:transform .35s ease, opacity .35s ease; }
   .support-fab.hidden{ transform:translateX(90px); opacity:0; }
-  .support-fab svg{ width:24px; height:24px; }
+  .support-fab svg{ width:28px; height:28px; }
+  #supportFab{ background:#25D366; } /* поддержка теперь в WhatsApp Business */
   #support{ background:var(--support-bg, var(--bg)); min-height:100vh; }
   .support-msgs{ padding:12px 20px 170px; display:flex; flex-direction:column; gap:10px; min-height:40vh; }
   .msg{ overflow-wrap:anywhere; white-space:pre-wrap; max-width:78%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.4; }
@@ -1220,8 +1221,8 @@
     </div>
   </div>
 
-  <div class="support-fab" id="supportFab" onclick="showScreen('support')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+  <div class="support-fab" id="supportFab" onclick="openWhatsApp()" aria-label="WhatsApp">
+    <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35zM12.04 21.5h-.01a9.45 9.45 0 0 1-4.82-1.32l-.35-.21-3.58.94.96-3.49-.23-.36A9.44 9.44 0 0 1 2.56 12C2.56 6.78 6.8 2.54 12.04 2.54c2.53 0 4.91.99 6.7 2.78a9.4 9.4 0 0 1 2.77 6.7c0 5.22-4.25 9.48-9.47 9.48zm8.07-17.55A11.33 11.33 0 0 0 12.04.6C5.75.6.63 5.72.63 12c0 2.01.52 3.97 1.52 5.7L.53 23.6l6.04-1.59a11.4 11.4 0 0 0 5.46 1.39h.01c6.29 0 11.41-5.12 11.41-11.4 0-3.05-1.19-5.91-3.34-8.06z"/></svg>
   </div>
 
   <div class="screen" id="support">
@@ -1361,7 +1362,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261108-175";
+  const CURRENT_VERSION = "20261108-176";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -1814,11 +1815,11 @@ async function workerNotify(kind, text){
 /* ---------- уведомления клиентам от бота ---------- */
 const NOTIFY_BOT_LINK = 'https://t.me/' + NOTIFY_BOT_USERNAME.replace('@','');
 const TG_MSG = {
-  ru:{ connected:"✅ Уведомления milaisss подключены. Здесь будут статусы ваших заказов и ответы поддержки.", orderTitle:"🛍️ Заказ оформлен!", total:"Итого", pickup:"Пункт БТС", status:"Статус", hint:"Мы пришлём сообщение здесь, когда статус изменится." },
-  uz:{ connected:"✅ milaisss bildirishnomalari yoqildi. Bu yerda buyurtmalaringiz holati va yordam javoblari keladi.", orderTitle:"🛍️ Buyurtma rasmiylashtirildi!", total:"Jami", pickup:"BTS punkti", status:"Holati", hint:"Holat o‘zgarganda shu yerga xabar yuboramiz." },
-  tr:{ connected:"✅ milaisss bildirimleri bağlandı. Sipariş durumlarınız ve destek yanıtları burada gelecek.", orderTitle:"🛍️ Siparişiniz alındı!", total:"Toplam", pickup:"BTS noktası", status:"Durum", hint:"Durum değiştiğinde buraya mesaj göndereceğiz." },
-  az:{ connected:"✅ milaisss bildirişləri qoşuldu. Sifariş statusları və dəstək cavabları burada gələcək.", orderTitle:"🛍️ Sifariş rəsmiləşdirildi!", total:"Cəmi", pickup:"BTS məntəqəsi", status:"Status", hint:"Status dəyişəndə buraya mesaj göndərəcəyik." },
-  en:{ connected:"✅ milaisss notifications are on. Order statuses and support replies will arrive here.", orderTitle:"🛍️ Order placed!", total:"Total", pickup:"BTS pickup point", status:"Status", hint:"We’ll message you here when the status changes." }
+  ru:{ connected:"✅ Уведомления milaisss подключены. Здесь будут статусы ваших заказов.", orderTitle:"🛍️ Заказ оформлен!", total:"Итого", pickup:"Пункт БТС", status:"Статус", hint:"Мы пришлём сообщение здесь, когда статус изменится." },
+  uz:{ connected:"✅ milaisss bildirishnomalari yoqildi. Bu yerda buyurtmalaringiz holati keladi.", orderTitle:"🛍️ Buyurtma rasmiylashtirildi!", total:"Jami", pickup:"BTS punkti", status:"Holati", hint:"Holat o‘zgarganda shu yerga xabar yuboramiz." },
+  tr:{ connected:"✅ milaisss bildirimleri bağlandı. Sipariş durumlarınız burada gelecek.", orderTitle:"🛍️ Siparişiniz alındı!", total:"Toplam", pickup:"BTS noktası", status:"Durum", hint:"Durum değiştiğinde buraya mesaj göndereceğiz." },
+  az:{ connected:"✅ milaisss bildirişləri qoşuldu. Sifariş statusları burada gələcək.", orderTitle:"🛍️ Sifariş rəsmiləşdirildi!", total:"Cəmi", pickup:"BTS məntəqəsi", status:"Status", hint:"Status dəyişəndə buraya mesaj göndərəcəyik." },
+  en:{ connected:"✅ milaisss notifications are on. Order statuses will arrive here.", orderTitle:"🛍️ Order placed!", total:"Total", pickup:"BTS pickup point", status:"Status", hint:"We’ll message you here when the status changes." }
 };
 const TG_STATUS = {
   'Проверяется оплата':{ ru:'Проверяется оплата', uz:'To‘lov tekshirilmoqda', tr:'Ödeme kontrol ediliyor', az:'Ödəniş yoxlanılır', en:'Checking payment' }
@@ -2064,6 +2065,14 @@ const STR_CARTOOS = {
   en:{ cartItemOut:"Sold out — remove it from the cart", cartItemLeft:"Only {n} left — remove it and add again", cartFixItems:"Some items in your cart are no longer in stock. Remove them to place the order." }
 };
 Object.keys(STR_CARTOOS).forEach(l => Object.assign(STR[l], STR_CARTOOS[l]));
+const STR_WA = {
+  ru:{ waHello:"Здравствуйте! У меня вопрос по магазину milaisss.", waSoon:"Поддержка в WhatsApp скоро появится" },
+  uz:{ waHello:"Assalomu alaykum! milaisss do‘koni bo‘yicha savolim bor.", waSoon:"WhatsApp orqali yordam tez orada ishga tushadi" },
+  tr:{ waHello:"Merhaba! milaisss mağazası hakkında bir sorum var.", waSoon:"WhatsApp desteği yakında" },
+  az:{ waHello:"Salam! milaisss mağazası ilə bağlı sualım var.", waSoon:"WhatsApp dəstəyi tezliklə" },
+  en:{ waHello:"Hello! I have a question about the milaisss shop.", waSoon:"WhatsApp support is coming soon" }
+};
+Object.keys(STR_WA).forEach(l => Object.assign(STR[l], STR_WA[l]));
 const STR_ORDLOAD = {
   ru:{ ordersLoading:"Загружаем ваши заказы…" }, uz:{ ordersLoading:"Buyurtmalaringiz yuklanmoqda…" },
   tr:{ ordersLoading:"Siparişleriniz yükleniyor…" }, az:{ ordersLoading:"Sifarişləriniz yüklənir…" },
@@ -2965,8 +2974,10 @@ db.collection('settings').doc('shop').onSnapshot(doc => {
   try{ localStorage.setItem('milaisss_settings_cache', JSON.stringify(data)); }catch(e){}
   applyShopSettings(data);
 }, err => { _settingsReady = true; renderCatPills(); markLoaded('settings'); });
+let WHATSAPP_NUMBER = '';
 function applyShopSettings(data){
   _settingsReady = true;
+  WHATSAPP_NUMBER = String(data.whatsappNumber || '').replace(/\D/g, '');
   // цвета и шрифты задаются только в коде (CSS в index.html); старые значения из админки игнорируем
   ['navColor','bgColor','categoryChipColor','orangeColor','pmrSelectedBg','langBtnBg','menuBtnBg','iconBorderColor','blackDownColor','blackDownFont','fontFamily','categoryFont','colorBorder','btsAddressColor','supportBgColor','supportCustBubble','supportCustText','supportAdminBubble','supportAdminText','supportFont'].forEach(k => { delete data[k]; });
   if (data.navColor) document.getElementById('bottomNav').style.background = data.navColor;
@@ -3229,7 +3240,15 @@ document.addEventListener('touchend', (e) => {
   edgeStartX = null; edgeStartY = null;
 });
 
-/* ---------- support chat ---------- */
+/* ---------- поддержка: WhatsApp Business ---------- */
+function openWhatsApp(){
+  if (!WHATSAPP_NUMBER){ showToast(t('waSoon')); return; }
+  const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(t('waHello'));
+  try{ if (isTelegramUser() && tg && typeof tg.openLink === 'function'){ tg.openLink(url); return; } }catch(e){}
+  const w = window.open(url, '_blank'); if (!w) location.href = url;
+}
+
+/* ---------- support chat (старый, отключён) ---------- */
 let _supUnsub = null;
 function setupSupportListener(){
   const customerId = getCustomerId();
@@ -5248,8 +5267,7 @@ function afterAuth(){
   afterAuth._done = true;
   subscribeMyReviews();
   subscribeMyRestock();
-  _supUnsub && _supUnsub(); _supUnsub = null; setupSupportListener._admin = undefined;
-  setupSupportListener();
+  // чат поддержки на сайте отключён — поддержка в WhatsApp Business
   loadCustomerProfile();
   renderProfileHeader();
   renderTelegramLoginWidget();
