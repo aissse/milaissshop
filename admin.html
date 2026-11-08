@@ -160,7 +160,6 @@
     <div class="tab" data-tab="stock" onclick="switchTab('stock')">Склад</div>
     <div class="tab" data-tab="restock" onclick="switchTab('restock')">Ждут поступления <span id="restockBadge"></span></div>
     <div class="tab" data-tab="delivery" onclick="switchTab('delivery')">Доставка</div>
-    <div class="tab" data-tab="support" onclick="switchTab('support')">Чат с клиентами</div>
     <div class="tab" data-tab="accounting" onclick="switchTab('accounting')">Учёт</div>
     <div class="tab" data-tab="finance" onclick="switchTab('finance')">Реквизиты</div>
     <div class="tab" data-tab="subscribers" onclick="switchTab('subscribers')">Подписки</div>
@@ -223,13 +222,6 @@
       </div>
     </div>
 
-    <div class="tab-panel" id="tab-support">
-      <div class="card">
-        <h1>Чат с клиентами</h1>
-        <p class="hint" style="margin-top:0;">Здесь появляются покупатели, которые писали в поддержку.</p>
-        <div id="supportTabContent"></div>
-      </div>
-    </div>
 
     <div class="tab-panel" id="tab-accounting">
       <div class="card">
@@ -423,6 +415,9 @@
       <div class="card collapsible" id="card-social">
         <div class="card-header" onclick="toggleCard('card-social')"><h1>Соцсети</h1><span class="card-chevron">▲</span></div>
         <div class="card-body">
+        <label>WhatsApp Business — номер поддержки</label>
+        <input type="tel" id="f_whatsapp" placeholder="+998 90 123 45 67" onchange="saveSetting('whatsappNumber', this.value.replace(/[^0-9]/g, ''))">
+        <div class="hint" style="margin-bottom:12px;">Зелёная кнопка WhatsApp в магазине откроет чат с этим номером. Пиши с кодом страны.</div>
         <label>Instagram (ссылка)</label>
         <input type="url" id="f_instagram" placeholder="https://instagram.com/..." onchange="saveSocialLink('instagram', this.value)">
         <label>TikTok (ссылка)</label>
@@ -565,7 +560,7 @@ function openAdmin(){
   if (_adminOpened) return; _adminOpened = true;
   document.getElementById('lockScreen').style.display = 'none';
   document.getElementById('adminWrap').style.display = 'block';
-  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSupport(); loadSubscribers(); loadVisits(); loadAccounting(); loadRestock();
+  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSubscribers(); loadVisits(); loadAccounting(); loadRestock();
   PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
 }
 function checkPassword(){
@@ -1297,6 +1292,7 @@ function loadSettings(){
     blackDownItems = data.blackDownItems || [];
     loadBlackDownRows(blackDownItems);
     socialLinks = data.socialLinks || {};
+    if (data.whatsappNumber) document.getElementById('f_whatsapp').value = '+' + data.whatsappNumber;
     if (socialLinks.instagram) document.getElementById('f_instagram').value = socialLinks.instagram;
     if (socialLinks.tiktok) document.getElementById('f_tiktok').value = socialLinks.tiktok;
     btsBranches = data.btsBranches || [];
