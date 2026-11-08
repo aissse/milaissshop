@@ -1382,7 +1382,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261109-177";
+  const CURRENT_VERSION = "20261109-178";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2086,11 +2086,11 @@ const STR_CARTOOS = {
 };
 Object.keys(STR_CARTOOS).forEach(l => Object.assign(STR[l], STR_CARTOOS[l]));
 const STR_WA = {
-  ru:{ waHello:"Здравствуйте! У меня вопрос по магазину milaisss.", waSoon:"Поддержка в WhatsApp скоро появится" },
-  uz:{ waHello:"Assalomu alaykum! milaisss do‘koni bo‘yicha savolim bor.", waSoon:"WhatsApp orqali yordam tez orada ishga tushadi" },
-  tr:{ waHello:"Merhaba! milaisss mağazası hakkında bir sorum var.", waSoon:"WhatsApp desteği yakında" },
-  az:{ waHello:"Salam! milaisss mağazası ilə bağlı sualım var.", waSoon:"WhatsApp dəstəyi tezliklə" },
-  en:{ waHello:"Hello! I have a question about the milaisss shop.", waSoon:"WhatsApp support is coming soon" }
+  ru:{ tgHello:"Здравствуйте! Пишу в поддержку магазина milaisss 🛍️", waHello:"Здравствуйте! У меня вопрос по магазину milaisss.", waSoon:"Поддержка в WhatsApp скоро появится" },
+  uz:{ tgHello:"Assalomu alaykum! milaisss do‘koni yordam xizmatiga yozyapman 🛍️", waHello:"Assalomu alaykum! milaisss do‘koni bo‘yicha savolim bor.", waSoon:"WhatsApp orqali yordam tez orada ishga tushadi" },
+  tr:{ tgHello:"Merhaba! milaisss mağazası destek hattına yazıyorum 🛍️", waHello:"Merhaba! milaisss mağazası hakkında bir sorum var.", waSoon:"WhatsApp desteği yakında" },
+  az:{ tgHello:"Salam! milaisss mağazasının dəstək xidmətinə yazıram 🛍️", waHello:"Salam! milaisss mağazası ilə bağlı sualım var.", waSoon:"WhatsApp dəstəyi tezliklə" },
+  en:{ tgHello:"Hello! I'm writing to milaisss shop support 🛍️", waHello:"Hello! I have a question about the milaisss shop.", waSoon:"WhatsApp support is coming soon" }
 };
 Object.keys(STR_WA).forEach(l => Object.assign(STR[l], STR_WA[l]));
 const STR_ORDLOAD = {
@@ -3273,7 +3273,8 @@ function openWhatsApp(){
 }
 
 function openTelegramSupport(){
-  const url = 'https://t.me/' + TG_SUPPORT;
+  // ?text= — сообщение уже набрано в поле ввода: клиент видит, что пишет в поддержку milaisss
+  const url = 'https://t.me/' + TG_SUPPORT + '?text=' + encodeURIComponent(t('tgHello'));
   try{ if (isTelegramUser() && tg && typeof tg.openTelegramLink === 'function'){ tg.openTelegramLink(url); return; } }catch(e){}
   const w = window.open(url, '_blank'); if (!w) location.href = url;
 }
