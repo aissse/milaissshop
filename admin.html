@@ -418,7 +418,10 @@
         <div class="card-body">
         <label>WhatsApp Business — номер поддержки</label>
         <input type="tel" id="f_whatsapp" placeholder="+998 90 123 45 67" onchange="saveSetting('whatsappNumber', this.value.replace(/[^0-9]/g, ''))">
-        <div class="hint" style="margin-bottom:12px;">Зелёная кнопка WhatsApp в магазине откроет чат с этим номером. Пиши с кодом страны.</div>
+        <div class="hint" style="margin-bottom:12px;">Кнопка поддержки в магазине → «WhatsApp» откроет чат с этим номером. Пиши с кодом страны.</div>
+        <label>Telegram поддержки (username)</label>
+        <input type="text" id="f_tgSupport" placeholder="@milaisss_Support" onchange="saveSetting('telegramSupport', this.value.trim().replace(/^@/, ''))">
+        <div class="hint" style="margin-bottom:12px;">Кнопка поддержки → «Telegram» откроет чат с этим профилем. Пусто — @milaisss_Support.</div>
         <label>Instagram (ссылка)</label>
         <input type="url" id="f_instagram" placeholder="https://instagram.com/..." onchange="saveSocialLink('instagram', this.value)">
         <label>TikTok (ссылка)</label>
@@ -1294,6 +1297,7 @@ function loadSettings(){
     loadBlackDownRows(blackDownItems);
     socialLinks = data.socialLinks || {};
     if (data.whatsappNumber) document.getElementById('f_whatsapp').value = '+' + data.whatsappNumber;
+    document.getElementById('f_tgSupport').value = '@' + (data.telegramSupport || 'milaisss_Support');
     if (socialLinks.instagram) document.getElementById('f_instagram').value = socialLinks.instagram;
     if (socialLinks.tiktok) document.getElementById('f_tiktok').value = socialLinks.tiktok;
     btsBranches = data.btsBranches || [];
