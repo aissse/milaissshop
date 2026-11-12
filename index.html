@@ -1398,7 +1398,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261112-179";
+  const CURRENT_VERSION = "20261112-180";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -4941,9 +4941,9 @@ function renderPromoStatus(p){
     const what = p.type === 'fixed' ? `−${fmt(d)}` : `−${Number(p.value)}% · ${t('promoDiscount')} ${fmt(d)}`;
     showPromoStatus('ok', `✓ ${t('promoOk')}: <b>${escH(p.code)}</b> (${what}) · ${t('promoToPay')} <b>${fmt(sub - d)}</b>`);
   } else if (st === 'expired'){
-    showPromoStatus('bad', `✕ ${t('promoExpired')}${p.validUntil ? ` (${t('promoExpiredOn')} ${fmtDateRu(p.validUntil)})` : ''} — ${t('promoNoDiscount')}`);
+    showPromoStatus('bad', `✕ ${t('promoExpired')}${p.validUntil ? ` (${t('promoExpiredOn')} ${fmtDateRu(p.validUntil)})` : ''}`);
   } else if (st === 'off'){
-    showPromoStatus('bad', `✕ ${t('promoOff')} — ${t('promoNoDiscount')}`);
+    showPromoStatus('bad', `✕ ${t('promoOff')}`);
   } else {
     showPromoStatus('bad', `✕ ${t('promoNotFound')}`);
   }
