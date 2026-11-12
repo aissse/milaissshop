@@ -160,6 +160,7 @@
     <div class="tab" data-tab="stock" onclick="switchTab('stock')">Склад</div>
     <div class="tab" data-tab="restock" onclick="switchTab('restock')">Ждут поступления <span id="restockBadge"></span></div>
     <div class="tab" data-tab="delivery" onclick="switchTab('delivery')">Доставка</div>
+    <div class="tab" data-tab="promo" onclick="switchTab('promo')">Промокоды</div>
     <div class="tab" data-tab="accounting" onclick="switchTab('accounting')">Учёт</div>
     <div class="tab" data-tab="finance" onclick="switchTab('finance')">Реквизиты</div>
     <div class="tab" data-tab="subscribers" onclick="switchTab('subscribers')">Подписки</div>
@@ -223,6 +224,24 @@
       </div>
     </div>
 
+
+    <div class="tab-panel" id="tab-promo">
+      <div class="card">
+        <h1>Промокоды</h1>
+        <p class="hint" style="margin-top:0;">Покупатель вводит код при оформлении заказа. Код действует <b>включительно до</b> выбранной даты (по Ташкенту), после этого скидка не даётся и покупатель видит красную надпись «истёк». Код пишется латиницей и цифрами, без пробелов (например SALE10). Скидку дополнительно перепроверяет платёжный сервер — подделать её нельзя.</p>
+        <div class="row">
+          <div style="flex:1;"><label>Код</label><input type="text" id="promoCodeIn" maxlength="30" placeholder="SALE10" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase;"></div>
+          <div style="flex:1;"><label>Скидка</label><input type="number" id="promoValueIn" min="1" step="1" placeholder="10" inputmode="numeric"></div>
+        </div>
+        <div class="row">
+          <div style="flex:1;"><label>Тип скидки</label><select id="promoTypeIn"><option value="percent">% от суммы заказа</option><option value="fixed">сум (фиксированная)</option></select></div>
+          <div style="flex:1;"><label>Действует до (включительно)</label><input type="date" id="promoUntilIn"></div>
+        </div>
+        <button type="button" class="btn" id="promoSaveBtn" onclick="savePromo()">Сохранить промокод</button>
+        <div class="hint" id="promoFormHint">Если такой код уже есть — он обновится.</div>
+        <div id="promoAdminList" style="margin-top:16px;"><p class="hint">Загружаем…</p></div>
+      </div>
+    </div>
 
     <div class="tab-panel" id="tab-accounting">
       <div class="card">
@@ -564,7 +583,7 @@ function openAdmin(){
   if (_adminOpened) return; _adminOpened = true;
   document.getElementById('lockScreen').style.display = 'none';
   document.getElementById('adminWrap').style.display = 'block';
-  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSubscribers(); loadVisits(); loadAccounting(); loadRestock();
+  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSubscribers(); loadVisits(); loadAccounting(); loadRestock(); loadPromos();
   PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
 }
 function checkPassword(){
@@ -1796,10 +1815,95 @@ function loadOrders(){
     filterAndRenderOrders();
     renderAnalytics();
     try{ renderAccounting(); }catch(e){}
+    try{ renderPromos(); }catch(e){} // счётчик «оплаченных заказов с этим кодом»
   });
 }
 
 let allVisits = [];
+/* ---------- промокоды ----------
+   Документ promo_codes/{КОД}: { code, type: 'percent'|'fixed', value, validUntil: 'ГГГГ-ММ-ДД', active, updatedAt }.
+   Код действует включительно до validUntil по времени Ташкента — так же считают сайт и платёжный воркер. */
+const PROMO_RE = /^[A-Z0-9_-]{2,30}$/;
+let promoList = [];
+function promoToday(){ return new Date(Date.now() + 5 * 3600 * 1000).toISOString().slice(0, 10); }
+function promoDateRu(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '')); return m ? `${m[3]}.${m[2]}.${m[1]}` : '—'; }
+function promoStatusOf(p){
+  if (p.active === false) return ['Выключен', '#777'];
+  if (!p.validUntil || promoToday() > p.validUntil) return ['Истёк', '#b3261e'];
+  return ['Действует', '#1f7a4d'];
+}
+function promoValueText(p){ return p.type === 'fixed' ? `−${Number(p.value).toLocaleString('ru-RU')} сум` : `−${Number(p.value)}%`; }
+function promoUses(code){ return allOrders.filter(o => o.promoCode === code && isPaidOrder(o)).length; }
+function loadPromos(){
+  db.collection('promo_codes').onSnapshot(snap => {
+    promoList = [];
+    snap.forEach(d => promoList.push(Object.assign({ code: d.id }, d.data())));
+    promoList.sort((a, b) => String(b.validUntil || '').localeCompare(String(a.validUntil || '')));
+    renderPromos();
+  }, err => {
+    console.error(err);
+    document.getElementById('promoAdminList').innerHTML = '<p class="hint" style="color:#b3261e;">Не удалось загрузить промокоды. Опубликуй новые правила Firestore (в них есть раздел promo_codes).</p>';
+  });
+}
+function renderPromos(){
+  const wrap = document.getElementById('promoAdminList'); if (!wrap) return;
+  if (!promoList.length){ wrap.innerHTML = '<p class="hint">Промокодов пока нет.</p>'; return; }
+  wrap.innerHTML = promoList.map(p => {
+    const [st, color] = promoStatusOf(p);
+    const c = escH(p.code);
+    return `<div class="order-admin-card" style="margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div style="font-weight:800; font-size:16px; letter-spacing:.5px;">${c}</div>
+        <div style="font-size:12px; font-weight:700; color:${color}; border:1px solid ${color}; border-radius:20px; padding:3px 10px;">${st}</div>
+      </div>
+      <div class="oline">Скидка: <b>${escH(promoValueText(p))}</b> · до ${escH(promoDateRu(p.validUntil))} включительно</div>
+      <div class="oline">Оплаченных заказов с этим кодом: ${promoUses(p.code)}</div>
+      <div class="row">
+        <button type="button" class="btn secondary" style="margin-top:8px;" onclick="editPromo('${c}')">Изменить</button>
+        <button type="button" class="btn secondary" style="margin-top:8px;" onclick="togglePromo('${c}')">${p.active === false ? 'Включить' : 'Выключить'}</button>
+        <button type="button" class="btn secondary" style="margin-top:8px; background:#8a2020;" onclick="deletePromo('${c}')">Удалить</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function savePromo(){
+  const code = String(document.getElementById('promoCodeIn').value || '').trim().toUpperCase().replace(/\s+/g, '');
+  const type = document.getElementById('promoTypeIn').value === 'fixed' ? 'fixed' : 'percent';
+  const value = Math.round(Number(document.getElementById('promoValueIn').value));
+  const validUntil = document.getElementById('promoUntilIn').value;
+  if (!PROMO_RE.test(code)){ adminToast('Код: от 2 до 30 символов, только латиница, цифры, «-» и «_», без пробелов'); return; }
+  if (type === 'percent' && !(value >= 1 && value <= 99)){ adminToast('Скидка в процентах — от 1 до 99'); return; }
+  if (type === 'fixed' && !(value >= 1000)){ adminToast('Фиксированная скидка — от 1 000 сум'); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(validUntil)){ adminToast('Выбери дату «Действует до»'); return; }
+  if (validUntil < promoToday() && !confirm('Эта дата уже прошла — код сразу будет «истёкшим». Сохранить всё равно?')) return;
+  const btn = document.getElementById('promoSaveBtn'); btn.disabled = true;
+  try{
+    await db.collection('promo_codes').doc(code).set({ code, type, value, validUntil, active: true, updatedAt: Date.now() });
+    adminToast(`Промокод ${code} сохранён ✓`);
+    ['promoCodeIn', 'promoValueIn', 'promoUntilIn'].forEach(id => document.getElementById(id).value = '');
+  }catch(e){
+    console.error(e); adminToast('Не удалось сохранить промокод: ' + (e && e.code || e));
+  }finally{ btn.disabled = false; }
+}
+function editPromo(code){
+  const p = promoList.find(x => x.code === code); if (!p) return;
+  document.getElementById('promoCodeIn').value = p.code;
+  document.getElementById('promoTypeIn').value = p.type === 'fixed' ? 'fixed' : 'percent';
+  document.getElementById('promoValueIn').value = p.value || '';
+  document.getElementById('promoUntilIn').value = p.validUntil || '';
+  document.getElementById('promoCodeIn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+async function togglePromo(code){
+  const p = promoList.find(x => x.code === code); if (!p) return;
+  try{ await db.collection('promo_codes').doc(code).update({ active: p.active === false, updatedAt: Date.now() }); }
+  catch(e){ console.error(e); adminToast('Не удалось изменить промокод: ' + (e && e.code || e)); }
+}
+async function deletePromo(code){
+  if (!confirm(`Удалить промокод ${code}? Уже оформленные заказы с ним не изменятся.`)) return;
+  try{ await db.collection('promo_codes').doc(code).delete(); adminToast(`Промокод ${code} удалён`); }
+  catch(e){ console.error(e); adminToast('Не удалось удалить промокод: ' + (e && e.code || e)); }
+}
+
 // визиты грузим только за последние 31 день: раньше админка при каждом открытии читала ВСЕ визиты за всё время
 // (документ на каждого посетителя в день) — это быстро съедало суточный лимит чтений Firebase.
 // Поэтому «Всё время» в аналитике показывает визиты максимум за 31 день (заказы — по-прежнему за всё время).
@@ -1960,6 +2064,7 @@ function filterAndRenderOrders(){
       ${o.btsBranch ? `<div class="oline">📍 ${escH(o.btsBranch)}</div>` : ''}
       ${o.note ? `<div class="oline">📝 ${escH(o.note)}</div>` : ''}
       ${o.paymentMethod ? `<div class="oline" style="font-weight:700;">💰 Способ оплаты: ${escH(o.paymentMethod)}</div>` : ''}
+      ${o.promoCode ? `<div class="oline" style="font-weight:700; color:#1f7a4d;">🏷 + промокод <b>${escH(o.promoCode)}</b>: −${Number(o.promoDiscount || 0).toLocaleString('ru-RU')} сум${o.subtotal ? ` (без скидки ${Number(o.subtotal).toLocaleString('ru-RU')} сум)` : ''}</div>` : ''}
       ${o.paid === true ? `<div class="oline" style="font-weight:700; color:#1f7a4d;">✅ Оплачен онлайн${o.paidAt ? ' · ' + (o.paidAt.toDate ? o.paidAt.toDate() : new Date(o.paidAt)).toLocaleString('ru-RU') : ''}${o.clickTransId ? ' · Click №' + escH(o.clickTransId) : ''}${o.uzumTransId ? ' · Uzum №' + escH(o.uzumTransId) : ''}</div>` : (o.paymentStatus === 'REVERSED' ? `<div class="oline" style="font-weight:700; color:#b3261e;">↩️ Оплата отменена банком</div>` : '')}
       ${o.paid === true ? `<label class="oline" style="display:flex; align-items:center; gap:8px; cursor:pointer;${o.testOrder ? ' color:#b3261e; font-weight:700;' : ''}"><input type="checkbox" class="test-order-cb" ${o.testOrder ? 'checked' : ''} style="width:auto;"> 🧪 Тестовый заказ — не считать в учёте</label>` : ''}
       <select class="status-select">
@@ -2192,7 +2297,10 @@ function accSalesRows(){
     if (fromTs && ts < fromTs) return;
     if (toTs && ts > toTs) return;
     (o.items || []).forEach((it, idx) => {
-      const qty = Number(it.qty)||0, price = Number(it.price)||0;
+      const qty = Number(it.qty)||0;
+      // скидку по промокоду делим между позициями пропорционально цене, чтобы выручка = реально оплаченная сумма
+      const promoK = (o.promoCode && Number(o.subtotal) > 0) ? (Number(o.total) || 0) / Number(o.subtotal) : 1;
+      const price = (Number(it.price)||0) * promoK;
       const uc = unitCostOf(o, idx, it);
       rows.push({
         ts, orderId: o.id, customer: o.customerName || 'Покупатель', phone: o.phone || '',

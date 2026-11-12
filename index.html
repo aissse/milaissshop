@@ -417,6 +417,13 @@
   .pay-field textarea:focus{ outline:none; border-color:var(--orange); box-shadow:0 0 0 3px rgba(122,28,28,.10); }
   .pay-field textarea{ width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:14px; background:var(--bg); color:inherit; }
   .pay-note{ font-size:11px; color:var(--muted); margin-top:5px; }
+  .promo-row{ display:flex; gap:8px; align-items:stretch; }
+  .promo-row input{ flex:1; min-width:0; text-transform:uppercase; letter-spacing:.5px; }
+  .promo-row button{ flex:none; border:0; border-radius:12px; padding:0 16px; font:inherit; font-size:13px; font-weight:700; background:var(--ink); color:var(--on-ink, #fff); cursor:pointer; }
+  .promo-row button:disabled{ opacity:.55; cursor:default; }
+  .promo-status{ font-size:12px; font-weight:700; margin-top:6px; display:none; line-height:1.45; }
+  .promo-status.ok{ display:block; color:#1f7a4d; }
+  .promo-status.bad{ display:block; color:#c0392b; }
   .bts-result-item{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px; margin-bottom:6px; cursor:pointer; background:var(--bg); }
   .bts-result-item:active{ background:var(--stone); }
   .pay-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -1183,6 +1190,15 @@
       <div class="pay-note" data-i18n="noteHint">Не обязательно, но можно — например, пожелания по доставке</div>
     </div>
 
+    <div class="pay-field" style="margin-bottom:16px;">
+      <label class="block-label" data-i18n="promoLabel" style="margin-top:0;">Промокод</label>
+      <div class="promo-row">
+        <input type="text" id="promoInput" maxlength="30" autocomplete="off" autocapitalize="characters" spellcheck="false" data-i18n-ph="promoPlaceholder" placeholder="Введите промокод" oninput="onPromoInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyPromo();}">
+        <button type="button" id="promoBtn" onclick="applyPromo()" data-i18n="promoApply">Применить</button>
+      </div>
+      <div id="promoStatus" class="promo-status"></div>
+    </div>
+
     <button class="checkout-btn" onclick="confirmPayment()" id="confirmPaymentBtn" data-i18n="confirmTransferBtn">Перейти к оплате</button>
     <div class="offer-note"><span data-i18n="offerA">Оформляя заказ, вы принимаете условия</span> <a href="oferta.html" target="_blank" rel="noopener" data-i18n="offerB">публичной оферты</a></div>
     <div class="offer-note"><a href="payment.html" target="_blank" rel="noopener" onclick="this.href='payment.html?lang='+lang" data-i18n="payReturnLink">Оплата, возврат и безопасность платежей</a></div>
@@ -1382,7 +1398,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261109-178";
+  const CURRENT_VERSION = "20261112-179";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2061,6 +2077,40 @@ const STR_RESTOCK = {
   en:{ restockReg:"Sign up so we can let you know when the item is back", restockBtn:"Notify me when available", restockDone:"We’ll notify you", restockHint:"This size is out of stock. Tap and we’ll message you on Telegram when it’s back.", restockDoneNote:"You’re on the waiting list. We’ll message you as soon as the size is back.", restockNeedBot:"To get the message, connect the shop bot:", restockBotLink:"open the bot", restockToast:"Done! We’ll let you know when the size is back" }
 };
 Object.keys(STR_RESTOCK).forEach(l => Object.assign(STR[l], STR_RESTOCK[l]));
+/* Частые вопросы: «Как отследить заказ?» + промокоды на оформлении */
+const STR_PROMO = {
+  ru:{ faqQTrack:"Как отследить заказ?",
+       faqATrack:"Есть два удобных способа:<br>📦 <b>На сайте:</b> откройте «Профиль» → «Мои заказы» — там виден статус каждого заказа.<br>🔔 <b>В Telegram:</b> в «Профиле» нажмите на колокольчик — откроется наш бот <b>@milaisss_bot</b>. Нажмите «Старт», и бот будет сам присылать вам каждое изменение статуса заказа.",
+       promoLabel:"Промокод", promoPlaceholder:"Введите промокод", promoApply:"Применить", promoRemove:"Убрать",
+       promoOk:"Промокод применён", promoDiscount:"скидка", promoToPay:"к оплате",
+       promoExpired:"Срок действия промокода истёк", promoExpiredOn:"действовал до", promoNotFound:"Такого промокода нет",
+       promoOff:"Промокод сейчас не действует", promoNoDiscount:"скидки нет", promoCheckErr:"Не удалось проверить промокод, попробуйте ещё раз", promoEnter:"Введите промокод" },
+  uz:{ faqQTrack:"Buyurtmani qanday kuzatish mumkin?",
+       faqATrack:"Ikki qulay usul bor:<br>📦 <b>Saytda:</b> «Profil» → «Buyurtmalarim» bo‘limini oching — har bir buyurtma holati shu yerda ko‘rinadi.<br>🔔 <b>Telegramda:</b> «Profil»da qo‘ng‘iroqchani bosing — <b>@milaisss_bot</b> botimiz ochiladi. «Start»ni bosing, bot buyurtma holatidagi har bir o‘zgarishni o‘zi yuborib turadi.",
+       promoLabel:"Promokod", promoPlaceholder:"Promokodni kiriting", promoApply:"Qo‘llash", promoRemove:"Olib tashlash",
+       promoOk:"Promokod qo‘llandi", promoDiscount:"chegirma", promoToPay:"to‘lov uchun",
+       promoExpired:"Promokod muddati tugagan", promoExpiredOn:"amal qilgan sana", promoNotFound:"Bunday promokod yo‘q",
+       promoOff:"Promokod hozir amal qilmaydi", promoNoDiscount:"chegirma yo‘q", promoCheckErr:"Promokodni tekshirib bo‘lmadi, qaytadan urinib ko‘ring", promoEnter:"Promokodni kiriting" },
+  tr:{ faqQTrack:"Siparişimi nasıl takip edebilirim?",
+       faqATrack:"İki kolay yol var:<br>📦 <b>Sitede:</b> «Profil» → «Siparişlerim» bölümünü açın — her siparişin durumu orada görünür.<br>🔔 <b>Telegram'da:</b> «Profil»de zil simgesine dokunun — <b>@milaisss_bot</b> botumuz açılır. «Başlat»a basın, bot sipariş durumundaki her değişikliği size kendisi gönderir.",
+       promoLabel:"Promosyon kodu", promoPlaceholder:"Promosyon kodunu girin", promoApply:"Uygula", promoRemove:"Kaldır",
+       promoOk:"Promosyon kodu uygulandı", promoDiscount:"indirim", promoToPay:"ödenecek",
+       promoExpired:"Promosyon kodunun süresi doldu", promoExpiredOn:"son geçerlilik", promoNotFound:"Böyle bir promosyon kodu yok",
+       promoOff:"Promosyon kodu şu anda geçerli değil", promoNoDiscount:"indirim yok", promoCheckErr:"Promosyon kodu kontrol edilemedi, tekrar deneyin", promoEnter:"Promosyon kodunu girin" },
+  az:{ faqQTrack:"Sifarişi necə izləmək olar?",
+       faqATrack:"İki rahat yol var:<br>📦 <b>Saytda:</b> «Profil» → «Sifarişlərim» bölməsini açın — hər sifarişin statusu orada görünür.<br>🔔 <b>Telegram-da:</b> «Profil»də zəngə toxunun — <b>@milaisss_bot</b> botumuz açılacaq. «Start» düyməsini basın, bot sifariş statusundakı hər dəyişikliyi sizə özü göndərəcək.",
+       promoLabel:"Promokod", promoPlaceholder:"Promokodu daxil edin", promoApply:"Tətbiq et", promoRemove:"Sil",
+       promoOk:"Promokod tətbiq olundu", promoDiscount:"endirim", promoToPay:"ödəniləcək",
+       promoExpired:"Promokodun müddəti bitib", promoExpiredOn:"etibarlı idi", promoNotFound:"Belə promokod yoxdur",
+       promoOff:"Promokod hazırda etibarlı deyil", promoNoDiscount:"endirim yoxdur", promoCheckErr:"Promokodu yoxlamaq alınmadı, yenidən cəhd edin", promoEnter:"Promokodu daxil edin" },
+  en:{ faqQTrack:"How can I track my order?",
+       faqATrack:"There are two easy ways:<br>📦 <b>On the site:</b> open “Profile” → “My orders” — the status of every order is shown there.<br>🔔 <b>In Telegram:</b> in “Profile”, tap the bell — our bot <b>@milaisss_bot</b> will open. Tap “Start”, and the bot will send you every change in your order status.",
+       promoLabel:"Promo code", promoPlaceholder:"Enter promo code", promoApply:"Apply", promoRemove:"Remove",
+       promoOk:"Promo code applied", promoDiscount:"discount", promoToPay:"to pay",
+       promoExpired:"This promo code has expired", promoExpiredOn:"valid until", promoNotFound:"No such promo code",
+       promoOff:"This promo code is not active right now", promoNoDiscount:"no discount", promoCheckErr:"Couldn’t check the promo code, please try again", promoEnter:"Enter a promo code" }
+};
+Object.keys(STR_PROMO).forEach(l => Object.assign(STR[l], STR_PROMO[l]));
 const STR_REVLINK = {
   ru:{ revLinkLogin:"Не нашли этот заказ. Войдите через Telegram тем же аккаунтом, с которого оформляли заказ" },
   uz:{ revLinkLogin:"Bu buyurtma topilmadi. Buyurtma bergan Telegram akkauntingiz orqali kiring" },
@@ -2547,7 +2597,11 @@ function renderSocialIcons(){
 
 function renderFaq(){
   const wrap = document.getElementById('faqSection');
-  wrap.innerHTML = faqItems.map((f, i) => `
+  // «Как отследить заказ?» показываем всегда — и к стандартным вопросам, и к своим из админки
+  // (если в админке уже есть свой вопрос про отслеживание — второй не добавляем)
+  const hasTrack = faqItems.some(f => /отслед|kuzat|takip|izlə|track/i.test(String(f && f.q || '')));
+  const list = hasTrack ? faqItems : faqItems.concat([{ q: t('faqQTrack'), a: t('faqATrack') }]);
+  wrap.innerHTML = list.map((f, i) => `
     <div class="faq-item" id="faq-${i}">
       <div class="faq-q" onclick="toggleFaq(${i})"><span>${f.q}</span><span class="chev">⌄</span></div>
       <div class="faq-a">${f.a}</div>
@@ -4520,7 +4574,7 @@ function renderCart(){
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
     </div>
     ${cartBad ? `<div class="cart-oos-banner">${t('cartFixItems')}</div>` : ''}
-    <button class="checkout-btn" ${cartBad ? 'disabled' : ''} onclick="requireRegistration(goToCheckoutFlow)">${t('checkoutBtn')}</button>
+    <button class="checkout-btn" ${cartBad ? 'disabled' : ''} onclick="goToCheckoutFlow()">${t('checkoutBtn')}</button>
     <div class="hint">${t('nextStepHint')}</div>
   `;
 }
@@ -4535,6 +4589,7 @@ function goToCheckoutFlow(){
   document.getElementById('btsSelectedDisplay').style.display = 'none';
   document.getElementById('btsResults').innerHTML = '';
   const _nt = document.getElementById('orderNoteInput'); if (_nt) _nt.value = '';
+  clearPromo(true);
 
   const phoneBlock = document.getElementById('phoneFieldBlock');
   if (customerProfile && customerProfile.phone){
@@ -4850,6 +4905,82 @@ function detectSource(){
 }
 try{ detectSource(); }catch(e){}
 
+/* ---------- промокоды ----------
+   Промокоды хранит админка в коллекции promo_codes (id документа = сам код заглавными буквами).
+   Покупатель может прочитать только один код по точному названию — список кодов ему недоступен.
+   Промокод действует ВКЛЮЧИТЕЛЬНО до даты «Действует до» по времени Ташкента.
+   Ту же скидку перепроверяет платёжный воркер — подделать сумму в браузере не выйдет. */
+let appliedPromo = null;   // { code, type, value, validUntil, active }
+const PROMO_RE = /^[A-Z0-9_-]{2,30}$/;
+function tashkentToday(){ return new Date(Date.now() + 5 * 3600 * 1000).toISOString().slice(0, 10); }
+function normPromo(v){ return String(v || '').trim().toUpperCase().replace(/\s+/g, ''); }
+function promoState(p){
+  if (!p) return 'notfound';
+  if (p.active === false || !(Number(p.value) > 0)) return 'off';
+  if (!p.validUntil || tashkentToday() > String(p.validUntil)) return 'expired';
+  return 'ok';
+}
+function promoDiscountFor(p, subtotal){
+  const v = Number(p && p.value) || 0;
+  let d = 0;
+  if (p && p.type === 'fixed') d = Math.round(v);
+  else if (v > 0 && v < 100) d = Math.round(subtotal * v / 100);
+  return Math.max(0, Math.min(d, subtotal - 1000)); // к оплате всегда остаётся хотя бы 1 000 сум
+}
+function cartSubtotal(){ return cart.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.qty) || 0), 0); }
+function fmtDateRu(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '')); return m ? `${m[3]}.${m[2]}.${m[1]}` : String(iso || ''); }
+function showPromoStatus(cls, html){
+  const el = document.getElementById('promoStatus'); if (!el) return;
+  el.className = 'promo-status' + (cls ? ' ' + cls : '');
+  el.innerHTML = html || '';
+}
+function renderPromoStatus(p){
+  const st = promoState(p);
+  if (st === 'ok'){
+    const sub = cartSubtotal(), d = promoDiscountFor(p, sub);
+    const what = p.type === 'fixed' ? `−${fmt(d)}` : `−${Number(p.value)}% · ${t('promoDiscount')} ${fmt(d)}`;
+    showPromoStatus('ok', `✓ ${t('promoOk')}: <b>${escH(p.code)}</b> (${what}) · ${t('promoToPay')} <b>${fmt(sub - d)}</b>`);
+  } else if (st === 'expired'){
+    showPromoStatus('bad', `✕ ${t('promoExpired')}${p.validUntil ? ` (${t('promoExpiredOn')} ${fmtDateRu(p.validUntil)})` : ''} — ${t('promoNoDiscount')}`);
+  } else if (st === 'off'){
+    showPromoStatus('bad', `✕ ${t('promoOff')} — ${t('promoNoDiscount')}`);
+  } else {
+    showPromoStatus('bad', `✕ ${t('promoNotFound')}`);
+  }
+}
+function clearPromo(clearInput){
+  appliedPromo = null;
+  if (clearInput){ const i = document.getElementById('promoInput'); if (i) i.value = ''; }
+  showPromoStatus('', '');
+}
+function onPromoInput(){
+  // поменяли код после «Применить» — скидка снимается, пока не нажмут «Применить» снова
+  const v = normPromo((document.getElementById('promoInput') || {}).value);
+  if (appliedPromo && v !== appliedPromo.code) clearPromo(false);
+  else if (!appliedPromo) showPromoStatus('', '');
+}
+async function applyPromo(){
+  const inp = document.getElementById('promoInput'), btn = document.getElementById('promoBtn');
+  const code = normPromo(inp && inp.value);
+  if (inp) inp.value = code;
+  appliedPromo = null;
+  if (!code){ showPromoStatus('bad', '✕ ' + t('promoEnter')); return; }
+  if (!PROMO_RE.test(code)){ showPromoStatus('bad', '✕ ' + t('promoNotFound')); return; }
+  if (btn) btn.disabled = true;
+  try{
+    const doc = await db.collection('promo_codes').doc(code).get({ source: 'server' });
+    const p = doc.exists ? Object.assign({}, doc.data(), { code }) : null;
+    if (normPromo((document.getElementById('promoInput') || {}).value) !== code) return; // пока проверяли, код уже стёрли
+    if (promoState(p) === 'ok') appliedPromo = p;
+    renderPromoStatus(p);
+  }catch(e){
+    console.warn('promo', e);
+    showPromoStatus('bad', '✕ ' + t('promoCheckErr'));
+  }finally{
+    if (btn) btn.disabled = false;
+  }
+}
+
 function finalizeOrder(phone, branch){
   if (_ordering || !cart.length) return;
   syncCartWithProducts(); // актуальные цены (если ты изменил цену, пока клиент был на оформлении)
@@ -4865,7 +4996,23 @@ function finalizeOrder(phone, branch){
   });
   const methodLabel = PAY_METHOD_LABELS[selectedPayMethod] || selectedPayMethod || 'Уточняется';
   const orderNote = ((document.getElementById('orderNoteInput')||{}).value || '').trim().slice(0,300);
-  text += `\nИтого: ${fmt(total)}\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n💰 Способ оплаты: ${methodLabel}`;
+  // промокод: срок перепроверяем в момент оформления (вдруг наступила полночь и он истёк)
+  const subtotal = total;
+  let promoFields = {};
+  if (appliedPromo){
+    if (promoState(appliedPromo) !== 'ok'){
+      renderPromoStatus(appliedPromo); appliedPromo = null; _ordering = false;
+      showToast(t('promoExpired')); return;
+    }
+    const promoDiscount = promoDiscountFor(appliedPromo, subtotal);
+    if (promoDiscount > 0){
+      total = subtotal - promoDiscount;
+      promoFields = { promoCode: appliedPromo.code, promoDiscount, subtotal };
+    }
+  }
+  text += `\nИтого: ${fmt(total)}`;
+  if (promoFields.promoCode) text += ` (без скидки ${fmt(subtotal)}, промокод ${promoFields.promoCode}: −${fmt(promoFields.promoDiscount)})`;
+  text += `\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n💰 Способ оплаты: ${methodLabel}`;
   if (orderNote) text += `\n📝 Примечание: ${orderNote}`;
 
   const customerId = getCustomerId();
@@ -4882,12 +5029,13 @@ function finalizeOrder(phone, branch){
     customerId, customerName, items: orderItems, total,
     btsBranch: branch, phone, paymentMethod: methodLabel, note: orderNote, source: detectSource(),
     status: 'Проверяется оплата', createdAt: Date.now(),
-    lang, notifyChatId
+    lang, notifyChatId, ...promoFields
   }).then(() => {
     const orderId = orderRef.id;
     const payOnline = ONLINE_PAY_METHODS.includes(selectedPayMethod) && orderId;
     const _custNote = workerNotify('customer', buildOrderNotifyText(orderItems, total, branch));
     cart = []; updateCartBadge();
+    clearPromo(true);
     document.getElementById('phoneInput').value = '';
     const _n2 = document.getElementById('orderNoteInput'); if (_n2) _n2.value = '';
     // онлайн-заказы: продавцу в Telegram приходит только сообщение об ОПЛАТЕ (его шлёт платёжный Worker)
