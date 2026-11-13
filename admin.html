@@ -1275,6 +1275,22 @@ function renderStockList(){
   }).join('');
 }
 
+// Запись в базу с ответом: «Сохранено ✓» или понятная ошибка (раньше ошибки молча терялись,
+// и галочка «Показывать покупателям» стояла, хотя в базе ничего не поменялось).
+function firebaseErrText(err){
+  const code = String(err && err.code || '');
+  if (code.includes('resource-exhausted')) return 'закончился дневной лимит Firebase — попробуй после 13:00 или подключи оплату Blaze';
+  if (code.includes('permission-denied')) return 'нет прав (войди в админку заново)';
+  if (code.includes('unavailable')) return 'нет связи с базой, проверь интернет';
+  return code || String(err && err.message || err);
+}
+function saveWithFeedback(promise, okText, onFail){
+  let done = false;
+  const slow = setTimeout(() => { if (!done) adminToast('База пока не подтвердила изменение… Если так и не появится «✓», скорее всего закончился дневной лимит Firebase.'); }, 8000);
+  return promise.then(() => { done = true; clearTimeout(slow); adminToast(okText); })
+    .catch(err => { done = true; clearTimeout(slow); console.error(err); adminToast('Не сохранилось: ' + firebaseErrText(err)); if (onFail) onFail(err); });
+}
+
 function loadReviews(){
   db.collection('reviews').onSnapshot(snap => {
     const wrap = document.getElementById('reviewList');
@@ -1292,8 +1308,17 @@ function loadReviews(){
         ${/^https?:\/\//i.test(r.photo||'') ? `<img src="${escH(r.photo)}" style="max-width:140px; border-radius:8px; margin-bottom:8px; display:block;">` : ''}
         <label><input type="checkbox" class="rcheck" data-id="${escH(doc.id)}" ${r.approved ? 'checked' : ''}> Показывать покупателям</label>
       `;
-      row.querySelector('.rcheck').onchange = (e) => db.collection('reviews').doc(doc.id).update({ approved: e.target.checked });
-      row.querySelector('.rdel').onclick = () => { if (confirm('Удалить отзыв?')) db.collection('reviews').doc(doc.id).delete(); };
+      row.querySelector('.rcheck').onchange = (e) => {
+        const box = e.target, want = box.checked;
+        box.disabled = true;
+        saveWithFeedback(db.collection('reviews').doc(doc.id).update({ approved: want }),
+          want ? 'Отзыв теперь виден покупателям ✓' : 'Отзыв скрыт ✓',
+          () => { box.checked = !want; })
+          .finally(() => { box.disabled = false; });
+      };
+      row.querySelector('.rdel').onclick = () => {
+        if (confirm('Удалить отзыв?')) saveWithFeedback(db.collection('reviews').doc(doc.id).delete(), 'Отзыв удалён ✓');
+      };
       wrap.appendChild(row);
     });
   });
