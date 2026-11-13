@@ -1398,7 +1398,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261112-180";
+  const CURRENT_VERSION = "20261114-181";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2196,7 +2196,10 @@ function applyLang(){
   renderFavGrid();
   renderLegalFooter();
   renderSupportMsgs();
-  if (!faqCustomized){ faqItems = defaultFaqItems(); renderFaq(); }
+  if (!faqCustomized){ faqItems = defaultFaqItems(); }
+  renderFaq();                 // и свой список из админки: встроенный вопрос «Как отследить заказ?» тоже переводится
+  renderRatingSummary();       // строка со звёздами «N отзывов покупателей» на главной
+  try{ if (appliedPromo) renderPromoStatus(appliedPromo); }catch(e){}
   if (!policyCustomized){ policyItems = defaultPolicyItems(); }
   if (currentProduct) renderPolicyAccordion();
   renderHero();
