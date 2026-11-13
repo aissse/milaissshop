@@ -209,6 +209,14 @@
       <div class="card">
         <h1>Заказы и доставка</h1>
         <p class="hint" style="margin-top:0;">Наличие товара списывается автоматически в момент оформления заказа покупателем — тебе не нужно ничего для этого делать. Статусы здесь — это только этапы доставки: меняй их по мере отправки заказа (Собирается → В пути → Доставлен), покупатель сразу увидит статус в своём профиле.</p>
+        <div style="margin-bottom:12px;">
+          <label for="orderPhoneSearch">🔎 Поиск по номеру клиента</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="search" id="orderPhoneSearch" inputmode="tel" autocomplete="off" placeholder="Например 90 123 45 67" oninput="filterAndRenderOrders()" style="flex:1;">
+            <button type="button" class="btn secondary" style="margin-top:0; flex:none; width:auto; padding:0 14px;" onclick="clearPhoneSearch()">✕</button>
+          </div>
+          <div class="hint" style="margin-top:4px;">Можно вводить с +998 или без, с пробелами или без. Ищет по всем заказам за всё время — фильтр дат и вкладки не мешают.</div>
+        </div>
         <div class="row" style="margin-bottom:10px;">
           <button type="button" class="btn secondary" style="margin-top:0;" onclick="setDateRange('today')">Сегодня</button>
           <button type="button" class="btn secondary" style="margin-top:0;" onclick="setDateRange('yesterday')">Вчера</button>
@@ -2025,9 +2033,21 @@ function orderReason(o){  // почему заказ не среди оплач�
   if (o.testOrder === true) return ['🧪 Тестовый заказ', '#8a5a00'];
   return ['⏳ Не оплачен', '#8a5a00'];
 }
+// цифры номера без +998 в начале: «+998 90 123-45-67» → «901234567»
+function phoneDigits(v){
+  let d = String(v || '').replace(/\D/g, '');
+  if (d.length > 9 && d.startsWith('998')) d = d.slice(3);
+  return d;
+}
+function clearPhoneSearch(){
+  const i = document.getElementById('orderPhoneSearch');
+  if (i){ i.value = ''; filterAndRenderOrders(); i.focus(); }
+}
 function filterAndRenderOrders(){
   const fromVal = document.getElementById('dateFrom').value;
   const toVal = document.getElementById('dateTo').value;
+  const phoneQ = phoneDigits((document.getElementById('orderPhoneSearch') || {}).value);
+  if (phoneQ.length >= 3) return renderPhoneSearch(phoneQ);
   let orders = allOrders;
   if (fromVal){
     const fromTs = new Date(fromVal + 'T00:00:00').getTime();
@@ -2050,7 +2070,45 @@ function filterAndRenderOrders(){
   const wrap = document.getElementById('ordersAdminList');
   if (orders.length === 0){ wrap.innerHTML = `<p class="hint">${ordersView === 'paid' ? 'Оплаченных заказов за этот период нет' : 'Здесь пусто'}</p>`; return; }
   wrap.innerHTML = '';
-  orders.forEach(o => {
+  orders.forEach(o => renderAdminOrderCard(o, wrap));
+}
+
+// поиск по номеру: все заказы этого клиента за всё время, сводка по товарам и карточки заказов
+function renderPhoneSearch(q){
+  const found = allOrders.filter(o => phoneDigits(o.phone).includes(q));
+  document.getElementById('ordersTabs').innerHTML = '';
+  const cnt = document.getElementById('ordersCount');
+  const wrap = document.getElementById('ordersAdminList');
+  if (!found.length){
+    cnt.textContent = 'По этому номеру заказов не найдено';
+    wrap.innerHTML = '<p class="hint">Проверь цифры. Поиск идёт по номеру, который клиент указал при оформлении.</p>';
+    return;
+  }
+  const paid = found.filter(isPaidOrder);
+  const phones = [...new Set(found.map(o => String(o.phone || '').trim()).filter(Boolean))];
+  const names = [...new Set(found.map(o => String(o.customerName || '').trim()).filter(Boolean))];
+  // сводка товаров только по оплаченным заказам (неоплаченные и отмены клиент не получал)
+  const agg = {};
+  paid.forEach(o => (o.items || []).forEach(it => {
+    const key = `${it.name || ''}|${it.size || ''}|${it.colorName || ''}`;
+    if (!agg[key]) agg[key] = { name: it.name || 'Товар', size: it.size || '—', color: it.colorName || '—', qty: 0 };
+    agg[key].qty += Number(it.qty) || 0;
+  }));
+  const items = Object.values(agg).sort((a, b) => b.qty - a.qty);
+  const totalQty = items.reduce((a, x) => a + x.qty, 0);
+  const totalSum = paid.reduce((a, o) => a + (Number(o.total) || 0), 0);
+  cnt.textContent = `Найдено заказов: ${found.length} (оплачено ${paid.length})`;
+  wrap.innerHTML = `<div class="order-admin-card" style="border:2px solid #1f7a4d; margin-bottom:14px;">
+      <div class="who">${escH(names.join(', ') || 'Покупатель')}</div>
+      <div class="oline">📞 ${escH(phones.join(', '))}</div>
+      <div class="oline" style="font-weight:700;">Оплачено: ${paid.length} заказ(ов) · ${totalQty} шт · ${totalSum.toLocaleString('ru-RU')} сум</div>
+      ${items.length ? `<div class="oline" style="margin-top:6px; font-weight:700;">Что покупал:</div>` + items.map(x => `<div class="oline">• ${escH(x.name)} (${escH(x.size)}, ${escH(x.color)}) × ${x.qty}</div>`).join('') : '<div class="oline">Оплаченных заказов пока нет.</div>'}
+    </div>`;
+  found.forEach(o => renderAdminOrderCard(o, wrap));
+}
+
+// одна карточка заказа (используется и в обычном списке, и в поиске по номеру)
+function renderAdminOrderCard(o, wrap){
     const card = document.createElement('div');
     card.className = 'order-admin-card';
     const _rs = isPaidOrder(o) ? null : orderReason(o);
@@ -2107,7 +2165,6 @@ function filterAndRenderOrders(){
       adminToast(ok ? 'Статус сохранён, клиенту отправлено в Telegram ✅' : 'Статус сохранён, но Telegram не доставил (клиент не запускал бота?)');
     };
     wrap.appendChild(card);
-  });
 }
 
 // ручная отмена: статус «Отменён» и возврат остатков — одной транзакцией и только один раз (stockRestored).
