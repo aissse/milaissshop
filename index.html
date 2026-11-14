@@ -417,6 +417,16 @@
   .pay-field textarea:focus{ outline:none; border-color:var(--orange); box-shadow:0 0 0 3px rgba(122,28,28,.10); }
   .pay-field textarea{ width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:14px; background:var(--bg); color:inherit; }
   .pay-note{ font-size:11px; color:var(--muted); margin-top:5px; }
+  .ship-seg{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .ship-opt, .ship-country{ border:1.5px solid var(--line); border-radius:12px; padding:11px 10px; background:transparent; color:var(--ink); font:inherit; font-size:13px; font-weight:700; cursor:pointer; text-align:center; }
+  .ship-opt.selected, .ship-country.selected{ border-color:var(--ink); border-width:2px; background:var(--pmr-selected-bg, var(--stone)); }
+  .ship-opt small.ship-soon{ display:none; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; margin-left:6px; padding:2px 7px; border-radius:20px; background:var(--orange, #7A1C1C); color:#fff; vertical-align:middle; }
+  .ship-opt.soon small.ship-soon{ display:inline-block; }
+  .ship-opt.soon{ opacity:.75; }
+  .ship-countries{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px; }
+  .ship-country{ text-align:left; line-height:1.3; }
+  .ship-country small{ display:block; font-weight:600; opacity:.7; margin-top:2px; }
+  #abroadBlock input{ width:100%; box-sizing:border-box; }
   .promo-row{ display:flex; gap:8px; align-items:stretch; }
   .promo-row input{ flex:1; min-width:0; text-transform:uppercase; letter-spacing:.5px; }
   .promo-row button{ flex:none; border:0; border-radius:12px; padding:0 16px; font:inherit; font-size:13px; font-weight:700; background:var(--ink); color:var(--on-ink, #fff); cursor:pointer; }
@@ -1171,13 +1181,38 @@
       </div>
     </div>
 
+    <div class="pay-field" id="shipTypeBlock" style="margin-bottom:16px;">
+      <label class="block-label" data-i18n="shipWhereLabel" style="margin-top:0;">Куда доставить?</label>
+      <div class="ship-seg">
+        <button type="button" class="ship-opt selected" data-ship="uz" onclick="setShipType('uz')" data-i18n="shipUz">По Узбекистану</button>
+        <button type="button" class="ship-opt" data-ship="abroad" onclick="setShipType('abroad')"><span data-i18n="shipAbroad">За рубеж</span><small class="ship-soon" data-i18n="shipSoon">скоро</small></button>
+      </div>
+    </div>
+
+    <div class="pay-field" id="abroadBlock" style="margin-bottom:16px; display:none;">
+      <label class="block-label" data-i18n="abroadCountry" style="margin-top:0;">Страна</label>
+      <div id="abroadCountries" class="ship-countries"></div>
+      <label class="block-label" for="abName" data-i18n="abroadName">Имя и фамилия получателя</label>
+      <input type="text" id="abName" maxlength="80" autocomplete="name" data-i18n-ph="abroadNamePh" placeholder="Как в паспорте">
+      <label class="block-label" for="abPhone" data-i18n="abroadPhone">Телефон получателя (с кодом страны)</label>
+      <input type="text" id="abPhone" maxlength="24" autocomplete="tel" inputmode="tel" placeholder="+7 701 123 45 67">
+      <label class="block-label" for="abCity" data-i18n="abroadCity">Город</label>
+      <input type="text" id="abCity" maxlength="60" autocomplete="address-level2">
+      <label class="block-label" for="abAddress" data-i18n="abroadAddress">Адрес (улица, дом, квартира)</label>
+      <input type="text" id="abAddress" maxlength="160" autocomplete="street-address">
+      <label class="block-label" for="abZip" data-i18n="abroadZip">Почтовый индекс (если знаете)</label>
+      <input type="text" id="abZip" maxlength="12" autocomplete="postal-code" inputmode="numeric">
+      <div class="pay-note" data-i18n="abroadNote">Отправляем через BTS Global. Трек-номер пришлём после отправки. Таможенные сборы страны получателя (если будут) оплачивает получатель.</div>
+      <div id="abroadSummary" class="promo-status"></div>
+    </div>
+
     <div class="pay-field" id="phoneFieldBlock" style="margin-bottom:16px;">
       <label class="block-label" data-i18n="phoneFieldLabel" style="margin-top:0;">Ваш номер телефона</label>
       <div class="phone-pill"><span class="phone-pill-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><input type="tel" inputmode="numeric" id="phoneInput" placeholder="+998 90 123 45 67" maxlength="17" autocomplete="tel" oninput="fmtUzPhone(this)" onfocus="fmtUzPhone(this,true)"></div>
       <div class="pay-note" data-i18n="phoneFieldNote">Нужен, чтобы курьер мог с вами связаться.</div>
     </div>
 
-    <div class="pay-field" style="margin-bottom:16px;">
+    <div class="pay-field" id="btsBlock" style="margin-bottom:16px;">
       <label class="block-label" data-i18n="btsLabel" style="margin-top:0;">Ближайший пункт БТС</label>
       <input type="text" id="btsSearchInput" data-i18n-ph="btsPlaceholder" placeholder="Начните вводить город или улицу..." oninput="filterBtsResults(this.value)">
       <div id="btsSelectedDisplay" style="font-size:12px; font-weight:700; color:var(--bts-address-color, var(--orange)); margin-top:6px; display:none;"></div>
@@ -1398,7 +1433,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261114-181";
+  const CURRENT_VERSION = "20261114-183";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2111,6 +2146,50 @@ const STR_PROMO = {
        promoOff:"This promo code is not active right now", promoNoDiscount:"no discount", promoCheckErr:"Couldn’t check the promo code, please try again", promoEnter:"Enter a promo code" }
 };
 Object.keys(STR_PROMO).forEach(l => Object.assign(STR[l], STR_PROMO[l]));
+/* Доставка за рубеж (BTS Global) */
+const STR_ABROAD = {
+  ru:{ shipSoon:"скоро", shipSoonToast:"Доставка за рубеж скоро будет доступна", shipWhereLabel:"Куда доставить?", shipUz:"По Узбекистану", shipAbroad:"За рубеж", abroadCountry:"Страна",
+       abroadName:"Имя и фамилия получателя", abroadNamePh:"Как в паспорте", abroadPhone:"Телефон получателя (с кодом страны)",
+       abroadCity:"Город", abroadAddress:"Адрес (улица, дом, квартира)", abroadZip:"Почтовый индекс (если знаете)",
+       abroadNote:"Отправляем через BTS Global. Трек-номер пришлём после отправки. Таможенные сборы страны получателя (если будут) оплачивает получатель.",
+       abroadShip:"Доставка", abroadGoods:"Товары",
+       errAbroadCountry:"Выберите страну доставки", errAbroadName:"Укажите имя и фамилию получателя", errAbroadPhone:"Укажите телефон получателя с кодом страны, например +7…",
+       errAbroadCity:"Укажите город", errAbroadAddress:"Укажите адрес: улицу, дом, квартиру",
+       cRU:"Россия", cKZ:"Казахстан", cKG:"Кыргызстан", cTR:"Турция", cAZ:"Азербайджан" },
+  uz:{ shipSoon:"tez orada", shipSoonToast:"Chet elga yetkazib berish tez orada ishga tushadi", shipWhereLabel:"Qayerga yetkazamiz?", shipUz:"O‘zbekiston bo‘ylab", shipAbroad:"Chet elga", abroadCountry:"Davlat",
+       abroadName:"Qabul qiluvchining ismi va familiyasi", abroadNamePh:"Pasportdagidek", abroadPhone:"Qabul qiluvchi telefoni (davlat kodi bilan)",
+       abroadCity:"Shahar", abroadAddress:"Manzil (ko‘cha, uy, xonadon)", abroadZip:"Pochta indeksi (bilsangiz)",
+       abroadNote:"BTS Global orqali jo‘natamiz. Jo‘natilgandan keyin trek-raqamni yuboramiz. Qabul qiluvchi davlatining bojxona to‘lovlarini (bo‘lsa) qabul qiluvchi to‘laydi.",
+       abroadShip:"Yetkazib berish", abroadGoods:"Mahsulotlar",
+       errAbroadCountry:"Yetkazib berish davlatini tanlang", errAbroadName:"Qabul qiluvchining ismi va familiyasini kiriting", errAbroadPhone:"Qabul qiluvchi telefonini davlat kodi bilan kiriting, masalan +7…",
+       errAbroadCity:"Shaharni kiriting", errAbroadAddress:"Manzilni kiriting: ko‘cha, uy, xonadon",
+       cRU:"Rossiya", cKZ:"Qozog‘iston", cKG:"Qirg‘iziston", cTR:"Turkiya", cAZ:"Ozarbayjon" },
+  tr:{ shipSoon:"yakında", shipSoonToast:"Yurt dışına gönderim yakında başlayacak", shipWhereLabel:"Nereye gönderelim?", shipUz:"Özbekistan içi", shipAbroad:"Yurt dışı", abroadCountry:"Ülke",
+       abroadName:"Alıcının adı ve soyadı", abroadNamePh:"Pasaporttaki gibi", abroadPhone:"Alıcının telefonu (ülke koduyla)",
+       abroadCity:"Şehir", abroadAddress:"Adres (sokak, bina, daire)", abroadZip:"Posta kodu (biliyorsanız)",
+       abroadNote:"BTS Global ile gönderiyoruz. Kargo takip numarasını gönderimden sonra ileteceğiz. Alıcı ülkenin gümrük ücretlerini (varsa) alıcı öder.",
+       abroadShip:"Kargo", abroadGoods:"Ürünler",
+       errAbroadCountry:"Teslimat ülkesini seçin", errAbroadName:"Alıcının adını ve soyadını girin", errAbroadPhone:"Alıcının telefonunu ülke koduyla girin, örneğin +90…",
+       errAbroadCity:"Şehri girin", errAbroadAddress:"Adresi girin: sokak, bina, daire",
+       cRU:"Rusya", cKZ:"Kazakistan", cKG:"Kırgızistan", cTR:"Türkiye", cAZ:"Azerbaycan" },
+  az:{ shipSoon:"tezliklə", shipSoonToast:"Xaricə çatdırılma tezliklə mümkün olacaq", shipWhereLabel:"Hara çatdıraq?", shipUz:"Özbəkistan daxili", shipAbroad:"Xaricə", abroadCountry:"Ölkə",
+       abroadName:"Alıcının adı və soyadı", abroadNamePh:"Pasportdakı kimi", abroadPhone:"Alıcının telefonu (ölkə kodu ilə)",
+       abroadCity:"Şəhər", abroadAddress:"Ünvan (küçə, ev, mənzil)", abroadZip:"Poçt indeksi (bilirsinizsə)",
+       abroadNote:"BTS Global ilə göndəririk. Göndərişdən sonra trek-nömrəni göndərəcəyik. Alıcı ölkənin gömrük rüsumlarını (olarsa) alıcı ödəyir.",
+       abroadShip:"Çatdırılma", abroadGoods:"Məhsullar",
+       errAbroadCountry:"Çatdırılma ölkəsini seçin", errAbroadName:"Alıcının adını və soyadını daxil edin", errAbroadPhone:"Alıcının telefonunu ölkə kodu ilə daxil edin, məsələn +994…",
+       errAbroadCity:"Şəhəri daxil edin", errAbroadAddress:"Ünvanı daxil edin: küçə, ev, mənzil",
+       cRU:"Rusiya", cKZ:"Qazaxıstan", cKG:"Qırğızıstan", cTR:"Türkiyə", cAZ:"Azərbaycan" },
+  en:{ shipSoon:"soon", shipSoonToast:"Shipping abroad is coming soon", shipWhereLabel:"Where should we deliver?", shipUz:"Within Uzbekistan", shipAbroad:"Abroad", abroadCountry:"Country",
+       abroadName:"Recipient’s full name", abroadNamePh:"As in passport", abroadPhone:"Recipient’s phone (with country code)",
+       abroadCity:"City", abroadAddress:"Address (street, building, apartment)", abroadZip:"Postal code (if you know it)",
+       abroadNote:"We ship via BTS Global. We’ll send you the tracking number after dispatch. Any customs fees in the destination country are paid by the recipient.",
+       abroadShip:"Shipping", abroadGoods:"Items",
+       errAbroadCountry:"Choose the destination country", errAbroadName:"Enter the recipient’s full name", errAbroadPhone:"Enter the recipient’s phone with country code, e.g. +7…",
+       errAbroadCity:"Enter the city", errAbroadAddress:"Enter the address: street, building, apartment",
+       cRU:"Russia", cKZ:"Kazakhstan", cKG:"Kyrgyzstan", cTR:"Turkey", cAZ:"Azerbaijan" }
+};
+Object.keys(STR_ABROAD).forEach(l => Object.assign(STR[l], STR_ABROAD[l]));
 const STR_REVLINK = {
   ru:{ revLinkLogin:"Не нашли этот заказ. Войдите через Telegram тем же аккаунтом, с которого оформляли заказ" },
   uz:{ revLinkLogin:"Bu buyurtma topilmadi. Buyurtma bergan Telegram akkauntingiz orqali kiring" },
@@ -2199,6 +2278,7 @@ function applyLang(){
   if (!faqCustomized){ faqItems = defaultFaqItems(); }
   renderFaq();                 // и свой список из админки: встроенный вопрос «Как отследить заказ?» тоже переводится
   renderRatingSummary();       // строка со звёздами «N отзывов покупателей» на главной
+  try{ renderAbroad(); }catch(e){} // названия стран и итог доставки за рубеж
   try{ if (appliedPromo) renderPromoStatus(appliedPromo); }catch(e){}
   if (!policyCustomized){ policyItems = defaultPolicyItems(); }
   if (currentProduct) renderPolicyAccordion();
@@ -3077,6 +3157,9 @@ function applyShopSettings(data){
   renderCatPills();
   renderMainGrid();
   btsBranches = data.btsBranches || [];
+  abroadShipping = (data.abroadShipping && typeof data.abroadShipping === 'object') ? data.abroadShipping : {};
+  abroadOpen = data.abroadOpen === true;
+  try{ renderAbroad(); }catch(e){}
   if (data.faqItems && data.faqItems.length){ faqItems = data.faqItems; faqCustomized = true; renderFaq(); }
   if (data.policyItems && data.policyItems.length){ policyItems = data.policyItems; policyCustomized = true; }
   socialLinks = data.socialLinks || {};
@@ -4593,6 +4676,7 @@ function goToCheckoutFlow(){
   document.getElementById('btsResults').innerHTML = '';
   const _nt = document.getElementById('orderNoteInput'); if (_nt) _nt.value = '';
   clearPromo(true);
+  abroadCountry = ''; setShipType('uz'); renderAbroad();
 
   const phoneBlock = document.getElementById('phoneFieldBlock');
   if (customerProfile && customerProfile.phone){
@@ -4607,6 +4691,57 @@ function goToCheckoutFlow(){
 }
 
 let selectedBtsBranch = '';
+/* ---------- доставка за рубеж (BTS Global) ----------
+   Цены по странам задаются в админке: settings/shop.abroadShipping = { KZ: { on: true, price: 250000 }, ... }.
+   Стоимость доставки прибавляется к заказу; платёжный воркер сверяет её с настройками. */
+const ABROAD_COUNTRIES = ['RU', 'KZ', 'KG', 'TR', 'AZ'];
+let abroadShipping = {};
+let abroadOpen = false;       // галочка «Открыть доставку за рубеж» в админке; пока выключена — кнопка с пометкой «скоро»
+let shipType = 'uz';          // 'uz' | 'abroad'
+let abroadCountry = '';
+function abroadEnabled(){ if (!abroadOpen) return []; return ABROAD_COUNTRIES.filter(c => abroadShipping[c] && abroadShipping[c].on && Number(abroadShipping[c].price) >= 0); }
+function abroadFee(){ const c = abroadShipping[abroadCountry]; return (shipType === 'abroad' && c && c.on) ? Math.round(Number(c.price) || 0) : 0; }
+function renderAbroad(){
+  const on = abroadEnabled();
+  const abBtn = document.querySelector('.ship-opt[data-ship="abroad"]');
+  if (abBtn) abBtn.classList.toggle('soon', !on.length);
+  if (!on.length && shipType === 'abroad') setShipType('uz');
+  if (abroadCountry && !on.includes(abroadCountry)) abroadCountry = '';
+  const wrap = document.getElementById('abroadCountries');
+  if (wrap) wrap.innerHTML = on.map(c => `<button type="button" class="ship-country${c === abroadCountry ? ' selected' : ''}" onclick="selectAbroadCountry('${c}')">${escH(t('c' + c))}<small>${t('abroadShip')}: ${Number(abroadShipping[c].price) > 0 ? fmt(Math.round(Number(abroadShipping[c].price))) : '0'}</small></button>`).join('');
+  renderAbroadSummary();
+}
+function setShipType(tp){
+  if (tp === 'abroad' && !abroadEnabled().length){ showToast(t('shipSoonToast')); tp = 'uz'; }
+  shipType = tp === 'abroad' ? 'abroad' : 'uz';
+  document.querySelectorAll('.ship-opt').forEach(b => b.classList.toggle('selected', b.dataset.ship === shipType));
+  const ab = shipType === 'abroad';
+  const show = (id, v) => { const el = document.getElementById(id); if (el) el.style.display = v ? '' : 'none'; };
+  show('abroadBlock', ab);
+  show('btsBlock', !ab);
+  // номер для курьера по Узбекистану не нужен — за рубежом спрашиваем телефон получателя
+  show('phoneFieldBlock', !ab && !(customerProfile && customerProfile.phone));
+  renderAbroadSummary();
+  try{ if (appliedPromo) renderPromoStatus(appliedPromo); }catch(e){}
+}
+function selectAbroadCountry(c){
+  abroadCountry = c;
+  document.querySelectorAll('.ship-country').forEach(b => b.classList.toggle('selected', b.getAttribute('onclick').includes(`'${c}'`)));
+  renderAbroadSummary();
+  try{ if (appliedPromo) renderPromoStatus(appliedPromo); }catch(e){}
+}
+function orderGoodsAfterPromo(){
+  const sub = cartSubtotal();
+  return (appliedPromo && promoState(appliedPromo) === 'ok') ? sub - promoDiscountFor(appliedPromo, sub) : sub;
+}
+function renderAbroadSummary(){
+  const el = document.getElementById('abroadSummary'); if (!el) return;
+  if (shipType !== 'abroad' || !abroadCountry){ el.className = 'promo-status'; el.innerHTML = ''; return; }
+  const goods = orderGoodsAfterPromo(), fee = abroadFee();
+  el.className = 'promo-status ok';
+  el.innerHTML = `✓ ${escH(t('c' + abroadCountry))}: ${t('abroadGoods')} ${fmt(goods)} + ${t('abroadShip')} ${fmt(fee)} · ${t('promoToPay')} <b>${fmt(goods + fee)}</b>`;
+}
+function intlPhoneOk(v){ const s = String(v || '').trim(); const d = s.replace(/\D/g, ''); return /^\+/.test(s) && d.length >= 8 && d.length <= 15; }
 let selectedPayMethod = '';
 
 function showSoonPopup(){
@@ -4656,6 +4791,7 @@ function uzPhoneOk(v){
 
 function confirmPayment(){
   unlockSfx(); // iOS разрешает звук только в момент касания — «разблокируем» его сейчас, проиграем позже
+  if (shipType === 'abroad') return confirmAbroad();
   const phone = document.getElementById('phoneInput').value.trim();
   const branch = selectedBtsBranch;
 
@@ -4670,6 +4806,29 @@ function confirmPayment(){
   window._payTapAt = Date.now(); // момент нажатия «Перейти к оплате» — нужен, чтобы сразу открыть приложение Uzum
   if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
   finalizeOrder(phone, branch);
+}
+
+function confirmAbroad(){
+  const val = id => ((document.getElementById(id) || {}).value || '').trim();
+  const bad = (id, msg) => { const el = document.getElementById(id); if (el){ el.classList.add('field-bad'); el.focus(); } showToast(t(msg)); };
+  ['abName', 'abPhone', 'abCity', 'abAddress'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('field-bad'); });
+  if (!abroadCountry || !abroadEnabled().includes(abroadCountry)){ showToast(t('errAbroadCountry')); return; }
+  if (val('abName').length < 3) return bad('abName', 'errAbroadName');
+  if (!intlPhoneOk(val('abPhone'))) return bad('abPhone', 'errAbroadPhone');
+  if (val('abCity').length < 2) return bad('abCity', 'errAbroadCity');
+  if (val('abAddress').length < 5) return bad('abAddress', 'errAbroadAddress');
+  if (!selectedPayMethod){ showToast(t('choosePay')); return; }
+  window._payTapAt = Date.now();
+  if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
+  const zip = val('abZip');
+  const countryRu = STR.ru['c' + abroadCountry] || abroadCountry;
+  window._abroadOrder = {
+    deliveryType: 'abroad', country: abroadCountry, city: val('abCity'), address: val('abAddress'),
+    zip, recipientName: val('abName'), shippingFee: abroadFee()
+  };
+  // строка «куда отправить» — в том же поле, что и пункт БТС, чтобы админка, бот и уведомления показали её без изменений
+  const branch = `🌍 BTS Global → ${countryRu}, ${val('abCity')}, ${val('abAddress')}${zip ? ', ' + zip : ''} · получатель: ${val('abName')}`;
+  finalizeOrder(val('abPhone'), branch);
 }
 
 const PAY_METHOD_LABELS = { uzum:'Uzum Bank', click:'Click', card:'Карта' };
@@ -4942,7 +5101,8 @@ function renderPromoStatus(p){
   if (st === 'ok'){
     const sub = cartSubtotal(), d = promoDiscountFor(p, sub);
     const what = p.type === 'fixed' ? `−${fmt(d)}` : `−${Number(p.value)}% · ${t('promoDiscount')} ${fmt(d)}`;
-    showPromoStatus('ok', `✓ ${t('promoOk')}: <b>${escH(p.code)}</b> (${what}) · ${t('promoToPay')} <b>${fmt(sub - d)}</b>`);
+    showPromoStatus('ok', `✓ ${t('promoOk')}: <b>${escH(p.code)}</b> (${what}) · ${t('promoToPay')} <b>${fmt(sub - d + abroadFee())}</b>`);
+    try{ renderAbroadSummary(); }catch(e){}
   } else if (st === 'expired'){
     showPromoStatus('bad', `✕ ${t('promoExpired')}${p.validUntil ? ` (${t('promoExpiredOn')} ${fmtDateRu(p.validUntil)})` : ''}`);
   } else if (st === 'off'){
@@ -5013,13 +5173,23 @@ function finalizeOrder(phone, branch){
       promoFields = { promoCode: appliedPromo.code, promoDiscount, subtotal };
     }
   }
+  // доставка за рубеж: фиксированная цена по стране прибавляется к сумме товаров
+  let abroadFields = {};
+  const ab = (shipType === 'abroad') ? window._abroadOrder : null;
+  window._abroadOrder = null;
+  if (ab){
+    total += ab.shippingFee;
+    abroadFields = Object.assign({}, ab, { subtotal });
+  }
   text += `\nИтого: ${fmt(total)}`;
-  if (promoFields.promoCode) text += ` (без скидки ${fmt(subtotal)}, промокод ${promoFields.promoCode}: −${fmt(promoFields.promoDiscount)})`;
+  if (promoFields.promoCode) text += ` (товары ${fmt(subtotal)}, промокод ${promoFields.promoCode}: −${fmt(promoFields.promoDiscount)})`;
+  if (ab) text += `\n🌍 Доставка за рубеж: ${STR.ru['c' + ab.country] || ab.country} — ${fmt(ab.shippingFee)}`;
   text += `\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n💰 Способ оплаты: ${methodLabel}`;
   if (orderNote) text += `\n📝 Примечание: ${orderNote}`;
 
   const customerId = getCustomerId();
-  const customerName = getCustomerName();
+  let customerName = getCustomerName();
+  if (ab && (!customerProfile || !String(customerName || '').trim())) customerName = ab.recipientName; // гость без профиля — имя получателя
 
   const confirmBtn = document.getElementById('confirmPaymentBtn');
   const confirmBtnOriginalText = confirmBtn ? confirmBtn.textContent : '';
@@ -5032,7 +5202,7 @@ function finalizeOrder(phone, branch){
     customerId, customerName, items: orderItems, total,
     btsBranch: branch, phone, paymentMethod: methodLabel, note: orderNote, source: detectSource(),
     status: 'Проверяется оплата', createdAt: Date.now(),
-    lang, notifyChatId, ...promoFields
+    lang, notifyChatId, ...promoFields, ...abroadFields
   }).then(() => {
     const orderId = orderRef.id;
     const payOnline = ONLINE_PAY_METHODS.includes(selectedPayMethod) && orderId;

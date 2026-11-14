@@ -413,6 +413,13 @@
         <button class="btn secondary" onclick="addBtsBranch()">+ Добавить пункт</button>
         <div class="hint">Покупатель выберет ближайший пункт из этого списка при оформлении заказа (там будет поиск).</div>
 
+        <h1 style="margin-top:22px;">🌍 Доставка за рубеж (BTS Global)</h1>
+        <div class="hint" style="margin-top:0;">Отметь страны, куда отправляешь, и укажи фиксированную цену доставки в сумах. Покупатель увидит на оформлении «По Узбекистану / За рубеж», выберет страну — и цена доставки прибавится к заказу. Если не отмечена ни одна страна, выбора «За рубеж» на сайте нет. Платёжный сервер сверяет цену доставки с этими настройками.</div>
+        <label style="display:flex; align-items:center; gap:8px; font-weight:800; margin:6px 0 12px;"><input type="checkbox" id="ab_open" style="width:auto;"> Открыть доставку за рубеж для покупателей</label>
+        <div class="hint" style="margin-top:-6px;">Пока галочка снята, на сайте кнопка «За рубеж» видна с пометкой «скоро» и показывает уведомление «Доставка за рубеж скоро будет доступна». Поставь галочку, когда будет готова оплата для иностранных карт.</div>
+        <div id="abroadRows"></div>
+        <button class="btn" onclick="saveAbroadShipping()">Сохранить цены доставки</button>
+
         <label style="margin-top:18px;">Массовое добавление (по одному адресу на строке)</label>
         <textarea id="bulkBtsInput" rows="6" placeholder="Ташкент, Яккасарайский р-н — YAKKASAROY, ул. Бобур 22&#10;Самарканд — SAGDIANA, ул. Абу Бакр Розий&#10;..."></textarea>
         <button class="btn" onclick="bulkImportBts()">Импортировать список</button>
@@ -1353,6 +1360,9 @@ function loadSettings(){
     if (socialLinks.instagram) document.getElementById('f_instagram').value = socialLinks.instagram;
     if (socialLinks.tiktok) document.getElementById('f_tiktok').value = socialLinks.tiktok;
     btsBranches = data.btsBranches || [];
+    abroadShippingCfg = (data.abroadShipping && typeof data.abroadShipping === 'object') ? data.abroadShipping : {};
+    if (document.activeElement !== document.getElementById('ab_open')) document.getElementById('ab_open').checked = data.abroadOpen === true;
+    renderAbroadRows();
     avatarOptions = data.avatarOptions || [];
     renderAvatarTags();
     renderBtsTags();
@@ -1490,6 +1500,35 @@ function removeAvatarOption(i){
 
 function escH(v){ return String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 let btsBranches = [];
+/* ---------- доставка за рубеж: settings/shop.abroadShipping = { KZ: { on: true, price: 250000 }, ... } ---------- */
+const ABROAD_LIST = [['RU','🇷🇺 Россия'], ['KZ','🇰🇿 Казахстан'], ['KG','🇰🇬 Кыргызстан'], ['TR','🇹🇷 Турция'], ['AZ','🇦🇿 Азербайджан']];
+let abroadShippingCfg = {};
+function renderAbroadRows(){
+  const wrap = document.getElementById('abroadRows'); if (!wrap) return;
+  // не перерисовываем, пока админ печатает цену
+  if (wrap.contains(document.activeElement)) return;
+  wrap.innerHTML = ABROAD_LIST.map(([c, name]) => {
+    const cfg = abroadShippingCfg[c] || {};
+    return `<div class="row" style="align-items:center; margin-bottom:8px;">
+      <label style="flex:1; display:flex; align-items:center; gap:8px; margin:0; font-weight:700;"><input type="checkbox" id="ab_on_${c}" ${cfg.on ? 'checked' : ''} style="width:auto;"> ${name}</label>
+      <input type="number" id="ab_price_${c}" min="0" step="1000" inputmode="numeric" placeholder="цена, сум" value="${cfg.price != null ? Number(cfg.price) : ''}" style="flex:1;">
+    </div>`;
+  }).join('');
+}
+function saveAbroadShipping(){
+  const out = {};
+  for (const [c, name] of ABROAD_LIST){
+    const on = document.getElementById('ab_on_' + c).checked;
+    const raw = document.getElementById('ab_price_' + c).value;
+    const price = Math.round(Number(raw));
+    if (on && (raw === '' || !(price >= 0))){ adminToast(`Укажи цену доставки: ${name}`); return; }
+    out[c] = { on, price: raw === '' ? 0 : price };
+  }
+  const open = document.getElementById('ab_open').checked;
+  if (open && !Object.values(out).some(x => x.on)){ adminToast('Отметь хотя бы одну страну, чтобы открыть доставку за рубеж'); return; }
+  saveWithFeedback(db.collection('settings').doc('shop').set({ abroadShipping: out, abroadOpen: open }, { merge: true }),
+    open ? 'Доставка за рубеж открыта для покупателей ✓' : 'Сохранено ✓ (на сайте пока «скоро»)');
+}
 function renderBtsTags(){
   const wrap = document.getElementById('btsTags');
   if (btsBranches.length > 25){
@@ -2145,6 +2184,7 @@ function renderAdminOrderCard(o, wrap){
       <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
       ${o.phone ? `<div class="oline">📞 ${escH(o.phone)}</div>` : ''}
       ${o.btsBranch ? `<div class="oline">📍 ${escH(o.btsBranch)}</div>` : ''}
+      ${o.deliveryType === 'abroad' ? `<div class="oline" style="font-weight:700;">🌍 За рубеж · доставка ${Number(o.shippingFee || 0).toLocaleString('ru-RU')} сум (товары ${Number(o.subtotal || 0).toLocaleString('ru-RU')} сум)</div>` : ''}
       ${o.note ? `<div class="oline">📝 ${escH(o.note)}</div>` : ''}
       ${o.paymentMethod ? `<div class="oline" style="font-weight:700;">💰 Способ оплаты: ${escH(o.paymentMethod)}</div>` : ''}
       ${o.promoCode ? `<div class="oline" style="font-weight:700; color:#1f7a4d;">🏷 + промокод <b>${escH(o.promoCode)}</b>: −${Number(o.promoDiscount || 0).toLocaleString('ru-RU')} сум${o.subtotal ? ` (без скидки ${Number(o.subtotal).toLocaleString('ru-RU')} сум)` : ''}</div>` : ''}
@@ -2381,7 +2421,7 @@ function accSalesRows(){
     (o.items || []).forEach((it, idx) => {
       const qty = Number(it.qty)||0;
       // скидку по промокоду делим между позициями пропорционально цене, чтобы выручка = реально оплаченная сумма
-      const promoK = (o.promoCode && Number(o.subtotal) > 0) ? (Number(o.total) || 0) / Number(o.subtotal) : 1;
+      const promoK = (o.promoCode && Number(o.subtotal) > 0) ? (Number(o.subtotal) - (Number(o.promoDiscount) || 0)) / Number(o.subtotal) : 1; // доставка за рубеж не выручка с товара
       const price = (Number(it.price)||0) * promoK;
       const uc = unitCostOf(o, idx, it);
       rows.push({
