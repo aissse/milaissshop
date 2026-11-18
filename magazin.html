@@ -5,83 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>mila/isss — магазин</title>
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#121214">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="vendor/three.min.js"></script>
 <style>
   :root{ --g:#2B2D31; --s:#D9DADC; --y:#FFC93C; --ink:#F3F3F4; --muted:#A7A9AE; --ease:cubic-bezier(.65,.02,.24,1); }
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-  html,body{ height:100%; background:#141416; color:var(--ink); font-family:'Inter',system-ui,sans-serif; overflow:hidden; overscroll-behavior:none; }
-  #stage{ position:fixed; inset:0; overflow:hidden; touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab; }
-  #stage.dragging{ cursor:grabbing; }
-  .scene{ position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .9s ease, visibility 0s linear .9s; }
-  .scene.on{ opacity:1; visibility:visible; transition:opacity .9s ease, visibility 0s; }
-  .frame{ position:absolute; left:0; top:0; transform-origin:0 0; will-change:transform; }
-  .frame.anim{ transition:transform 1.25s var(--ease); }
-  .frame > img.bg{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; -webkit-user-drag:none; }
+  html,body{ height:100%; background:#121214; color:var(--ink); font-family:'Inter',system-ui,sans-serif; overflow:hidden; overscroll-behavior:none; }
+  #view{ position:fixed; inset:0; touch-action:none; cursor:grab; }
+  #view.dragging{ cursor:grabbing; } #view.pointing{ cursor:pointer; }
+  canvas{ display:block; width:100%; height:100%; }
 
-  /* значки-точки на сцене */
-  .hs{ position:absolute; transform:translate(-50%,-50%) scale(var(--iz,1)); transform-origin:center; z-index:5;
-       display:flex; flex-direction:column; align-items:center; gap:6px; border:0; background:none; cursor:pointer; color:var(--ink); font:inherit; transition:opacity .4s ease; }
-  .hs .dot{ width:54px; height:54px; border-radius:50%; background:var(--y); color:var(--g); display:grid; place-items:center;
-            box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,201,60,.6); animation:pulse 2.2s infinite; }
-  .hs .dot svg{ width:28px; height:28px; }
-  .hs .lbl{ font-size:12px; font-weight:800; letter-spacing:.3px; padding:4px 10px; border-radius:20px; background:rgba(43,45,49,.85); color:#fff; white-space:nowrap; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
-  .hs.big .dot{ width:72px; height:72px; } .hs.big .dot svg{ width:34px; height:34px; } .hs.big .lbl{ font-size:14px; padding:6px 14px; }
-  @keyframes pulse{ 0%{ box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,201,60,.55); } 70%{ box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 0 16px rgba(255,201,60,0); } 100%{ box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,201,60,0); } }
-  .zoomed .hs.hub{ opacity:0; pointer-events:none; }
+  /* значки в 3D-сцене (следуют за точкой в зале) */
+  #hs{ position:fixed; inset:0; pointer-events:none; z-index:5; }
+  .hs{ position:absolute; left:0; top:0; display:flex; flex-direction:column; align-items:center; gap:7px; border:0; background:none; color:var(--ink); font:inherit; cursor:pointer;
+       pointer-events:auto; transform:translate(-50%,-50%); transition:opacity .45s ease; will-change:transform; }
+  .hs.off{ opacity:0; pointer-events:none; }
+  .hs .dot{ width:52px; height:52px; border-radius:50%; background:rgba(255,201,60,.95); color:var(--g); display:grid; place-items:center; animation:pulse 2.4s infinite; box-shadow:0 8px 22px rgba(0,0,0,.35); }
+  .hs .dot svg{ width:26px; height:26px; }
+  .hs .lbl{ font-size:12px; font-weight:800; padding:5px 11px; border-radius:20px; background:rgba(20,20,22,.72); color:#fff; white-space:nowrap; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+  .hs.big .dot{ width:70px; height:70px; } .hs.big .dot svg{ width:32px; height:32px; } .hs.big .lbl{ font-size:14px; padding:7px 15px; }
+  @keyframes pulse{ 0%{ box-shadow:0 8px 22px rgba(0,0,0,.35), 0 0 0 0 rgba(255,201,60,.55); } 70%{ box-shadow:0 8px 22px rgba(0,0,0,.35), 0 0 0 18px rgba(255,201,60,0); } 100%{ box-shadow:0 8px 22px rgba(0,0,0,.35), 0 0 0 0 rgba(255,201,60,0); } }
 
-  /* одежда на вешалках */
-  .hang{ position:absolute; transform-origin:50% 0; cursor:pointer; z-index:3; }
-  .hang svg.hanger{ position:absolute; left:50%; top:0; width:100%; transform:translate(-50%,-38%); overflow:visible; pointer-events:none; }
-  .hang .gar{ position:absolute; left:0; top:22%; width:100%; filter:drop-shadow(0 6px 6px rgba(0,0,0,.25)); }
-  .hang .gar img{ width:100%; display:block; }
-  /* обувь на полках */
-  .shoe{ position:absolute; transform:translate(-50%,-100%); cursor:pointer; z-index:3; transition:transform .25s ease; }
-  .shoe:hover{ transform:translate(-50%,-104%); }
-  .shoe svg, .shoe img{ width:100%; display:block; }
-    .tag{ position:absolute; left:50%; top:100%; transform:translateX(-50%) scale(var(--iz,1)); transform-origin:top center; margin-top:2px; font-size:10px; font-weight:800;
-        background:rgba(43,45,49,.85); color:#fff; padding:2px 6px; border-radius:6px; white-space:nowrap; opacity:0; transition:opacity .3s ease; pointer-events:none; }
-  .zoomed .tag{ opacity:1; }
-
-  /* верхняя панель */
-  .top{ position:fixed; left:0; right:0; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:10px;
-        padding:calc(10px + env(safe-area-inset-top)) 14px 10px; pointer-events:none; }
-  .top > *{ pointer-events:auto; }
   .pill{ height:42px; min-width:42px; padding:0 14px; border-radius:21px; border:0; display:inline-flex; align-items:center; justify-content:center; gap:8px; font:inherit; font-weight:700; font-size:14px;
-         background:rgba(43,45,49,.78); color:#fff; -webkit-backdrop-filter:blur(14px) saturate(160%); backdrop-filter:blur(14px) saturate(160%); box-shadow:0 4px 14px rgba(0,0,0,.25); cursor:pointer; }
+         background:rgba(20,20,22,.62); color:#fff; -webkit-backdrop-filter:blur(14px) saturate(160%); backdrop-filter:blur(14px) saturate(160%); box-shadow:0 4px 14px rgba(0,0,0,.25); cursor:pointer; }
   .pill svg{ width:20px; height:20px; }
-  .logo{ font-weight:800; font-size:17px; letter-spacing:.2px; }
-  /* «/» в логотипе — бордовый; на графите светлее, чтобы читался (на серебре — #7A1C1C) */
-  .logo b{ color:#D9404A; }
   .badge{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--y); color:var(--g); font-size:12px; font-weight:800; display:inline-grid; place-items:center; }
-  #backBtn{ visibility:hidden; } #backBtn.show{ visibility:visible; }
-
-  .hint{ position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom)); transform:translate(-50%,10px); z-index:15; opacity:0; transition:opacity .5s ease, transform .5s ease;
-         background:rgba(43,45,49,.85); color:#fff; font-size:13px; font-weight:600; padding:10px 16px; border-radius:22px; white-space:nowrap; pointer-events:none; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
-  .hint.show{ opacity:1; transform:translate(-50%,0); }
-
-  .zoneNav{ position:fixed; left:50%; bottom:calc(68px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:15; display:none; gap:8px; }
-  .zoneNav.show{ display:flex; }
-  .zoneNav button.act{ background:var(--y); color:var(--g); }
-  #moreBtn{ position:fixed; right:14px; top:calc(62px + env(safe-area-inset-top)); z-index:16; display:none; }
+  #backBtn{ position:fixed; left:14px; top:calc(12px + env(safe-area-inset-top)); z-index:20; transition:opacity .4s ease; }
+  #cartBtn{ position:fixed; right:14px; top:calc(12px + env(safe-area-inset-top)); z-index:20; }
+  #backBtn.off{ opacity:0; pointer-events:none; }
+  #moreBtn{ position:fixed; right:14px; top:calc(64px + env(safe-area-inset-top)); z-index:16; display:none; }
   #moreBtn.show{ display:inline-flex; }
-  /* обычное фото на белом фоне: «умножение» растворяет белое в стене. Ставим на сам элемент вешалки/пары —
-     внутри своего слоя (z-index, filter) смешивание не видит фото зала */
-  .hang.mult, .shoe.mult{ mix-blend-mode:multiply; }
-  .hang.mult .gar, .shoe.mult img{ filter:none; }
-  .shoe.mult .tag{ mix-blend-mode:normal; }
-  .shoe img:not(.blend){ mix-blend-mode:normal; filter:drop-shadow(0 4px 3px rgba(0,0,0,.28)); }
-  .noimg{ font-size:28px; text-align:center; }
-  .pv img{ width:100%; height:100%; object-fit:contain; }
-  .row .th img{ width:100%; height:100%; object-fit:cover; border-radius:12px; }
-  .colors{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
-  .cl{ height:36px; padding:0 12px 0 8px; border-radius:18px; border:1px solid #55575D; background:transparent; color:var(--ink); font:inherit; font-weight:600; font-size:13px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
-  .cl i{ width:18px; height:18px; border-radius:50%; border:1px solid #D9DADC; }
-  .cl.on{ border-color:var(--y); }
-  .old{ color:var(--muted); text-decoration:line-through; font-size:14px; font-weight:600; margin-left:8px; }
+  .zoneNav{ position:fixed; left:50%; bottom:calc(64px + env(safe-area-inset-bottom)); transform:translate(-50%,12px); z-index:15; display:flex; gap:8px; opacity:0; pointer-events:none; transition:opacity .5s ease, transform .5s ease; }
+  .zoneNav.show{ opacity:1; transform:translate(-50%,0); pointer-events:auto; }
+  .zoneNav button.act{ background:var(--y); color:var(--g); }
+  .hint{ position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); transform:translate(-50%,10px); z-index:15; opacity:0; transition:opacity .5s ease, transform .5s ease;
+         background:rgba(20,20,22,.72); color:#fff; font-size:13px; font-weight:600; padding:10px 16px; border-radius:22px; white-space:nowrap; pointer-events:none; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+  .hint.show{ opacity:1; transform:translate(-50%,0); }
+  .toast{ position:fixed; left:50%; top:calc(64px + env(safe-area-inset-top)); transform:translate(-50%,-10px); z-index:40; background:var(--ink); color:var(--g); font-weight:700; font-size:14px;
+          padding:11px 16px; border-radius:14px; opacity:0; transition:opacity .3s ease, transform .3s ease; pointer-events:none; max-width:90vw; text-align:center; }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
 
-  /* нижние панели */
   .shade{ position:fixed; inset:0; z-index:30; background:rgba(0,0,0,.45); opacity:0; visibility:hidden; transition:opacity .35s ease, visibility 0s linear .35s; }
   .shade.show{ opacity:1; visibility:visible; transition:opacity .35s ease; }
   .sheet{ position:fixed; left:0; right:0; bottom:0; z-index:31; max-width:520px; margin:0 auto; max-height:86vh; overflow:auto; background:var(--g); color:var(--ink);
@@ -89,91 +55,86 @@
   .sheet.show{ transform:none; }
   .grab{ width:40px; height:5px; border-radius:3px; background:#55575D; margin:0 auto 14px; }
   .pv{ width:100%; aspect-ratio:1.25; border-radius:18px; background:var(--s); display:grid; place-items:center; margin-bottom:16px; overflow:hidden; }
-  .pv svg{ width:62%; max-height:84%; }
+  .pv img{ width:100%; height:100%; object-fit:contain; }
+  .noimg{ font-size:40px; }
   .pname{ font-size:20px; font-weight:800; } .pprice{ font-size:18px; font-weight:800; color:var(--y); margin:6px 0 14px; }
+  .old{ color:var(--muted); text-decoration:line-through; font-size:14px; font-weight:600; margin-left:8px; }
   .muted{ color:var(--muted); font-size:13px; }
+  .colors{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
+  .cl{ height:36px; padding:0 12px 0 8px; border-radius:18px; border:1px solid #55575D; background:transparent; color:var(--ink); font:inherit; font-weight:600; font-size:13px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+  .cl i{ width:18px; height:18px; border-radius:50%; border:1px solid #D9DADC; } .cl.on{ border-color:var(--y); }
   .sizes{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 18px; }
   .sz{ min-width:48px; height:42px; padding:0 12px; border-radius:12px; border:1px solid #55575D; background:transparent; color:var(--ink); font:inherit; font-weight:700; cursor:pointer; }
   .sz.on{ background:var(--ink); color:var(--g); border-color:var(--ink); }
-  .sz:disabled{ opacity:1; color:#7d7f85; border-style:dashed; cursor:not-allowed; }
+  .sz:disabled{ color:#7d7f85; border-style:dashed; cursor:not-allowed; }
   .btn{ width:100%; height:54px; border:0; border-radius:16px; background:var(--y); color:var(--g); font:inherit; font-weight:800; font-size:16px; cursor:pointer; }
   .btn:disabled{ background:#55575D; color:#C9CACD; cursor:not-allowed; }
   .row{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #3D3F45; }
-  .row .th{ width:56px; height:56px; border-radius:12px; background:var(--s); display:grid; place-items:center; flex:none; }
-  .row .th svg{ width:80%; max-height:80%; }
+  .row .th{ width:56px; height:56px; border-radius:12px; background:var(--s); display:grid; place-items:center; flex:none; overflow:hidden; }
+  .row .th img{ width:100%; height:100%; object-fit:cover; }
   .row .nm{ flex:1; font-weight:700; font-size:14px; } .row .nm small{ display:block; color:var(--muted); font-weight:600; margin-top:3px; }
   .row .pr{ font-weight:800; font-size:14px; white-space:nowrap; }
   .row .rm{ border:0; background:none; color:#FF8A80; font:inherit; font-size:12px; font-weight:700; cursor:pointer; padding:6px; }
   .tot{ display:flex; justify-content:space-between; font-weight:800; font-size:18px; margin:16px 0 4px; }
   .ok{ color:#6BD49A; font-size:13px; font-weight:600; margin-bottom:16px; }
-  .toast{ position:fixed; left:50%; top:calc(66px + env(safe-area-inset-top)); transform:translate(-50%,-10px); z-index:40; background:var(--ink); color:var(--g); font-weight:700; font-size:14px;
-          padding:11px 16px; border-radius:14px; opacity:0; transition:opacity .3s ease, transform .3s ease; pointer-events:none; max-width:90vw; text-align:center; }
-  .toast.show{ opacity:1; transform:translate(-50%,0); }
-  .loader{ position:fixed; inset:0; z-index:50; background:var(--g); display:grid; place-items:center; transition:opacity .6s ease; }
+
+  .loader{ position:fixed; inset:0; z-index:50; background:#121214; display:grid; place-items:center; transition:opacity .8s ease; }
   .loader.hide{ opacity:0; pointer-events:none; }
-  .loader .logo{ font-size:28px; }
-  @media (prefers-reduced-motion:reduce){ .frame.anim{ transition-duration:.01s; } .scene, .scene.on{ transition-duration:.2s; } .hs .dot{ animation:none; } }
+  .loader .bar{ width:120px; height:2px; background:#2B2D31; border-radius:2px; overflow:hidden; margin-top:18px; }
+  .loader .bar i{ display:block; height:100%; width:30%; background:var(--y); animation:load 1.1s ease-in-out infinite; }
+  .loader .lg{ font-weight:900; font-size:26px; letter-spacing:-.5px; } .loader .lg b{ color:#C4313B; }
+  @keyframes load{ 0%{ transform:translateX(-100%); } 100%{ transform:translateX(400%); } }
+  .nogl{ position:fixed; inset:0; display:none; place-items:center; text-align:center; padding:30px; z-index:60; background:#121214; }
 </style>
 </head>
 <body>
-<div class="loader" id="loader"><div class="logo">mila<b>/</b>isss</div></div>
+<div class="loader" id="loader"><div style="text-align:center"><div class="lg">mila<b>/</b>isss</div><div class="bar"><i></i></div></div></div>
+<div class="nogl" id="nogl"><div><p style="font-weight:700;margin-bottom:12px">Этот браузер не поддерживает 3D-магазин.</p><a href="index.html" style="color:var(--y)">Перейти в каталог</a></div></div>
 
-<div id="stage">
-  <div class="scene on" id="sc-entrance"><div class="frame" data-img="1672x941"><img class="bg" src="img/store/entrance.webp" alt="">
-    <button class="hs big" style="left:51%;top:62%" data-go="enter"><span class="dot">%DOOR%</span><span class="lbl">Войти в магазин</span></button>
-  </div></div>
-  <div class="scene" id="sc-center"><div class="frame"><img class="bg" src="img/store/center.webp" alt="">
-    <button class="hs hub" style="left:8%;top:36%" data-go="tops"><span class="dot">%TEE%</span><span class="lbl">Верхняя одежда</span></button>
-    <button class="hs hub" style="left:16%;top:58%" data-go="bottoms"><span class="dot">%PANTS%</span><span class="lbl">Нижняя одежда</span></button>
-    <button class="hs hub" style="left:75%;top:28%" data-go="shoes"><span class="dot">%SNEAKER%</span><span class="lbl">Обувь</span></button>
-    <button class="hs hub" style="left:44%;top:50%" data-go="cashier"><span class="dot">%BAG%</span><span class="lbl">Касса</span></button>
-    <div id="shelves"></div>
-  </div></div>
-  <div class="scene" id="sc-left"><div class="frame"><img class="bg" src="img/store/left.webp" alt="">
-    <div id="racks"></div>
-  </div></div>
+<div id="view"></div>
+<div id="hs">
+  <button class="hs big" data-go="enter" data-at="0,1.25,0.35"><span class="dot" data-i="DOOR"></span><span class="lbl">Войти в магазин</span></button>
+  <button class="hs" data-go="tops" data-at="-3.9,2.3,-6.2" data-hub="1"><span class="dot" data-i="TEE"></span><span class="lbl">Верхняя одежда</span></button>
+  <button class="hs" data-go="bottoms" data-at="-4.2,1.95,-9.2" data-hub="1"><span class="dot" data-i="PANTS"></span><span class="lbl">Нижняя одежда</span></button>
+  <button class="hs" data-go="shoes" data-at="4.3,2.6,-7.4" data-hub="1"><span class="dot" data-i="SNEAKER"></span><span class="lbl">Обувь</span></button>
+  <button class="hs" data-go="cashier" data-at="0,1.55,-11.4" data-hub="1"><span class="dot" data-i="BAG"></span><span class="lbl">Касса</span></button>
 </div>
 
-<div class="top">
-  <button class="pill" id="backBtn" aria-label="Назад">%BACK%<span id="backTxt">В зал</span></button>
-  <div class="pill logo" style="pointer-events:none">mila<b>/</b>isss</div>
-  <button class="pill" id="cartBtn" aria-label="Корзина">%BAG2%<span class="badge" id="cartN">0</span></button>
-</div>
+<button class="pill off" id="backBtn" aria-label="Назад"><span data-i="BACK"></span><span id="backTxt">На улицу</span></button>
+<button class="pill" id="cartBtn" aria-label="Корзина"><span data-i="BAG"></span><span class="badge" id="cartN">0</span></button>
+<button class="pill" id="moreBtn">Ещё →</button>
 <div class="zoneNav" id="zoneNav">
   <button class="pill" data-go="tops">Верх</button><button class="pill" data-go="bottoms">Низ</button><button class="pill" data-go="shoes">Обувь</button><button class="pill" data-go="cashier">Касса</button>
 </div>
-<button class="pill" id="moreBtn">Ещё →</button>
 <div class="hint" id="hint"></div>
 <div class="toast" id="toast"></div>
-
 <div class="shade" id="shade"></div>
 <div class="sheet" id="sheet"></div>
 
 <script>
-/* ===================== иконки ===================== */
-const I = {
-  DOOR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z"/></svg>',
+'use strict';
+/* =====================================================================
+   mila/isss — 3D-магазин. Всё строится кодом (Three.js): фасад, двери,
+   зал, вешалки, полки. Товары — из админки, только в наличии.
+   Корзина общая с сайтом (localStorage milaisss_cart), оплата — на сайте.
+   ===================================================================== */
+const ICONS = {
+  DOOR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M12 3v18"/><path d="M9.5 12h-1M15.5 12h-1"/></svg>',
   TEE:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 3 3 6l2 5 2-1v11h10V10l2 1 2-5-5-3c0 1.7-1.8 3-4 3S8 4.7 8 3Z"/></svg>',
   PANTS:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12l1 18h-5l-2-11-2 11H5L6 3Z"/><path d="M6 7h12"/></svg>',
   SNEAKER:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16v-5l4-3 3 3 5 1 6 1.5a2 2 0 0 1 2 2V16H2Z"/><path d="M2 16v2h20v-2"/><path d="M9 11l1.5-2M12 12l1.5-2"/></svg>',
   BAG:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 14H5L6 7Z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>',
   BACK:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>'
 };
-I.BAG2 = I.BAG;
-document.querySelectorAll('.dot, .pill').forEach(el => { el.innerHTML = el.innerHTML.replace(/%([A-Z0-9]+)%/g, (m,k) => I[k] || m); });
+document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = ICONS[el.dataset.i] || ''; });
 
-/* ===================== товары из админки (только в наличии) ===================== */
-const firebaseConfig = { apiKey:"AIzaSyAPg6nCQ4I9vTKX5AXlmHM5gwYAsrNvW40", authDomain:"milaisss.firebaseapp.com", projectId:"milaisss", storageBucket:"milaisss.firebasestorage.app", messagingSenderId:"785104008182", appId:"1:785104008182:web:25d36e5c69aa7b71050dd7" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-let products = [];
+/* ===================== данные: товары из админки ===================== */
 const TYPE_ZONE = { top:'tops', set:'tops', bottom:'bottoms', shoes:'shoes' };
 const discOf = p => { const d = Number(p && p.discount) || 0; return (d > 0 && d < 100) ? d : 0; };
 const effPrice = p => { const d = discOf(p); return d ? Math.round(Number(p.price||0) * (100 - d) / 100 / 100) * 100 : Number(p.price||0); };
-function colorsOf(p){ return (p.colors && p.colors.length) ? p.colors : [{ name:'Стандарт', hex:'#f4f1ec', stock: p.stock || 0 }]; }
-function sizesOf(p){ const raw = (p.sizes && p.sizes.length) ? p.sizes : ["38","39","40","41","42","43"]; return raw.map(s => (s && typeof s === 'object') ? s.size : s); }
-// то же правило, что на сайте (getSizeStock)
-function sizeStock(p, c, size){
+const colorsOf = p => (p.colors && p.colors.length) ? p.colors : [{ name:'Стандарт', hex:'#f4f1ec', stock: p.stock || 0 }];
+const sizesOf = p => ((p.sizes && p.sizes.length) ? p.sizes : ["38","39","40","41","42","43"]).map(s => (s && typeof s === 'object') ? s.size : s);
+function sizeStock(p, c, size){ // то же правило, что на сайте (getSizeStock)
   if (!c) return Number(p.stock || 0);
   if (c.sizeStocks && Object.prototype.hasOwnProperty.call(c.sizeStocks, size)) return Number(c.sizeStocks[size]) || 0;
   if (c.sizeStocks && Object.keys(c.sizeStocks).length) return 0;
@@ -184,215 +145,529 @@ const inStock = p => colorsOf(p).some(c => sizesOf(p).some(s => sizeStock(p, c, 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const safeUrl = u => /^https:\/\//i.test(String(u || '').trim()) ? String(u).trim() : '';
 function firstImage(p){ const c = colorsOf(p).find(c => c.image || (c.images && c.images[0])); return safeUrl(p.image) || (c && safeUrl(c.image || c.images[0])) || ''; }
-// картинка для сцены: PNG без фона из админки, иначе обычное фото с «растворённым» белым фоном
-function sceneImg(p){
-  const png = safeUrl(p.showcaseImage);
-  if (png) return `<img src="${esc(png)}" alt="" loading="lazy" draggable="false">`;
-  const img = firstImage(p);
-  if (img) return `<img class="blend" src="${esc(img)}" alt="" loading="lazy" draggable="false">`;
-  return `<div class="noimg">${p.zone === 'shoes' ? '👟' : '👕'}</div>`;
-}
-async function loadProducts(){
-  let snap;
-  try{ snap = await db.collection('products').get(); }
-  catch(e){ console.warn(e); toast('Не удалось загрузить товары — проверьте интернет'); return; }
-  products = [];
-  snap.forEach(doc => { const d = doc.data(); if (d.hidden) return; const p = { id: doc.id, ...d }; p.zone = TYPE_ZONE[p.type] || 'shoes'; if (inStock(p)) products.push(p); });
-  buildRacks(); buildShelves(); ui();
-}
-const HANGER = '<svg class="hanger" viewBox="0 0 100 40"><path d="M50 18c0-6 6-6 6-11a6 6 0 0 0-12 0" fill="none" stroke="#151515" stroke-width="3" stroke-linecap="round"/><path d="M50 18 6 36h88L50 18Z" fill="none" stroke="#151515" stroke-width="3.5" stroke-linejoin="round"/></svg>';
-const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ') + ' сум';
+const fmt = n => Number(n || 0).toLocaleString('ru-RU').replace(/,/g,' ') + ' сум';
+let products = [];
 
-/* ===================== раскладка товаров по сцене ===================== */
-// точки взяты с фото (в процентах от кадра)
-const RAILS = {
-  tops:    { a:[7.5,32.6], b:[32.5,40.2], w0:5.6, w1:4.4 },   // передняя стойка на левой стене
-  bottoms: { a:[38.5,41.4], b:[53.5,46.0], w0:3.6, w1:3.0 }  // дальняя стойка
+/* ===================== Three.js: основа ===================== */
+const view = document.getElementById('view');
+let renderer;
+try{ renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high-performance' }); }
+catch(e){ document.getElementById('nogl').style.display = 'grid'; throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = .95;
+view.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0e10);
+scene.fog = new THREE.Fog(0x0d0e10, 22, 48);
+const camera = new THREE.PerspectiveCamera(50, 1, 0.05, 80);
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+/* ---------- процедурные текстуры (без картинок — чёткие при любом приближении) ---------- */
+function canvasTex(w, h, draw, repeat){
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso;
+  if (repeat){ t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat[0], repeat[1]); }
+  return t;
+}
+function rnd(seed){ let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+function noiseFill(g, w, h, base, amt, seed, blotch){
+  g.fillStyle = base; g.fillRect(0, 0, w, h);
+  const r = rnd(seed);
+  if (blotch) for (let i = 0; i < 90; i++){ // мягкие пятна бетона
+    const x = r()*w, y = r()*h, rad = 30 + r()*120, a = .012 + r()*.022, dark = r() > .5;
+    const gr = g.createRadialGradient(x, y, 0, x, y, rad);
+    gr.addColorStop(0, dark ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad*2, rad*2);
+  }
+  const img = g.getImageData(0, 0, w, h), d = img.data;
+  for (let i = 0; i < d.length; i += 4){ const n = (r() - .5) * amt; d[i] += n; d[i+1] += n; d[i+2] += n; }
+  g.putImageData(img, 0, 0);
+}
+const TEX = {
+  concrete: canvasTex(1024, 1024, (g,w,h) => noiseFill(g, w, h, '#CBC4BA', 14, 7, true), [2, 1]),
+  concreteDark: canvasTex(512, 512, (g,w,h) => noiseFill(g, w, h, '#A9A39A', 16, 11, true), [1, 1]),
+  floor: canvasTex(1024, 1024, (g,w,h) => {
+    noiseFill(g, w, h, '#57575A', 10, 3, true);
+    const r = rnd(5), n = 4, s = w / n;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++){ g.fillStyle = `rgba(${r()>.5?255:0},${r()>.5?255:0},${r()>.5?255:0},0)`; const v = (r() - .5) * 18; g.fillStyle = v > 0 ? `rgba(255,255,255,${v/255})` : `rgba(0,0,0,${-v/255})`; g.fillRect(i*s, j*s, s, s); }
+    g.strokeStyle = 'rgba(25,25,27,.75)'; g.lineWidth = 3;
+    for (let i = 0; i <= n; i++){ g.beginPath(); g.moveTo(i*s, 0); g.lineTo(i*s, h); g.stroke(); g.beginPath(); g.moveTo(0, i*s); g.lineTo(w, i*s); g.stroke(); }
+  }, [5, 7]),
+  stone: canvasTex(1024, 1024, (g,w,h) => {
+    noiseFill(g, w, h, '#D3CEC5', 9, 21, false);
+    g.strokeStyle = 'rgba(80,72,64,.18)'; g.lineWidth = 2;
+    for (let y = 0; y <= h; y += h/4){ g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+    for (let row = 0; row < 4; row++) for (let x = (row % 2) * w/4; x <= w; x += w/2){ g.beginPath(); g.moveTo(x, row*h/4); g.lineTo(x, (row+1)*h/4); g.stroke(); }
+  }, [3, 2]),
+  pave: canvasTex(1024, 1024, (g,w,h) => {
+    noiseFill(g, w, h, '#36373B', 12, 9, true);
+    g.strokeStyle = 'rgba(10,10,12,.85)'; g.lineWidth = 4;
+    for (let i = 0; i <= 4; i++){ g.beginPath(); g.moveTo(i*w/4, 0); g.lineTo(i*w/4, h); g.stroke(); g.beginPath(); g.moveTo(0, i*h/4); g.lineTo(w, i*h/4); g.stroke(); }
+  }, [8, 4]),
+  glow: canvasTex(256, 256, (g,w,h) => { const gr = g.createRadialGradient(w/2, h/2, 0, w/2, h/2, w/2); gr.addColorStop(0, 'rgba(255,236,200,1)'); gr.addColorStop(.35, 'rgba(255,224,170,.45)'); gr.addColorStop(1, 'rgba(255,214,160,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }),
+  cone: canvasTex(256, 512, (g,w,h) => { // световое пятно спота на стене: яркая «шапка» и мягкий хвост вниз (к краям — ноль)
+    g.save(); g.scale(1, 2);
+    const gr = g.createRadialGradient(w/2, h*.09, 0, w/2, h*.16, w/2);
+    gr.addColorStop(0, 'rgba(255,232,190,.95)'); gr.addColorStop(.3, 'rgba(255,224,176,.42)'); gr.addColorStop(1, 'rgba(255,214,160,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h/2); g.restore();
+  })
 };
-const SHELVES = [ // левый и правый край каждой полки
-  { a:[67,41.6], b:[83,36.4] }, { a:[67,50.3], b:[83,48.6] }, { a:[67,58.6], b:[83,59.0] }, { a:[67,66.8], b:[83,70.2] }
-];
-function lerp(a,b,t){ return a + (b-a)*t; }
-const CAP = { tops:8, bottoms:6, shoes:12 }, page = { tops:0, bottoms:0, shoes:0 };
+TEX.concrete.colorSpace = TEX.floor.colorSpace = THREE.SRGBColorSpace;
+
+/* ---------- материалы ---------- */
+const M = {
+  wall: new THREE.MeshStandardMaterial({ map:TEX.concrete, roughness:.92 }),
+  floor: new THREE.MeshStandardMaterial({ map:TEX.floor, roughness:.32, metalness:.05 }),
+  ceil: new THREE.MeshStandardMaterial({ color:0xBDB7AE, roughness:.95 }),
+  stone: new THREE.MeshStandardMaterial({ map:TEX.stone, roughness:.9 }),
+  pave: new THREE.MeshStandardMaterial({ map:TEX.pave, roughness:.22, metalness:.1 }),
+  black: new THREE.MeshStandardMaterial({ color:0x141415, roughness:.45, metalness:.6 }),
+  counter: new THREE.MeshStandardMaterial({ map:TEX.concreteDark, roughness:.8 }),
+  shelf: new THREE.MeshStandardMaterial({ color:0xCFC9C0, roughness:.55, emissive:0x2a2520 }),
+  led: new THREE.MeshBasicMaterial({ color:0xFFF1D6 }),
+  glass: new THREE.MeshPhysicalMaterial({ color:0xffffff, roughness:.05, metalness:0, transmission:0, transparent:true, opacity:.12 }),
+  curtain: new THREE.MeshStandardMaterial({ color:0x6E6A65, roughness:1 }),
+  fabricDark: new THREE.MeshStandardMaterial({ color:0x2A2A2C, roughness:1 }),
+  fabricLight: new THREE.MeshStandardMaterial({ color:0xB8B0A4, roughness:1 }),
+  leaf: new THREE.MeshStandardMaterial({ color:0x3E5236, roughness:.9 }),
+  pot: new THREE.MeshStandardMaterial({ color:0xD9D4CB, roughness:.85 })
+};
+const add = (mesh, x, y, z, parent) => { mesh.position.set(x, y, z); (parent || scene).add(mesh); return mesh; };
+const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+const plane = (w, h, mat) => new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+const glowMat = (opacity, tex) => new THREE.MeshBasicMaterial({ map: tex || TEX.glow, transparent:true, opacity, depthWrite:false, blending:THREE.AdditiveBlending });
+
+/* ===================== зал ===================== */
+// размеры (метры): ширина 10 (x -5…5), глубина 14 (z 0…-14), высота 3.6
+const W = 10, D = 14, H = 3.6;
+function texFor(base, rx, ry){ const t = base.clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return t; }
+const floor = plane(W, D, new THREE.MeshStandardMaterial({ map:texFor(TEX.floor, 5, 7), roughness:.3, metalness:.05 }));
+floor.rotation.x = -Math.PI/2; add(floor, 0, 0, -D/2);
+const ceil = plane(W, D, M.ceil); ceil.rotation.x = Math.PI/2; add(ceil, 0, H, -D/2);
+const wallMat = (rx) => new THREE.MeshStandardMaterial({ map:texFor(TEX.concrete, rx, 1), roughness:.92 });
+const wl = plane(D, H, wallMat(3)); wl.rotation.y = Math.PI/2; add(wl, -W/2, H/2, -D/2);
+const wr = plane(D, H, wallMat(3)); wr.rotation.y = -Math.PI/2; add(wr, W/2, H/2, -D/2);
+const wb = plane(W, H, wallMat(2)); add(wb, 0, H/2, -D);
+
+// вертикальные световые щели между панелями (как на фото)
+[-3, -6.5, -10].forEach(z => {
+  add(box(.02, H - .1, .03, M.led), -W/2 + .012, H/2, z);
+  add(plane(.5, H, glowMat(.35)), -W/2 + .02, H/2, z).rotation.y = Math.PI/2;
+});
+// световая рамка на потолке
+(function(){
+  const x0 = -2.2, x1 = 2.2, z0 = -3.5, z1 = -9.5, y = H - .01, t = .05;
+  [[0, z0, x1 - x0, t], [0, z1, x1 - x0, t]].forEach(([x, z, w, d]) => { const m = box(w, .01, d, M.led); add(m, x, y, z); });
+  [[x0, (z0+z1)/2], [x1, (z0+z1)/2]].forEach(([x, z]) => add(box(t, .01, Math.abs(z1 - z0), M.led), x, y, z));
+})();
+// трековые споты (корпуса) + световые пятна на стенах
+const trackY = H - .08;
+[-3.6, 3.6].forEach(x => {
+  add(box(.04, .03, 9.5, M.black), x, trackY + .05, -7.5);
+  for (let z = -3; z >= -12; z -= 1.5){
+    const s = new THREE.Mesh(new THREE.CylinderGeometry(.045, .055, .16, 16), M.black);
+    s.rotation.z = x < 0 ? -0.5 : 0.5; add(s, x, trackY - .04, z);
+    const spot = plane(1.5, 2.6, glowMat(.38, TEX.cone)); spot.rotation.y = x < 0 ? Math.PI/2 : -Math.PI/2;
+    add(spot, x < 0 ? -W/2 + .015 : W/2 - .015, H - 1.35, z);
+  }
+});
+[-2.5, 0, 2.5].forEach(x => { const sp = plane(1.6, 2.6, glowMat(.32, TEX.cone)); add(sp, x, H - 1.35, -D + .015); add(new THREE.Mesh(new THREE.CylinderGeometry(.045, .055, .16, 16), M.black), x, trackY - .04, -D + .9); });
+add(box(6.5, .03, .04, M.black), 0, trackY + .05, -D + .9);
+
+// свет
+scene.add(new THREE.HemisphereLight(0xFFF3E2, 0x3A3631, .7));
+const warm = (x, y, z, i, dist) => { const l = new THREE.PointLight(0xFFDDB0, i, dist, 1.6); l.position.set(x, y, z); scene.add(l); return l; };
+warm(0, 3.2, -4, 5.5, 10); warm(0, 3.2, -9.5, 5.5, 10); warm(-3.6, 2.8, -6.5, 4, 6); warm(3.6, 2.8, -6.5, 4, 6);
+const keyL = new THREE.DirectionalLight(0xFFE7C4, .6); keyL.position.set(2, 6, 2); scene.add(keyL);
+
+/* ---------- задняя стена: логотип, касса, примерочные ---------- */
+function logoTex(dark){
+  return canvasTex(2048, 512, (g, w, h) => {
+    g.clearRect(0, 0, w, h);
+    g.font = '900 300px Inter, Arial, sans-serif'; g.textBaseline = 'middle'; g.textAlign = 'left';
+    const a = 'mila', s = '/', b = 'isss';
+    const wa = g.measureText(a).width, ws = g.measureText(s).width * .9, wb2 = g.measureText(b).width, total = wa + ws + wb2;
+    let x = (w - total) / 2; const y = h / 2 + 10;
+    g.fillStyle = dark ? '#151515' : '#151515'; g.fillText(a, x, y); x += wa;
+    g.fillStyle = '#A3161F'; g.save(); g.translate(x + ws/2, y); g.transform(1, 0, -0.32, 1, 0, 0); g.fillRect(-ws*.22, -118, ws*.44, 236); g.restore(); x += ws;
+    g.fillStyle = '#151515'; g.fillText(b, x, y);
+  });
+}
+const LOGO = logoTex();
+const logoMat = new THREE.MeshBasicMaterial({ map:LOGO, transparent:true, toneMapped:false });
+add(plane(2.6, .65, logoMat), 0, 2.35, -D + .03);
+add(plane(3.6, 1.6, glowMat(.25)), 0, 2.35, -D + .02); // мягкая подсветка за буквами
+const counter = add(box(2.6, 1.05, .8, M.counter), 0, .525, -11.6);
+add(box(2.64, .03, .84, M.shelf), 0, 1.065, -11.6);
+add(box(.36, .26, .03, M.black), .7, 1.32, -11.75).rotation.y = -.25;     // монитор
+add(box(.04, .2, .04, M.black), .7, 1.17, -11.72);
+add(box(.22, .06, .16, M.black), -.5, 1.11, -11.55);                       // терминал
+[-3.6, 3.6].forEach(x => { // примерочные с занавесками
+  add(box(1.4, 2.6, .02, M.curtain), x, 1.3, -D + .12);
+  add(plane(1.6, .02, M.led), x, 2.62, -D + .14);
+});
+// стол-витрина со сложенными вещами
+add(box(1.6, .78, .9, M.counter), 0, .39, -7.4);
+add(box(1.1, .55, .8, M.counter), 0, .275, -8.25);
+[[-.4, -7.3, M.fabricDark], [.35, -7.45, M.fabricLight], [-.25, -8.25, M.fabricDark], [.3, -8.2, M.fabricLight]].forEach(([x, z, m], i) => {
+  const yb = z < -8 ? .55 : .78;
+  for (let k = 0; k < 3; k++) add(box(.42, .045, .32, m), x, yb + .025 + k * .048, z).rotation.y = (k - 1) * .04;
+});
+// растение у входа
+add(new THREE.Mesh(new THREE.CylinderGeometry(.32, .26, .6, 24), M.pot), 3.9, .3, -1.2);
+(function(){ const leafGeo = new THREE.PlaneGeometry(.09, .16), lm = new THREE.MeshStandardMaterial({ color:0x47603D, roughness:.8, side:THREE.DoubleSide }), r = rnd(77);
+  const inst = new THREE.InstancedMesh(leafGeo, lm, 420), o = new THREE.Object3D(); // одним вызовом отрисовки
+  for (let i = 0; i < 420; i++){ const a = r() * Math.PI * 2, rad = Math.sqrt(r()) * .55, y = 1.25 + r() * 1.25 - rad * .4;
+    o.position.set(3.9 + Math.cos(a) * rad, y, -1.2 + Math.sin(a) * rad); o.rotation.set(r() * 3, r() * 3, r() * 3); o.updateMatrix(); inst.setMatrixAt(i, o.matrix); }
+  scene.add(inst); })();
+add(new THREE.Mesh(new THREE.CylinderGeometry(.025, .03, 1.4, 8), M.black), 3.9, 1, -1.2);
+
+/* ---------- левая стена: две вешалки ---------- */
+const RACKS = {
+  tops:    { z0:-3.0, z1:-6.4, y:1.85, x:-W/2 + .42 },
+  bottoms: { z0:-7.4, z1:-10.6, y:1.62, x:-W/2 + .42 }
+};
+Object.values(RACKS).forEach(r => {
+  const rail = new THREE.Mesh(new THREE.CylinderGeometry(.014, .014, Math.abs(r.z1 - r.z0) + .3, 12), M.black);
+  rail.rotation.x = Math.PI/2; add(rail, r.x, r.y, (r.z0 + r.z1)/2);
+  [r.z0 - .1, r.z1 + .1].forEach(z => { add(box(.42, .02, .02, M.black), r.x - .21 + .21, r.y, z).position.x = -W/2 + .21; });
+});
+// вешалка (одна геометрия на все)
+const hangerGeo = (function(){
+  const g = new THREE.Group();
+  const hook = new THREE.Mesh(new THREE.TorusGeometry(.028, .004, 6, 16, Math.PI * 1.25), M.black); hook.rotation.y = Math.PI/2; hook.rotation.z = Math.PI*.1; hook.position.set(0, .02, 0); g.add(hook);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, .06, 6), M.black); neck.position.set(0, -.03, 0); g.add(neck);
+  const arm = (dir) => { const a = new THREE.Mesh(new THREE.CylinderGeometry(.007, .007, .25, 6), M.black); a.rotation.x = dir * 1.17; a.position.set(0, -.11, dir * .115); g.add(a); };
+  arm(1); arm(-1);
+  const bar = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, .44, 6), M.black); bar.rotation.x = Math.PI/2; bar.position.set(0, -.155, 0); g.add(bar);
+  return g;
+})();
+
+/* ---------- правая стена: полки с подсветкой ---------- */
+const SHELF = { x:W/2 - .2, z0:-4.0, z1:-9.2, ys:[.5, .95, 1.4, 1.85, 2.3], depth:.36, per:5 };
+SHELF.ys.forEach(y => {
+  const len = Math.abs(SHELF.z1 - SHELF.z0);
+  add(box(SHELF.depth, .035, len, M.shelf), SHELF.x, y, (SHELF.z0 + SHELF.z1)/2);
+  add(box(.012, .01, len, M.led), SHELF.x - SHELF.depth/2 + .02, y - .022, (SHELF.z0 + SHELF.z1)/2); // LED под полкой
+  const g = plane(len, .5, glowMat(.28)); g.rotation.y = -Math.PI/2; add(g, W/2 - .012, y - .2, (SHELF.z0 + SHELF.z1)/2);
+});
+
+/* ===================== улица и фасад ===================== */
+const street = plane(40, 18, new THREE.MeshStandardMaterial({ map:texFor(TEX.pave, 10, 4.5), roughness:.18, metalness:.15 }));
+street.rotation.x = -Math.PI/2; add(street, 0, -.001, 9);
+const FW = 34, FH = 6.2, WIN = { w:9, h:3.3, y:.25 }; // ширина фасада, проём витрины
+(function(){
+  const fm = new THREE.MeshStandardMaterial({ map:texFor(TEX.stone, 8, 2), roughness:.9 });
+  const sideW = (FW - WIN.w) / 2;
+  add(box(sideW, FH, .5, fm), -WIN.w/2 - sideW/2, FH/2, .25);
+  add(box(sideW, FH, .5, fm),  WIN.w/2 + sideW/2, FH/2, .25);
+  add(box(WIN.w, FH - WIN.h - WIN.y, .5, fm), 0, WIN.y + WIN.h + (FH - WIN.h - WIN.y)/2, .25);
+  add(box(WIN.w, WIN.y, .5, fm), 0, WIN.y/2, .25);
+  // верхний этаж: тёмные окна в рамах — фасад заполняет экран
+  add(box(FW, 6, .5, fm), 0, FH + 3, .25);
+  for (let x = -14; x <= 14; x += 3.5){ add(box(2.2, 2.6, .05, new THREE.MeshStandardMaterial({ color:0x1B1D21, roughness:.25, metalness:.4 })), x, FH + 2.2, .52); add(box(2.3, .06, .08, M.black), x, FH + .87, .54); }
+  add(box(FW, .18, .6, M.black), 0, FH, .3);
+  // чёрные рамы витрины
+  const fr = (w, h, x, y) => add(box(w, h, .08, M.black), x, y, .48);
+  fr(WIN.w + .12, .08, 0, WIN.y + WIN.h); fr(WIN.w + .12, .08, 0, WIN.y);
+  fr(.08, WIN.h, -WIN.w/2, WIN.y + WIN.h/2); fr(.08, WIN.h, WIN.w/2, WIN.y + WIN.h/2);
+  [-1.25, 1.25].forEach(x => fr(.06, WIN.h, x, WIN.y + WIN.h/2));            // края двери
+  fr(2.5, .06, 0, WIN.y + 2.6);                                                // фрамуга над дверью
+  [-3.2, 3.2].forEach(x => fr(.05, WIN.h, x, WIN.y + WIN.h/2));
+  // стекло витрины (без двери)
+  [[-WIN.w/2 + (WIN.w/2 - 1.25)/2, WIN.w/2 - 1.25], [WIN.w/2 - (WIN.w/2 - 1.25)/2, WIN.w/2 - 1.25]].forEach(([x, w]) => add(plane(w, WIN.h, M.glass), x, WIN.y + WIN.h/2, .46));
+  add(plane(2.5, WIN.h - 2.6 + WIN.y - .06, M.glass), 0, WIN.y + 2.6 + (WIN.h - 2.6)/2, .46);
+  // вывеска с подсветкой
+  const sign = plane(4.4, 1.1, logoMat); add(sign, 0, 4.85, .505);
+  add(plane(6.5, 2.2, glowMat(.45)), 0, 4.85, .5);
+  // настенные фонари
+  [-WIN.w/2 - .7, WIN.w/2 + .7].forEach(x => { add(box(.14, .3, .12, M.black), x, 2.2, .56); add(plane(.6, 1.6, glowMat(.5, TEX.cone)), x, 2.2, .51); const g2 = plane(.6, 1.6, glowMat(.35, TEX.cone)); g2.rotation.z = Math.PI; add(g2, x, 1.4, .51); });
+  // манекены в витрине (силуэты)
+  [[-2.7, M.fabricDark], [-2.0, new THREE.MeshStandardMaterial({ color:0x5A1E22, roughness:1 })]].forEach(([x, m]) => {
+    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(.17, .42, 8, 16), m); torso.scale.set(1, 1, .62); add(torso, x, 1.55, -.6);
+    [-1, 1].forEach(s2 => { const leg = new THREE.Mesh(new THREE.CapsuleGeometry(.075, .62, 6, 12), M.fabricDark); add(leg, x + s2 * .08, .78, -.6); });
+    add(new THREE.Mesh(new THREE.CylinderGeometry(.035, .04, .1, 12), M.pot), x, 1.95, -.6);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(.006, .006, .5, 8), M.black), x, .46, -.6);
+    add(box(.5, .22, .5, M.pot), x, .11, -.6);
+  });
+})();
+// раздвижные двери
+const doorL = new THREE.Group(), doorR = new THREE.Group();
+[[doorL, -1], [doorR, 1]].forEach(([g, s]) => {
+  const leaf = plane(1.22, 2.55, M.glass); g.add(leaf);
+  const fr = (w, h, x, y) => { const m = box(w, h, .04, M.black); m.position.set(x, y, .01); g.add(m); };
+  fr(1.22, .05, 0, 1.275); fr(1.22, .05, 0, -1.275); fr(.05, 2.55, -.61, 0); fr(.05, 2.55, .61, 0);
+  const handle = box(.03, 1.0, .03, M.black); handle.position.set(-s * .5, 0, .06); g.add(handle);
+  g.position.set(s * .615, WIN.y + 1.3, .44); scene.add(g);
+});
+const streetLight = new THREE.PointLight(0xFFE2BA, 4, 9, 1.8); streetLight.position.set(0, 3, 3); scene.add(streetLight);
+add(plane(9, 3, glowMat(.18)), 0, 1.8, .2); // тёплое свечение из витрины
+
+/* ===================== товары в сцене ===================== */
+// материал: фото товара; у обычного фото на белом фоне белое делаем прозрачным (шейдер),
+// у PNG без фона — берём прозрачность картинки
+function productMat(tex, keyWhite){
+  return new THREE.ShaderMaterial({
+    uniforms:{ map:{ value:tex }, keyWhite:{ value: keyWhite ? 1 : 0 }, tint:{ value:new THREE.Color(1, .97, .92) } },
+    vertexShader:'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader:`uniform sampler2D map; uniform float keyWhite; uniform vec3 tint; varying vec2 vUv;
+      void main(){ vec4 c = texture2D(map, vUv);
+        float a = c.a;
+        if (keyWhite > .5){ float mn = min(c.r, min(c.g, c.b)); float mx = max(c.r, max(c.g, c.b)); a *= 1.0 - smoothstep(.84, .95, mn) * (1.0 - smoothstep(.06, .16, mx - mn)); }
+        if (a < .04) discard;
+        gl_FragColor = vec4(c.rgb * tint, a);
+#include <colorspace_fragment>
+      }`,
+    transparent:true, side:THREE.DoubleSide, depthWrite:true
+  });
+}
+const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous');
+function cardTex(p){ // если фото не загрузилось — аккуратная карточка с названием
+  return canvasTex(512, 640, (g, w, h) => {
+    g.fillStyle = '#EDEBE7'; g.beginPath(); g.roundRect(8, 8, w - 16, h - 16, 36); g.fill();
+    g.fillStyle = '#2B2D31'; g.font = '700 46px Inter, Arial'; g.textAlign = 'center';
+    const words = String(p.name || '').split(' '); let line = '', y = h/2 - 30;
+    words.forEach(wd => { if (g.measureText(line + wd).width > w - 80){ g.fillText(line, w/2, y); line = ''; y += 56; } line += wd + ' '; }); g.fillText(line, w/2, y);
+    g.fillStyle = '#7A4F00'; g.font = '800 40px Inter, Arial'; g.fillText(fmt(effPrice(p)), w/2, y + 80);
+  });
+}
+function loadProductTex(p){
+  const png = safeUrl(p.showcaseImage), photo = firstImage(p);
+  return new Promise(res => {
+    const url = png || photo;
+    if (!url) return res({ tex: cardTex(p), key:false });
+    loader.load(url, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso; res({ tex:t, key:!png }); },
+      undefined, () => res({ tex: cardTex(p), key:false }));
+  });
+}
+const pickables = [], swingers = [], itemGroup = new THREE.Group(); scene.add(itemGroup);
+const CAP = { tops:8, bottoms:6, shoes:25 }, page = { tops:0, bottoms:0, shoes:0 };
 const ofZone = z => products.filter(p => p.zone === z);
 const pageOf = z => { const all = ofZone(z), n = Math.max(1, Math.ceil(all.length / CAP[z])); page[z] = Math.min(page[z], n - 1); return all.slice(page[z] * CAP[z], (page[z] + 1) * CAP[z]); };
-function buildRacks(){
-  const box = document.getElementById('racks'); box.innerHTML = ''; swingers.length = 0;
-  ['tops','bottoms'].forEach(type => {
-    const list = pageOf(type), R = RAILS[type], n = list.length;
+const texCache = {};
+async function placeItems(zones){
+  for (const zone of zones){
+    // убираем прежние вещи этой зоны
+    for (let i = itemGroup.children.length - 1; i >= 0; i--){ const o = itemGroup.children[i]; if (o.userData.zone === zone) itemGroup.remove(o); }
+    for (let i = pickables.length - 1; i >= 0; i--) if (pickables[i].userData.zone === zone) pickables.splice(i, 1);
+    for (let i = swingers.length - 1; i >= 0; i--) if (swingers[i].zone === zone) swingers.splice(i, 1);
+    const list = pageOf(zone);
+    const loaded = await Promise.all(list.map(p => texCache[p.id] || (texCache[p.id] = loadProductTex(p))));
     list.forEach((p, i) => {
-      const t = n === 1 ? .5 : (i + .5) / n, x = lerp(R.a[0], R.b[0], t), y = lerp(R.a[1], R.b[1], t), w = lerp(R.w0, R.w1, t);
-      const el = document.createElement('div');
-      const html = sceneImg(p);
-      el.className = 'hang' + (html.includes('class="blend"') ? ' mult' : ''); el.dataset.id = p.id;
-      el.style.cssText = `left:${x - w/2}%;top:${y}%;width:${w}%;height:${w*2.4}%;z-index:${10 - i}`;
-      el.innerHTML = HANGER + `<div class="gar">${html}</div>`;
-      box.appendChild(el); swingers.push({ el, a:0, v:0 });
+      const { tex, key } = loaded[i], img = tex.image || {}, aspect = (img.width && img.height) ? img.height / img.width : 1.2;
+      if (zone === 'shoes'){
+        const per = SHELF.per, row = Math.floor(i / per), k = i % per, gap = (Math.abs(SHELF.z1 - SHELF.z0) - 1) / (per - 1);
+        const w = .38, h = Math.min(.4, w * aspect), y = SHELF.ys[SHELF.ys.length - 1 - row] + .018;
+        const z = SHELF.z0 - .5 - k * gap;
+        const m = plane(w, h, productMat(tex, key)); m.rotation.y = -Math.PI/2;
+        m.position.set(SHELF.x - .02, y + h/2, z);
+        m.userData = { id:p.id, zone }; itemGroup.add(m); pickables.push(m);
+      } else {
+        const R = RACKS[zone], n = list.length, span = Math.abs(R.z1 - R.z0) - .5;
+        const z = R.z0 - .25 - (n === 1 ? span/2 : i * span / (n - 1));
+        const pivot = new THREE.Group(); pivot.position.set(R.x, R.y, z); pivot.userData = { zone };
+        const hg = hangerGeo.clone(); hg.position.y = -.01; pivot.add(hg);
+        const w = zone === 'tops' ? .5 : .4, h = Math.min(zone === 'tops' ? .75 : 1.05, w * aspect);
+        const m = plane(w, h, productMat(tex, key)); m.rotation.y = Math.PI/2;
+        m.position.set(.012 + i * .002, -.15 - h/2 + (zone === 'tops' ? .02 : .0), 0);
+        m.userData = { id:p.id, zone }; pivot.add(m); pickables.push(m);
+        itemGroup.add(pivot); swingers.push({ pivot, zone, a:0, v:0 });
+      }
     });
-  });
-}
-function buildShelves(){
-  const box = document.getElementById('shelves'); box.innerHTML = '';
-  const perShelf = 3;
-  pageOf('shoes').forEach((p, i) => {
-    const s = SHELVES[Math.floor(i / perShelf)], k = i % perShelf, t = (k + .6) / (perShelf + .2);
-    const x = lerp(s.a[0], s.b[0], t), y = lerp(s.a[1], s.b[1], t) - .3;
-    const el = document.createElement('div');
-    const html = sceneImg(p);
-    el.className = 'shoe' + (html.includes('class="blend"') ? ' mult' : ''); el.dataset.id = p.id;
-    el.style.cssText = `left:${x}%;top:${y}%;width:3.9%`;
-    el.innerHTML = html + `<span class="tag">${fmt(effPrice(p))}</span>`;
-    box.appendChild(el);
-  });
-}
-function morePage(){ // «ещё →» листает вешалку / полки по кругу
-  if (!zone || zone === 'cashier') return;
-  const n = Math.ceil(ofZone(zone).length / CAP[zone]); page[zone] = (page[zone] + 1) % n;
-  zone === 'shoes' ? buildShelves() : buildRacks(); ui();
+  }
+  ui();
 }
 
-/* ===================== камера ===================== */
-const IMG_W = 1672, IMG_H = 941;
-const stage = document.getElementById('stage');
-const cams = {}; // для каждой сцены: { frame, fx, fy, z }
-['entrance','center','left'].forEach(n => { cams[n] = { frame: document.querySelector('#sc-'+n+' .frame'), fx:.5, fy:.5, z:1 }; });
-let vw = innerWidth, vh = innerHeight, CW, CH;
-function measure(){
-  vw = innerWidth; vh = innerHeight;
-  const s = Math.max(vw / IMG_W, vh / IMG_H); CW = IMG_W * s; CH = IMG_H * s;
-  Object.values(cams).forEach(c => { c.frame.style.width = CW + 'px'; c.frame.style.height = CH + 'px'; apply(c, false); });
-}
-function apply(c, animate){
-  const z = c.z, W = CW * z, H = CH * z;
-  let tx = vw / 2 - c.fx * W, ty = vh / 2 - c.fy * H;
-  tx = Math.min(0, Math.max(vw - W, tx)); ty = Math.min(0, Math.max(vh - H, ty));
-  c.fx = (vw / 2 - tx) / W; c.fy = (vh / 2 - ty) / H; // запоминаем то, что реально видно
-  c.frame.classList.toggle('anim', !!animate);
-  c.frame.style.transform = `translate3d(${tx}px,${ty}px,0) scale(${z})`;
-  c.frame.style.setProperty('--iz', (1 / z).toFixed(3));
-}
-// подогнать область кадра (в долях) под экран
-function fit(c, x0, y0, x1, y1, animate){
-  const zw = vw / ((x1 - x0) * CW), zh = vh / ((y1 - y0) * CH);
-  c.z = Math.max(1, Math.min(zw, zh) * .92); c.fx = (x0 + x1) / 2; c.fy = (y0 + y1) / 2; apply(c, animate);
-}
-function setCam(c, fx, fy, z, animate){ c.fx = fx; c.fy = fy; c.z = z; apply(c, animate); }
-
-/* ===================== сцены и переходы ===================== */
-let scene = 'entrance', zone = null, busy = false;
-const ZONES = { // что показывать камерой
-  tops:    { scene:'left',   box:[.03,.24,.37,.78] },
-  bottoms: { scene:'left',   box:[.35,.34,.57,.72] },
-  shoes:   { scene:'center', box:[.63,.27,.87,.77] },
-  cashier: { scene:'center', box:[.32,.40,.57,.74] }
+/* ===================== камера и переходы ===================== */
+const tgt = new THREE.Vector3();
+const VIEWS = { // где стоит камера и куда смотрит (для широкого экрана; на узком камера отходит дальше)
+  street:  { p:[0, 1.75, 11.5], t:[0, 2.6, 0] },
+  door:    { p:[0, 1.6, 1.6],   t:[0, 1.5, -6] },
+  hall:    { p:[0, 1.7, -.4], t:[0, 1.35, -9] },
+  tops:    { p:[-1.75, 1.45, -4.6], t:[-5, 1.35, -4.6], slide:[-2.9, -6.3] },
+  bottoms: { p:[-1.95, 1.25, -9.0], t:[-5, 1.15, -9.0], slide:[-7.8, -10.2] },
+  shoes:   { p:[2.2, 1.5, -6.6], t:[5, 1.45, -6.6], slide:[-4.6, -8.6] },
+  cashier: { p:[0, 1.65, -8.6],   t:[0, 1.15, -12.5] }
 };
-function show(n){ document.querySelectorAll('.scene').forEach(s => s.classList.toggle('on', s.id === 'sc-' + n)); scene = n; }
-function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
-function ui(){
-  document.getElementById('backBtn').classList.toggle('show', scene !== 'entrance');
-  document.getElementById('backTxt').textContent = zone ? 'В зал' : 'На улицу';
-  document.getElementById('zoneNav').classList.toggle('show', scene !== 'entrance');
-  document.querySelectorAll('#zoneNav button').forEach(b => b.classList.toggle('act', b.dataset.go === zone));
-  document.getElementById('sc-center').classList.toggle('zoomed', !!zone);
-  document.getElementById('sc-left').classList.toggle('zoomed', !!zone);
-  const more = document.getElementById('moreBtn'), many = zone && zone !== 'cashier' && ofZone(zone).length > CAP[zone];
-  more.classList.toggle('show', !!many);
-  if (many) more.textContent = `Ещё → ${page[zone] + 1}/${Math.ceil(ofZone(zone).length / CAP[zone])}`;
+let state = 'street', zone = null, busy = false;
+const camPos = new THREE.Vector3(), camTgt = new THREE.Vector3();
+let lookYaw = 0, slideZ = 0; // ручной поворот в зале / сдвиг вдоль стены
+function narrowFactor(){ const a = innerWidth / innerHeight; return a < 1 ? Math.min(1.9, 1.05 / a) : 1; }
+function viewFor(name){
+  const v = VIEWS[name], p = new THREE.Vector3(...v.p), t = new THREE.Vector3(...v.t);
+  const f = narrowFactor();
+  if (name === 'street'){ p.z = 6 + 5.5 * Math.max(1, f * .95); p.y = 1.6 + (f - 1) * .5; t.y = 2.4 + (f - 1) * .2; }
+  else if (name === 'hall'){ /* на телефоне — тот же вид, смотрим поворотом */ }
+  else if (f > 1 && v.slide){ const dir = p.clone().sub(t).normalize(); p.add(dir.multiplyScalar((f - 1) * .9)); }
+  return { p, t };
 }
-let hintT;
-function hint(txt, ms = 3200){ const h = document.getElementById('hint'); h.textContent = txt; h.classList.add('show'); clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove('show'), ms); }
+function setCam(p, t){ camPos.copy(p); camTgt.copy(t); }
+setCam(viewFor('street').p, viewFor('street').t);
+const SPEED = window.__FAST ? .12 : 1;
+const ease = x => x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2;
+// сплайн Катмулла–Рома через точки (концы продлены), t 0…1 — плавная траектория без рывков на стыках
+function curve(pts){
+  const n = pts.length - 1;
+  return t => {
+    if (n === 0) return pts[0].clone();
+    const f = Math.max(0, Math.min(n - 1e-6, t * n)), i = Math.floor(f), u = f - i;
+    const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n, i + 2)];
+    const u2 = u * u, u3 = u2 * u, out = new THREE.Vector3();
+    ['x','y','z'].forEach(k => { out[k] = .5 * ((2*p1[k]) + (-p0[k] + p2[k]) * u + (2*p0[k] - 5*p1[k] + 4*p2[k] - p3[k]) * u2 + (-p0[k] + 3*p1[k] - 3*p2[k] + p3[k]) * u3); });
+    return out;
+  };
+}
+// плавный пролёт по точкам (кривая), цель взгляда — тоже по кривой
+function fly(points, targets, dur){
+  return new Promise(res => {
+    const pc = curve([camPos.clone(), ...points]), tc = curve([camTgt.clone(), ...targets]);
+    const t0 = performance.now(); dur *= SPEED;
+    (function step(now){
+      const k = Math.max(0, Math.min(1, (now - t0) / dur)), e = ease(k);
+      camPos.copy(pc(e)); camTgt.copy(tc(e));
+      if (k < 1) requestAnimationFrame(step); else res();
+    })(t0);
+  });
+}
+function doors(open, dur){
+  return new Promise(res => {
+    dur *= SPEED; const t0 = performance.now(), from = doorR.position.x, to = open ? 1.86 : .615;
+    (function step(now){ const k = Math.max(0, Math.min(1, (now - t0) / dur)), e = ease(k), x = from + (to - from) * e;
+      doorR.position.x = x; doorL.position.x = -x; if (k < 1) requestAnimationFrame(step); else res(); })(t0);
+  });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const HALL_MID = new THREE.Vector3(0, 1.65, -5.6);
 
 async function go(target){
-  if (busy) return; busy = true;
+  if (busy) return; busy = true; hideHint();
   try{
+    lookYaw = 0; slideZ = 0;
     if (target === 'enter'){
-      const e = cams.entrance; setCam(e, .51, .6, 3.4, true);               // камера подходит к двери
-      await wait(650);
-      const c = cams.center; setCam(c, .44, .55, 1.5, false); show('center'); // внутри: начинаем ближе
-      await wait(60); setCam(c, .44, .55, 1, true);                          // и «отъезжаем», открывая зал
-      zone = null; ui(); await wait(1000);
-      hint(vw < 700 ? 'Нажмите на значок или проведите по экрану' : 'Нажмите на значок — камера подъедет');
-    }
-    else if (target === 'hall'){
-      if (scene === 'left'){
-        const l = cams.left; setCam(l, .55, .5, 1, true); await wait(300);
-        const c = cams.center; setCam(c, .1, .5, 1.35, false); show('center'); await wait(60); setCam(c, .44, .55, 1, true);
-      } else { setCam(cams.center, .44, .55, 1, true); }
-      zone = null; ui(); await wait(1100);
+      state = 'entering'; ui();
+      await fly([new THREE.Vector3(0, 1.62, 4.2)], [new THREE.Vector3(0, 1.55, -4)], 1100); // подходим к двери
+      await doors(true, 1100);                                                                 // двери разъезжаются
+      const d = viewFor('door'), h = viewFor('hall');
+      await fly([d.p, h.p], [d.t, h.t], 2100);                                                 // проходим внутрь
+      doors(false, 1400);
+      state = 'hall'; zone = null; ui();
+      hint(innerWidth < 700 ? 'Нажмите на значок или поверните взгляд пальцем' : 'Нажмите на значок — камера подойдёт');
     }
     else if (target === 'street'){
-      const e = cams.entrance; setCam(e, .51, .6, 3.4, false); show('entrance'); await wait(60); setCam(e, .51, .55, 1, true);
-      zone = null; ui(); await wait(1100);
+      state = 'leaving'; ui();
+      const d = viewFor('door'); await fly([HALL_MID.clone().setZ(-2.5), d.p], [new THREE.Vector3(0, 1.5, 6), new THREE.Vector3(0, 1.5, 8)], 1500);
+      await doors(true, 700);
+      const s = viewFor('street'); await fly([new THREE.Vector3(0, 1.62, 4.2), s.p], [new THREE.Vector3(0, 1.6, 0), s.t], 1700);
+      doors(false, 900); state = 'street'; zone = null; ui();
     }
-    else if (ZONES[target]){
-      const Z = ZONES[target];
-      if (Z.scene === 'left' && scene !== 'left'){
-        setCam(cams.center, .06, .45, 1.45, true); await wait(450);           // поворот налево
-        const l = cams.left; setCam(l, .55, .5, 1.15, false); show('left'); await wait(60);
-      } else if (Z.scene === 'center' && scene !== 'center'){
-        setCam(cams.left, .9, .5, 1.2, true); await wait(450);                // поворот направо
-        const c = cams.center; setCam(c, .3, .5, 1.2, false); show('center'); await wait(60);
-      }
-      fit(cams[Z.scene], ...Z.box, true); zone = target; ui(); await wait(1250);
-      if (target === 'tops' || target === 'bottoms') hint(matchMedia('(hover:hover)').matches ? 'Проведите мышкой по одежде, нажмите — подробнее' : 'Проведите пальцем по одежде, нажмите — подробнее');
+    else if (target === 'hall'){
+      const h = viewFor('hall'); await fly([HALL_MID, h.p], [new THREE.Vector3(0, 1.4, -9), h.t], 1600);
+      state = 'hall'; zone = null; ui();
+    }
+    else if (VIEWS[target]){
+      const v = viewFor(target);
+      const via = (zone && zone !== target) || state === 'hall' ? [HALL_MID.clone()] : [];
+      const viaT = via.length ? [new THREE.Vector3((v.t.x) * .4, 1.4, (v.t.z + camTgt.z) / 2)] : [];
+      state = 'moving'; ui();
+      await fly([...via, v.p], [...viaT, v.t], via.length ? 2000 : 1500);
+      state = 'zone'; zone = target; ui();
+      if (target === 'tops' || target === 'bottoms') hint(matchMedia('(hover:hover)').matches ? 'Проведите мышкой по одежде · нажмите — подробнее' : 'Проведите пальцем по одежде · нажмите — подробнее');
       if (target === 'shoes') hint('Нажмите на пару — подробнее');
       if (target === 'cashier') openCheckout();
     }
-  } finally { busy = false; }
+  } finally { busy = false; ui(); }
 }
 
-/* ===================== жесты: перетаскивание камеры, касание, «трогать» одежду ===================== */
+/* ===================== интерфейс ===================== */
+const $ = id => document.getElementById(id);
+function ui(){
+  const inside = state !== 'street' && state !== 'entering' && state !== 'leaving';
+  $('backBtn').classList.toggle('off', !inside || busy);
+  $('backTxt').textContent = zone ? 'В зал' : 'На улицу';
+  $('zoneNav').classList.toggle('show', inside && !busy);
+  document.querySelectorAll('#zoneNav button').forEach(b => b.classList.toggle('act', b.dataset.go === zone));
+  document.querySelectorAll('.hs').forEach(h => {
+    const show = h.dataset.go === 'enter' ? state === 'street' && !busy : state === 'hall' && !busy;
+    h.classList.toggle('off', !show);
+  });
+  const many = zone && zone !== 'cashier' && ofZone(zone).length > CAP[zone];
+  $('moreBtn').classList.toggle('show', !!many && !busy);
+  if (many) $('moreBtn').textContent = `Ещё → ${page[zone] + 1}/${Math.ceil(ofZone(zone).length / CAP[zone])}`;
+}
+let hintT;
+function hint(t, ms = 3600){ const h = $('hint'); h.textContent = t; h.classList.add('show'); clearTimeout(hintT); hintT = setTimeout(hideHint, ms); }
+function hideHint(){ $('hint').classList.remove('show'); }
+let toastT;
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600); }
+
+/* ===================== жесты ===================== */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+function pick(x, y){ ndc.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects(pickables, false)[0]; return hit ? hit.object : null; }
 let drag = null;
-stage.addEventListener('pointerdown', e => {
-  drag = { x:e.clientX, y:e.clientY, lx:e.clientX, ly:e.clientY, moved:false, c:cams[scene] };
-  stage.setPointerCapture(e.pointerId);
-});
-stage.addEventListener('pointermove', e => {
-  touchClothes(e.clientX, e.clientY, drag ? e.clientX - drag.lx : e.movementX || 0);
+view.addEventListener('pointerdown', e => { drag = { x:e.clientX, y:e.clientY, lx:e.clientX, moved:false }; view.setPointerCapture(e.pointerId); });
+view.addEventListener('pointermove', e => {
+  const dx = drag ? e.clientX - drag.lx : (e.movementX || 0);
+  // «трогаем» одежду: вещь под пальцем/мышкой раскачивается
+  if (zone === 'tops' || zone === 'bottoms'){
+    const o = pick(e.clientX, e.clientY);
+    if (o){ const s = swingers.find(s => s.pivot === o.parent); if (s && dx){ s.v += Math.max(-.06, Math.min(.06, dx * .004)); const i = swingers.indexOf(s); [swingers[i-1], swingers[i+1]].forEach(n => { if (n && n.zone === s.zone) n.v += dx * .0012; }); } }
+    view.classList.toggle('pointing', !!o && !drag);
+  } else if (zone === 'shoes' && !drag){ view.classList.toggle('pointing', !!pick(e.clientX, e.clientY)); }
   if (!drag) return;
-  const dx = e.clientX - drag.lx, dy = e.clientY - drag.ly; drag.lx = e.clientX; drag.ly = e.clientY;
-  if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 8){ drag.moved = true; stage.classList.add('dragging'); }
-  if (drag.moved && scene !== 'entrance'){ const c = drag.c; c.fx -= dx / (CW * c.z); c.fy -= dy / (CH * c.z); apply(c, false); }
+  drag.lx = e.clientX;
+  if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 8){ drag.moved = true; view.classList.add('dragging'); }
+  if (!drag.moved || busy) return;
+  if (state === 'hall') lookYaw = Math.max(-1.05, Math.min(1.05, lookYaw + dx * .004));
+  else if (state === 'zone' && VIEWS[zone].slide){ const sl = VIEWS[zone].slide, base = VIEWS[zone].p[2]; const sign = zone === 'shoes' ? 1 : -1; slideZ = Math.max(sl[1] - base, Math.min(sl[0] - base, slideZ + sign * dx * .006)); }
 });
-function endDrag(e){
-  if (!drag) return; stage.classList.remove('dragging');
-  const wasTap = !drag.moved; drag = null;
-  if (!wasTap) return;
-  stage.releasePointerCapture?.(e.pointerId);
-  const t = document.elementFromPoint(e.clientX, e.clientY);
-  const hs = t && t.closest('[data-go]'); if (hs) return go(hs.dataset.go);
-  const item = t && t.closest('[data-id]'); if (item){ const s = swingers.find(s => s.el === item); if (s) s.v += 6; openProduct(item.dataset.id); }
-}
-stage.addEventListener('pointerup', endDrag);
-stage.addEventListener('pointercancel', () => { drag = null; stage.classList.remove('dragging'); });
+view.addEventListener('pointerup', e => {
+  if (!drag) return; const tap = !drag.moved; drag = null; view.classList.remove('dragging');
+  if (!tap || busy) return;
+  const o = pick(e.clientX, e.clientY);
+  if (o && state === 'zone'){ const s = swingers.find(s => s.pivot === o.parent); if (s) s.v += .05; openProduct(o.userData.id); }
+});
+view.addEventListener('pointercancel', () => { drag = null; view.classList.remove('dragging'); });
+document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+$('backBtn').onclick = () => go(zone ? 'hall' : 'street');
+$('cartBtn').onclick = () => (state === 'street' ? openCheckout() : go('cashier'));
+$('moreBtn').onclick = () => { if (!zone || zone === 'cashier') return; const n = Math.ceil(ofZone(zone).length / CAP[zone]); page[zone] = (page[zone] + 1) % n; placeItems([zone]); };
 
-/* качание одежды: пружина */
-const swingers = [];
-let lastTouched = null;
-function touchClothes(x, y, dx){
-  if (scene !== 'left' || !dx) return;
-  const t = document.elementFromPoint(x, y), h = t && t.closest('.hang');
-  if (!h) return;
-  const s = swingers.find(s => s.el === h); if (!s) return;
-  s.v += Math.max(-9, Math.min(9, dx * .9));
-  // соседние вешалки тоже чуть задеваем
-  const i = swingers.indexOf(s); [swingers[i-1], swingers[i+1]].forEach(n => { if (n && n.el.parentNode === h.parentNode) n.v += dx * .25; });
-}
-function tick(){
-  for (const s of swingers){
-    s.v += -s.a * .045; s.v *= .93; s.a += s.v * .16;
-    s.a = Math.max(-28, Math.min(28, s.a));
-    if (Math.abs(s.a) > .02 || Math.abs(s.v) > .02) s.el.style.transform = `rotate(${s.a.toFixed(2)}deg)`;
+/* ===================== кадр ===================== */
+const hsEls = [...document.querySelectorAll('.hs')].map(el => ({ el, at:new THREE.Vector3(...el.dataset.at.split(',').map(Number)) }));
+const tmpV = new THREE.Vector3(), look = new THREE.Vector3();
+function resize(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w / h < 1 ? 62 : 50; camera.updateProjectionMatrix(); if (!busy && state === 'street') setCam(viewFor('street').p, viewFor('street').t); }
+addEventListener('resize', resize); resize();
+let last = performance.now();
+renderer.setAnimationLoop(now => {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  // камера + ручной поворот/сдвиг (мягко)
+  camera.position.copy(camPos);
+  if (state === 'zone' && slideZ){ camera.position.z += slideZ; }
+  look.copy(camTgt); if (state === 'zone' && slideZ) look.z += slideZ;
+  if (lookYaw){ const d = look.clone().sub(camera.position); d.applyAxisAngle(new THREE.Vector3(0, 1, 0), -lookYaw); look.copy(camera.position).add(d); }
+  camera.lookAt(look);
+  // одежда качается (пружина)
+  for (const s of swingers){ s.v += -s.a * 9 * dt; s.v *= Math.pow(.25, dt); s.a += s.v * 60 * dt; s.a = Math.max(-.5, Math.min(.5, s.a)); s.pivot.rotation.x = s.a; }
+  renderer.render(scene, camera);
+  // значки следуют за своими точками
+  for (const h of hsEls){
+    tmpV.copy(h.at).project(camera);
+    const vis = tmpV.z < 1 && Math.abs(tmpV.x) < 1.15 && Math.abs(tmpV.y) < 1.15;
+    h.el.style.transform = `translate(${(tmpV.x * .5 + .5) * innerWidth}px, ${(-tmpV.y * .5 + .5) * innerHeight}px) translate(-50%,-50%)`;
+    h.el.style.visibility = vis ? 'visible' : 'hidden';
   }
-  requestAnimationFrame(tick);
-}
+});
 
-/* ===================== карточка товара, корзина, касса ===================== */
-const CART_KEY = 'milaisss_cart'; // та же корзина, что на сайте
+/* ===================== корзина, карточка товара, касса ===================== */
+const CART_KEY = 'milaisss_cart';
 function readCart(){ try{ const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); return Array.isArray(c) ? c.filter(x => x && x.productId && x.qty > 0) : []; }catch(e){ return []; } }
 function writeCart(c){ try{ localStorage.setItem(CART_KEY, JSON.stringify(c)); }catch(e){} badge(); }
-function badge(){ const n = readCart().reduce((a, c) => a + c.qty, 0); document.getElementById('cartN').textContent = n > 99 ? '99+' : n; }
-const sheet = document.getElementById('sheet'), shadeEl = document.getElementById('shade');
+function badge(){ const n = readCart().reduce((a, c) => a + c.qty, 0); $('cartN').textContent = n > 99 ? '99+' : n; }
+addEventListener('storage', e => { if (e.key === CART_KEY) badge(); });
+const sheet = $('sheet'), shadeEl = $('shade');
 function openSheet(html){ sheet.innerHTML = '<div class="grab"></div>' + html; shadeEl.classList.add('show'); sheet.classList.add('show'); }
 function closeSheet(){ shadeEl.classList.remove('show'); sheet.classList.remove('show'); }
 shadeEl.addEventListener('click', closeSheet);
@@ -411,11 +686,11 @@ function openProduct(id){
       <a href="index.html?product=${encodeURIComponent(p.id)}" class="muted" style="display:block;text-align:center;margin-top:14px;color:var(--muted)">Подробнее о товаре на сайте</a>`);
     sheet.querySelectorAll('.cl').forEach(b => b.onclick = () => { ci = +b.dataset.ci; if (sizeStock(p, colors[ci], size) <= 0) size = ''; draw(); });
     sheet.querySelectorAll('.sz:not(:disabled)').forEach(b => b.onclick = () => { size = b.dataset.s; draw(); });
-    document.getElementById('addBtn').onclick = () => add(p, colors[ci], size);
+    $('addBtn').onclick = () => addToCart(p, colors[ci], size);
   };
   draw();
 }
-function add(p, c, size){
+function addToCart(p, c, size){
   const limit = sizeStock(p, c, size); if (!size || limit <= 0) return;
   const cart = readCart(), ex = cart.find(x => x.productId === p.id && x.size === size && x.colorName === c.name);
   if (ex){ if (ex.qty >= limit){ toast('Больше нет в наличии'); return; } ex.qty++; }
@@ -425,7 +700,7 @@ function add(p, c, size){
 function openCheckout(){
   const cart = readCart();
   if (!cart.length){ openSheet(`<div class="pname">Касса</div><p class="muted" style="margin:10px 0 18px">Корзина пока пустая — выберите одежду на вешалках или обувь на полках.</p><button class="btn" id="cBtn">Пойти выбирать</button>`);
-    document.getElementById('cBtn').onclick = () => { closeSheet(); go('hall'); }; return; }
+    $('cBtn').onclick = () => { closeSheet(); if (state !== 'street') go('hall'); else go('enter'); }; return; }
   const rows = cart.map((c, i) => `<div class="row"><div class="th">${safeUrl(c.image) ? `<img src="${esc(c.image)}" alt="">` : esc(c.emoji || '👟')}</div>
     <div class="nm">${esc(c.name)}<small>${esc(c.colorName || '')}${c.size ? ' · ' + esc(c.size) : ''}${c.qty > 1 ? ' · ' + c.qty + ' шт' : ''}</small></div>
     <div class="pr">${fmt(c.price * c.qty)}</div><button class="rm" data-i="${i}">убрать</button></div>`).join('');
@@ -435,26 +710,26 @@ function openCheckout(){
     <div class="ok">${sum >= 850000 ? '✓ Бесплатная доставка' : 'До бесплатной доставки: ' + fmt(850000 - sum)}</div>
     <button class="btn" id="payBtn">Оформить и оплатить · Click / Uzum</button>`);
   sheet.querySelectorAll('.rm').forEach(b => b.onclick = () => { const c = readCart(); c.splice(+b.dataset.i, 1); writeCart(c); openCheckout(); });
-  document.getElementById('payBtn').onclick = () => { location.href = 'index.html'; }; // оформление и оплата — как обычно на сайте
+  $('payBtn').onclick = () => { location.href = 'index.html'; };
 }
-let toastT;
-function toast(t){ const el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600); }
-
-document.getElementById('backBtn').onclick = () => go(zone ? 'hall' : 'street');
-document.getElementById('moreBtn').onclick = morePage;
-document.getElementById('cartBtn').onclick = () => scene === 'entrance' ? openCheckout() : go('cashier');
-document.querySelectorAll('#zoneNav [data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
 
 /* ===================== старт ===================== */
-measure(); badge(); loadProducts();
-addEventListener('storage', e => { if (e.key === CART_KEY) badge(); });
-setCam(cams.entrance, .51, .55, 1, false);
-addEventListener('resize', measure);
-requestAnimationFrame(tick);
-// показываем, когда фото загружены (остальные догружаются в фоне)
-const first = document.querySelector('#sc-entrance img');
-const ready = () => document.getElementById('loader').classList.add('hide');
-first.complete ? ready() : (first.onload = ready, first.onerror = ready);
+async function loadProducts(){
+  try{
+    firebase.initializeApp({ apiKey:"AIzaSyAPg6nCQ4I9vTKX5AXlmHM5gwYAsrNvW40", authDomain:"milaisss.firebaseapp.com", projectId:"milaisss", storageBucket:"milaisss.firebasestorage.app", messagingSenderId:"785104008182", appId:"1:785104008182:web:25d36e5c69aa7b71050dd7" });
+    const snap = await firebase.firestore().collection('products').get();
+    products = [];
+    snap.forEach(doc => { const d = doc.data(); if (d.hidden) return; const p = { id: doc.id, ...d }; p.zone = TYPE_ZONE[p.type] || 'shoes'; if (inStock(p)) products.push(p); });
+  }catch(e){ console.warn(e); toast('Не удалось загрузить товары — проверьте интернет'); }
+  await placeItems(['tops', 'bottoms', 'shoes']);
+}
+badge(); ui();
+(document.fonts && document.fonts.load ? document.fonts.load('900 100px Inter') : Promise.resolve()).catch(() => {}).then(() => {
+  // логотип рисуем, когда шрифт готов
+  const fresh = logoTex(); logoMat.map = fresh; logoMat.needsUpdate = true;
+});
+loadProducts();
+setTimeout(() => $('loader').classList.add('hide'), 700);
 </script>
 </body>
 </html>
