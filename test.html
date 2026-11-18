@@ -1106,6 +1106,13 @@
   .nx-fig{ position:absolute; bottom:0; left:50%; width:min(46%, 300px); height:92%; transition:transform .8s cubic-bezier(.65,0,.3,1), filter .8s ease, opacity .8s ease; cursor:pointer; }
   .nx-fig img{ width:100%; height:100%; object-fit:contain; object-position:bottom; }
   html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:multiply; }
+  .nx-figin{ position:relative; width:100%; height:100%; }
+  .nx-pin{ position:absolute; transform:translate(-50%,-50%); border:0; background:none; padding:0; cursor:pointer; display:flex; align-items:center; gap:6px; z-index:2; opacity:0; transition:opacity .4s ease .5s; }
+  .nx-fig[style*="scale(1)"] .nx-pin{ opacity:1; }
+  .nx-pin b{ width:22px; height:22px; border-radius:50%; background:#fff; color:#151112; font-size:11px; font-weight:800; display:grid; place-items:center; box-shadow:0 0 0 5px rgba(255,255,255,.35), 0 4px 12px rgba(0,0,0,.25); }
+  .nx-pin span{ font-size:11px; font-weight:700; color:var(--ink); background:var(--bg); padding:4px 8px; border-radius:12px; white-space:nowrap; opacity:0; transform:translateX(-4px); transition:opacity .25s, transform .25s; pointer-events:none; }
+  .nx-pin:hover span, .nx-pin:focus span{ opacity:1; transform:none; }
+  .nx-shot img.nx-real{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .nx-ctrl{ display:flex; align-items:center; gap:14px; margin-top:16px; }
   .nx-cbtn{ width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--ink); display:grid; place-items:center; cursor:pointer; flex:none; }
   .nx-cbtn svg{ width:16px; height:16px; }
@@ -3343,7 +3350,7 @@ function showNetBanner(on){
   b.innerHTML = '<span>'+escH(t('netErr'))+'</span><button type="button" onclick="location.reload()">'+escH(t('netRetry'))+'</button>';
   document.body.appendChild(b);
 }
-db.collection('products').onSnapshot(snap => {
+db.collection('test_products').onSnapshot(snap => { // ТЕСТ: свои товары
   products = [];
   snap.forEach(doc => {
     const d = doc.data();
@@ -3355,7 +3362,7 @@ db.collection('products').onSnapshot(snap => {
   renderMainGrid(); renderFavGrid();
   if (document.getElementById('shopAll').classList.contains('active')) renderShopAllGrid();
   try{ if (document.getElementById('cart').classList.contains('active')) renderCart(); }catch(e){}
-  try{ localStorage.setItem('milaisss_products_cache', JSON.stringify({ t: Date.now(), p: products })); }catch(e){}
+  try{ localStorage.setItem('milaisss_test_products_cache', JSON.stringify({ t: Date.now(), p: products })); }catch(e){}
   markLoaded('products');
   showNetBanner(false);
   openDeepLinkProduct();
@@ -4504,7 +4511,7 @@ function cartProblems(){
 // перед оформлением: свежие остатки прямо с сервера (а не из памяти страницы)
 async function verifyCartWithServer(){
   const ids = [...new Set(cart.map(i => i.productId).filter(Boolean))];
-  const docs = await Promise.all(ids.map(id => db.collection('products').doc(id).get({ source: 'server' }).catch(() => db.collection('products').doc(id).get())));
+  const docs = await Promise.all(ids.map(id => db.collection('test_products').doc(id).get({ source: 'server' }).catch(() => db.collection('test_products').doc(id).get())));
   docs.forEach((d, i) => {
     const idx = products.findIndex(p => p.id === ids[i]);
     const data = d && d.exists ? d.data() : null;
@@ -5929,7 +5936,7 @@ function afterAuth(){
   try{ if (document.getElementById('profile').classList.contains('active')){ renderOrders(); renderMyReviews(); } }catch(e){}
 }
 try{
-  const _pc = JSON.parse(localStorage.getItem('milaisss_products_cache') || 'null');
+  const _pc = JSON.parse(localStorage.getItem('milaisss_test_products_cache') || 'null');
   if (_pc && Array.isArray(_pc.p) && _pc.p.length && Date.now() - _pc.t < 7 * 86400000){ products = _pc.p; markLoaded('products'); }
 }catch(e){}
 try{
@@ -6051,7 +6058,8 @@ const inStockN = p => stockOf(p) > 0;
 /* ---------- 1. орбита ---------- */
 let orb = [], pos = 0, target = 0, active = -1, raf = 0;
 function buildOrbit(){
-  const list = products.filter(inStockN).slice(0, 7);
+  const H = window.NXHOME || {}, chosen = (H.orbit || []).map(id => products.find(p => p.id === id)).filter(Boolean);
+  const list = chosen.length ? chosen.slice(0, 7) : products.filter(inStockN).slice(0, 7);
   const sig = list.map(p => p.id + (p.image || '') + (p.showcaseImage || '')).join('|');
   if (sig === buildOrbit._sig) return; buildOrbit._sig = sig;
   orb = list; const box = $('nxOrbit'); if (!box) return;
@@ -6140,12 +6148,19 @@ function buildLooks(){
   looks = [];
   for (let i = 0; i < n; i++){ const pieces = [tops[i % (tops.length || 1)], bottoms[i % (bottoms.length || 1)], shoes[i % (shoes.length || 1)]].filter(Boolean); if (pieces.length) looks.push(pieces); }
   if (!looks.length && av.length) looks = [av.slice(0, 3)];
+  looks = looks.map(l => ({ pieces: l.map(p => ({ p })) }));
+  const HL = ((window.NXHOME || {}).looks || []).map(l => ({ photo: okUrl(l.photo), pieces: (l.pieces || []).map(pc => ({ p: products.find(x => x.id === pc.id), x: pc.x, y: pc.y })).filter(pc => pc.p) })).filter(l => l.photo || l.pieces.length);
+  if (HL.length) looks = HL;
   li = Math.min(li, Math.max(0, looks.length - 1));
   const stage = $('nxStage'); if (!stage) return;
-  stage.innerHTML = looks.map((l, i) => { const h = picHTML(l[0]); return `<div class="nx-fig${h.includes('class="blend"') ? ' blend' : ''}" data-i="${i}">${h}</div>`; }).join('');
-  $('nxSteps').innerHTML = looks.map((l, i) => `<button class="nx-step" data-i="${i}">${String(i + 1).padStart(2, '0')} ${escN(nameOf(l[0]).split(' ')[0] || '')}</button>`).join('');
+  stage.innerHTML = looks.map((l, i) => {
+    const h = l.photo ? `<img src="${escN(l.photo)}" alt="" loading="lazy">` : (l.pieces[0] ? picHTML(l.pieces[0].p) : '');
+    const pins = l.pieces.map((pc, k) => pc.x != null ? `<button class="nx-pin" style="left:${pc.x}%;top:${pc.y}%" data-id="${escN(pc.p.id)}"><b>${k + 1}</b><span>${escN(nameOf(pc.p))}</span></button>` : '').join('');
+    return `<div class="nx-fig${h.includes('class="blend"') ? ' blend' : ''}" data-i="${i}"><div class="nx-figin">${h}${pins}</div></div>`; }).join('');
+  $('nxSteps').innerHTML = looks.map((l, i) => `<button class="nx-step" data-i="${i}">${String(i + 1).padStart(2, '0')} ${escN(l.pieces[0] ? nameOf(l.pieces[0].p).split(' ')[0] : '')}</button>`).join('');
   $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.onclick = () => showLook(+b.dataset.i, true));
-  stage.querySelectorAll('.nx-fig').forEach(f => f.onclick = () => { const i = +f.dataset.i; if (i === li) openProduct(looks[i][0].id); else showLook(i, true); });
+  stage.querySelectorAll('.nx-pin').forEach(b => b.onclick = e => { e.stopPropagation(); if (+b.closest('.nx-fig').dataset.i === li) openProduct(b.dataset.id); });
+  stage.querySelectorAll('.nx-fig').forEach(f => f.onclick = () => { const i = +f.dataset.i; if (i === li){ const pc = looks[i].pieces[0]; if (pc) openProduct(pc.p.id); } else showLook(i, true); });
   showLook(li); schedule();
 }
 function showLook(i, user){
@@ -6157,7 +6172,7 @@ function showLook(i, user){
     f.style.filter = d === 0 ? 'none' : 'blur(6px)'; f.style.opacity = Math.abs(d) > 2 ? 0 : (d === 0 ? 1 : .55); f.style.zIndex = 10 - Math.abs(d);
   });
   $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.classList.toggle('on', +b.dataset.i === li));
-  const l = looks[li];
+  const l = looks[li].pieces.map(pc => pc.p);
   $('nxPieces').innerHTML = l.map((p, k) => `<div class="nx-piece" data-id="${escN(p.id)}"><div class="th">${picHTML(p)}<b>${k + 1}</b></div><div class="nm"><small>milaisss · ${escN(typeof translateCategory === 'function' ? translateCategory(p.category || '') : (p.category || ''))}</small><div>${escN(nameOf(p))}</div><span>${fmt(typeof effPrice === 'function' ? effPrice(p) : p.price)}</span></div><span class="nx-plus">${PLUS}</span></div>`).join('');
   $('nxPieces').querySelectorAll('.nx-piece').forEach(r => r.onclick = () => openProduct(r.dataset.id));
   $('nxPcs').textContent = `${l.length} ${T('pcs')}`;
@@ -6168,7 +6183,7 @@ function wireLooks(){
   $('nxPrev').onclick = () => showLook(li - 1, true);
   $('nxNext').onclick = () => showLook(li + 1, true);
   $('nxPause').onclick = () => { lookPaused = !lookPaused; $('nxPause').innerHTML = lookPaused ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>'; schedule(); };
-  $('nxLookCta').onclick = () => { const l = looks[li]; if (l && l[0]) openProduct(l[0].id); };
+  $('nxLookCta').onclick = () => { const l = looks[li]; if (l && l.pieces[0]) openProduct(l.pieces[0].p.id); };
   let sx = null; const st = $('nxStage');
   st.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive:true });
   st.addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) showLook(li + (dx < 0 ? 1 : -1), true); sx = null; });
@@ -6192,11 +6207,20 @@ function revealSetup(){
 }
 let rescan = () => {};
 let lastSig = '';
+function buildPhotos(){
+  const H = window.NXHOME || {};
+  const put = (el, url) => { if (!el) return; const old = el.querySelector('img.nx-real'); if (old) old.remove(); const ph = el.querySelector('.phc'); if (okUrl(url)){ const im = document.createElement('img'); im.className = 'nx-real'; im.src = url; im.alt = ''; im.loading = 'lazy'; el.prepend(im); if (ph) ph.style.display = 'none'; } else if (ph) ph.style.display = ''; };
+  const shots = document.querySelectorAll('#nxStreetSec .nx-shot');
+  (H.street || []).forEach((st, i) => { put(shots[i], st.photo); const ids = (st.ids || []).filter(id => products.some(p => p.id === id)); if (shots[i]){ shots[i].onclick = ids.length ? () => openProduct(ids[0]) : null; shots[i].style.cursor = ids.length ? 'pointer' : ''; }
+    const cap = shots[i] && shots[i].parentElement.querySelector('.nx-cap span'); if (cap && st.caption) cap.textContent = st.caption; });
+  const fab = document.querySelectorAll('#nxFabSec .nx-shot'); (H.fabric || []).forEach((f, i) => put(fab[i], f.photo));
+  put(document.querySelector('.nx-band .nx-shot'), (H.band || {}).photo);
+}
 window.nxRender = function(force){ // перестраиваем только когда изменились товары, категории или язык
   try{
-    const sig = lang + '|' + (Array.isArray(CATEGORIES) ? CATEGORIES.join(',') : '') + '|' + products.map(p => p.id + ':' + stockOf(p) + ':' + (p.price || 0) + ':' + (p.image || '') + ':' + (p.showcaseImage || '') + ':' + (p.name || '')).join('|');
+    const sig = JSON.stringify(window.NXHOME || {}) + lang + '|' + (Array.isArray(CATEGORIES) ? CATEGORIES.join(',') : '') + '|' + products.map(p => p.id + ':' + stockOf(p) + ':' + (p.price || 0) + ':' + (p.image || '') + ':' + (p.showcaseImage || '') + ':' + (p.name || '')).join('|');
     if (!force && sig === lastSig) return; lastSig = sig;
-    texts(); buildOrbit(); buildCats(); buildLooks(); rescan();
+    texts(); buildOrbit(); buildCats(); buildLooks(); buildPhotos(); rescan();
   }catch(e){ console.warn('nx', e); }
 };
 window.nxInit = function(){
@@ -6216,6 +6240,9 @@ window.nxInit = function(){
 (function(){
   const _rmg = renderMainGrid; renderMainGrid = function(){ const r = _rmg.apply(this, arguments); try{ nxRender(); }catch(e){} return r; };
   const _al = applyLang; applyLang = function(){ const r = _al.apply(this, arguments); try{ nxRender(true); }catch(e){} return r; };
+  // ТЕСТ: оформление заказа отключено, чтобы никто не оплатил тестовый товар
+  goToCheckoutFlow = function(){ showToast('🧪 Тестовый режим: оформление заказа отключено'); };
+  try{ db.collection('test_settings').doc('home').onSnapshot(d => { window.NXHOME = d.exists ? d.data() : null; nxRender(true); }, e => console.warn('home', e)); }catch(e){}
   nxInit();
 })();
 </script>
