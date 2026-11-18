@@ -703,6 +703,10 @@ function productFormCardHTML(type){
       <input type="url" id="f_image_${suf}" placeholder="https://...">
       <div class="hint">Загрузи фото в любой хостинг картинок (например imgur.com) и вставь сюда ссылку.</div>
 
+      <label>Фото без фона для витрины-магазина (PNG, необязательно)</label>
+      <input type="url" id="f_showcase_${suf}" placeholder="https://...png">
+      <div class="hint">Для сцены «магазин»: вещь на вешалке / пара на полке. Нужен PNG с прозрачным фоном. Если пусто — возьмём обычное фото и уберём белый фон автоматически.</div>
+
       ${sizeFieldHTML(suf, type.sizeMode)}
 
       <label>Цвета: фото и наличие по размерам</label>
@@ -865,6 +869,7 @@ async function saveProduct(type){
   const category = document.getElementById(`f_category_${suf}`).value || 'Все';
   const price = Number(document.getElementById(`f_price_${suf}`).value) || 0;
   const image = document.getElementById(`f_image_${suf}`).value.trim();
+  const showcaseImage = (document.getElementById(`f_showcase_${suf}`) || {}).value ? document.getElementById(`f_showcase_${suf}`).value.trim() : '';
   const discount = Math.min(90, Math.max(0, Math.round(Number(document.getElementById(`f_discount_${suf}`).value) || 0)));
   const ikpu = (document.getElementById(`f_ikpu_${suf}`) || {}).value || '';
   const ikpuItem = IKPU_LIST.find(x => x.code === ikpu);
@@ -898,7 +903,7 @@ async function saveProduct(type){
 
   if (!name || !price){ alert('Укажи хотя бы название и цену'); return; }
 
-  const data = { name, nameTranslations, sub, category, price, discount, ikpu, ikpuPackage, stock, image, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
+  const data = { name, nameTranslations, sub, category, price, discount, ikpu, ikpuPackage, stock, image, showcaseImage, sizes, colors, cardColor, desc, descTranslations, returnPolicy, deliveryPolicy, careInstructions, returnPolicyTranslations, deliveryPolicyTranslations, careInstructionsTranslations, type: suf };
   const saveBtn = document.getElementById(`saveBtn_${suf}`);
   if (saveBtn.disabled) return;
   const isEdit = !!(editingId && editingType === suf);
@@ -982,6 +987,7 @@ function resetForm(type){
   updateDiscPreview(suf);
   document.getElementById(`f_ikpu_${suf}`).value = IKPU_DEFAULT_BY_TYPE[suf] || '';
   document.getElementById(`f_image_${suf}`).value = '';
+  document.getElementById(`f_showcase_${suf}`).value = '';
   if (typeConfig.sizeMode === 'free'){ document.getElementById(`f_sizes_${suf}`).value = ''; }
   else { document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => cb.checked = false); }
   clearColorRows(`colorRows_${suf}`); addColorRow(`colorRows_${suf}`, null, suf);
@@ -1017,6 +1023,7 @@ function editProduct(id, p){
   updateDiscPreview(suf);
   document.getElementById(`f_ikpu_${suf}`).value = IKPU_LIST.some(x => x.code === p.ikpu) ? p.ikpu : (p.ikpu ? '' : (IKPU_DEFAULT_BY_TYPE[suf] || ''));
   document.getElementById(`f_image_${suf}`).value = p.image || '';
+  document.getElementById(`f_showcase_${suf}`).value = p.showcaseImage || '';
 
   // поддержка старого формата sizes (массив объектов {size, stock}) — переносим как общий ориентир для новых цветов
   const legacySizeStocks = {};

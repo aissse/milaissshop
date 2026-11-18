@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>mila/isss — магазин</title>
+<meta name="robots" content="noindex">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --g:#2B2D31; --s:#D9DADC; --y:#FFC93C; --ink:#F3F3F4; --muted:#A7A9AE; --ease:cubic-bezier(.65,.02,.24,1); }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; background:#141416; color:var(--ink); font-family:'Inter',system-ui,sans-serif; overflow:hidden; overscroll-behavior:none; }
+  #stage{ position:fixed; inset:0; overflow:hidden; touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab; }
+  #stage.dragging{ cursor:grabbing; }
+  .scene{ position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .9s ease, visibility 0s linear .9s; }
+  .scene.on{ opacity:1; visibility:visible; transition:opacity .9s ease, visibility 0s; }
+  .frame{ position:absolute; left:0; top:0; transform-origin:0 0; will-change:transform; }
+  .frame.anim{ transition:transform 1.25s var(--ease); }
+  .frame > img.bg{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; -webkit-user-drag:none; }
+
+  /* значки-точки на сцене */
+  .hs{ position:absolute; transform:translate(-50%,-50%) scale(var(--iz,1)); transform-origin:center; z-index:5;
+       display:flex; flex-direction:column; align-items:center; gap:6px; border:0; background:none; cursor:pointer; color:var(--ink); font:inherit; transition:opacity .4s ease; }
+  .hs .dot{ width:54px; height:54px; border-radius:50%; background:var(--y); color:var(--g); display:grid; place-items:center;
+            box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,201,60,.6); animation:pulse 2.2s infinite; }
+  .hs .dot svg{ width:28px; height:28px; }
+  .hs .lbl{ font-size:12px; font-weight:800; letter-spacing:.3px; padding:4px 10px; border-radius:20px; background:rgba(43,45,49,.85); color:#fff; white-space:nowrap; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  .hs.big .dot{ width:72px; height:72px; } .hs.big .dot svg{ width:34px; height:34px; } .hs.big .lbl{ font-size:14px; padding:6px 14px; }
+  @keyframes pulse{ 0%{ box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,201,60,.55); } 70%{ box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 0 16px rgba(255,201,60,0); } 100%{ box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,201,60,0); } }
+  .zoomed .hs.hub{ opacity:0; pointer-events:none; }
+
+  /* одежда на вешалках */
+  .hang{ position:absolute; transform-origin:50% 0; cursor:pointer; z-index:3; }
+  .hang svg.hanger{ position:absolute; left:50%; top:0; width:100%; transform:translate(-50%,-38%); overflow:visible; pointer-events:none; }
+  .hang .gar{ position:absolute; left:0; top:22%; width:100%; filter:drop-shadow(0 6px 6px rgba(0,0,0,.25)); }
+  .hang .gar img{ width:100%; display:block; }
+  /* обувь на полках */
+  .shoe{ position:absolute; transform:translate(-50%,-100%); cursor:pointer; z-index:3; transition:transform .25s ease; }
+  .shoe:hover{ transform:translate(-50%,-104%); }
+  .shoe svg, .shoe img{ width:100%; display:block; }
+    .tag{ position:absolute; left:50%; top:100%; transform:translateX(-50%) scale(var(--iz,1)); transform-origin:top center; margin-top:2px; font-size:10px; font-weight:800;
+        background:rgba(43,45,49,.85); color:#fff; padding:2px 6px; border-radius:6px; white-space:nowrap; opacity:0; transition:opacity .3s ease; pointer-events:none; }
+  .zoomed .tag{ opacity:1; }
+
+  /* верхняя панель */
+  .top{ position:fixed; left:0; right:0; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:10px;
+        padding:calc(10px + env(safe-area-inset-top)) 14px 10px; pointer-events:none; }
+  .top > *{ pointer-events:auto; }
+  .pill{ height:42px; min-width:42px; padding:0 14px; border-radius:21px; border:0; display:inline-flex; align-items:center; justify-content:center; gap:8px; font:inherit; font-weight:700; font-size:14px;
+         background:rgba(43,45,49,.78); color:#fff; -webkit-backdrop-filter:blur(14px) saturate(160%); backdrop-filter:blur(14px) saturate(160%); box-shadow:0 4px 14px rgba(0,0,0,.25); cursor:pointer; }
+  .pill svg{ width:20px; height:20px; }
+  .logo{ font-weight:800; font-size:17px; letter-spacing:.2px; }
+  /* «/» в логотипе — бордовый; на графите светлее, чтобы читался (на серебре — #7A1C1C) */
+  .logo b{ color:#D9404A; }
+  .badge{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--y); color:var(--g); font-size:12px; font-weight:800; display:inline-grid; place-items:center; }
+  #backBtn{ visibility:hidden; } #backBtn.show{ visibility:visible; }
+
+  .hint{ position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom)); transform:translate(-50%,10px); z-index:15; opacity:0; transition:opacity .5s ease, transform .5s ease;
+         background:rgba(43,45,49,.85); color:#fff; font-size:13px; font-weight:600; padding:10px 16px; border-radius:22px; white-space:nowrap; pointer-events:none; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+  .hint.show{ opacity:1; transform:translate(-50%,0); }
+
+  .zoneNav{ position:fixed; left:50%; bottom:calc(68px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:15; display:none; gap:8px; }
+  .zoneNav.show{ display:flex; }
+  .zoneNav button.act{ background:var(--y); color:var(--g); }
+  #moreBtn{ position:fixed; right:14px; top:calc(62px + env(safe-area-inset-top)); z-index:16; display:none; }
+  #moreBtn.show{ display:inline-flex; }
+  /* обычное фото на белом фоне: «умножение» растворяет белое в стене. Ставим на сам элемент вешалки/пары —
+     внутри своего слоя (z-index, filter) смешивание не видит фото зала */
+  .hang.mult, .shoe.mult{ mix-blend-mode:multiply; }
+  .hang.mult .gar, .shoe.mult img{ filter:none; }
+  .shoe.mult .tag{ mix-blend-mode:normal; }
+  .shoe img:not(.blend){ mix-blend-mode:normal; filter:drop-shadow(0 4px 3px rgba(0,0,0,.28)); }
+  .noimg{ font-size:28px; text-align:center; }
+  .pv img{ width:100%; height:100%; object-fit:contain; }
+  .row .th img{ width:100%; height:100%; object-fit:cover; border-radius:12px; }
+  .colors{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
+  .cl{ height:36px; padding:0 12px 0 8px; border-radius:18px; border:1px solid #55575D; background:transparent; color:var(--ink); font:inherit; font-weight:600; font-size:13px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+  .cl i{ width:18px; height:18px; border-radius:50%; border:1px solid #D9DADC; }
+  .cl.on{ border-color:var(--y); }
+  .old{ color:var(--muted); text-decoration:line-through; font-size:14px; font-weight:600; margin-left:8px; }
+
+  /* нижние панели */
+  .shade{ position:fixed; inset:0; z-index:30; background:rgba(0,0,0,.45); opacity:0; visibility:hidden; transition:opacity .35s ease, visibility 0s linear .35s; }
+  .shade.show{ opacity:1; visibility:visible; transition:opacity .35s ease; }
+  .sheet{ position:fixed; left:0; right:0; bottom:0; z-index:31; max-width:520px; margin:0 auto; max-height:86vh; overflow:auto; background:var(--g); color:var(--ink);
+          border-radius:24px 24px 0 0; padding:10px 20px calc(22px + env(safe-area-inset-bottom)); transform:translateY(105%); transition:transform .45s var(--ease); box-shadow:0 -10px 40px rgba(0,0,0,.4); }
+  .sheet.show{ transform:none; }
+  .grab{ width:40px; height:5px; border-radius:3px; background:#55575D; margin:0 auto 14px; }
+  .pv{ width:100%; aspect-ratio:1.25; border-radius:18px; background:var(--s); display:grid; place-items:center; margin-bottom:16px; overflow:hidden; }
+  .pv svg{ width:62%; max-height:84%; }
+  .pname{ font-size:20px; font-weight:800; } .pprice{ font-size:18px; font-weight:800; color:var(--y); margin:6px 0 14px; }
+  .muted{ color:var(--muted); font-size:13px; }
+  .sizes{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 18px; }
+  .sz{ min-width:48px; height:42px; padding:0 12px; border-radius:12px; border:1px solid #55575D; background:transparent; color:var(--ink); font:inherit; font-weight:700; cursor:pointer; }
+  .sz.on{ background:var(--ink); color:var(--g); border-color:var(--ink); }
+  .sz:disabled{ opacity:1; color:#7d7f85; border-style:dashed; cursor:not-allowed; }
+  .btn{ width:100%; height:54px; border:0; border-radius:16px; background:var(--y); color:var(--g); font:inherit; font-weight:800; font-size:16px; cursor:pointer; }
+  .btn:disabled{ background:#55575D; color:#C9CACD; cursor:not-allowed; }
+  .row{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #3D3F45; }
+  .row .th{ width:56px; height:56px; border-radius:12px; background:var(--s); display:grid; place-items:center; flex:none; }
+  .row .th svg{ width:80%; max-height:80%; }
+  .row .nm{ flex:1; font-weight:700; font-size:14px; } .row .nm small{ display:block; color:var(--muted); font-weight:600; margin-top:3px; }
+  .row .pr{ font-weight:800; font-size:14px; white-space:nowrap; }
+  .row .rm{ border:0; background:none; color:#FF8A80; font:inherit; font-size:12px; font-weight:700; cursor:pointer; padding:6px; }
+  .tot{ display:flex; justify-content:space-between; font-weight:800; font-size:18px; margin:16px 0 4px; }
+  .ok{ color:#6BD49A; font-size:13px; font-weight:600; margin-bottom:16px; }
+  .toast{ position:fixed; left:50%; top:calc(66px + env(safe-area-inset-top)); transform:translate(-50%,-10px); z-index:40; background:var(--ink); color:var(--g); font-weight:700; font-size:14px;
+          padding:11px 16px; border-radius:14px; opacity:0; transition:opacity .3s ease, transform .3s ease; pointer-events:none; max-width:90vw; text-align:center; }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
+  .loader{ position:fixed; inset:0; z-index:50; background:var(--g); display:grid; place-items:center; transition:opacity .6s ease; }
+  .loader.hide{ opacity:0; pointer-events:none; }
+  .loader .logo{ font-size:28px; }
+  @media (prefers-reduced-motion:reduce){ .frame.anim{ transition-duration:.01s; } .scene, .scene.on{ transition-duration:.2s; } .hs .dot{ animation:none; } }
+</style>
+</head>
+<body>
+<div class="loader" id="loader"><div class="logo">mila<b>/</b>isss</div></div>
+
+<div id="stage">
+  <div class="scene on" id="sc-entrance"><div class="frame" data-img="1672x941"><img class="bg" src="img/store/entrance.webp" alt="">
+    <button class="hs big" style="left:51%;top:62%" data-go="enter"><span class="dot">%DOOR%</span><span class="lbl">Войти в магазин</span></button>
+  </div></div>
+  <div class="scene" id="sc-center"><div class="frame"><img class="bg" src="img/store/center.webp" alt="">
+    <button class="hs hub" style="left:8%;top:36%" data-go="tops"><span class="dot">%TEE%</span><span class="lbl">Верхняя одежда</span></button>
+    <button class="hs hub" style="left:16%;top:58%" data-go="bottoms"><span class="dot">%PANTS%</span><span class="lbl">Нижняя одежда</span></button>
+    <button class="hs hub" style="left:75%;top:28%" data-go="shoes"><span class="dot">%SNEAKER%</span><span class="lbl">Обувь</span></button>
+    <button class="hs hub" style="left:44%;top:50%" data-go="cashier"><span class="dot">%BAG%</span><span class="lbl">Касса</span></button>
+    <div id="shelves"></div>
+  </div></div>
+  <div class="scene" id="sc-left"><div class="frame"><img class="bg" src="img/store/left.webp" alt="">
+    <div id="racks"></div>
+  </div></div>
+</div>
+
+<div class="top">
+  <button class="pill" id="backBtn" aria-label="Назад">%BACK%<span id="backTxt">В зал</span></button>
+  <div class="pill logo" style="pointer-events:none">mila<b>/</b>isss</div>
+  <button class="pill" id="cartBtn" aria-label="Корзина">%BAG2%<span class="badge" id="cartN">0</span></button>
+</div>
+<div class="zoneNav" id="zoneNav">
+  <button class="pill" data-go="tops">Верх</button><button class="pill" data-go="bottoms">Низ</button><button class="pill" data-go="shoes">Обувь</button><button class="pill" data-go="cashier">Касса</button>
+</div>
+<button class="pill" id="moreBtn">Ещё →</button>
+<div class="hint" id="hint"></div>
+<div class="toast" id="toast"></div>
+
+<div class="shade" id="shade"></div>
+<div class="sheet" id="sheet"></div>
+
+<script>
+/* ===================== иконки ===================== */
+const I = {
+  DOOR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z"/></svg>',
+  TEE:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 3 3 6l2 5 2-1v11h10V10l2 1 2-5-5-3c0 1.7-1.8 3-4 3S8 4.7 8 3Z"/></svg>',
+  PANTS:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12l1 18h-5l-2-11-2 11H5L6 3Z"/><path d="M6 7h12"/></svg>',
+  SNEAKER:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16v-5l4-3 3 3 5 1 6 1.5a2 2 0 0 1 2 2V16H2Z"/><path d="M2 16v2h20v-2"/><path d="M9 11l1.5-2M12 12l1.5-2"/></svg>',
+  BAG:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 14H5L6 7Z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>',
+  BACK:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>'
+};
+I.BAG2 = I.BAG;
+document.querySelectorAll('.dot, .pill').forEach(el => { el.innerHTML = el.innerHTML.replace(/%([A-Z0-9]+)%/g, (m,k) => I[k] || m); });
+
+/* ===================== товары из админки (только в наличии) ===================== */
+const firebaseConfig = { apiKey:"AIzaSyAPg6nCQ4I9vTKX5AXlmHM5gwYAsrNvW40", authDomain:"milaisss.firebaseapp.com", projectId:"milaisss", storageBucket:"milaisss.firebasestorage.app", messagingSenderId:"785104008182", appId:"1:785104008182:web:25d36e5c69aa7b71050dd7" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+let products = [];
+const TYPE_ZONE = { top:'tops', set:'tops', bottom:'bottoms', shoes:'shoes' };
+const discOf = p => { const d = Number(p && p.discount) || 0; return (d > 0 && d < 100) ? d : 0; };
+const effPrice = p => { const d = discOf(p); return d ? Math.round(Number(p.price||0) * (100 - d) / 100 / 100) * 100 : Number(p.price||0); };
+function colorsOf(p){ return (p.colors && p.colors.length) ? p.colors : [{ name:'Стандарт', hex:'#f4f1ec', stock: p.stock || 0 }]; }
+function sizesOf(p){ const raw = (p.sizes && p.sizes.length) ? p.sizes : ["38","39","40","41","42","43"]; return raw.map(s => (s && typeof s === 'object') ? s.size : s); }
+// то же правило, что на сайте (getSizeStock)
+function sizeStock(p, c, size){
+  if (!c) return Number(p.stock || 0);
+  if (c.sizeStocks && Object.prototype.hasOwnProperty.call(c.sizeStocks, size)) return Number(c.sizeStocks[size]) || 0;
+  if (c.sizeStocks && Object.keys(c.sizeStocks).length) return 0;
+  if (typeof c.stock === 'number') return c.stock;
+  return Number(p.stock || 0);
+}
+const inStock = p => colorsOf(p).some(c => sizesOf(p).some(s => sizeStock(p, c, s) > 0));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const safeUrl = u => /^https:\/\//i.test(String(u || '').trim()) ? String(u).trim() : '';
+function firstImage(p){ const c = colorsOf(p).find(c => c.image || (c.images && c.images[0])); return safeUrl(p.image) || (c && safeUrl(c.image || c.images[0])) || ''; }
+// картинка для сцены: PNG без фона из админки, иначе обычное фото с «растворённым» белым фоном
+function sceneImg(p){
+  const png = safeUrl(p.showcaseImage);
+  if (png) return `<img src="${esc(png)}" alt="" loading="lazy" draggable="false">`;
+  const img = firstImage(p);
+  if (img) return `<img class="blend" src="${esc(img)}" alt="" loading="lazy" draggable="false">`;
+  return `<div class="noimg">${p.zone === 'shoes' ? '👟' : '👕'}</div>`;
+}
+async function loadProducts(){
+  let snap;
+  try{ snap = await db.collection('products').get(); }
+  catch(e){ console.warn(e); toast('Не удалось загрузить товары — проверьте интернет'); return; }
+  products = [];
+  snap.forEach(doc => { const d = doc.data(); if (d.hidden) return; const p = { id: doc.id, ...d }; p.zone = TYPE_ZONE[p.type] || 'shoes'; if (inStock(p)) products.push(p); });
+  buildRacks(); buildShelves(); ui();
+}
+const HANGER = '<svg class="hanger" viewBox="0 0 100 40"><path d="M50 18c0-6 6-6 6-11a6 6 0 0 0-12 0" fill="none" stroke="#151515" stroke-width="3" stroke-linecap="round"/><path d="M50 18 6 36h88L50 18Z" fill="none" stroke="#151515" stroke-width="3.5" stroke-linejoin="round"/></svg>';
+const fmt = n => n.toLocaleString('ru-RU').replace(/,/g,' ') + ' сум';
+
+/* ===================== раскладка товаров по сцене ===================== */
+// точки взяты с фото (в процентах от кадра)
+const RAILS = {
+  tops:    { a:[7.5,32.6], b:[32.5,40.2], w0:5.6, w1:4.4 },   // передняя стойка на левой стене
+  bottoms: { a:[38.5,41.4], b:[53.5,46.0], w0:3.6, w1:3.0 }  // дальняя стойка
+};
+const SHELVES = [ // левый и правый край каждой полки
+  { a:[67,41.6], b:[83,36.4] }, { a:[67,50.3], b:[83,48.6] }, { a:[67,58.6], b:[83,59.0] }, { a:[67,66.8], b:[83,70.2] }
+];
+function lerp(a,b,t){ return a + (b-a)*t; }
+const CAP = { tops:8, bottoms:6, shoes:12 }, page = { tops:0, bottoms:0, shoes:0 };
+const ofZone = z => products.filter(p => p.zone === z);
+const pageOf = z => { const all = ofZone(z), n = Math.max(1, Math.ceil(all.length / CAP[z])); page[z] = Math.min(page[z], n - 1); return all.slice(page[z] * CAP[z], (page[z] + 1) * CAP[z]); };
+function buildRacks(){
+  const box = document.getElementById('racks'); box.innerHTML = ''; swingers.length = 0;
+  ['tops','bottoms'].forEach(type => {
+    const list = pageOf(type), R = RAILS[type], n = list.length;
+    list.forEach((p, i) => {
+      const t = n === 1 ? .5 : (i + .5) / n, x = lerp(R.a[0], R.b[0], t), y = lerp(R.a[1], R.b[1], t), w = lerp(R.w0, R.w1, t);
+      const el = document.createElement('div');
+      const html = sceneImg(p);
+      el.className = 'hang' + (html.includes('class="blend"') ? ' mult' : ''); el.dataset.id = p.id;
+      el.style.cssText = `left:${x - w/2}%;top:${y}%;width:${w}%;height:${w*2.4}%;z-index:${10 - i}`;
+      el.innerHTML = HANGER + `<div class="gar">${html}</div>`;
+      box.appendChild(el); swingers.push({ el, a:0, v:0 });
+    });
+  });
+}
+function buildShelves(){
+  const box = document.getElementById('shelves'); box.innerHTML = '';
+  const perShelf = 3;
+  pageOf('shoes').forEach((p, i) => {
+    const s = SHELVES[Math.floor(i / perShelf)], k = i % perShelf, t = (k + .6) / (perShelf + .2);
+    const x = lerp(s.a[0], s.b[0], t), y = lerp(s.a[1], s.b[1], t) - .3;
+    const el = document.createElement('div');
+    const html = sceneImg(p);
+    el.className = 'shoe' + (html.includes('class="blend"') ? ' mult' : ''); el.dataset.id = p.id;
+    el.style.cssText = `left:${x}%;top:${y}%;width:3.9%`;
+    el.innerHTML = html + `<span class="tag">${fmt(effPrice(p))}</span>`;
+    box.appendChild(el);
+  });
+}
+function morePage(){ // «ещё →» листает вешалку / полки по кругу
+  if (!zone || zone === 'cashier') return;
+  const n = Math.ceil(ofZone(zone).length / CAP[zone]); page[zone] = (page[zone] + 1) % n;
+  zone === 'shoes' ? buildShelves() : buildRacks(); ui();
+}
+
+/* ===================== камера ===================== */
+const IMG_W = 1672, IMG_H = 941;
+const stage = document.getElementById('stage');
+const cams = {}; // для каждой сцены: { frame, fx, fy, z }
+['entrance','center','left'].forEach(n => { cams[n] = { frame: document.querySelector('#sc-'+n+' .frame'), fx:.5, fy:.5, z:1 }; });
+let vw = innerWidth, vh = innerHeight, CW, CH;
+function measure(){
+  vw = innerWidth; vh = innerHeight;
+  const s = Math.max(vw / IMG_W, vh / IMG_H); CW = IMG_W * s; CH = IMG_H * s;
+  Object.values(cams).forEach(c => { c.frame.style.width = CW + 'px'; c.frame.style.height = CH + 'px'; apply(c, false); });
+}
+function apply(c, animate){
+  const z = c.z, W = CW * z, H = CH * z;
+  let tx = vw / 2 - c.fx * W, ty = vh / 2 - c.fy * H;
+  tx = Math.min(0, Math.max(vw - W, tx)); ty = Math.min(0, Math.max(vh - H, ty));
+  c.fx = (vw / 2 - tx) / W; c.fy = (vh / 2 - ty) / H; // запоминаем то, что реально видно
+  c.frame.classList.toggle('anim', !!animate);
+  c.frame.style.transform = `translate3d(${tx}px,${ty}px,0) scale(${z})`;
+  c.frame.style.setProperty('--iz', (1 / z).toFixed(3));
+}
+// подогнать область кадра (в долях) под экран
+function fit(c, x0, y0, x1, y1, animate){
+  const zw = vw / ((x1 - x0) * CW), zh = vh / ((y1 - y0) * CH);
+  c.z = Math.max(1, Math.min(zw, zh) * .92); c.fx = (x0 + x1) / 2; c.fy = (y0 + y1) / 2; apply(c, animate);
+}
+function setCam(c, fx, fy, z, animate){ c.fx = fx; c.fy = fy; c.z = z; apply(c, animate); }
+
+/* ===================== сцены и переходы ===================== */
+let scene = 'entrance', zone = null, busy = false;
+const ZONES = { // что показывать камерой
+  tops:    { scene:'left',   box:[.03,.24,.37,.78] },
+  bottoms: { scene:'left',   box:[.35,.34,.57,.72] },
+  shoes:   { scene:'center', box:[.63,.27,.87,.77] },
+  cashier: { scene:'center', box:[.32,.40,.57,.74] }
+};
+function show(n){ document.querySelectorAll('.scene').forEach(s => s.classList.toggle('on', s.id === 'sc-' + n)); scene = n; }
+function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
+function ui(){
+  document.getElementById('backBtn').classList.toggle('show', scene !== 'entrance');
+  document.getElementById('backTxt').textContent = zone ? 'В зал' : 'На улицу';
+  document.getElementById('zoneNav').classList.toggle('show', scene !== 'entrance');
+  document.querySelectorAll('#zoneNav button').forEach(b => b.classList.toggle('act', b.dataset.go === zone));
+  document.getElementById('sc-center').classList.toggle('zoomed', !!zone);
+  document.getElementById('sc-left').classList.toggle('zoomed', !!zone);
+  const more = document.getElementById('moreBtn'), many = zone && zone !== 'cashier' && ofZone(zone).length > CAP[zone];
+  more.classList.toggle('show', !!many);
+  if (many) more.textContent = `Ещё → ${page[zone] + 1}/${Math.ceil(ofZone(zone).length / CAP[zone])}`;
+}
+let hintT;
+function hint(txt, ms = 3200){ const h = document.getElementById('hint'); h.textContent = txt; h.classList.add('show'); clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove('show'), ms); }
+
+async function go(target){
+  if (busy) return; busy = true;
+  try{
+    if (target === 'enter'){
+      const e = cams.entrance; setCam(e, .51, .6, 3.4, true);               // камера подходит к двери
+      await wait(650);
+      const c = cams.center; setCam(c, .44, .55, 1.5, false); show('center'); // внутри: начинаем ближе
+      await wait(60); setCam(c, .44, .55, 1, true);                          // и «отъезжаем», открывая зал
+      zone = null; ui(); await wait(1000);
+      hint(vw < 700 ? 'Нажмите на значок или проведите по экрану' : 'Нажмите на значок — камера подъедет');
+    }
+    else if (target === 'hall'){
+      if (scene === 'left'){
+        const l = cams.left; setCam(l, .55, .5, 1, true); await wait(300);
+        const c = cams.center; setCam(c, .1, .5, 1.35, false); show('center'); await wait(60); setCam(c, .44, .55, 1, true);
+      } else { setCam(cams.center, .44, .55, 1, true); }
+      zone = null; ui(); await wait(1100);
+    }
+    else if (target === 'street'){
+      const e = cams.entrance; setCam(e, .51, .6, 3.4, false); show('entrance'); await wait(60); setCam(e, .51, .55, 1, true);
+      zone = null; ui(); await wait(1100);
+    }
+    else if (ZONES[target]){
+      const Z = ZONES[target];
+      if (Z.scene === 'left' && scene !== 'left'){
+        setCam(cams.center, .06, .45, 1.45, true); await wait(450);           // поворот налево
+        const l = cams.left; setCam(l, .55, .5, 1.15, false); show('left'); await wait(60);
+      } else if (Z.scene === 'center' && scene !== 'center'){
+        setCam(cams.left, .9, .5, 1.2, true); await wait(450);                // поворот направо
+        const c = cams.center; setCam(c, .3, .5, 1.2, false); show('center'); await wait(60);
+      }
+      fit(cams[Z.scene], ...Z.box, true); zone = target; ui(); await wait(1250);
+      if (target === 'tops' || target === 'bottoms') hint(matchMedia('(hover:hover)').matches ? 'Проведите мышкой по одежде, нажмите — подробнее' : 'Проведите пальцем по одежде, нажмите — подробнее');
+      if (target === 'shoes') hint('Нажмите на пару — подробнее');
+      if (target === 'cashier') openCheckout();
+    }
+  } finally { busy = false; }
+}
+
+/* ===================== жесты: перетаскивание камеры, касание, «трогать» одежду ===================== */
+let drag = null;
+stage.addEventListener('pointerdown', e => {
+  drag = { x:e.clientX, y:e.clientY, lx:e.clientX, ly:e.clientY, moved:false, c:cams[scene] };
+  stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener('pointermove', e => {
+  touchClothes(e.clientX, e.clientY, drag ? e.clientX - drag.lx : e.movementX || 0);
+  if (!drag) return;
+  const dx = e.clientX - drag.lx, dy = e.clientY - drag.ly; drag.lx = e.clientX; drag.ly = e.clientY;
+  if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 8){ drag.moved = true; stage.classList.add('dragging'); }
+  if (drag.moved && scene !== 'entrance'){ const c = drag.c; c.fx -= dx / (CW * c.z); c.fy -= dy / (CH * c.z); apply(c, false); }
+});
+function endDrag(e){
+  if (!drag) return; stage.classList.remove('dragging');
+  const wasTap = !drag.moved; drag = null;
+  if (!wasTap) return;
+  stage.releasePointerCapture?.(e.pointerId);
+  const t = document.elementFromPoint(e.clientX, e.clientY);
+  const hs = t && t.closest('[data-go]'); if (hs) return go(hs.dataset.go);
+  const item = t && t.closest('[data-id]'); if (item){ const s = swingers.find(s => s.el === item); if (s) s.v += 6; openProduct(item.dataset.id); }
+}
+stage.addEventListener('pointerup', endDrag);
+stage.addEventListener('pointercancel', () => { drag = null; stage.classList.remove('dragging'); });
+
+/* качание одежды: пружина */
+const swingers = [];
+let lastTouched = null;
+function touchClothes(x, y, dx){
+  if (scene !== 'left' || !dx) return;
+  const t = document.elementFromPoint(x, y), h = t && t.closest('.hang');
+  if (!h) return;
+  const s = swingers.find(s => s.el === h); if (!s) return;
+  s.v += Math.max(-9, Math.min(9, dx * .9));
+  // соседние вешалки тоже чуть задеваем
+  const i = swingers.indexOf(s); [swingers[i-1], swingers[i+1]].forEach(n => { if (n && n.el.parentNode === h.parentNode) n.v += dx * .25; });
+}
+function tick(){
+  for (const s of swingers){
+    s.v += -s.a * .045; s.v *= .93; s.a += s.v * .16;
+    s.a = Math.max(-28, Math.min(28, s.a));
+    if (Math.abs(s.a) > .02 || Math.abs(s.v) > .02) s.el.style.transform = `rotate(${s.a.toFixed(2)}deg)`;
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ===================== карточка товара, корзина, касса ===================== */
+const CART_KEY = 'milaisss_cart'; // та же корзина, что на сайте
+function readCart(){ try{ const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); return Array.isArray(c) ? c.filter(x => x && x.productId && x.qty > 0) : []; }catch(e){ return []; } }
+function writeCart(c){ try{ localStorage.setItem(CART_KEY, JSON.stringify(c)); }catch(e){} badge(); }
+function badge(){ const n = readCart().reduce((a, c) => a + c.qty, 0); document.getElementById('cartN').textContent = n > 99 ? '99+' : n; }
+const sheet = document.getElementById('sheet'), shadeEl = document.getElementById('shade');
+function openSheet(html){ sheet.innerHTML = '<div class="grab"></div>' + html; shadeEl.classList.add('show'); sheet.classList.add('show'); }
+function closeSheet(){ shadeEl.classList.remove('show'); sheet.classList.remove('show'); }
+shadeEl.addEventListener('click', closeSheet);
+function openProduct(id){
+  const p = products.find(x => x.id === id); if (!p) return;
+  const colors = colorsOf(p), sizes = sizesOf(p);
+  let ci = Math.max(0, colors.findIndex(c => sizes.some(s => sizeStock(p, c, s) > 0))), size = '';
+  const priceHTML = discOf(p) ? `${fmt(effPrice(p))}<span class="old">${fmt(p.price)}</span>` : fmt(p.price);
+  const draw = () => {
+    const c = colors[ci], img = safeUrl(c.image || (c.images && c.images[0])) || firstImage(p);
+    const colorsHTML = colors.length > 1 ? `<div class="muted">Цвет: ${esc(c.name)}</div><div class="colors">${colors.map((x, i) => `<button class="cl${i === ci ? ' on' : ''}" data-ci="${i}"><i style="background:${esc(x.hex || '#ccc')}"></i>${esc(x.name)}</button>`).join('')}</div>` : '';
+    openSheet(`<div class="pv">${img ? `<img src="${esc(img)}" alt="">` : '<div class="noimg">👕</div>'}</div>
+      <div class="pname">${esc(p.name)}</div><div class="pprice">${priceHTML}</div>${colorsHTML}
+      <div class="muted">Размер</div><div class="sizes">${sizes.map(s => `<button class="sz${s === size ? ' on' : ''}" data-s="${esc(s)}" ${sizeStock(p, c, s) > 0 ? '' : 'disabled'}>${esc(s)}</button>`).join('')}</div>
+      <button class="btn" id="addBtn" ${size ? '' : 'disabled'}>${size ? 'Добавить в корзину' : 'Выберите размер'}</button>
+      <a href="index.html?product=${encodeURIComponent(p.id)}" class="muted" style="display:block;text-align:center;margin-top:14px;color:var(--muted)">Подробнее о товаре на сайте</a>`);
+    sheet.querySelectorAll('.cl').forEach(b => b.onclick = () => { ci = +b.dataset.ci; if (sizeStock(p, colors[ci], size) <= 0) size = ''; draw(); });
+    sheet.querySelectorAll('.sz:not(:disabled)').forEach(b => b.onclick = () => { size = b.dataset.s; draw(); });
+    document.getElementById('addBtn').onclick = () => add(p, colors[ci], size);
+  };
+  draw();
+}
+function add(p, c, size){
+  const limit = sizeStock(p, c, size); if (!size || limit <= 0) return;
+  const cart = readCart(), ex = cart.find(x => x.productId === p.id && x.size === size && x.colorName === c.name);
+  if (ex){ if (ex.qty >= limit){ toast('Больше нет в наличии'); return; } ex.qty++; }
+  else cart.push({ productId:p.id, name:p.name, image: c.image || p.image || '', emoji: p.emoji || '👟', price: effPrice(p), oldPrice: Number(p.price || 0), discount: discOf(p), size, colorName: c.name, qty: 1 });
+  writeCart(cart); closeSheet(); toast(`${p.name} (${size}) — в корзине`);
+}
+function openCheckout(){
+  const cart = readCart();
+  if (!cart.length){ openSheet(`<div class="pname">Касса</div><p class="muted" style="margin:10px 0 18px">Корзина пока пустая — выберите одежду на вешалках или обувь на полках.</p><button class="btn" id="cBtn">Пойти выбирать</button>`);
+    document.getElementById('cBtn').onclick = () => { closeSheet(); go('hall'); }; return; }
+  const rows = cart.map((c, i) => `<div class="row"><div class="th">${safeUrl(c.image) ? `<img src="${esc(c.image)}" alt="">` : esc(c.emoji || '👟')}</div>
+    <div class="nm">${esc(c.name)}<small>${esc(c.colorName || '')}${c.size ? ' · ' + esc(c.size) : ''}${c.qty > 1 ? ' · ' + c.qty + ' шт' : ''}</small></div>
+    <div class="pr">${fmt(c.price * c.qty)}</div><button class="rm" data-i="${i}">убрать</button></div>`).join('');
+  const sum = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  openSheet(`<div class="pname">Касса</div><p class="muted" style="margin:4px 0 6px">Ваши товары</p>${rows}
+    <div class="tot"><span>Итого</span><span>${fmt(sum)}</span></div>
+    <div class="ok">${sum >= 850000 ? '✓ Бесплатная доставка' : 'До бесплатной доставки: ' + fmt(850000 - sum)}</div>
+    <button class="btn" id="payBtn">Оформить и оплатить · Click / Uzum</button>`);
+  sheet.querySelectorAll('.rm').forEach(b => b.onclick = () => { const c = readCart(); c.splice(+b.dataset.i, 1); writeCart(c); openCheckout(); });
+  document.getElementById('payBtn').onclick = () => { location.href = 'index.html'; }; // оформление и оплата — как обычно на сайте
+}
+let toastT;
+function toast(t){ const el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600); }
+
+document.getElementById('backBtn').onclick = () => go(zone ? 'hall' : 'street');
+document.getElementById('moreBtn').onclick = morePage;
+document.getElementById('cartBtn').onclick = () => scene === 'entrance' ? openCheckout() : go('cashier');
+document.querySelectorAll('#zoneNav [data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+
+/* ===================== старт ===================== */
+measure(); badge(); loadProducts();
+addEventListener('storage', e => { if (e.key === CART_KEY) badge(); });
+setCam(cams.entrance, .51, .55, 1, false);
+addEventListener('resize', measure);
+requestAnimationFrame(tick);
+// показываем, когда фото загружены (остальные догружаются в фоне)
+const first = document.querySelector('#sc-entrance img');
+const ready = () => document.getElementById('loader').classList.add('hide');
+first.complete ? ready() : (first.onload = ready, first.onerror = ready);
+</script>
+</body>
+</html>
