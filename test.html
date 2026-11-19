@@ -1107,7 +1107,7 @@
   .nx-fig img{ width:100%; height:100%; object-fit:contain; object-position:bottom; }
   html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:multiply; }
   .nx-figin{ position:relative; width:100%; height:100%; }
-  .nx-pin{ position:absolute; transform:translate(-50%,-50%); border:0; background:none; padding:0; cursor:pointer; display:flex; align-items:center; gap:6px; z-index:2; opacity:0; transition:opacity .4s ease .5s; }
+  .nx-pin{ position:absolute; transform:translate(-11px,-50%); /* центр кружка — ровно в точке, подпись справа */ border:0; background:none; padding:0; cursor:pointer; display:flex; align-items:center; gap:6px; z-index:2; opacity:0; transition:opacity .4s ease .5s; }
   .nx-fig[style*="scale(1)"] .nx-pin{ opacity:1; }
   .nx-pin b{ width:22px; height:22px; border-radius:50%; background:#fff; color:#151112; font-size:11px; font-weight:800; display:grid; place-items:center; box-shadow:0 0 0 5px rgba(255,255,255,.35), 0 4px 12px rgba(0,0,0,.25); }
   .nx-pin span{ font-size:11px; font-weight:700; color:var(--ink); background:var(--bg); padding:4px 8px; border-radius:12px; white-space:nowrap; opacity:0; transform:translateX(-4px); transition:opacity .25s, transform .25s; pointer-events:none; }
@@ -1220,6 +1220,16 @@
   .nx-cat .nx-fade > .on{ opacity:1; }
   .nx-cat:hover .nx-fade{ transform:translateY(-6px) scale(1.04); transition:transform .6s cubic-bezier(.2,.7,.2,1); }
   html:not([data-theme="dark"]) .nx-cat .nx-fade img.blend{ mix-blend-mode:multiply; }
+
+  /* ===== правки 20.11 (2) ===== */
+  /* 1. «В этом образе» едет вместе с прокруткой — виден и когда смотрим обувь модели */
+  @media (min-width:900px){ .nx-look-side{ position:sticky; top:calc(92px + env(safe-area-inset-top)); align-self:start; } }
+  /* 2. точки ставятся по самой картинке (её реальный размер внутри рамки) */
+  .nx-figin > img{ position:absolute; inset:0; }
+  /* 3. фото с фоном (не PNG) — края мягко растворяются в фоне плитки / орбиты */
+  .nx-cat .nx-fade > img.blend, .nx-cat > img.blend, .nx-item img.blend, .nx-piece .th img.blend{
+    -webkit-mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, #000 52%, transparent 100%);
+            mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, #000 52%, transparent 100%); }
   /* таблица размеров */
   .nx-modal{ position:fixed; inset:0; z-index:2000; display:none; align-items:flex-end; justify-content:center; background:rgba(20,12,10,.45); }
   .nx-modal.show{ display:flex; animation:nxFade .3s ease; }
@@ -6234,14 +6244,25 @@ function buildLooks(){
   const stage = $('nxStage'); if (!stage) return;
   stage.innerHTML = looks.map((l, i) => {
     const h = l.photo ? `<img src="${escN(l.photo)}" alt="" loading="lazy">` : (l.pieces[0] ? picHTML(l.pieces[0].p) : '');
-    const pins = l.pieces.map((pc, k) => pc.x != null ? `<button class="nx-pin" style="left:${pc.x}%;top:${pc.y}%" data-id="${escN(pc.p.id)}"><b>${k + 1}</b><span>${escN(nameOf(pc.p))}</span></button>` : '').join('');
+    const pins = l.pieces.map((pc, k) => pc.x != null ? `<button class="nx-pin" style="left:${pc.x}%;top:${pc.y}%" data-x="${pc.x}" data-y="${pc.y}" data-id="${escN(pc.p.id)}"><b>${k + 1}</b><span>${escN(nameOf(pc.p))}</span></button>` : '').join('');
     return `<div class="nx-fig${h.includes('class="blend"') ? ' blend' : ''}" data-i="${i}"><div class="nx-figin">${h}${pins}</div></div>`; }).join('');
   $('nxSteps').innerHTML = looks.map((l, i) => `<button class="nx-step" data-i="${i}">${String(i + 1).padStart(2, '0')} ${escN(l.pieces[0] ? nameOf(l.pieces[0].p).split(' ')[0] : '')}</button>`).join('');
   $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.onclick = () => showLook(+b.dataset.i, true));
+  stage.querySelectorAll('.nx-figin > img').forEach(im => { if (im.complete) layoutPins(); else im.addEventListener('load', layoutPins, { once:true }); });
   stage.querySelectorAll('.nx-pin').forEach(b => b.onclick = e => { e.stopPropagation(); if (+b.closest('.nx-fig').dataset.i === li) openProduct(b.dataset.id); });
   stage.querySelectorAll('.nx-fig').forEach(f => f.onclick = () => { const i = +f.dataset.i; if (i === li){ const pc = looks[i].pieces[0]; if (pc) openProduct(pc.p.id); } else showLook(i, true); });
   showLook(li); schedule();
 }
+// точка = процент от самой картинки; картинка вписана в рамку (contain, прижата вниз), поэтому пересчитываем в пиксели
+function layoutPins(){
+  document.querySelectorAll('#nxStage .nx-figin').forEach(box => {
+    const img = box.querySelector(':scope > img'); if (!img || !img.naturalWidth) return;
+    const W = box.clientWidth, H = box.clientHeight, sc = Math.min(W / img.naturalWidth, H / img.naturalHeight);
+    const dw = img.naturalWidth * sc, dh = img.naturalHeight * sc, ox = (W - dw) / 2, oy = H - dh;
+    box.querySelectorAll('.nx-pin').forEach(pn => { pn.style.left = (ox + pn.dataset.x / 100 * dw) + 'px'; pn.style.top = (oy + pn.dataset.y / 100 * dh) + 'px'; });
+  });
+}
+addEventListener('resize', () => layoutPins());
 function showLook(i, user){
   if (!looks.length) return; li = (i + looks.length) % looks.length;
   $('nxStage').querySelectorAll('.nx-fig').forEach(f => {
