@@ -1188,6 +1188,57 @@
   .nx-foot .footer-contacts, .nx-foot .footer-contacts *{ color:#fff !important; }
   .nx-foot .legal-footer, .nx-foot .legal-footer *{ color:rgba(255,255,255,.75) !important; background:none !important; border-color:rgba(255,255,255,.2) !important; }
   #shopFooter, .social-follow{ display:none !important; }
+  /* ===== правки 20.11 ===== */
+  :root{ --burgundy:#6A1626; }
+  /* 5. «/» в логотипе, бордовый блок и подвал — один тёмно-бордовый (в обеих темах) */
+  .logo .slash, .app-loader-logo .slash{ color:var(--burgundy) !important; }
+  html[data-theme="dark"] .logo .slash{ color:#B3364A !important; }
+  .nx-band, .nx-foot{ background:var(--burgundy) !important; }
+  .nx-band .newsletter-row button{ color:var(--burgundy) !important; }
+  /* 6. страница заканчивается бордовым подвалом, без полосы снизу */
+  .app:has(#home.active){ padding-bottom:0 !important; }
+  .nx-foot-in{ padding-bottom:calc(120px + env(safe-area-inset-bottom)) !important; }
+  /* 1–2. первый экран целиком в окне: название — в левом верхнем углу, ползунок орбиты виден сразу */
+  @media (min-width:900px){
+    .nx-hero{ height:100svh; min-height:640px; max-height:980px; padding-top:calc(88px + env(safe-area-inset-top)); padding-bottom:0; grid-template-rows:auto 1fr; align-items:start; }
+    .nx-hero-info{ grid-row:1; align-self:start; padding-top:4vh; }
+    .nx-title{ font-size:clamp(40px,4.3vw,72px); max-width:30vw; }
+    .nx-orbit{ grid-row:1 / 3; margin-left:34%; min-height:0; height:100%; }
+    .nx-drag{ position:absolute; left:50%; bottom:calc(118px + env(safe-area-inset-bottom)); transform:translateX(-50%); margin:0; }
+    .nx-sizes{ bottom:calc(118px + env(safe-area-inset-bottom)); }
+  }
+  /* 4. мягкое открытие карточки */
+  .nx-item.nx-pop img{ animation:nxPop .32s ease forwards; }
+  @keyframes nxPop{ to{ transform:scale(1.07); opacity:.55; } }
+  #detail.screen.active{ animation:nxIn .6s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes nxIn{ from{ opacity:0; transform:translateY(26px) scale(.985); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion:reduce){ #detail.screen.active{ animation:none; } }
+  /* 3. в плитках категорий фото плавно сменяются */
+  .nx-cat .nx-fade{ position:absolute; left:12%; right:12%; top:8%; height:66%; }
+  .nx-cat .nx-fade > *{ position:absolute; inset:0; opacity:0; transition:opacity 1.2s ease; }
+  .nx-cat .nx-fade > img{ width:100%; height:100%; object-fit:contain; left:0; top:0; }
+  .nx-cat .nx-fade > .on{ opacity:1; }
+  .nx-cat:hover .nx-fade{ transform:translateY(-6px) scale(1.04); transition:transform .6s cubic-bezier(.2,.7,.2,1); }
+  html:not([data-theme="dark"]) .nx-cat .nx-fade img.blend{ mix-blend-mode:multiply; }
+  /* таблица размеров */
+  .nx-modal{ position:fixed; inset:0; z-index:2000; display:none; align-items:flex-end; justify-content:center; background:rgba(20,12,10,.45); }
+  .nx-modal.show{ display:flex; animation:nxFade .3s ease; }
+  @keyframes nxFade{ from{ opacity:0; } }
+  .nx-mbox{ width:100%; max-width:520px; max-height:88vh; overflow:auto; background:var(--bg); color:var(--ink); border-radius:22px 22px 0 0; padding:22px 22px calc(26px + env(safe-area-inset-bottom)); animation:nxUp .45s cubic-bezier(.2,.7,.2,1); position:relative; }
+  @media (min-width:700px){ .nx-modal{ align-items:center; } .nx-mbox{ border-radius:20px; } }
+  @keyframes nxUp{ from{ transform:translateY(40px); opacity:0; } }
+  .nx-mbox h3{ font-family:'Archivo','Inter',sans-serif; font-weight:900; font-size:26px; margin:0 0 4px; letter-spacing:-.01em; }
+  .nx-mbox .lead{ font-weight:700; margin:0 0 10px; }
+  .nx-mbox p{ font-size:14px; line-height:1.55; color:var(--text-soft); margin:0 0 12px; }
+  .nx-mbox table{ width:100%; border-collapse:collapse; margin:6px 0 18px; font-size:14px; }
+  .nx-mbox th{ text-align:left; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:8px 6px; border-bottom:1px solid var(--line); }
+  .nx-mbox td{ padding:9px 6px; border-bottom:1px solid var(--line); font-weight:600; }
+  .nx-mbox td:last-child, .nx-mbox th:last-child{ text-align:right; }
+  .nx-mbox ol{ margin:0 0 14px 18px; padding:0; font-size:14px; line-height:1.7; }
+  .nx-mbox .note{ font-size:12px; font-style:italic; color:var(--muted); }
+  .nx-mbox .sign{ font-weight:800; margin-top:14px; }
+  .nx-x{ position:absolute; right:14px; top:14px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--ink); font-size:18px; cursor:pointer; }
+
   /* шапка на креме: тёмный текст и без тени (старая шапка была рассчитана на тёмное фото) */
   .site-header:not(.solid){ color:var(--ink) !important; background:color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
   .site-header .logo{ text-shadow:none !important; }
@@ -6055,6 +6106,28 @@ const stockOf = p => colorsOfN(p).reduce((s, c) => s + (c.sizeStocks ? Object.va
 const nameOf = p => (typeof getTranslatedProductName === 'function' ? getTranslatedProductName(p) : p.name) || '';
 const inStockN = p => stockOf(p) > 0;
 
+
+const SG = {
+  ru:{ h:'Таблица размеров', lead:'Найди свой идеальный размер.', p:'Чтобы выбрать подходящий размер обуви, измерь длину своей стопы и сравни результат с таблицей ниже.', c1:'EU размер', c2:'Длина стопы', cm:'см', how:'Как правильно измерить стопу?', s:['Поставь ногу на лист бумаги.','Отметь край пятки и кончик самого длинного пальца.','Измерь расстояние между отметками.','Сравни полученный результат с таблицей.'], note:'Обрати внимание: размеры могут незначительно отличаться в зависимости от модели обуви. Если сомневаешься между двумя размерами, свяжись с нами — поможем подобрать подходящий.', sign:'MILAISSS — твой стиль, твой размер.' },
+  uz:{ h:'Oʻlchamlar jadvali', lead:'Oʻzingizga mos oʻlchamni toping.', p:'Mos poyabzal oʻlchamini tanlash uchun oyogʻingiz uzunligini oʻlchang va natijani quyidagi jadval bilan solishtiring.', c1:'EU oʻlcham', c2:'Oyoq uzunligi', cm:'sm', how:'Oyoqni qanday toʻgʻri oʻlchash kerak?', s:['Oyogʻingizni qogʻoz varagʻiga qoʻying.','Tovon chetini va eng uzun barmoq uchini belgilang.','Belgilar orasidagi masofani oʻlchang.','Natijani jadval bilan solishtiring.'], note:'Eʼtibor bering: oʻlchamlar poyabzal modeliga qarab biroz farq qilishi mumkin. Ikki oʻlcham orasida ikkilansangiz, biz bilan bogʻlaning — mosini tanlashga yordam beramiz.', sign:'MILAISSS — sizning uslubingiz, sizning oʻlchamingiz.' },
+  tr:{ h:'Beden tablosu', lead:'Mükemmel bedenini bul.', p:'Doğru ayakkabı numarasını seçmek için ayağının uzunluğunu ölç ve sonucu aşağıdaki tabloyla karşılaştır.', c1:'EU numara', c2:'Ayak uzunluğu', cm:'cm', how:'Ayak nasıl doğru ölçülür?', s:['Ayağını bir kâğıdın üzerine koy.','Topuğun kenarını ve en uzun parmağın ucunu işaretle.','İki işaret arasındaki mesafeyi ölç.','Sonucu tabloyla karşılaştır.'], note:'Not: numaralar ayakkabı modeline göre biraz farklılık gösterebilir. İki numara arasında kararsızsan bize yaz — doğru olanı seçmene yardım edelim.', sign:'MILAISSS — senin tarzın, senin numaran.' },
+  az:{ h:'Ölçü cədvəli', lead:'Öz ideal ölçünü tap.', p:'Uyğun ayaqqabı ölçüsünü seçmək üçün ayağının uzunluğunu ölç və nəticəni aşağıdakı cədvəllə müqayisə et.', c1:'EU ölçü', c2:'Ayaq uzunluğu', cm:'sm', how:'Ayağı necə düzgün ölçmək olar?', s:['Ayağını kağız vərəqinin üzərinə qoy.','Dabanın kənarını və ən uzun barmağın ucunu qeyd et.','Qeydlər arasındakı məsafəni ölç.','Nəticəni cədvəllə müqayisə et.'], note:'Diqqət: ölçülər ayaqqabı modelindən asılı olaraq bir qədər fərqlənə bilər. İki ölçü arasında tərəddüd edirsənsə, bizimlə əlaqə saxla — uyğun olanı seçməyə kömək edərik.', sign:'MILAISSS — sənin üslubun, sənin ölçün.' },
+  en:{ h:'Size guide', lead:'Find your perfect size.', p:'To choose the right shoe size, measure the length of your foot and compare it with the table below.', c1:'EU size', c2:'Foot length', cm:'cm', how:'How to measure your foot', s:['Place your foot on a sheet of paper.','Mark the edge of your heel and the tip of your longest toe.','Measure the distance between the marks.','Compare the result with the table.'], note:'Please note: sizes may vary slightly depending on the shoe model. If you are between two sizes, contact us — we will help you choose.', sign:'MILAISSS — your style, your size.' }
+};
+const SG_ROWS = [[36,'22,5'],[37,'23'],[38,'24'],[39,'24,5'],[40,'25'],[41,'26'],[42,'26,5'],[43,'27,5'],[44,'28'],[45,'29']];
+function openSizeGuide(){
+  const g = SG[lang] || SG.ru, cm = v => (lang === 'en' || lang === 'tr') ? v.replace(',', '.') : v;
+  let m = document.getElementById('nxSizeGuide');
+  if (!m){ m = document.createElement('div'); m.id = 'nxSizeGuide'; m.className = 'nx-modal'; m.onclick = e => { if (e.target === m) m.classList.remove('show'); }; document.body.appendChild(m); }
+  m.innerHTML = `<div class="nx-mbox" role="dialog" aria-modal="true"><button class="nx-x" aria-label="×" onclick="document.getElementById('nxSizeGuide').classList.remove('show')">×</button>
+    <h3>${g.h}</h3><p class="lead">${g.lead}</p><p>${g.p}</p>
+    <table><thead><tr><th>${g.c1}</th><th>${g.c2}</th></tr></thead><tbody>${SG_ROWS.map(r => `<tr><td>${r[0]}</td><td>${cm(r[1])} ${g.cm}</td></tr>`).join('')}</tbody></table>
+    <p class="lead">${g.how}</p><ol>${g.s.map(x => `<li>${x}</li>`).join('')}</ol>
+    <p class="note">${g.note}</p><p class="sign">${g.sign}</p></div>`;
+  m.classList.add('show');
+}
+window.openSizeGuide = openSizeGuide;
+
 /* ---------- 1. орбита ---------- */
 let orb = [], pos = 0, target = 0, active = -1, raf = 0;
 function buildOrbit(){
@@ -6111,7 +6184,7 @@ function wireOrbit(){
   box.addEventListener('pointerdown', e => { drag = { x:e.clientX, p:pos, moved:false }; box.setPointerCapture(e.pointerId); box.classList.add('drag'); });
   box.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) drag.moved = true; if (!drag.moved) return; pos = target = Math.max(-.4, Math.min(orb.length - .6, drag.p - dx / Math.max(120, box.clientWidth * .22))); cancelAnimationFrame(raf); layout(); const r = Math.round(pos); if (r !== active && r >= 0 && r < orb.length) setActive(r); });
   const end = e => { if (!drag) return; box.classList.remove('drag'); const was = drag; drag = null;
-    if (!was.moved){ const el = document.elementFromPoint(e.clientX, e.clientY); const it = el && el.closest('.nx-item'); if (it){ const i = +it.dataset.i; if (i === active) openProduct(orb[i].id); else goTo(i); } return; }
+    if (!was.moved){ const el = document.elementFromPoint(e.clientX, e.clientY); const it = el && el.closest('.nx-item'); if (it){ const i = +it.dataset.i; if (i === active){ it.classList.add('nx-pop'); setTimeout(() => { openProduct(orb[i].id); it.classList.remove('nx-pop'); }, 260); } else goTo(i); } return; }
     goTo(Math.round(pos)); };
   box.addEventListener('pointerup', end); box.addEventListener('pointercancel', () => { drag = null; box.classList.remove('drag'); goTo(Math.round(pos)); });
   const fromTrack = e => { const r = track.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (orb.length - 1); };
@@ -6120,8 +6193,8 @@ function wireOrbit(){
   track.addEventListener('pointermove', e => { if (td){ target = fromTrack(e); animate(); } });
   track.addEventListener('pointerup', () => { td = false; goTo(Math.round(target)); });
   $('nxSz').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (b && orb[active]) openProduct(orb[active].id, undefined, b.dataset.s); });
-  $('nxMore').onclick = () => orb[active] && openProduct(orb[active].id);
-  $('nxGuide').onclick = () => orb[active] && openProduct(orb[active].id);
+  $('nxMore').onclick = () => { const it = document.querySelector(`.nx-item[data-i="${active}"]`); if (it) it.classList.add('nx-pop'); setTimeout(() => { orb[active] && openProduct(orb[active].id); if (it) it.classList.remove('nx-pop'); }, 260); };
+  $('nxGuide').onclick = openSizeGuide;
   addEventListener('resize', layout);
   addEventListener('keydown', e => { if (!document.getElementById('home').classList.contains('active')) return; const r = $('nxHero').getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; if (e.key === 'ArrowRight') goTo(active + 1); if (e.key === 'ArrowLeft') goTo(active - 1); });
 }
@@ -6133,9 +6206,15 @@ function buildCats(){
   const list = (cats.length ? cats : CATEGORIES || []).slice(0, 4);
   box.innerHTML = list.map(c => {
     const items = products.filter(p => (p.category || '').trim().toLowerCase() === String(c).trim().toLowerCase());
-    const tile = (typeof categoryImages === 'object' && okUrl(categoryImages[c])) ? `<img src="${escN(categoryImages[c])}" alt="" loading="lazy">` : (items[0] ? picHTML(items[0]) : '<div class="nx-ph">👕</div>');
+    const pics = items.filter(p => okUrl(p.showcaseImage) || imgOf(p)).map(picHTML);
+    const tile = pics.length ? `<div class="nx-fade">${pics.map((h, k) => k === 0 ? h.replace('<img ', '<img data-on="1" ') : h).join('')}</div>` : (items[0] ? picHTML(items[0]) : '<div class="nx-ph">👕</div>');
     return `<button class="nx-cat nx-reveal" data-c="${escN(c)}">${tile}<div class="nx-cat-b"><div><b>${escN(typeof translateCategory === 'function' ? translateCategory(c) : c)}</b><small>${items.length} ${T('styles')}</small></div><span class="nx-arrow">${ARROW}</span></div></button>`;
   }).join('');
+  box.querySelectorAll('.nx-fade').forEach(f => { const first = f.firstElementChild; if (first) first.classList.add('on'); });
+  clearInterval(buildCats._t);
+  buildCats._t = setInterval(() => { // каждые 3 с — следующее фото; плитки сменяются по очереди, не все разом
+    box.querySelectorAll('.nx-fade').forEach((f, k) => setTimeout(() => { const kids = [...f.children]; if (kids.length < 2) return; const i = kids.findIndex(x => x.classList.contains('on')); kids[i].classList.remove('on'); kids[(i + 1) % kids.length].classList.add('on'); }, k * 450));
+  }, 3200);
   box.querySelectorAll('.nx-cat').forEach(b => b.onclick = () => { selectMainCategory(b.dataset.c); const a = $('productsAnchor'); if (a) a.scrollIntoView({ behavior:'smooth', block:'start' }); });
 }
 
