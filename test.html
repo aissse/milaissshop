@@ -1228,8 +1228,24 @@
   .nx-figin > img{ position:absolute; inset:0; }
   /* 3. фото с фоном (не PNG) — края мягко растворяются в фоне плитки / орбиты */
   .nx-cat .nx-fade > img.blend, .nx-cat > img.blend, .nx-item img.blend, .nx-piece .th img.blend{
-    -webkit-mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, #000 52%, transparent 100%);
-            mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, #000 52%, transparent 100%); }
+    /* три маски перемножаются: края по ширине и высоте уходят в ноль, плюс мягкий овал — рамки фото не видно совсем */
+    -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 20%, #000 80%, transparent 100%), radial-gradient(ellipse 62% 64% at 50% 52%, #000 45%, transparent 100%);
+    -webkit-mask-composite:source-in, source-in;
+            mask-image:linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 20%, #000 80%, transparent 100%), radial-gradient(ellipse 62% 64% at 50% 52%, #000 45%, transparent 100%);
+            mask-composite:intersect; }
+
+  /* ===== правки 20.11 (3) ===== */
+  /* 1. карточка товара на ПК: фото едет вместе с прокруткой и занимает высоту экрана — нет пустоты под фото */
+  @media (min-width:900px){
+    .detail-layout.top-layout .detail-media{ position:sticky; top:calc(84px + env(safe-area-inset-top)); align-self:start; }
+    .detail-layout.top-layout .carousel{ aspect-ratio:auto; height:min(calc(100svh - 120px), 860px); }
+  }
+  /* 3. переход по меню: заголовок блока встаёт под шапкой, а не прячется за ней */
+  #nxHero, #nxCatsSec, #nxLookSec, #productsAnchor, #faqSection, #nxStreetSec, #nxFabSec{ scroll-margin-top:calc(96px + env(safe-area-inset-top)); }
+  /* 5. «Таблица размеров» — в карточке товара; в орбите убрана */
+  #nxGuide{ display:none !important; }
+  .nx-sgl{ display:inline-flex !important; align-items:center; gap:6px; margin:10px 0 4px; font-size:12px; font-weight:700; color:var(--ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; font-family:inherit; }
+  .nx-sgl[hidden]{ display:none !important; }
   /* таблица размеров */
   .nx-modal{ position:fixed; inset:0; z-index:2000; display:none; align-items:flex-end; justify-content:center; background:rgba(20,12,10,.45); }
   .nx-modal.show{ display:flex; animation:nxFade .3s ease; }
@@ -1462,6 +1478,7 @@
           </div>
           <div class="block-label" data-i18n="sizeLabel">Размер</div>
           <div class="sizes" id="sizeRow"></div>
+          <button type="button" class="nx-sgl" id="nxDetailGuide" hidden onclick="openSizeGuide(window.__nxGuideKind)">📏 <span data-nx="guide">Таблица размеров</span></button>
           <div class="block-label"><span data-i18n="colorLabelWord">Цвет</span>: <span id="colorLabel" style="color:var(--ink); font-weight:700;"></span></div>
           <div class="colors" id="colorRow"></div>
           <div class="block-label" data-i18n="descLabel">Описание</div>
@@ -6242,6 +6259,17 @@ function wireOrbit(){
   $('nxSz').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (b && orb[active]) openProduct(orb[active].id, undefined, b.dataset.s); });
   $('nxMore').onclick = () => { const it = document.querySelector(`.nx-item[data-i="${active}"]`); if (it) it.classList.add('nx-pop'); setTimeout(() => { orb[active] && openProduct(orb[active].id); if (it) it.classList.remove('nx-pop'); }, 260); };
   $('nxGuide').onclick = openSizeGuide;
+  // автовращение: каждые 1,5 с — следующий товар; пауза при наведении/перетаскивании и 5 с после касания
+  let idleUntil = 0, hover = false;
+  const touch = () => { idleUntil = Date.now() + 5000; };
+  box.addEventListener('pointerenter', () => { hover = true; }); box.addEventListener('pointerleave', () => { hover = false; });
+  box.addEventListener('pointerdown', touch); track.addEventListener('pointerdown', touch);
+  setInterval(() => {
+    if (!orb.length || orb.length < 2 || drag || hover || document.hidden || Date.now() < idleUntil) return;
+    const home = document.getElementById('home'); if (!home || !home.classList.contains('active')) return;
+    const r = box.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+    goTo(active + 1 >= orb.length ? 0 : active + 1);
+  }, 1500);
   addEventListener('resize', layout);
   addEventListener('keydown', e => { if (!document.getElementById('home').classList.contains('active')) return; const r = $('nxHero').getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; if (e.key === 'ArrowRight') goTo(active + 1); if (e.key === 'ArrowLeft') goTo(active - 1); });
 }
@@ -6378,6 +6406,10 @@ window.nxInit = function(){
   const _rmg = renderMainGrid; renderMainGrid = function(){ const r = _rmg.apply(this, arguments); try{ nxRender(); }catch(e){} return r; };
   const _al = applyLang; applyLang = function(){ const r = _al.apply(this, arguments); try{ nxRender(true); }catch(e){} return r; };
   // ТЕСТ: оформление заказа отключено, чтобы никто не оплатил тестовый товар
+  const _op = openProduct; openProduct = function(){ const r = _op.apply(this, arguments);
+    try{ const kind = currentProduct ? (currentProduct.type === 'shoes' ? 'shoes' : (currentProduct.type === 'top' || currentProduct.type === 'set') ? 'top' : null) : null;
+      window.__nxGuideKind = kind; const b = document.getElementById('nxDetailGuide'); if (b) b.hidden = !kind; }catch(e){}
+    return r; };
   goToCheckoutFlow = function(){ showToast('🧪 Тестовый режим: оформление заказа отключено'); };
   try{ db.collection('test_settings').doc('home').onSnapshot(d => { window.NXHOME = d.exists ? d.data() : null; nxRender(true); }, e => console.warn('home', e)); }catch(e){}
   nxInit();
