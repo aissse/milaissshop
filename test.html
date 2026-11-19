@@ -1227,12 +1227,17 @@
   /* 2. точки ставятся по самой картинке (её реальный размер внутри рамки) */
   .nx-figin > img{ position:absolute; inset:0; }
   /* 3. фото с фоном (не PNG) — края мягко растворяются в фоне плитки / орбиты */
-  .nx-cat .nx-fade > img.blend, .nx-cat > img.blend, .nx-item img.blend, .nx-piece .th img.blend{
-    /* три маски перемножаются: края по ширине и высоте уходят в ноль, плюс мягкий овал — рамки фото не видно совсем */
-    -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 20%, #000 80%, transparent 100%), radial-gradient(ellipse 62% 64% at 50% 52%, #000 45%, transparent 100%);
-    -webkit-mask-composite:source-in, source-in;
-            mask-image:linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 20%, #000 80%, transparent 100%), radial-gradient(ellipse 62% 64% at 50% 52%, #000 45%, transparent 100%);
-            mask-composite:intersect; }
+  /* фото с фоном: картинка вписана по своим пропорциям; под ней — размытая и чуть увеличенная копия, которая
+     продолжает фон фото за его края и мягко тает в фоне магазина. У самого фото растушёван только узкий край (фон), товар не задет */
+  .nx-pic{ position:absolute; inset:0; }
+  .nx-pic > img, .nx-pic > canvas{ position:absolute !important; left:50% !important; top:50% !important; right:auto !important; bottom:auto !important; transform:translate(-50%,-50%); max-width:none; object-fit:fill; }
+  .nx-pic > img{ width:100%; height:100%; object-fit:contain; }
+  .nx-pic > canvas{ filter:blur(6px); pointer-events:none; }
+  .nx-pic > img.nx-on{ -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 2%, #000 98%, transparent 100%), linear-gradient(180deg, transparent 0, #000 2%, #000 98%, transparent 100%); -webkit-mask-composite:source-in;
+            mask-image:linear-gradient(90deg, transparent 0, #000 2%, #000 98%, transparent 100%), linear-gradient(180deg, transparent 0, #000 2%, #000 98%, transparent 100%); mask-composite:intersect; }
+  .nx-pic > img.blend{ mix-blend-mode:normal !important; } /* смешиваем один раз — всю группу (фото + продолжение фона) */
+  html:not([data-theme="dark"]) .nx-cat .nx-fade > .nx-pic, html:not([data-theme="dark"]) .nx-piece .th .nx-pic{ mix-blend-mode:multiply; }
+  .nx-cat .nx-fade{ left:16%; right:16%; top:10%; height:60%; }
 
   /* ===== правки 20.11 (3) ===== */
   /* 1. карточка товара на ПК: фото едет вместе с прокруткой и занимает высоту экрана — нет пустоты под фото */
@@ -1278,7 +1283,7 @@
   html:not([data-theme="dark"]) .nx-item img.blend, html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:normal; }
   .nx-title{ font-size:clamp(38px,10vw,58px); }
   .nx-hero-info{ z-index:60; pointer-events:none; } .nx-hero-info button{ pointer-events:auto; }
-  html[data-theme="dark"] .nx-item.blend img{ background:#F2E9DF; box-shadow:0 18px 40px rgba(0,0,0,.45); }
+
   @media (max-width:899px){ .nx-item{ width:min(52vw,280px); } }
   @media (min-width:900px){
     .nx-title{ font-size:clamp(46px,5.4vw,86px); max-width:38vw; }
@@ -6128,8 +6133,50 @@ const okUrl = u => /^https:\/\//i.test(String(u || '').trim()) ? String(u).trim(
 function imgOf(p){ const c = colorsOfN(p).find(c => c.image || (c.images && c.images[0])); return okUrl(p.image) || (c && okUrl(c.image || c.images[0])) || ''; }
 function picHTML(p){ // PNG без фона — как есть; обычное фото — белый фон растворяется в кремовом (multiply)
   const png = okUrl(p.showcaseImage); if (png) return `<img src="${escN(png)}" alt="" loading="lazy" decoding="async">`;
-  const im = imgOf(p); return im ? `<img class="blend" src="${escN(im)}" alt="" loading="lazy" decoding="async">` : `<div class="nx-ph">${escN(p.emoji || '👕')}</div>`;
+  const im = imgOf(p); if (!im) return `<div class="nx-ph">${escN(p.emoji || '👕')}</div>`;
+  const u = escN(im); // фон фото продолжается размытой копией и тает в фоне; сам товар не трогаем
+  return `<span class="nx-pic"><img class="blend nx-fg" src="${u}" alt="" loading="lazy" decoding="async"></span>`;
 }
+
+/* мягкие края фото с фоном: продолжаем фон за края, растягивая только крайние пиксели (товар в этом не участвует),
+   затем это продолжение размывается и тает в фоне магазина */
+const EXT = .32;
+function nxExtend(img){
+  const pic = img.parentElement; if (!pic || !img.naturalWidth) return;
+  const W = pic.clientWidth, H = pic.clientHeight; if (!W || !H) return;
+  const nw = img.naturalWidth, nh = img.naturalHeight, sc = Math.min(W / nw, H / nh) / (1 + EXT * .9);
+  const dw = nw * sc, dh = nh * sc;
+  img.style.width = dw + 'px'; img.style.height = dh + 'px'; img.classList.add('nx-on');
+  let cv = pic.querySelector('canvas');
+  if (!cv){
+    cv = document.createElement('canvas'); pic.insertBefore(cv, img);
+    const k = Math.min(1, 220 / Math.max(nw, nh)), w = Math.round(nw * k), h = Math.round(nh * k), mx = Math.round(w * EXT), my = Math.round(h * EXT);
+    cv.width = w + mx * 2; cv.height = h + my * 2;
+    const g = cv.getContext('2d'); const e = 2;
+    try{
+      g.drawImage(img, mx, my, w, h);
+      g.drawImage(img, 0, 0, e, nh, 0, my, mx, h);                 // слева
+      g.drawImage(img, nw - e, 0, e, nh, mx + w, my, mx, h);       // справа
+      g.drawImage(img, 0, 0, nw, e, mx, 0, w, my);                 // сверху
+      g.drawImage(img, 0, nh - e, nw, e, mx, my + h, w, my);       // снизу
+      g.drawImage(img, 0, 0, e, e, 0, 0, mx, my); g.drawImage(img, nw - e, 0, e, e, mx + w, 0, mx, my);
+      g.drawImage(img, 0, nh - e, e, e, 0, my + h, mx, my); g.drawImage(img, nw - e, nh - e, e, e, mx + w, my + h, mx, my);
+      // растворение продолжения: прозрачность уходит в ноль к краям холста (только поля, само фото — полностью)
+      g.globalCompositeOperation = 'destination-in';
+      const fx = mx / cv.width, fy = my / cv.height;
+      const gh = g.createLinearGradient(0, 0, cv.width, 0); gh.addColorStop(0, 'rgba(0,0,0,0)'); gh.addColorStop(fx, '#000'); gh.addColorStop(1 - fx, '#000'); gh.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gh; g.fillRect(0, 0, cv.width, cv.height);
+      const gv = g.createLinearGradient(0, 0, 0, cv.height); gv.addColorStop(0, 'rgba(0,0,0,0)'); gv.addColorStop(fy, '#000'); gv.addColorStop(1 - fy, '#000'); gv.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gv; g.fillRect(0, 0, cv.width, cv.height);
+      g.globalCompositeOperation = 'source-over';
+    }catch(err){ cv.remove(); return; }
+  }
+  cv.style.width = dw * (1 + EXT * 2) + 'px'; cv.style.height = dh * (1 + EXT * 2) + 'px';
+}
+document.addEventListener('load', e => { const t = e.target; if (t && t.classList && t.classList.contains('nx-fg')) nxExtend(t); }, true);
+function nxExtendAll(){ document.querySelectorAll('img.nx-fg').forEach(im => { if (im.complete && im.naturalWidth) nxExtend(im); }); }
+addEventListener('resize', () => { clearTimeout(nxExtendAll._t); nxExtendAll._t = setTimeout(nxExtendAll, 150); });
+
 const stockOf = p => colorsOfN(p).reduce((s, c) => s + (c.sizeStocks ? Object.values(c.sizeStocks).reduce((a, b) => a + (Number(b) || 0), 0) : (Number(c.stock) || 0)), 0) || Number(p.stock || 0);
 const nameOf = p => (typeof getTranslatedProductName === 'function' ? getTranslatedProductName(p) : p.name) || '';
 const inStockN = p => stockOf(p) > 0;
@@ -6200,7 +6247,7 @@ function buildOrbit(){
   if (sig === buildOrbit._sig) return; buildOrbit._sig = sig;
   orb = list; const box = $('nxOrbit'); if (!box) return;
   box.querySelectorAll('.nx-item').forEach(e => e.remove());
-  orb.forEach((p, i) => { const el = document.createElement('div'); const html = picHTML(p); el.className = 'nx-item' + (html.includes('class="blend"') ? ' blend' : ''); el.dataset.i = i; el.innerHTML = html + '<i></i>'; box.appendChild(el); });
+  orb.forEach((p, i) => { const el = document.createElement('div'); const html = picHTML(p); el.className = 'nx-item' + (html.includes('blend') ? ' blend' : ''); el.dataset.i = i; el.innerHTML = html + '<i></i>'; box.appendChild(el); });
   target = pos = Math.min(Math.floor(orb.length / 2), orb.length - 1); active = -1;
   $('nxDragTo').textContent = String(orb.length).padStart(2, '0');
   layout(); setActive(Math.round(pos));
@@ -6310,7 +6357,7 @@ function buildLooks(){
   stage.innerHTML = looks.map((l, i) => {
     const h = l.photo ? `<img src="${escN(l.photo)}" alt="" loading="lazy">` : (l.pieces[0] ? picHTML(l.pieces[0].p) : '');
     const pins = l.pieces.map((pc, k) => pc.x != null ? `<button class="nx-pin" style="left:${pc.x}%;top:${pc.y}%" data-x="${pc.x}" data-y="${pc.y}" data-id="${escN(pc.p.id)}"><b>${k + 1}</b><span>${escN(nameOf(pc.p))}</span></button>` : '').join('');
-    return `<div class="nx-fig${h.includes('class="blend"') ? ' blend' : ''}" data-i="${i}"><div class="nx-figin">${h}${pins}</div></div>`; }).join('');
+    return `<div class="nx-fig${h.includes('blend') ? ' blend' : ''}" data-i="${i}"><div class="nx-figin">${h}${pins}</div></div>`; }).join('');
   $('nxSteps').innerHTML = looks.map((l, i) => `<button class="nx-step" data-i="${i}">${String(i + 1).padStart(2, '0')} ${escN(l.pieces[0] ? nameOf(l.pieces[0].p).split(' ')[0] : '')}</button>`).join('');
   $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.onclick = () => showLook(+b.dataset.i, true));
   stage.querySelectorAll('.nx-figin > img').forEach(im => { if (im.complete) layoutPins(); else im.addEventListener('load', layoutPins, { once:true }); });
@@ -6385,7 +6432,7 @@ window.nxRender = function(force){ // перестраиваем только к
   try{
     const sig = JSON.stringify(window.NXHOME || {}) + lang + '|' + (Array.isArray(CATEGORIES) ? CATEGORIES.join(',') : '') + '|' + products.map(p => p.id + ':' + stockOf(p) + ':' + (p.price || 0) + ':' + (p.image || '') + ':' + (p.showcaseImage || '') + ':' + (p.name || '')).join('|');
     if (!force && sig === lastSig) return; lastSig = sig;
-    texts(); buildOrbit(); buildCats(); buildLooks(); buildPhotos(); rescan();
+    texts(); buildOrbit(); buildCats(); buildLooks(); buildPhotos(); rescan(); setTimeout(nxExtendAll, 50);
   }catch(e){ console.warn('nx', e); }
 };
 window.nxInit = function(){
