@@ -1244,6 +1244,7 @@
   .nx-mbox th{ text-align:left; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:8px 6px; border-bottom:1px solid var(--line); }
   .nx-mbox td{ padding:9px 6px; border-bottom:1px solid var(--line); font-weight:600; }
   .nx-mbox td:last-child, .nx-mbox th:last-child{ text-align:right; }
+  .nx-mbox .nx-t4 th, .nx-mbox .nx-t4 td{ text-align:center; } .nx-mbox .nx-t4 th:first-child, .nx-mbox .nx-t4 td:first-child{ text-align:left; } .nx-mbox .nx-t4 th{ white-space:normal; line-height:1.3; }
   .nx-mbox ol{ margin:0 0 14px 18px; padding:0; font-size:14px; line-height:1.7; }
   .nx-mbox .note{ font-size:12px; font-style:italic; color:var(--muted); }
   .nx-mbox .sign{ font-weight:800; margin-top:14px; }
@@ -6124,8 +6125,31 @@ const SG = {
   az:{ h:'Ölçü cədvəli', lead:'Öz ideal ölçünü tap.', p:'Uyğun ayaqqabı ölçüsünü seçmək üçün ayağının uzunluğunu ölç və nəticəni aşağıdakı cədvəllə müqayisə et.', c1:'EU ölçü', c2:'Ayaq uzunluğu', cm:'sm', how:'Ayağı necə düzgün ölçmək olar?', s:['Ayağını kağız vərəqinin üzərinə qoy.','Dabanın kənarını və ən uzun barmağın ucunu qeyd et.','Qeydlər arasındakı məsafəni ölç.','Nəticəni cədvəllə müqayisə et.'], note:'Diqqət: ölçülər ayaqqabı modelindən asılı olaraq bir qədər fərqlənə bilər. İki ölçü arasında tərəddüd edirsənsə, bizimlə əlaqə saxla — uyğun olanı seçməyə kömək edərik.', sign:'MILAISSS — sənin üslubun, sənin ölçün.' },
   en:{ h:'Size guide', lead:'Find your perfect size.', p:'To choose the right shoe size, measure the length of your foot and compare it with the table below.', c1:'EU size', c2:'Foot length', cm:'cm', how:'How to measure your foot', s:['Place your foot on a sheet of paper.','Mark the edge of your heel and the tip of your longest toe.','Measure the distance between the marks.','Compare the result with the table.'], note:'Please note: sizes may vary slightly depending on the shoe model. If you are between two sizes, contact us — we will help you choose.', sign:'MILAISSS — your style, your size.' }
 };
+
+// таблица размеров для верха (худи, свитшоты, футболки, двойки)
+const SGT = {
+  ru:{ h:'Таблица размеров', lead:'Найди свой идеальный размер.', c:['Размер (US/EU)','Обхват груди','Длина изделия','Длина рукава'], cm:'см', how:'Как правильно измерить?',
+       s:[['Обхват груди','Измерь самый широкий участок груди, не затягивая сантиметр.'],['Длина изделия','Измерь от верхней точки плеча до низа изделия.'],['Длина рукава','Измерь от плечевого шва до конца рукава.']],
+       tipH:'Совет:', tip:'Если сомневаешься между двумя размерами — выбирай больший для более комфортной посадки.', sign:'MILAISSS — твой стиль, твой размер.' },
+  uz:{ h:'Oʻlchamlar jadvali', lead:'Oʻzingizga mos oʻlchamni toping.', c:['Oʻlcham (US/EU)','Koʻkrak aylanasi','Kiyim uzunligi','Yeng uzunligi'], cm:'sm', how:'Qanday toʻgʻri oʻlchash kerak?',
+       s:[['Koʻkrak aylanasi','Koʻkrakning eng keng joyini santimetrni tortmasdan oʻlchang.'],['Kiyim uzunligi','Yelkaning eng yuqori nuqtasidan kiyim pastigacha oʻlchang.'],['Yeng uzunligi','Yelka chokidan yeng uchigacha oʻlchang.']],
+       tipH:'Maslahat:', tip:'Ikki oʻlcham orasida ikkilansangiz — qulayroq boʻlishi uchun kattasini tanlang.', sign:'MILAISSS — sizning uslubingiz, sizning oʻlchamingiz.' },
+  tr:{ h:'Beden tablosu', lead:'Mükemmel bedenini bul.', c:['Beden (US/EU)','Göğüs çevresi','Ürün boyu','Kol boyu'], cm:'cm', how:'Nasıl doğru ölçülür?',
+       s:[['Göğüs çevresi','Göğsün en geniş yerini mezurayı sıkmadan ölç.'],['Ürün boyu','Omzun en üst noktasından ürünün altına kadar ölç.'],['Kol boyu','Omuz dikişinden kolun ucuna kadar ölç.']],
+       tipH:'İpucu:', tip:'İki beden arasında kararsızsan daha rahat bir kalıp için büyük olanı seç.', sign:'MILAISSS — senin tarzın, senin bedenin.' },
+  az:{ h:'Ölçü cədvəli', lead:'Öz ideal ölçünü tap.', c:['Ölçü (US/EU)','Sinə çevrəsi','Məhsulun uzunluğu','Qol uzunluğu'], cm:'sm', how:'Necə düzgün ölçmək olar?',
+       s:[['Sinə çevrəsi','Sinənin ən geniş hissəsini santimetri sıxmadan ölç.'],['Məhsulun uzunluğu','Çiyninin ən yuxarı nöqtəsindən məhsulun aşağısına qədər ölç.'],['Qol uzunluğu','Çiyin tikişindən qolun ucuna qədər ölç.']],
+       tipH:'Məsləhət:', tip:'İki ölçü arasında tərəddüd edirsənsə — daha rahat oturuş üçün böyüyünü seç.', sign:'MILAISSS — sənin üslubun, sənin ölçün.' },
+  en:{ h:'Size guide', lead:'Find your perfect size.', c:['Size (US/EU)','Chest','Body length','Sleeve length'], cm:'cm', how:'How to measure',
+       s:[['Chest','Measure around the widest part of your chest without pulling the tape tight.'],['Body length','Measure from the highest point of the shoulder to the hem.'],['Sleeve length','Measure from the shoulder seam to the end of the sleeve.']],
+       tipH:'Tip:', tip:'If you are between two sizes, choose the larger one for a more comfortable fit.', sign:'MILAISSS — your style, your size.' }
+};
+const SGT_ROWS = [['S (44)','88–94','68','62'],['M (46)','94–100','70','64'],['L (48)','100–106','72','66'],['XL (50)','106–112','74','68'],['XXL (52)','112–118','76','70']];
+const guideKind = p => !p ? null : (p.type === 'shoes' ? 'shoes' : (p.type === 'top' || p.type === 'set') ? 'top' : null);
 const SG_ROWS = [[36,'22,5'],[37,'23'],[38,'24'],[39,'24,5'],[40,'25'],[41,'26'],[42,'26,5'],[43,'27,5'],[44,'28'],[45,'29']];
-function openSizeGuide(){
+function openSizeGuide(kind){
+  if (kind === undefined) kind = guideKind(orb[active]) || 'shoes';
+  if (kind === 'top') return openTopGuide();
   const g = SG[lang] || SG.ru, cm = v => (lang === 'en' || lang === 'tr') ? v.replace(',', '.') : v;
   let m = document.getElementById('nxSizeGuide');
   if (!m){ m = document.createElement('div'); m.id = 'nxSizeGuide'; m.className = 'nx-modal'; m.onclick = e => { if (e.target === m) m.classList.remove('show'); }; document.body.appendChild(m); }
@@ -6134,6 +6158,18 @@ function openSizeGuide(){
     <table><thead><tr><th>${g.c1}</th><th>${g.c2}</th></tr></thead><tbody>${SG_ROWS.map(r => `<tr><td>${r[0]}</td><td>${cm(r[1])} ${g.cm}</td></tr>`).join('')}</tbody></table>
     <p class="lead">${g.how}</p><ol>${g.s.map(x => `<li>${x}</li>`).join('')}</ol>
     <p class="note">${g.note}</p><p class="sign">${g.sign}</p></div>`;
+  m.classList.add('show');
+}
+function openTopGuide(){
+  const g = SGT[lang] || SGT.ru;
+  let m = document.getElementById('nxSizeGuide');
+  if (!m){ m = document.createElement('div'); m.id = 'nxSizeGuide'; m.className = 'nx-modal'; m.onclick = e => { if (e.target === m) m.classList.remove('show'); }; document.body.appendChild(m); }
+  m.innerHTML = `<div class="nx-mbox" role="dialog" aria-modal="true"><button class="nx-x" aria-label="×" onclick="document.getElementById('nxSizeGuide').classList.remove('show')">×</button>
+    <h3>${g.h}</h3><p class="lead">${g.lead}</p>
+    <div style="overflow-x:auto"><table class="nx-t4"><thead><tr>${g.c.map((c, i) => `<th>${c}${i ? ` (${g.cm})` : ''}</th>`).join('')}</tr></thead>
+    <tbody>${SGT_ROWS.map(r => `<tr>${r.map((v, i) => `<td>${i ? v : `<b>${v}</b>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="lead">${g.how}</p><ol>${g.s.map(x => `<li><b>${x[0]}</b> — ${x[1]}</li>`).join('')}</ol>
+    <p class="note"><b>${g.tipH}</b> ${g.tip}</p><p class="sign">${g.sign}</p></div>`;
   m.classList.add('show');
 }
 window.openSizeGuide = openSizeGuide;
@@ -6187,6 +6223,7 @@ function setActive(i){
   const sz = sizesOfN(p);
   $('nxSz').innerHTML = sz.map(s => { const n = colorsOfN(p).reduce((a, c) => a + (typeof getSizeStock === 'function' ? getSizeStock(p, c, s) : 1), 0); return `<button ${n > 0 ? '' : 'disabled'} data-s="${escN(s)}">${escN(s)}</button>`; }).join('');
   $('nxSizes').style.visibility = sz.length ? 'visible' : 'hidden';
+  $('nxGuide').style.visibility = guideKind(p) ? 'visible' : 'hidden'; // для низа таблицы пока нет
 }
 function wireOrbit(){
   const box = $('nxOrbit'), track = $('nxTrack');
