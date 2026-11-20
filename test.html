@@ -1218,7 +1218,7 @@
     .nx-sizes{ bottom:calc(118px + env(safe-area-inset-bottom)); }
   }
   /* 4. мягкое открытие карточки */
-  .nx-item.nx-pop img{ animation:nxPop .32s ease forwards; }
+  .nx-item.nx-pop > .nx-pic, .nx-item.nx-pop > img{ animation:nxPop .32s ease forwards; } /* анимируем фото вместе с его фоном, а не только картинку — иначе фото «выходит» из рамки */
   @keyframes nxPop{ to{ transform:scale(1.07); opacity:.55; } }
   #detail.screen.active{ animation:nxIn .6s cubic-bezier(.2,.7,.2,1) backwards; }
   @keyframes nxIn{ from{ opacity:0; transform:translateY(26px) scale(.985); } to{ opacity:1; transform:none; } }
