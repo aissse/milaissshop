@@ -1259,7 +1259,8 @@
     .detail-layout.top-layout .carousel{ aspect-ratio:auto; height:min(calc(100vh - 120px), 860px); height:min(calc(100svh - 120px), 860px); }
   }
   /* 3. переход по меню: заголовок блока встаёт под шапкой, а не прячется за ней */
-  #nxHero, #nxCatsSec, #nxLookSec, #productsAnchor, #faqSection, #nxStreetSec, #nxFabSec{ scroll-margin-top:calc(96px + env(safe-area-inset-top)); }
+  #nxHero, #nxCatsSec, #productsAnchor, #faqSection, #nxStreetSec, #nxFabSec{ scroll-margin-top:calc(96px + env(safe-area-inset-top)); }
+  #nxLookSec, #ratingSummary{ scroll-margin-top:calc(60px + env(safe-area-inset-top)); } /* у этих блоков свой отступ сверху — встаём ровно под шапку */
   /* 5. «Таблица размеров» — в карточке товара; в орбите убрана */
   #nxGuide{ display:none !important; }
   .nx-sgl{ display:inline-flex !important; align-items:center; gap:6px; margin:10px 0 4px; font-size:12px; font-weight:700; color:var(--ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; font-family:inherit; }
@@ -1350,7 +1351,7 @@
   <div class="screen active" id="home">
     <div class="site-header" id="siteHeader">
       <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">mila<span class="slash">/</span>isss</div>
-      <nav class="nx-nav"><a data-nxgo="#productsAnchor" data-nx="nav1">Каталог</a><a data-nxgo="#nxHero" data-nx="nav2">Новинки</a><a data-nxgo="#nxLookSec" data-nx="nav3">Образы</a><a data-nxgo="#faqSection" data-nx="nav4">Вопросы</a></nav>
+      <nav class="nx-nav"><a data-nxgo="#productsAnchor" data-nx="nav1">Каталог</a><a data-nxgo="#nxHero" data-nx="nav2">Новинки</a><a data-nxgo="#nxLookSec" data-nx="nav3">Образы</a><a data-nxgo="#ratingSummary" data-nx="nav5" class="nx-revnav" style="display:none">Отзывы</a><a data-nxgo="#faqSection" data-nx="nav4">Вопросы</a></nav>
       <div class="sh-actions">
         <button type="button" class="sh-btn" id="searchBtn" onclick="openSearch()" aria-label="Search" data-i18n-aria="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
         <div class="sh-btn sh-lang" id="langBtn" onclick="toggleLangMenu(event)" role="button" aria-label="Language">
@@ -1482,7 +1483,7 @@
     <footer class="nx-foot"><div class="nx-foot-in">
       <div class="nx-cols">
         <div><h4 data-nx="fShop">Магазин</h4><a data-nxgo="#nxHero" data-nx="fNew"></a><a data-nxgo="#productsAnchor" data-nx="nav1"></a><a data-nxgo="#nxLookSec" data-nx="nav3"></a><a data-nxgo="favorites" data-nx="fFav"></a></div>
-        <div><h4 data-nx="fHelp">Помощь</h4><a data-nxgo="profile" data-nx="fOrders"></a><a data-nxgo="#faqSection" data-nx="fFaq"></a><a data-nxgo="support" data-nx="fSupport"></a><a data-nxgo="offer" data-nx="fOffer"></a></div>
+        <div><h4 data-nx="fHelp">Помощь</h4><a data-nxgo="profile" data-nx="fOrders"></a><a data-nxgo="#ratingSummary" data-nx="nav5" class="nx-revnav" style="display:none"></a><a data-nxgo="#faqSection" data-nx="fFaq"></a><a data-nxgo="support" data-nx="fSupport"></a><a data-nxgo="offer" data-nx="fOffer"></a></div>
         <div><h4 data-nx="fAbout">milaisss</h4><a data-nx="fRet" style="cursor:default"></a><a data-nx="fShip" style="cursor:default"></a></div>
         <div><h4 data-nx="fFollow">Мы в сети</h4><div class="footer-contacts" id="footerContacts"></div></div>
       </div>
@@ -3001,9 +3002,11 @@ function renderRatingSummary(){
   const approved = reviews.filter(r => r.approved && typeof r.rating === 'number' && r.rating >= 1 && r.rating <= 5);
   if (approved.length === 0){
     wrap.innerHTML = ''; wrap.style.display = 'none';
+    document.querySelectorAll('.nx-revnav').forEach(a => a.style.display = 'none');
     return;
   }
   wrap.style.display = '';
+  document.querySelectorAll('.nx-revnav').forEach(a => a.style.display = '');
   const L = NX_REV_TX[lang] || NX_REV_TX.ru;
   const avg = approved.reduce((s,r)=>s+r.rating,0) / approved.length;
   const pct = Math.max(0, Math.min(100, avg / 5 * 100));
@@ -6177,31 +6180,31 @@ authReady.then(() => { afterAuth(); logVisit(); });
 /* ================= новая главная (орбита, категории, образы, уличные фото, качество) ================= */
 (function(){
 const NX = {
-  ru:{ nav1:'Каталог', nav2:'Новинки', nav3:'Образы', nav4:'Вопросы', drag:'Потяни орбиту', size:'Размер', guide:'Таблица размеров', more:'Подробнее', catsE:'Категории', catsH:'Начни с фита.', all:'Смотреть все', styles:'моделей',
+  ru:{ nav1:'Каталог', nav2:'Новинки', nav3:'Образы', nav4:'Вопросы', nav5:'Отзывы', drag:'Потяни орбиту', size:'Размер', guide:'Таблица размеров', more:'Подробнее', catsE:'Категории', catsH:'Начни с фита.', all:'Смотреть все', styles:'моделей',
        lookE:'Лукбук', lookH:'Собери образ.', lookS:'Готовые образы с головы до ног. Нажми на вещь — откроется карточка.', inLook:'В этом образе', pcs:'вещи', lookCta:'Смотреть вещи образа', lookNote:'Фото моделей добавим из админки — пока образы собраны из товаров.',
        gridE:'Каталог', gridH:'Вещь на любой фит.', streetE:'Улица', streetH:'Носят смело.', streetS:'Как наши вещи выглядят на улице. Отметь @milaisss — и твоё фото может оказаться здесь.', streetPh:'Здесь будут фото покупателей', shopIt:'Смотреть вещи',
        c1:'Вечерняя парковка', c2:'Лестница, полдень', fabE:'Качество', fabH:'Сделано на совесть.', fabS:'Каждая вещь — плотная ткань, которую чувствуешь в руках, и швы, которые переживут сотню стирок.', fabPh:'Крупное фото ткани',
        f1:'Плотный футер', f1p:'Мягкий начёс внутри, плотная петля снаружи, манжеты держат форму после стирок.', f2:'Двойной капюшон', f2p:'Два слоя ткани и плоские шнурки — капюшон не теряет форму.', f3:'Плотный хлопок', f3p:'Свободный крой, спущенное плечо, ворот в рубчик с двойной строчкой.',
        bandH:'Простые вещи. Смелый стиль.', bandP:'Новые дропы, закрытые скидки и первыми — новости магазина.', bandPh:'Фото кампании', fShop:'Магазин', fHelp:'Помощь', fAbout:'milaisss', fFollow:'Мы в сети', fNew:'Новинки', fCart:'Корзина', fFav:'Избранное', fOrders:'Мои заказы', fFaq:'Вопросы', fSupport:'Поддержка', fOffer:'Оферта', fRet:'Возврат 7 дней', fShip:'Бесплатная доставка от 850 000 сум' },
-  uz:{ nav1:'Katalog', nav2:'Yangiliklar', nav3:'Obrazlar', nav4:'Savollar', drag:'Orbitani torting', size:'Oʻlcham', guide:'Oʻlchamlar jadvali', more:'Batafsil', catsE:'Kategoriyalar', catsH:'Fitdan boshlang.', all:'Hammasi', styles:'model',
+  uz:{ nav1:'Katalog', nav2:'Yangiliklar', nav3:'Obrazlar', nav4:'Savollar', nav5:'Sharhlar', drag:'Orbitani torting', size:'Oʻlcham', guide:'Oʻlchamlar jadvali', more:'Batafsil', catsE:'Kategoriyalar', catsH:'Fitdan boshlang.', all:'Hammasi', styles:'model',
        lookE:'Lukbuk', lookH:'Obraz yig‘ing.', lookS:'Boshdan-oyoq tayyor obrazlar. Kiyimni bosing — kartochka ochiladi.', inLook:'Bu obrazda', pcs:'ta', lookCta:'Obraz kiyimlarini ko‘rish', lookNote:'Model fotolarini admin paneldan qo‘shamiz — hozircha obrazlar mahsulotlardan yig‘ilgan.',
        gridE:'Katalog', gridH:'Har qanday fitga kiyim.', streetE:'Koʻcha', streetH:'Dadil kiyishadi.', streetS:'Kiyimlarimiz ko‘chada qanday ko‘rinadi. @milaisss deb belgilang — rasmingiz shu yerda chiqishi mumkin.', streetPh:'Bu yerda xaridorlar fotolari bo‘ladi', shopIt:'Kiyimlarni ko‘rish',
        c1:'Kechki avtoturargoh', c2:'Zinapoya, tush', fabE:'Sifat', fabH:'Vijdonan tikilgan.', fabS:'Har bir kiyim — qo‘lda seziladigan zich mato va yuzlab yuvishga chidaydigan choklar.', fabPh:'Matoning yirik fotosi',
        f1:'Zich futer', f1p:'Ichi yumshoq, tashqi tomoni zich, manjetlar yuvishdan keyin ham shaklini saqlaydi.', f2:'Ikki qavatli kapyushon', f2p:'Ikki qavat mato va yassi bog‘ichlar — kapyushon shaklini yo‘qotmaydi.', f3:'Zich paxta', f3p:'Erkin bichim, tushirilgan yelka, qo‘sh chokli yoqa.',
        bandH:'Oddiy kiyim. Dadil uslub.', bandP:'Yangi droplar, yopiq chegirmalar va do‘kon yangiliklari birinchi bo‘lib.', bandPh:'Kampaniya fotosi', fShop:'Do‘kon', fHelp:'Yordam', fAbout:'milaisss', fFollow:'Tarmoqlarda', fNew:'Yangiliklar', fCart:'Savat', fFav:'Sevimlilar', fOrders:'Buyurtmalarim', fFaq:'Savollar', fSupport:'Qo‘llab-quvvatlash', fOffer:'Oferta', fRet:'Qaytarish 7 kun', fShip:'850 000 so‘mdan bepul yetkazish' },
-  tr:{ nav1:'Katalog', nav2:'Yeniler', nav3:'Kombinler', nav4:'SSS', drag:'Yörüngeyi çek', size:'Beden', guide:'Beden tablosu', more:'Detaylar', catsE:'Kategoriler', catsH:'Kalıpla başla.', all:'Tümü', styles:'model',
+  tr:{ nav1:'Katalog', nav2:'Yeniler', nav3:'Kombinler', nav4:'SSS', nav5:'Yorumlar', drag:'Yörüngeyi çek', size:'Beden', guide:'Beden tablosu', more:'Detaylar', catsE:'Kategoriler', catsH:'Kalıpla başla.', all:'Tümü', styles:'model',
        lookE:'Lookbook', lookH:'Kombini tamamla.', lookS:'Baştan aşağı hazır kombinler. Bir parçaya dokun — kartı açılır.', inLook:'Bu kombinde', pcs:'parça', lookCta:'Kombindeki parçalar', lookNote:'Model fotoğraflarını panelden ekleyeceğiz — şimdilik kombinler ürünlerden oluşuyor.',
        gridE:'Katalog', gridH:'Her tarza bir parça.', streetE:'Sokak', streetH:'Cesurca giyiliyor.', streetS:'Ürünlerimiz sokakta nasıl duruyor. @milaisss etiketle — fotoğrafın burada olabilir.', streetPh:'Burada müşteri fotoğrafları olacak', shopIt:'Parçaları gör',
        c1:'Gece otoparkı', c2:'Merdiven, öğlen', fabE:'Kalite', fabH:'Özenle yapıldı.', fabS:'Her parça elinde hissettiğin kalın bir kumaş ve yüzlerce yıkamaya dayanan dikişler.', fabPh:'Kumaşın yakın çekimi',
        f1:'Kalın sweat kumaş', f1p:'İçi yumuşak şardonlu, dışı sık örgü; manşetler yıkamadan sonra formunu korur.', f2:'Çift kat kapüşon', f2p:'İki kat kumaş ve yassı ipler — kapüşon formunu kaybetmez.', f3:'Kalın pamuk', f3p:'Rahat kesim, düşük omuz, çift dikişli ribana yaka.',
        bandH:'Sade parçalar. Cesur stil.', bandP:'Yeni droplar, özel indirimler ve mağaza haberleri ilk sende.', bandPh:'Kampanya fotoğrafı', fShop:'Mağaza', fHelp:'Yardım', fAbout:'milaisss', fFollow:'Bizi takip et', fNew:'Yeniler', fCart:'Sepet', fFav:'Favoriler', fOrders:'Siparişlerim', fFaq:'SSS', fSupport:'Destek', fOffer:'Sözleşme', fRet:'7 gün iade', fShip:'850 000 sum üzeri ücretsiz kargo' },
-  az:{ nav1:'Kataloq', nav2:'Yeniliklər', nav3:'Obrazlar', nav4:'Suallar', drag:'Orbiti çək', size:'Ölçü', guide:'Ölçü cədvəli', more:'Ətraflı', catsE:'Kateqoriyalar', catsH:'Fitdən başla.', all:'Hamısı', styles:'model',
+  az:{ nav1:'Kataloq', nav2:'Yeniliklər', nav3:'Obrazlar', nav4:'Suallar', nav5:'Rəylər', drag:'Orbiti çək', size:'Ölçü', guide:'Ölçü cədvəli', more:'Ətraflı', catsE:'Kateqoriyalar', catsH:'Fitdən başla.', all:'Hamısı', styles:'model',
        lookE:'Lukbuk', lookH:'Obrazı topla.', lookS:'Başdan ayağa hazır obrazlar. Geyimə toxun — kartı açılacaq.', inLook:'Bu obrazda', pcs:'ədəd', lookCta:'Obrazın geyimlərinə bax', lookNote:'Model şəkillərini admin paneldən əlavə edəcəyik — hələlik obrazlar məhsullardan yığılıb.',
        gridE:'Kataloq', gridH:'Hər fitə bir geyim.', streetE:'Küçə', streetH:'Cəsarətlə geyinirlər.', streetS:'Geyimlərimiz küçədə necə görünür. @milaisss qeyd et — şəklin burada ola bilər.', streetPh:'Burada alıcıların şəkilləri olacaq', shopIt:'Geyimlərə bax',
        c1:'Axşam dayanacağı', c2:'Pilləkən, günorta', fabE:'Keyfiyyət', fabH:'Vicdanla tikilib.', fabS:'Hər geyim — əldə hiss olunan sıx parça və yüzlərlə yuyulmaya dözən tikişlər.', fabPh:'Parçanın yaxın planı',
        f1:'Sıx futer', f1p:'İçi yumşaq, çölü sıx toxuma, manjetlər yuyulmadan sonra formasını saxlayır.', f2:'İkiqat kapüşon', f2p:'İki qat parça və yastı bağlar — kapüşon formasını itirmir.', f3:'Sıx pambıq', f3p:'Sərbəst biçim, düşük çiyin, ikiqat tikişli yaxa.',
        bandH:'Sadə geyimlər. Cəsur üslub.', bandP:'Yeni droplar, qapalı endirimlər və mağaza xəbərləri ilk sənə.', bandPh:'Kampaniya şəkli', fShop:'Mağaza', fHelp:'Kömək', fAbout:'milaisss', fFollow:'Sosial şəbəkələr', fNew:'Yeniliklər', fCart:'Səbət', fFav:'Seçilmişlər', fOrders:'Sifarişlərim', fFaq:'Suallar', fSupport:'Dəstək', fOffer:'Oferta', fRet:'7 gün qaytarma', fShip:'850 000 sumdan pulsuz çatdırılma' },
-  en:{ nav1:'Shop', nav2:'New in', nav3:'Lookbook', nav4:'FAQ', drag:'Drag the orbit', size:'Size', guide:'Size guide', more:'View details', catsE:'Shop by category', catsH:'Start with the fit.', all:'View all', styles:'styles',
+  en:{ nav1:'Shop', nav2:'New in', nav3:'Lookbook', nav4:'FAQ', nav5:'Reviews', drag:'Drag the orbit', size:'Size', guide:'Size guide', more:'View details', catsE:'Shop by category', catsH:'Start with the fit.', all:'View all', styles:'styles',
        lookE:'The lookbook', lookH:'Shop the look.', lookS:'Looks styled head to toe. Tap a piece to open it.', inLook:'In this look', pcs:'pieces', lookCta:'Shop the pieces', lookNote:'Model photos will come from the admin panel — for now looks are built from products.',
        gridE:'The catalog', gridH:'A piece for every fit.', streetE:'Street file', streetH:'Worn loud.', streetS:'How our pieces look on the street. Tag @milaisss to be featured.', streetPh:'Customer photos will appear here', shopIt:'Shop the pieces',
        c1:'Night garage', c2:'Stairwell, noon', fabE:'Made to last', fabH:'Built heavy.', fabS:'Every piece starts with fabric you can feel, finished to survive a hundred washes.', fabPh:'Fabric close-up',
@@ -6551,15 +6554,26 @@ function nxScrollTo(el){
   const home = document.getElementById('home');
   if (home && !home.classList.contains('active')) showScreen('home');
   const off = parseFloat(getComputedStyle(el).scrollMarginTop) || 96;
-  const from = window.scrollY, to = Math.max(0, el.getBoundingClientRect().top + window.scrollY - off), dist = to - from;
+  // цель считаем заново каждый кадр: пока едем, догружаются картинки и страница может сдвинуться — всё равно останавливаемся точно на блоке
+  const target = () => Math.min(document.documentElement.scrollHeight - innerHeight, Math.max(0, el.getBoundingClientRect().top + window.scrollY - off));
+  const from = window.scrollY, dist = target() - from;
   if (Math.abs(dist) < 2) return;
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ window.scrollTo(0, to); return; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ window.scrollTo(0, target()); return; }
   const dur = Math.min(1500, Math.max(700, Math.abs(dist) * .35)); // дальше — чуть дольше, но не дольше 1,5 с
   const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   cancelAnimationFrame(nxScrollRaf); const t0 = performance.now();
+  let fix = 0;
   const stop = () => { cancelAnimationFrame(nxScrollRaf); removeEventListener('wheel', stop); removeEventListener('touchstart', stop); };
   addEventListener('wheel', stop, { passive:true, once:true }); addEventListener('touchstart', stop, { passive:true, once:true }); // покупатель сам крутит — не мешаем
-  (function step(now){ const k = Math.min(1, Math.max(0, (now - t0) / dur)); window.scrollTo(0, from + dist * ease(k)); if (k < 1) nxScrollRaf = requestAnimationFrame(step); else stop(); })(t0);
+  (function step(now){
+    const k = Math.min(1, Math.max(0, (now - t0) / dur));
+    const to = target();
+    window.scrollTo(0, from + (to - from) * ease(k));
+    if (k < 1) { nxScrollRaf = requestAnimationFrame(step); return; }
+    // доводка: если после остановки блок ещё сдвинулся (догрузилось фото) — мягко подправляем несколько кадров
+    if (Math.abs(target() - window.scrollY) > 2 && fix++ < 30){ window.scrollTo(0, window.scrollY + (target() - window.scrollY) * .35); nxScrollRaf = requestAnimationFrame(step); return; }
+    stop();
+  })(t0);
 }
 window.nxScrollTo = nxScrollTo;
 window.nxPieceStates = () => nxPieceStates();
