@@ -6306,7 +6306,7 @@ function wireOrbit(){
   box.addEventListener('pointerdown', e => { drag = { x:e.clientX, p:pos, moved:false }; box.setPointerCapture(e.pointerId); box.classList.add('drag'); });
   box.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) drag.moved = true; if (!drag.moved) return; pos = target = Math.max(-.4, Math.min(orb.length - .6, drag.p - dx / Math.max(120, box.clientWidth * .22))); cancelAnimationFrame(raf); layout(); const r = Math.round(pos); if (r !== active && r >= 0 && r < orb.length) setActive(r); });
   const end = e => { if (!drag) return; box.classList.remove('drag'); const was = drag; drag = null;
-    if (!was.moved){ const el = document.elementFromPoint(e.clientX, e.clientY); const it = el && el.closest('.nx-item'); if (it){ const i = +it.dataset.i; if (i === active){ it.classList.add('nx-pop'); setTimeout(() => { openProduct(orb[i].id); it.classList.remove('nx-pop'); }, 260); } else goTo(i); } return; }
+    if (!was.moved){ const el = document.elementFromPoint(e.clientX, e.clientY); const it = el && el.closest('.nx-item'); if (it){ const i = +it.dataset.i; if (i === active){ touch(); const pid = orb[i].id; it.classList.add('nx-pop'); setTimeout(() => { openProduct(pid); it.classList.remove('nx-pop'); }, 260); } else goTo(i); } return; }
     goTo(Math.round(pos)); };
   box.addEventListener('pointerup', end); box.addEventListener('pointercancel', () => { drag = null; box.classList.remove('drag'); goTo(Math.round(pos)); });
   const fromTrack = e => { const r = track.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (orb.length - 1); };
@@ -6315,7 +6315,10 @@ function wireOrbit(){
   track.addEventListener('pointermove', e => { if (td){ target = fromTrack(e); animate(); } });
   track.addEventListener('pointerup', () => { td = false; goTo(Math.round(target)); });
   $('nxSz').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (b && orb[active]) openProduct(orb[active].id, undefined, b.dataset.s); });
-  $('nxMore').onclick = () => { const it = document.querySelector(`.nx-item[data-i="${active}"]`); if (it) it.classList.add('nx-pop'); setTimeout(() => { orb[active] && openProduct(orb[active].id); if (it) it.classList.remove('nx-pop'); }, 260); };
+  $('nxMore').onclick = () => { // запоминаем товар в момент нажатия и останавливаем вращение — иначе орбита успевала повернуться и открывался соседний товар
+    touch(); const i = active, p = orb[i]; if (!p) return;
+    const it = document.querySelector(`.nx-item[data-i="${i}"]`); if (it) it.classList.add('nx-pop');
+    setTimeout(() => { openProduct(p.id); if (it) it.classList.remove('nx-pop'); }, 260); };
   // автовращение: каждые 1,5 с — следующий товар; пауза при наведении/перетаскивании и 5 с после касания
   let idleUntil = 0, hover = false;
   const touch = () => { idleUntil = Date.now() + 5000; };
