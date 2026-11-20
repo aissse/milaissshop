@@ -6238,6 +6238,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape'){ const m = document.g
 /* ---------- 1. орбита ---------- */
 let orb = [], pos = 0, target = 0, active = -1, raf = 0;
 function buildOrbit(){
+  if (!window.NXHOME_READY) return; // пока не пришли настройки главной — орбиту не строим, иначе мелькают товары не из админки
   const H = window.NXHOME || {}, chosen = (H.orbit || []).map(id => products.find(p => p.id === id)).filter(Boolean);
   const list = chosen.length ? chosen.slice(0, 7) : products.filter(inStockN).slice(0, 7);
   const sig = lang + '|' + list.map(p => p.id + (p.image || '') + (p.showcaseImage || '') + (p.name || '')).join('|');
@@ -6459,7 +6460,16 @@ window.nxInit = function(){
       window.__nxGuideKind = kind; const b = document.getElementById('nxDetailGuide'); if (b) b.hidden = !kind; }catch(e){}
     return r; };
   goToCheckoutFlow = function(){ showToast('🧪 Тестовый режим: оформление заказа отключено'); };
-  try{ db.collection('test_settings').doc('home').onSnapshot(d => { window.NXHOME = d.exists ? d.data() : null; nxRender(true); }, e => console.warn('home', e)); }catch(e){}
+  // настройки главной: сначала из памяти браузера (мгновенно и без «чужих» товаров), потом свежие из базы
+  const HOME_KEY = 'milaisss_home_cache_' + (location.pathname.indexOf('test') >= 0 ? 't' : 'l');
+  try{ const c = JSON.parse(localStorage.getItem(HOME_KEY) || 'null'); if (c && typeof c === 'object'){ window.NXHOME = c; window.NXHOME_READY = true; } }catch(e){}
+  const homeReady = () => { if (!window.NXHOME_READY){ window.NXHOME_READY = true; nxRender(true); } };
+  setTimeout(homeReady, 2500); // база не ответила — показываем автоматическую орбиту
+  try{ db.collection('test_settings').doc('home').onSnapshot(d => {
+      window.NXHOME = d.exists ? d.data() : null; window.NXHOME_READY = true;
+      try{ if (window.NXHOME) localStorage.setItem(HOME_KEY, JSON.stringify(window.NXHOME)); else localStorage.removeItem(HOME_KEY); }catch(e){}
+      nxRender(true);
+    }, e => { console.warn('home', e); homeReady(); }); }catch(e){ homeReady(); }
   nxInit();
 })();
 </script>
