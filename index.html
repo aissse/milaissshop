@@ -1129,8 +1129,19 @@
   .nx-piece .nm small{ display:block; font-size:9px; font-weight:800; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
   .nx-piece .nm div{ font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .nx-piece .nm span{ font-size:12px; color:var(--muted); }
-  .nx-plus{ width:30px; height:30px; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; flex:none; }
-  .nx-plus svg{ width:13px; height:13px; }
+  .nx-plus{ position:relative; width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--ink); display:grid; place-items:center; flex:none; cursor:pointer; padding:0;
+    transition:background .35s cubic-bezier(.2,.7,.2,1), border-color .35s ease, color .35s ease, transform .35s cubic-bezier(.3,1.6,.5,1); }
+  .nx-plus svg{ grid-area:1 / 1; width:14px; height:14px; transition:opacity .25s ease, transform .4s cubic-bezier(.3,1.6,.5,1); }
+  .nx-plus .ck{ opacity:0; transform:scale(.3) rotate(-30deg); }
+  .nx-plus:hover{ border-color:var(--ink); }
+  .nx-plus.on{ background:var(--burgundy, #6A1626); border-color:var(--burgundy, #6A1626); color:#fff; transform:scale(1.06); }
+  .nx-plus.on svg:not(.ck){ opacity:0; transform:scale(.3) rotate(90deg); }
+  .nx-plus.on .ck{ opacity:1; transform:none; }
+  .nx-szpick{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; max-height:0; overflow:hidden; opacity:0; padding:0 8px 0 78px; transition:max-height .35s ease, opacity .3s ease, padding .35s ease; }
+  .nx-szpick.open{ max-height:120px; opacity:1; padding:2px 8px 10px 78px; }
+  .nx-szpick span{ font-size:10px; font-weight:800; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
+  .nx-szpick button{ height:30px; min-width:38px; padding:0 10px; border-radius:15px; border:1px solid var(--line); background:transparent; color:var(--ink); font:600 12px 'Inter',sans-serif; cursor:pointer; }
+  .nx-szpick button:hover{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
   .nx-cta{ width:100%; height:48px; border:0; border-radius:24px; background:var(--orange); color:var(--on-orange); font:800 14px 'Inter',sans-serif; cursor:pointer; margin-top:16px; display:flex; align-items:center; justify-content:center; gap:8px; }
   .nx-note{ font-size:11px; color:var(--muted); margin-top:16px; }
 
@@ -1806,7 +1817,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261120-188";
+  const CURRENT_VERSION = "20261120-189";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -6119,6 +6130,7 @@ const $ = id => document.getElementById(id);
 const escN = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const CHECK = '<svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const CAM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
 
 const colorsOfN = p => (p.colors && p.colors.length) ? p.colors : [{ name:'Стандарт', stock:p.stock || 0 }];
@@ -6386,8 +6398,10 @@ function showLook(i, user){
   });
   $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.classList.toggle('on', +b.dataset.i === li));
   const l = looks[li].pieces.map(pc => pc.p);
-  $('nxPieces').innerHTML = l.map((p, k) => `<div class="nx-piece" data-id="${escN(p.id)}"><div class="th">${picHTML(p)}<b>${k + 1}</b></div><div class="nm"><small>milaisss · ${escN(typeof translateCategory === 'function' ? translateCategory(p.category || '') : (p.category || ''))}</small><div>${escN(nameOf(p))}</div><span>${fmt(typeof effPrice === 'function' ? effPrice(p) : p.price)}</span></div><span class="nx-plus">${PLUS}</span></div>`).join('');
-  $('nxPieces').querySelectorAll('.nx-piece').forEach(r => r.onclick = () => openProduct(r.dataset.id));
+  $('nxPieces').innerHTML = l.map((p, k) => `<div class="nx-piece" data-id="${escN(p.id)}"><div class="th">${picHTML(p)}<b>${k + 1}</b></div><div class="nm"><small>milaisss · ${escN(typeof translateCategory === 'function' ? translateCategory(p.category || '') : (p.category || ''))}</small><div>${escN(nameOf(p))}</div><span>${fmt(typeof effPrice === 'function' ? effPrice(p) : p.price)}</span></div><button type="button" class="nx-plus" aria-label="+">${PLUS}${CHECK}</button></div><div class="nx-szpick" data-for="${escN(p.id)}"></div>`).join('');
+  $('nxPieces').querySelectorAll('.nx-piece').forEach(r => r.onclick = e => { if (e.target.closest('.nx-plus')) return; openProduct(r.dataset.id); });
+  $('nxPieces').querySelectorAll('.nx-plus').forEach(b => b.onclick = e => { e.stopPropagation(); nxTogglePiece(b.closest('.nx-piece').dataset.id); });
+  nxPieceStates();
   $('nxPcs').textContent = `${l.length} ${T('pcs')}`;
   if (user) schedule();
 }
@@ -6401,6 +6415,37 @@ function wireLooks(){
   let sx = null; const st = $('nxStage');
   st.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive:true });
   st.addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) showLook(li + (dx < 0 ? 1 : -1), true); sx = null; });
+}
+
+/* ---------- «+» у вещи образа: в корзину / убрать из корзины ---------- */
+const inCartN = id => cart.some(c => c.productId === id);
+function nxPieceStates(){ document.querySelectorAll('#nxPieces .nx-piece').forEach(r => { const on = inCartN(r.dataset.id); const b = r.querySelector('.nx-plus'); b.classList.toggle('on', on); b.setAttribute('aria-label', on ? '✓' : '+'); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+function nxPutInCart(p, c, size){ // тот же формат позиции, что у кнопки «Добавить в корзину» в карточке
+  if (getSizeStock(p, c, size) <= 0) return false;
+  if (!cart.some(x => x.productId === p.id && x.size === size && x.colorName === c.name))
+    cart.push({ productId:p.id, name:p.name, image:c.image || p.image || '', emoji:p.emoji || '👟', price:effPrice(p), oldPrice:Number(p.price || 0), discount:discOf(p), size, colorName:c.name, qty:1 });
+  updateCartBadge(); if (typeof tg !== 'undefined' && tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+  showToast(t('addedCart')); return true;
+}
+function nxTogglePiece(id){
+  const p = products.find(x => x.id === id); if (!p) return;
+  const box = document.querySelector(`#nxPieces .nx-szpick[data-for="${CSS.escape(id)}"]`);
+  if (inCartN(id)){ // убираем из корзины все размеры этой вещи
+    for (let i = cart.length - 1; i >= 0; i--) if (cart[i].productId === id) cart.splice(i, 1);
+    updateCartBadge(); if (box) box.classList.remove('open'); return;
+  }
+  const colors = colorsOfN(p), sizes = sizesOfN(p);
+  const opts = []; colors.forEach(c => sizes.forEach(sz => { if (getSizeStock(p, c, sz) > 0) opts.push({ c, sz }); }));
+  if (!sizes.length){ const c = colors.find(c => getSizeStock(p, c, undefined) > 0); if (c) nxPutInCart(p, c, undefined); else showToast(t('noMoreStock')); return; }
+  if (!opts.length){ showToast(t('noMoreStock')); return; }
+  if (opts.length === 1){ nxPutInCart(p, opts[0].c, opts[0].sz); return; }
+  if (!box) return;
+  if (box.classList.contains('open')){ box.classList.remove('open'); return; }
+  const multi = new Set(opts.map(o => o.c.name)).size > 1; // несколько цветов — подписываем цвет у размера
+  box.innerHTML = `<span>${escN(T('size'))}:</span>` + opts.map((o, k) => `<button type="button" data-k="${k}">${escN(o.sz)}${multi ? ` · ${escN(o.c.name)}` : ''}</button>`).join('');
+  box.querySelectorAll('button').forEach(b => b.onclick = e => { e.stopPropagation(); const o = opts[+b.dataset.k]; if (nxPutInCart(p, o.c, o.sz)) box.classList.remove('open'); });
+  document.querySelectorAll('#nxPieces .nx-szpick.open').forEach(x => x !== box && x.classList.remove('open'));
+  box.classList.add('open');
 }
 
 /* ---------- 5. качество: подписи по очереди ---------- */
@@ -6430,6 +6475,7 @@ function nxScrollTo(el){
   (function step(now){ const k = Math.min(1, Math.max(0, (now - t0) / dur)); window.scrollTo(0, from + dist * ease(k)); if (k < 1) nxScrollRaf = requestAnimationFrame(step); else stop(); })(t0);
 }
 window.nxScrollTo = nxScrollTo;
+window.nxPieceStates = () => nxPieceStates();
 
 /* ---------- тексты на языке сайта ---------- */
 function texts(){ document.querySelectorAll('[data-nx]').forEach(el => { el.textContent = T(el.dataset.nx); }); }
@@ -6472,6 +6518,7 @@ window.nxInit = function(){
 <script>
 /* подключаем новую главную к данным сайта */
 (function(){
+  const _ucb = updateCartBadge; updateCartBadge = function(){ const r = _ucb.apply(this, arguments); try{ window.nxPieceStates && window.nxPieceStates(); }catch(e){} return r; };
   const _rmg = renderMainGrid; renderMainGrid = function(){ const r = _rmg.apply(this, arguments); try{ nxRender(); }catch(e){} return r; };
   // таблица размеров в карточке: у верха/двоек и у обуви
   const _op = openProduct; openProduct = function(){ const r = _op.apply(this, arguments);
