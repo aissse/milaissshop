@@ -1326,6 +1326,16 @@
   .nx-rfoot a{ display:block; color:var(--text-soft); font-size:12px; text-decoration:underline; text-underline-offset:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .nx-rav{ flex:0 0 32px; height:32px; border-radius:50%; background:var(--accent-strong); color:#fff; display:grid; place-items:center; font-weight:800; font-size:13px; }
   html[data-theme="dark"] .nx-rav{ color:#17110F; }
+  .nx-rmq{ overflow:hidden; margin:0 -20px; padding:2px 0 6px; -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); }
+  .nx-rtrack{ display:flex; width:max-content; animation:nxRevMarq 40s linear infinite; will-change:transform; }
+  .nx-rset, .nx-runit{ display:flex; }
+  .nx-runit{ gap:12px; padding-right:60px; }
+  .nx-rmq .nx-rcard{ flex:0 0 300px; width:300px; }
+  .nx-rmq.hold .nx-rtrack{ animation-play-state:paused; }
+  @media (hover:hover){ .nx-rmq:hover .nx-rtrack{ animation-play-state:paused; } }
+  @keyframes nxRevMarq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  @media (prefers-reduced-motion:reduce){ .nx-rmq{ overflow-x:auto; } .nx-rtrack{ animation:none; } .nx-rset[aria-hidden]{ display:none; } }
+  @media (max-width:640px){ .nx-rmq .nx-rcard{ flex-basis:270px; width:270px; } }
   @media (max-width:640px){ .nx-rrow{ grid-auto-columns:82%; margin:0 -20px; padding:0 20px 6px; scroll-padding:0 20px; } .nx-rnum{ font-size:44px; } }
 </style>
 </head>
@@ -1846,7 +1856,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261120-195";
+  const CURRENT_VERSION = "20261120-196";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -3013,8 +3023,24 @@ function renderRatingSummary(){
       <div><div class="nx-eyebrow">${L.e}</div><h2 class="nx-h2">${L.h}</h2></div>
       <div class="nx-rsum"><span class="nx-rnum">${avg.toFixed(1)}</span><div><span class="nx-rbig" aria-label="${avg.toFixed(1)}/5"><span class="nx-rbg">★★★★★</span><span class="nx-rfg" style="width:${pct}%">★★★★★</span></span><small>${approved.length} ${L.n}</small></div></div>
     </div>
-    ${cards ? `<div class="nx-rrow">${cards}</div>` : ''}`;
+    ${cards ? (() => {
+      // бегущая лента: карточки + пустое место, повторяем, чтобы лента была шире экрана, и дублируем для бесшовного круга
+      const n = latest.length, unitW = n * 312 + 60;
+      const k = Math.max(1, Math.ceil(1800 / unitW));
+      const unit = `<div class="nx-runit">${cards}</div>`;
+      const set = unit.repeat(k);
+      const dur = Math.round(k * n * 6);
+      return `<div class="nx-rmq"><div class="nx-rtrack" style="animation-duration:${dur}s"><div class="nx-rset">${set}</div><div class="nx-rset" aria-hidden="true">${set}</div></div></div>`;
+    })() : ''}`;
+  wrap.querySelectorAll('.nx-rset[aria-hidden] a, .nx-rset .nx-runit + .nx-runit a').forEach(a => a.setAttribute('tabindex', '-1'));
   wrap.querySelectorAll('a[data-pid]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); openProduct(a.dataset.pid); }));
+  const mq = wrap.querySelector('.nx-rmq');
+  if (mq){
+    const hold = on => mq.classList.toggle('hold', on);
+    mq.addEventListener('touchstart', () => hold(true), { passive:true });
+    mq.addEventListener('touchend', () => hold(false));
+    mq.addEventListener('touchcancel', () => hold(false));
+  }
 }
 
 function submitNewsletter(){
