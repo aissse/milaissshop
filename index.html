@@ -314,6 +314,7 @@
   .myrev .mr-stars{ color:var(--star); font-size:13px; margin:4px 0; }
   .myrev .mr-text{ font-size:13px; line-height:1.4; color:var(--text-soft, var(--ink)); }
   .myrev img{ width:64px; height:64px; border-radius:12px; object-fit:cover; margin-top:8px; display:block; }
+  .myrev .mr-photos{ display:flex; gap:6px; } .myrev .mr-photos img{ margin-top:8px; }
   .orders-chev{ font-size:16px; color:var(--muted); transition:transform .5s cubic-bezier(.32,.72,0,1); }
   .orders-chev.closed{ transform:rotate(-90deg); }
   /* шрифт заголовков вкладок в профиле (лого и остальной текст не меняются) */
@@ -384,7 +385,13 @@
   .review-form button:disabled{ background:var(--muted); cursor:not-allowed; }
   .review-photo-btn{ display:inline-flex; align-items:center; gap:6px; border:1px dashed var(--line); border-radius:10px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer; margin-bottom:6px; color:var(--ink); background:var(--surface); }
   .review-photo-preview{ margin-bottom:6px; }
-  .review-photo-preview img{ max-width:110px; max-height:110px; border-radius:10px; display:block; object-fit:cover; }
+  .review-photo-preview{ display:flex; gap:8px; flex-wrap:wrap; }
+  .review-photo-preview:empty{ display:none; }
+  .review-photo-preview .rp-th{ position:relative; width:76px; height:76px; }
+  .review-photo-preview img{ width:76px; height:76px; border-radius:12px; display:block; object-fit:cover; }
+  .review-photo-preview .rp-x{ position:absolute; top:-6px; right:-6px; width:24px; height:24px; border-radius:50%; border:0; background:var(--ink, #17110F); color:var(--bg, #fff); font-size:16px; line-height:24px; padding:0; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+  .stars.nudge{ animation:revNudge .4s; }
+  @keyframes revNudge{ 25%{ transform:translateX(-6px); } 50%{ transform:translateX(6px); } 75%{ transform:translateX(-3px); } }
   .review-photo-preview .rp-remove{ font-size:11px; color:var(--err-text, #c0392b); cursor:pointer; margin-top:4px; display:inline-block; }
 
   .reviews-list{ padding:0 20px 20px; }
@@ -581,6 +588,8 @@
   .profile-phone{ font-size:12px; color:var(--muted); margin-top:2px; }
   .review-item .rauthor{ font-weight:700; color:var(--ink); }
   .review-item .rphoto{ width:100%; max-width:200px; border-radius:10px; margin-top:8px; display:block; cursor:zoom-in; }
+  .review-item .rphotos{ display:flex; gap:8px; margin-top:8px; }
+  .review-item .rphotos .rphoto{ width:calc((100% - 16px) / 3); max-width:140px; aspect-ratio:1; object-fit:cover; margin-top:0; }
   .support-fab{ position:fixed; right:20px; bottom:110px; width:52px; height:52px; border-radius:50%; background:var(--orange); display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.2); z-index:60; transition:transform .35s ease, opacity .35s ease; }
   .support-fab.hidden{ transform:translateX(90px); opacity:0; }
   .support-fab svg{ width:28px; height:28px; }
@@ -1329,6 +1338,7 @@
   .nx-rfoot a{ display:block; color:var(--text-soft); font-size:12px; text-decoration:underline; text-underline-offset:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .nx-rav{ flex:0 0 32px; height:32px; border-radius:50%; background:var(--accent-strong); color:#fff; display:grid; place-items:center; font-weight:800; font-size:13px; }
   html[data-theme="dark"] .nx-rav{ color:#17110F; }
+  .nx-rph{ display:flex; gap:6px; } .nx-rph img{ width:64px; height:64px; border-radius:10px; object-fit:cover; display:block; }
   .nx-rmq{ overflow:hidden; margin:0 -20px; padding:2px 0 6px; -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); }
   .nx-rtrack{ display:flex; width:max-content; animation:nxRevMarq 40s linear infinite; will-change:transform; }
   .nx-rset, .nx-runit{ display:flex; }
@@ -1859,7 +1869,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261121-198";
+  const CURRENT_VERSION = "20261121-199";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2655,11 +2665,11 @@ const STR_ORDLOAD = {
 };
 Object.keys(STR_ORDLOAD).forEach(l => Object.assign(STR[l], STR_ORDLOAD[l]));
 const STR_FIX172 = {
-  ru:{ revLeave:"Оставить отзыв", revDoneLbl:"Отзыв отправлен", revPlaceholder:"Расскажите о товаре...", revAddPhoto:"Добавить фото (необязательно)", revReplacePhoto:"Заменить фото", revUploading:"Загружаем фото...", revSending:"Отправка...", revNeedText:"Напишите пару слов о товаре", revNone:"Пока нет отзывов по этому товару", revTitle:"Отзывы", fltPrice:"Цена, сум", fltFrom:"От", fltTo:"До", fltApply:"Применить", avChangeAny:"Можно сменить в любой момент", avLoading:"Загружаем аватары..." },
-  uz:{ revLeave:"Sharh qoldirish", revDoneLbl:"Sharh yuborildi", revPlaceholder:"Mahsulot haqida yozing...", revAddPhoto:"Rasm qo‘shish (ixtiyoriy)", revReplacePhoto:"Rasmni almashtirish", revUploading:"Rasm yuklanmoqda...", revSending:"Yuborilmoqda...", revNeedText:"Mahsulot haqida bir-ikki so‘z yozing", revNone:"Bu mahsulot haqida hali sharhlar yo‘q", revTitle:"Sharhlar", fltPrice:"Narx, so‘m", fltFrom:"Dan", fltTo:"Gacha", fltApply:"Qo‘llash", avChangeAny:"Istalgan vaqtda o‘zgartirish mumkin", avLoading:"Avatarlar yuklanmoqda..." },
-  tr:{ revLeave:"Yorum yap", revDoneLbl:"Yorum gönderildi", revPlaceholder:"Ürün hakkında yazın...", revAddPhoto:"Fotoğraf ekle (isteğe bağlı)", revReplacePhoto:"Fotoğrafı değiştir", revUploading:"Fotoğraf yükleniyor...", revSending:"Gönderiliyor...", revNeedText:"Ürün hakkında birkaç kelime yazın", revNone:"Bu ürün için henüz yorum yok", revTitle:"Yorumlar", fltPrice:"Fiyat, sum", fltFrom:"En az", fltTo:"En çok", fltApply:"Uygula", avChangeAny:"İstediğiniz zaman değiştirebilirsiniz", avLoading:"Avatarlar yükleniyor..." },
-  az:{ revLeave:"Rəy yaz", revDoneLbl:"Rəy göndərildi", revPlaceholder:"Məhsul haqqında yazın...", revAddPhoto:"Foto əlavə et (istəyə görə)", revReplacePhoto:"Fotonu dəyiş", revUploading:"Foto yüklənir...", revSending:"Göndərilir...", revNeedText:"Məhsul haqqında bir-iki söz yazın", revNone:"Bu məhsul üçün hələ rəy yoxdur", revTitle:"Rəylər", fltPrice:"Qiymət, sum", fltFrom:"Min", fltTo:"Maks", fltApply:"Tətbiq et", avChangeAny:"İstənilən vaxt dəyişmək olar", avLoading:"Avatarlar yüklənir..." },
-  en:{ revLeave:"Leave a review", revDoneLbl:"Review sent", revPlaceholder:"Tell us about the item...", revAddPhoto:"Add a photo (optional)", revReplacePhoto:"Replace photo", revUploading:"Uploading photo...", revSending:"Sending...", revNeedText:"Write a few words about the item", revNone:"No reviews for this item yet", revTitle:"Reviews", fltPrice:"Price, UZS", fltFrom:"From", fltTo:"To", fltApply:"Apply", avChangeAny:"You can change it any time", avLoading:"Loading avatars..." }
+  ru:{ revAddPhotos:"Добавить фото (до 3, необязательно)", revNeedStar:"Поставьте оценку звёздами", revMax3:"Можно прикрепить до 3 фото", revLeave:"Оставить отзыв", revDoneLbl:"Отзыв отправлен", revPlaceholder:"Расскажите о товаре (необязательно)", revAddPhoto:"Добавить фото (необязательно)", revReplacePhoto:"Заменить фото", revUploading:"Загружаем фото...", revSending:"Отправка...", revNeedText:"Напишите пару слов о товаре", revNone:"Пока нет отзывов по этому товару", revTitle:"Отзывы", fltPrice:"Цена, сум", fltFrom:"От", fltTo:"До", fltApply:"Применить", avChangeAny:"Можно сменить в любой момент", avLoading:"Загружаем аватары..." },
+  uz:{ revAddPhotos:"Rasm qo‘shish (3 tagacha, ixtiyoriy)", revNeedStar:"Yulduzcha bilan baho bering", revMax3:"3 tagacha rasm biriktirish mumkin", revLeave:"Sharh qoldirish", revDoneLbl:"Sharh yuborildi", revPlaceholder:"Mahsulot haqida yozing (ixtiyoriy)", revAddPhoto:"Rasm qo‘shish (ixtiyoriy)", revReplacePhoto:"Rasmni almashtirish", revUploading:"Rasm yuklanmoqda...", revSending:"Yuborilmoqda...", revNeedText:"Mahsulot haqida bir-ikki so‘z yozing", revNone:"Bu mahsulot haqida hali sharhlar yo‘q", revTitle:"Sharhlar", fltPrice:"Narx, so‘m", fltFrom:"Dan", fltTo:"Gacha", fltApply:"Qo‘llash", avChangeAny:"Istalgan vaqtda o‘zgartirish mumkin", avLoading:"Avatarlar yuklanmoqda..." },
+  tr:{ revAddPhotos:"Fotoğraf ekle (en fazla 3, isteğe bağlı)", revNeedStar:"Yıldızlarla puan verin", revMax3:"En fazla 3 fotoğraf ekleyebilirsiniz", revLeave:"Yorum yap", revDoneLbl:"Yorum gönderildi", revPlaceholder:"Ürün hakkında yazın (isteğe bağlı)", revAddPhoto:"Fotoğraf ekle (isteğe bağlı)", revReplacePhoto:"Fotoğrafı değiştir", revUploading:"Fotoğraf yükleniyor...", revSending:"Gönderiliyor...", revNeedText:"Ürün hakkında birkaç kelime yazın", revNone:"Bu ürün için henüz yorum yok", revTitle:"Yorumlar", fltPrice:"Fiyat, sum", fltFrom:"En az", fltTo:"En çok", fltApply:"Uygula", avChangeAny:"İstediğiniz zaman değiştirebilirsiniz", avLoading:"Avatarlar yükleniyor..." },
+  az:{ revAddPhotos:"Foto əlavə et (3-ə qədər, istəyə görə)", revNeedStar:"Ulduzlarla qiymət verin", revMax3:"3-ə qədər foto əlavə etmək olar", revLeave:"Rəy yaz", revDoneLbl:"Rəy göndərildi", revPlaceholder:"Məhsul haqqında yazın (istəyə görə)", revAddPhoto:"Foto əlavə et (istəyə görə)", revReplacePhoto:"Fotonu dəyiş", revUploading:"Foto yüklənir...", revSending:"Göndərilir...", revNeedText:"Məhsul haqqında bir-iki söz yazın", revNone:"Bu məhsul üçün hələ rəy yoxdur", revTitle:"Rəylər", fltPrice:"Qiymət, sum", fltFrom:"Min", fltTo:"Maks", fltApply:"Tətbiq et", avChangeAny:"İstənilən vaxt dəyişmək olar", avLoading:"Avatarlar yüklənir..." },
+  en:{ revAddPhotos:"Add photos (up to 3, optional)", revNeedStar:"Please rate with stars", revMax3:"You can attach up to 3 photos", revLeave:"Leave a review", revDoneLbl:"Review sent", revPlaceholder:"Tell us about the item (optional)", revAddPhoto:"Add a photo (optional)", revReplacePhoto:"Replace photo", revUploading:"Uploading photo...", revSending:"Sending...", revNeedText:"Write a few words about the item", revNone:"No reviews for this item yet", revTitle:"Reviews", fltPrice:"Price, UZS", fltFrom:"From", fltTo:"To", fltApply:"Apply", avChangeAny:"You can change it any time", avLoading:"Loading avatars..." }
 };
 Object.keys(STR_FIX172).forEach(l => Object.assign(STR[l], STR_FIX172[l]));
 
@@ -3012,14 +3022,15 @@ function renderRatingSummary(){
   const pct = Math.max(0, Math.min(100, avg / 5 * 100));
   const stars = n => { n = Math.round(n); return '★'.repeat(n) + '☆'.repeat(5 - n); };
   const ts = r => (r.createdAt && r.createdAt.toMillis) ? r.createdAt.toMillis() : (+r.createdAt || 0);
-  const latest = approved.filter(r => String(r.text||'').trim()).sort((a,b) => ts(b) - ts(a)).slice(0, 8);
+  const latest = approved.filter(r => String(r.text||'').trim() || revPhotosOf(r).length).sort((a,b) => ts(b) - ts(a)).slice(0, 8);
   const cards = latest.map(r => {
     const name = r.anonymous ? t('revAnonName') : (String(r.authorName||'').replace(/\s*\(@[^)]*\)/g,'').trim() || t('revBuyer'));
     const pr = products.find(p => p.id === r.productId);
     const prName = pr ? ((typeof getTranslatedProductName === 'function' ? getTranslatedProductName(pr) : pr.name) || pr.name || '') : '';
     return `<article class="nx-rcard">
       <div class="nx-rstars" aria-label="${Math.round(r.rating)}/5">${stars(r.rating)}</div>
-      <p class="nx-rtext">${escH(r.text)}</p>
+      ${String(r.text||'').trim() ? `<p class="nx-rtext">${escH(r.text)}</p>` : ''}
+      ${(() => { const ph = revPhotosOf(r); return ph.length ? `<div class="nx-rph">${ph.map(u => `<img src="${safeUrl(u)}" alt="" loading="lazy">`).join('')}</div>` : ''; })()}
       <div class="nx-rfoot"><span class="nx-rav">${escH(name.charAt(0).toUpperCase())}</span><div><b>${escH(name)}</b>${pr ? `<a href="#" data-pid="${escH(pr.id)}">${escH(prName)}</a>` : ''}</div></div>
     </article>`;
   }).join('');
@@ -4734,8 +4745,8 @@ function openReviews(){
             <div class="rev-stars">${r.rating ? '★'.repeat(r.rating)+'☆'.repeat(5-r.rating) : ''}</div>
           </div>
         </div>
-        <div class="rev-text">${escH(r.text)}${r.colorName ? ` <span class="hint" style="display:inline;">· ${t('revColor')}: ${escH(r.colorName)}</span>` : ''}</div>
-        ${safeUrl(r.photo) ? `<img class="rphoto" loading="lazy" alt="" src="${safeUrl(r.photo)}" onclick="openLightbox([this.getAttribute('src')], 0)">` : ''}
+        ${(r.text || r.colorName) ? `<div class="rev-text">${escH(r.text || '')}${r.colorName ? ` <span class="hint" style="display:inline;">· ${t('revColor')}: ${escH(r.colorName)}</span>` : ''}</div>` : ''}
+        ${(() => { const ph = revPhotosOf(r); return ph.length ? `<div class="rphotos">${ph.map((u, k) => `<img class="rphoto" loading="lazy" alt="" src="${safeUrl(u)}" data-k="${k}" onclick="openLightbox(Array.from(this.parentNode.querySelectorAll('img')).map(i => i.getAttribute('src')), ${k})">`).join('')}</div>` : ''; })()}
       </div>`;
     }).join('');
   }
@@ -5896,7 +5907,7 @@ function renderStatusList(orders){
   const wrap = document.getElementById('statusList'); if (!wrap) return;
   wrap.querySelectorAll('.review-form').forEach(f => {
     const key = f.id.slice(3), ta = document.getElementById('rt-' + key);
-    if (f.classList.contains('open') || (ta && ta.value)) _revDrafts[key] = { open: f.classList.contains('open'), text: ta ? ta.value : '' };
+    if (f.classList.contains('open') || (ta && ta.value) || (_revFiles[key] && _revFiles[key].length)) _revDrafts[key] = { open: f.classList.contains('open'), text: ta ? ta.value : '' };
   });
   try{ _renderStatusListInner(wrap, orders); } finally {
     Object.keys(_revDrafts).forEach(key => {
@@ -5905,6 +5916,7 @@ function renderStatusList(orders){
       if (ta && _revDrafts[key].text) ta.value = _revDrafts[key].text;
       const n = reviewStars[key]; if (n) document.querySelectorAll(`#stars-${key} span`).forEach(sp => sp.classList.toggle('on', Number(sp.getAttribute('data-n')) <= n));
     });
+    Object.keys(_revFiles).forEach(key => { const i = key.lastIndexOf('-'); renderReviewPhotos(key.slice(0, i), Number(key.slice(i + 1))); });
   }
 }
 function _renderStatusListInner(wrap, orders){
@@ -5932,7 +5944,7 @@ function renderMyReviews(){
   if (!mine.length){ wrap.innerHTML = `<div class="trk-empty">${t('noMyReviews')}</div>`; return; }
   wrap.innerHTML = mine.map(r => `<div class="myrev"><div class="mr-top"><span>${escH(r.productName || '')}${r.colorName ? ' · ' + escH(r.colorName) : ''}</span><span class="mr-st">${r.approved ? '✓' : t('revModeration')}</span></div>
     ${r.rating ? `<div class="mr-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>` : ''}
-    <div class="mr-text">${escH(r.text)}</div>${safeUrl(r.photo) ? `<img src="${safeUrl(r.photo)}" alt="">` : ''}</div>`).join('');
+    ${r.text ? `<div class="mr-text">${escH(r.text)}</div>` : ''}${(() => { const ph = revPhotosOf(r); return ph.length ? `<div class="mr-photos">${ph.map(u => `<img src="${safeUrl(u)}" alt="">`).join('')}</div>` : ''; })()}</div>`).join('');
 }
 
 function alreadyReviewed(order, it){
@@ -5948,9 +5960,9 @@ function reviewFormHTML(order, it, ii){
                 ${[1,2,3,4,5].map(n => `<span data-n="${n}" onclick="setStar('${order.id}',${ii},${n})">★</span>`).join('')}
               </div>
               <textarea id="rt-${order.id}-${ii}" placeholder="${escH(t('revPlaceholder'))}" rows="2"></textarea>
-              <label class="review-photo-btn" for="rp-${order.id}-${ii}">📷 <span id="rpLabel-${order.id}-${ii}">${t('revAddPhoto')}</span></label>
-              <input type="file" id="rp-${order.id}-${ii}" accept="image/*" onchange="previewReviewPhoto('${order.id}',${ii})" style="display:none;">
               <div class="review-photo-preview" id="rpPreview-${order.id}-${ii}"></div>
+              <label class="review-photo-btn" for="rp-${order.id}-${ii}" id="rpBtn-${order.id}-${ii}">📷 <span id="rpLabel-${order.id}-${ii}">${t('revAddPhotos')}</span></label>
+              <input type="file" id="rp-${order.id}-${ii}" accept="image/*" multiple onchange="previewReviewPhoto('${order.id}',${ii})" style="display:none;">
               <label class="anon-sw"><input type="checkbox" id="ra-${order.id}-${ii}"><span class="anon-track"><i></i></span><span class="anon-txt">${t('revAnon')}</span></label>
               <button id="rsBtn-${order.id}-${ii}" onclick="submitReview('${order.id}',${ii})">${t('sendBtn')}</button>
             </div>`;
@@ -6017,73 +6029,80 @@ function setStar(oi, ii, n){
 }
 function toggleReviewForm(oi, ii){ document.getElementById(`rf-${oi}-${ii}`).classList.toggle('open'); }
 
+const _revFiles = {}; // выбранные фото отзыва (до 3) — живут вне разметки, поэтому не теряются при перерисовке списка заказов
+function renderReviewPhotos(orderId, ii){
+  const key = `${orderId}-${ii}`, files = _revFiles[key] || [];
+  const preview = document.getElementById(`rpPreview-${key}`), btn = document.getElementById(`rpBtn-${key}`);
+  if (!preview) return;
+  (preview._urls || []).forEach(u => URL.revokeObjectURL(u));
+  preview._urls = files.map(f => URL.createObjectURL(f));
+  preview.innerHTML = preview._urls.map((u, k) => `<span class="rp-th"><img src="${u}" alt=""><button type="button" class="rp-x" aria-label="${escH(t('rmPhoto'))}" onclick="removeReviewPhoto('${orderId}',${ii},${k})">×</button></span>`).join('');
+  if (btn) btn.style.display = files.length >= 3 ? 'none' : '';
+}
 function previewReviewPhoto(orderId, ii){
-  const input = document.getElementById(`rp-${orderId}-${ii}`);
-  const preview = document.getElementById(`rpPreview-${orderId}-${ii}`);
-  const label = document.getElementById(`rpLabel-${orderId}-${ii}`);
-  const file = input.files && input.files[0];
-  if (!file){ preview.innerHTML = ''; if (label) label.textContent = t('revAddPhoto'); return; }
-  const url = URL.createObjectURL(file);
-  preview.innerHTML = `<img src="${url}"><span class="rp-remove" onclick="removeReviewPhoto('${orderId}',${ii})">${t('rmPhoto')}</span>`;
-  if (label) label.textContent = t('revReplacePhoto');
+  const key = `${orderId}-${ii}`;
+  const input = document.getElementById(`rp-${key}`);
+  const picked = Array.from((input && input.files) || []).filter(f => /^image\//.test(f.type || 'image/'));
+  const cur = _revFiles[key] || [];
+  const all = cur.concat(picked);
+  if (all.length > 3) showToast(t('revMax3'));
+  _revFiles[key] = all.slice(0, 3);
+  if (input) input.value = ''; // чтобы можно было выбрать то же фото ещё раз после удаления
+  renderReviewPhotos(orderId, ii);
 }
-function removeReviewPhoto(orderId, ii){
-  const input = document.getElementById(`rp-${orderId}-${ii}`);
-  input.value = '';
-  document.getElementById(`rpPreview-${orderId}-${ii}`).innerHTML = '';
-  const label = document.getElementById(`rpLabel-${orderId}-${ii}`);
-  if (label) label.textContent = t('revAddPhoto');
+function removeReviewPhoto(orderId, ii, k){
+  const key = `${orderId}-${ii}`;
+  (_revFiles[key] || []).splice(k, 1);
+  if (!(_revFiles[key] || []).length) delete _revFiles[key];
+  renderReviewPhotos(orderId, ii);
 }
+const revPhotosOf = r => { const a = Array.isArray(r.photos) ? r.photos.filter(u => safeUrl(u)) : []; return a.length ? a.slice(0, 3) : (safeUrl(r.photo) ? [r.photo] : []); };
 
 function submitReview(orderId, ii){
   const _o = (_lastOrders || []).find(x => x.id === orderId);
   const _it = _o && (_o.items || [])[ii];
   if (!_it) return;
+  const key = `${orderId}-${ii}`;
   const productId = _it.productId, productName = _it.name || '', colorName = _it.colorName || '';
-  const text = document.getElementById(`rt-${orderId}-${ii}`).value.trim();
-  const rating = reviewStars[`${orderId}-${ii}`] || null;
-  const fileInput = document.getElementById(`rp-${orderId}-${ii}`);
-  const file = fileInput && fileInput.files && fileInput.files[0];
-  const anonymous = document.getElementById(`ra-${orderId}-${ii}`).checked;
-  if (!text){ showToast(t('revNeedText')); const ta = document.getElementById(`rt-${orderId}-${ii}`); if (ta) ta.focus(); return; }
+  const ta = document.getElementById(`rt-${key}`);
+  const text = ta ? ta.value.trim() : '';
+  const rating = reviewStars[key] || null;
+  const files = (_revFiles[key] || []).slice(0, 3);
+  const anonEl = document.getElementById(`ra-${key}`);
+  const anonymous = !!(anonEl && anonEl.checked);
+  // обязательна только оценка звёздами; текст и фото (до 3) — по желанию
+  if (!rating){ showToast(t('revNeedStar')); const st = document.getElementById(`stars-${key}`); if (st){ st.classList.remove('nudge'); void st.offsetWidth; st.classList.add('nudge'); } return; }
 
-  const btn = document.getElementById(`rsBtn-${orderId}-${ii}`);
+  const btn = document.getElementById(`rsBtn-${key}`);
   if (btn && btn.disabled) return;
-  if (btn){ btn.disabled = true; btn.textContent = file ? t('revUploading') : t('revSending'); }
+  const unlock = () => { if (btn){ btn.disabled = false; btn.textContent = t('sendBtn'); } };
+  if (btn){ btn.disabled = true; btn.textContent = files.length ? t('revUploading') : t('revSending'); }
 
-  const finish = (photoUrl) => {
+  const finish = (photoUrls) => {
     const payload = {
       productId, productName, colorName: colorName || '', orderId, text, approved: false, createdAt: Date.now(),
       anonymous, authorName: anonymous ? '' : String(getCustomerName()||'').replace(/\s*\(@[^)]*\)/g,'').trim(), customerId: getCustomerId()
     };
-    if (rating) payload.rating = rating;
-    if (photoUrl) payload.photo = photoUrl;
+    payload.rating = rating;
+    if (photoUrls && photoUrls.length){ payload.photos = photoUrls; payload.photo = photoUrls[0]; } // photo — для старой админки и старых версий сайта
+    if (btn) btn.textContent = t('revSending');
     db.collection('reviews').add(payload).then(() => {
       showToast(t('revSent'));
-      try{ delete _revDrafts[`${orderId}-${ii}`]; }catch(e){}
+      try{ delete _revDrafts[key]; delete _revFiles[key]; }catch(e){}
       // форма могла уже перерисоваться (пришёл свой отзыв из базы) — тогда её просто нет
-      const rf = document.getElementById(`rf-${orderId}-${ii}`); if (rf) rf.classList.remove('open');
+      const rf = document.getElementById(`rf-${key}`); if (rf) rf.classList.remove('open');
     }, () => {
       showToast(t('revFail'));
-    }).finally(() => {
-      if (btn){ btn.disabled = false; btn.textContent = t('sendBtn'); }
-    });
+    }).finally(unlock);
   };
 
-  if (file){
-    if (!isImgbbConfigured()){
-      showToast(t('revNoPhotoCfg'));
-      finish(null);
-      return;
-    }
-    uploadReviewPhoto(file)
-      .then(url => finish(url))
-      .catch(() => {
-        showToast(t('photoFail'));
-        if (btn){ btn.disabled = false; btn.textContent = t('sendBtn'); }
-      });
+  if (files.length){
+    if (!isImgbbConfigured()){ showToast(t('revNoPhotoCfg')); finish([]); return; }
+    Promise.all(files.map(f => uploadReviewPhoto(f)))
+      .then(urls => finish(urls.filter(Boolean)))
+      .catch(() => { showToast(t('photoFail')); unlock(); });
   } else {
-    finish(null);
+    finish([]);
   }
 }
 
