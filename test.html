@@ -6339,7 +6339,7 @@ function buildCats(){
     if (document.hidden || !document.getElementById('home').classList.contains('active')) return;
     box.querySelectorAll('.nx-fade').forEach((f, k) => setTimeout(() => { const kids = [...f.children]; if (kids.length < 2) return; const i = kids.findIndex(x => x.classList.contains('on')); kids[i].classList.remove('on'); kids[(i + 1) % kids.length].classList.add('on'); }, k * 450));
   }, 3200);
-  box.querySelectorAll('.nx-cat').forEach(b => b.onclick = () => { selectMainCategory(b.dataset.c); const a = $('productsAnchor'); if (a) a.scrollIntoView({ behavior:'smooth', block:'start' }); });
+  box.querySelectorAll('.nx-cat').forEach(b => b.onclick = () => { selectMainCategory(b.dataset.c); nxScrollTo($('productsAnchor')); });
 }
 
 /* ---------- 3. образы (пока собираются из товаров: верх + низ + обувь) ---------- */
@@ -6414,6 +6414,25 @@ function wireFab(){
   show(0); fT = setInterval(() => show(fi + 1), 5000);
 }
 
+/* ---------- плавная прокрутка к блоку (своя анимация: одинаково мягко во всех браузерах, вкл. Safari) ---------- */
+let nxScrollRaf = 0;
+function nxScrollTo(el){
+  if (!el) return;
+  const home = document.getElementById('home');
+  if (home && !home.classList.contains('active')) showScreen('home');
+  const off = parseFloat(getComputedStyle(el).scrollMarginTop) || 96;
+  const from = window.scrollY, to = Math.max(0, el.getBoundingClientRect().top + window.scrollY - off), dist = to - from;
+  if (Math.abs(dist) < 2) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ window.scrollTo(0, to); return; }
+  const dur = Math.min(1500, Math.max(700, Math.abs(dist) * .35)); // дальше — чуть дольше, но не дольше 1,5 с
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  cancelAnimationFrame(nxScrollRaf); const t0 = performance.now();
+  const stop = () => { cancelAnimationFrame(nxScrollRaf); removeEventListener('wheel', stop); removeEventListener('touchstart', stop); };
+  addEventListener('wheel', stop, { passive:true, once:true }); addEventListener('touchstart', stop, { passive:true, once:true }); // покупатель сам крутит — не мешаем
+  (function step(now){ const k = Math.min(1, Math.max(0, (now - t0) / dur)); window.scrollTo(0, from + dist * ease(k)); if (k < 1) nxScrollRaf = requestAnimationFrame(step); else stop(); })(t0);
+}
+window.nxScrollTo = nxScrollTo;
+
 /* ---------- тексты на языке сайта ---------- */
 function texts(){ document.querySelectorAll('[data-nx]').forEach(el => { el.textContent = T(el.dataset.nx); }); }
 function revealSetup(){
@@ -6442,7 +6461,7 @@ window.nxRender = function(force){ // перестраиваем только к
 window.nxInit = function(){
   texts(); wireOrbit(); wireLooks(); wireFab(); rescan = revealSetup();
   document.querySelectorAll('[data-nxgo]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const g = a.dataset.nxgo;
-    if (g.startsWith('#')){ const el = document.querySelector(g); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }
+    if (g.startsWith('#')) nxScrollTo(document.querySelector(g));
     else if (g === 'support'){ e.stopPropagation(); showScreen('profile'); setTimeout(() => { if (!document.body.classList.contains('sf-open')) toggleSupportMenu(); }, 60); } // меню WhatsApp/Telegram видно на экране профиля
     else if (g === 'cart' || g === 'favorites' || g === 'profile') showScreen(g);
     else if (g === 'offer') location.href = 'oferta.html';
