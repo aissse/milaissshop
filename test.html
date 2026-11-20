@@ -1248,7 +1248,9 @@
   .nx-pic > canvas{ filter:blur(5px); pointer-events:none; }
   .nx-pic > img.nx-on{ -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 2%, #000 98%, transparent 100%), linear-gradient(180deg, transparent 0, #000 2%, #000 98%, transparent 100%); -webkit-mask-composite:source-in;
             mask-image:linear-gradient(90deg, transparent 0, #000 2%, #000 98%, transparent 100%), linear-gradient(180deg, transparent 0, #000 2%, #000 98%, transparent 100%); mask-composite:intersect; }
-  .nx-pic > img.blend{ mix-blend-mode:normal !important; } /* смешиваем один раз — всю группу (фото + продолжение фона) */
+  .nx-pic > img.blend{ mix-blend-mode:normal !important; }
+  html[data-theme="dark"] .nx-pic > canvas{ display:none; } /* ночью продление белого фона не нужно — оно и давало светлый ореол */
+  html[data-theme="dark"] .nx-pic > img.blend:not(.nx-cut){ border-radius:14px; } /* смешиваем один раз — всю группу (фото + продолжение фона) */
   html:not([data-theme="dark"]) .nx-cat .nx-fade > .nx-pic, html:not([data-theme="dark"]) .nx-piece .th .nx-pic{ mix-blend-mode:multiply; }
   .nx-cat .nx-fade{ left:13%; right:13%; top:9%; height:64%; }
 
@@ -6268,6 +6270,80 @@ function nxExtend(img){
 document.addEventListener('load', e => { const t = e.target; if (t && t.classList && t.classList.contains('nx-fg')) nxExtend(t); }, true);
 function nxExtendAll(){ document.querySelectorAll('img.nx-fg').forEach(im => { if (im.complete && im.naturalWidth) nxExtend(im); }); }
 addEventListener('resize', () => { clearTimeout(nxExtendAll._t); nxExtendAll._t = setTimeout(nxExtendAll, 150); });
+
+/* ---------- ночная тема: вырезаем белый/серый фон у фото товаров ----------
+   В светлой теме фото «растворяются» через multiply. На тёмном фоне так нельзя — белый фон превращается в светящийся прямоугольник.
+   Поэтому для тёмной темы делаем копию фото без фона (заливка от краёв по цвету фона). Если браузер не даёт прочитать
+   картинку (CORS) — оставляем фото как есть, но без светлого ореола вокруг. */
+const NX_CUT = new Map();
+function nxCutProcess(im){
+  const k = Math.min(1, 720 / Math.max(im.naturalWidth, im.naturalHeight));
+  const w = Math.max(1, Math.round(im.naturalWidth * k)), h = Math.max(1, Math.round(im.naturalHeight * k));
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d', { willReadFrequently:true }); g.drawImage(im, 0, 0, w, h);
+  const id = g.getImageData(0, 0, w, h), d = id.data;
+  // цвет фона по строкам: среднее по 3 крайним пикселям слева и справа, сглаженное по соседним строкам (фон бывает градиентом)
+  const raw = new Float32Array(h * 3);
+  for (let y = 0; y < h; y++){ let r = 0, gg = 0, b = 0, n = 0;
+    for (const x of [0, 1, 2, w - 3, w - 2, w - 1]){ if (x < 0 || x >= w) continue; const o = (y * w + x) * 4; r += d[o]; gg += d[o + 1]; b += d[o + 2]; n++; }
+    raw[y * 3] = r / n; raw[y * 3 + 1] = gg / n; raw[y * 3 + 2] = b / n; }
+  const bg = new Float32Array(h * 3), R = 6;
+  for (let y = 0; y < h; y++){ let r = 0, gg = 0, b = 0, n = 0; for (let j = Math.max(0, y - R); j <= Math.min(h - 1, y + R); j++){ r += raw[j * 3]; gg += raw[j * 3 + 1]; b += raw[j * 3 + 2]; n++; } bg[y * 3] = r / n; bg[y * 3 + 1] = gg / n; bg[y * 3 + 2] = b / n; }
+  const T1 = 10, T2 = 34;
+  const dist = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){ const o = (y * w + x) * 4, q = y * 3;
+    dist[y * w + x] = Math.max(Math.abs(d[o] - bg[q]), Math.abs(d[o + 1] - bg[q + 1]), Math.abs(d[o + 2] - bg[q + 2])); }
+  // заливка от краёв: фоном считаем только то, что похоже на фон И связано с краем фото (белые детали внутри вещи не трогаем)
+  const isBg = new Uint8Array(w * h), st = [];
+  const push = i => { if (!isBg[i] && dist[i] < T2){ isBg[i] = 1; st.push(i); } };
+  for (let x = 0; x < w; x++){ push(x); push((h - 1) * w + x); }
+  for (let y = 0; y < h; y++){ push(y * w); push(y * w + w - 1); }
+  while (st.length){ const i = st.pop(), x = i % w, y = (i / w) | 0;
+    if (x > 0) push(i - 1); if (x < w - 1) push(i + 1); if (y > 0) push(i - w); if (y < h - 1) push(i + w); }
+  // почти весь кадр — «фон»: значит, это не предметная съёмка (например, фото на модели) — не трогаем
+  let nb = 0; for (let i = 0; i < w * h; i++) nb += isBg[i];
+  if (nb < w * h * 0.12) return null;
+  const a = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) a[i] = isBg[i] ? Math.max(0, Math.min(1, (dist[i] - T1) / (T2 - T1))) : 1;
+  // мягкий край 3×3
+  const a2 = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){ let s2 = 0, n = 0;
+    for (let j = -1; j <= 1; j++) for (let i2 = -1; i2 <= 1; i2++){ const xx = x + i2, yy = y + j; if (xx >= 0 && xx < w && yy >= 0 && yy < h){ s2 += a[yy * w + xx]; n++; } }
+    a2[y * w + x] = Math.min(a[y * w + x], s2 / n) * 0.5 + a[y * w + x] * 0.5; }
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){ const i = y * w + x, o = i * 4, q = y * 3, al = a2[i];
+    if (al < 1 && al > 0.02){ for (let c = 0; c < 3; c++) d[o + c] = Math.max(0, Math.min(255, (d[o + c] - bg[q + c] * (1 - al)) / al)); } // убираем «засветку» фона с края вещи
+    d[o + 3] = Math.round(al * 255); }
+  g.putImageData(id, 0, 0);
+  return new Promise(res => { try{ cv.toBlob(b => res(b ? URL.createObjectURL(b) : null), 'image/png'); }catch(e){ res(null); } });
+}
+function nxCutout(url){
+  if (NX_CUT.has(url)) return NX_CUT.get(url);
+  const pr = new Promise(res => {
+    const im = new Image(); im.crossOrigin = 'anonymous'; im.decoding = 'async';
+    im.onload = () => { try{ Promise.resolve(nxCutProcess(im)).then(res, () => res(null)); }catch(e){ res(null); } };
+    im.onerror = () => res(null);
+    im.src = url;
+  });
+  NX_CUT.set(url, pr); return pr;
+}
+const nxIsDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+function nxDarkPhotos(){
+  const dark = nxIsDark();
+  document.querySelectorAll('img.nx-fg.blend').forEach(im => {
+    if (!dark){ if (im.dataset.nxOrig){ im.src = im.dataset.nxOrig; delete im.dataset.nxOrig; } im.classList.remove('nx-cut'); return; }
+    if (im.dataset.nxOrig || im.dataset.nxBusy) return;
+    const orig = im.getAttribute('src'); if (!orig || orig.startsWith('blob:')) return;
+    im.dataset.nxBusy = '1';
+    nxCutout(orig).then(u => {
+      delete im.dataset.nxBusy;
+      if (!u || !nxIsDark() || im.getAttribute('src') !== orig) return;
+      im.dataset.nxOrig = orig; im.src = u; im.classList.add('nx-cut');
+    });
+  });
+}
+window.nxDarkPhotos = nxDarkPhotos;
+new MutationObserver(() => nxDarkPhotos()).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+{ let qt = 0; new MutationObserver(ms => { if (!nxIsDark()) return; if (ms.some(m => m.addedNodes.length)){ clearTimeout(qt); qt = setTimeout(nxDarkPhotos, 30); } }).observe(document.body, { childList:true, subtree:true }); }
 
 const stockOf = p => colorsOfN(p).reduce((s, c) => s + (c.sizeStocks ? Object.values(c.sizeStocks).reduce((a, b) => a + (Number(b) || 0), 0) : (Number(c.stock) || 0)), 0) || Number(p.stock || 0);
 const nameOf = p => (typeof getTranslatedProductName === 'function' ? getTranslatedProductName(p) : p.name) || '';
