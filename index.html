@@ -1071,7 +1071,7 @@
   .nx-sizes-h button{ background:none; border:0; color:var(--ink); font:inherit; letter-spacing:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
   .nx-sz{ display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; }
   .nx-sz button{ height:38px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--ink); font:600 12px 'Inter',sans-serif; cursor:pointer; transition:background .2s, color .2s, border-color .2s; }
-  .nx-sz button:hover{ border-color:var(--ink); }
+  @media (hover:hover){ .nx-sz button:hover{ border-color:var(--ink); } }
   .nx-sz button:disabled{ color:var(--muted); border-style:dashed; cursor:not-allowed; text-decoration:line-through; }
   @media (min-width:900px){
     .nx-hero{ grid-template-columns:minmax(300px,.9fr) 1.6fr; grid-template-rows:1fr auto; padding:calc(96px + env(safe-area-inset-top)) 48px 30px; align-items:center; }
@@ -1087,16 +1087,17 @@
   .nx-cats{ display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; }
   @media (min-width:900px){ .nx-cats{ grid-template-columns:repeat(var(--n, 4), minmax(0, 1fr)); gap:16px; } .nx-cats.few{ max-width:820px; } }
   .nx-cat{ position:relative; aspect-ratio:1/1.12; border-radius:6px; background:var(--stone); overflow:hidden; cursor:pointer; border:0; padding:0; text-align:left; font:inherit; color:var(--ink); }
-  .nx-cat img{ position:absolute; left:12%; right:12%; top:8%; width:76%; height:66%; object-fit:contain; transition:transform .6s cubic-bezier(.2,.7,.2,1); }
-  html:not([data-theme="dark"]) .nx-cat img.blend{ mix-blend-mode:multiply; }
-  .nx-cat:hover img{ transform:translateY(-6px) scale(1.04); }
+  .nx-cat > img{ position:absolute; left:12%; right:12%; top:8%; width:76%; height:66%; object-fit:contain; transition:transform .6s cubic-bezier(.2,.7,.2,1); }
+  html:not([data-theme="dark"]) .nx-cat > img.blend{ mix-blend-mode:multiply; }
+  @media (hover:hover){ .nx-cat:hover > img{ transform:translateY(-6px) scale(1.04); } } /* только мышь: на телефоне «наведение» залипает после касания */
   .nx-cat .nx-ph{ inset:16% 22% 34%; }
   .nx-cat-b{ position:absolute; left:14px; right:14px; bottom:14px; display:flex; align-items:flex-end; justify-content:space-between; gap:8px; }
   .nx-cat-b b{ display:block; font-size:15px; font-weight:800; }
   .nx-cat-b small{ display:block; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
   .nx-arrow{ width:34px; height:34px; flex:none; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; transition:background .25s, color .25s, border-color .25s; }
   .nx-arrow svg{ width:15px; height:15px; }
-  .nx-cat:hover .nx-arrow{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  @media (hover:hover){ .nx-cat:hover .nx-arrow{ background:var(--ink); color:var(--bg); border-color:var(--ink); } }
+  .nx-cat:active .nx-arrow{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
 
   /* ===== 3. ОБРАЗЫ ===== */
   .nx-look > *{ min-width:0; } /* колонки могут сжиматься — иначе подписи шагов раздвигают блок за экран телефона */
@@ -1122,7 +1123,7 @@
   .nx-side-h{ display:flex; justify-content:space-between; font-weight:800; font-size:15px; margin-bottom:12px; }
   .nx-side-h small{ font-size:10px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
   .nx-piece{ display:flex; align-items:center; gap:12px; padding:10px 8px; border-radius:8px; cursor:pointer; transition:background .2s; }
-  .nx-piece:hover{ background:var(--stone); }
+  @media (hover:hover){ .nx-piece:hover{ background:var(--stone); } }
   .nx-piece .th{ position:relative; width:58px; height:58px; border-radius:6px; background:var(--stone); flex:none; overflow:hidden; }
   .nx-piece .th img{ width:100%; height:100%; object-fit:contain; }
   html:not([data-theme="dark"]) .nx-piece .th img.blend{ mix-blend-mode:multiply; }
@@ -1135,7 +1136,7 @@
     transition:background .35s cubic-bezier(.2,.7,.2,1), border-color .35s ease, color .35s ease, transform .35s cubic-bezier(.3,1.6,.5,1); }
   .nx-plus svg{ grid-area:1 / 1; width:14px; height:14px; transition:opacity .25s ease, transform .4s cubic-bezier(.3,1.6,.5,1); }
   .nx-plus .ck{ opacity:0; transform:scale(.3) rotate(-30deg); }
-  .nx-plus:hover{ border-color:var(--ink); }
+  @media (hover:hover){ .nx-plus:hover{ border-color:var(--ink); } }
   .nx-plus.on{ background:var(--burgundy, #6A1626); border-color:var(--burgundy, #6A1626); color:#fff; transform:scale(1.06); }
   .nx-plus.on svg:not(.ck){ opacity:0; transform:scale(.3) rotate(90deg); }
   .nx-plus.on .ck{ opacity:1; transform:none; }
@@ -1143,7 +1144,7 @@
   .nx-szpick.open{ max-height:120px; opacity:1; padding:2px 8px 10px 78px; }
   .nx-szpick span{ font-size:10px; font-weight:800; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
   .nx-szpick button{ height:30px; min-width:38px; padding:0 10px; border-radius:15px; border:1px solid var(--line); background:transparent; color:var(--ink); font:600 12px 'Inter',sans-serif; cursor:pointer; }
-  .nx-szpick button:hover{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  @media (hover:hover){ .nx-szpick button:hover{ background:var(--ink); color:var(--bg); border-color:var(--ink); } }
   .nx-cta{ width:100%; height:48px; border:0; border-radius:24px; background:var(--orange); color:var(--on-orange); font:800 14px 'Inter',sans-serif; cursor:pointer; margin-top:16px; display:flex; align-items:center; justify-content:center; gap:8px; }
   .nx-note{ font-size:11px; color:var(--muted); margin-top:16px; }
 
@@ -1229,7 +1230,7 @@
   .nx-cat .nx-fade > *{ position:absolute; inset:0; opacity:0; transition:opacity 1.2s ease; }
   .nx-cat .nx-fade > img{ width:100%; height:100%; object-fit:contain; left:0; top:0; }
   .nx-cat .nx-fade > .on{ opacity:1; }
-  .nx-cat:hover .nx-fade{ transform:translateY(-6px) scale(1.04); transition:transform .6s cubic-bezier(.2,.7,.2,1); }
+  @media (hover:hover){ .nx-cat:hover .nx-fade{ transform:translateY(-6px) scale(1.04); transition:transform .6s cubic-bezier(.2,.7,.2,1); } }
   html:not([data-theme="dark"]) .nx-cat .nx-fade img.blend{ mix-blend-mode:multiply; }
 
   /* ===== правки 20.11 (2) ===== */
@@ -1262,6 +1263,11 @@
   #nxGuide{ display:none !important; }
   .nx-sgl{ display:inline-flex !important; align-items:center; gap:6px; margin:10px 0 4px; font-size:12px; font-weight:700; color:var(--ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; font-family:inherit; }
   .nx-sgl[hidden]{ display:none !important; }
+  /* контраст в тёмной теме: бордовый как цвет ТЕКСТА на тёмном фоне слишком тёмный — берём светлый акцент */
+  html[data-theme="dark"] .nx-eyebrow, html[data-theme="dark"] .offer-note a{ color:var(--accent-strong); }
+  html[data-theme="dark"] .ship-opt small.ship-soon{ background:var(--accent-strong); color:#17110F; }
+  html[data-theme="dark"] .logo .slash, html[data-theme="dark"] .app-loader-logo .slash{ color:#C94A5E !important; }
+  .nx-sub{ color:var(--text-soft); }
   /* таблица размеров */
   .nx-modal{ position:fixed; inset:0; z-index:2000; display:none; align-items:flex-end; justify-content:center; background:rgba(20,12,10,.45); }
   .nx-modal.show{ display:flex; animation:nxFade .3s ease; }
@@ -1819,7 +1825,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261120-192";
+  const CURRENT_VERSION = "20261120-193";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
