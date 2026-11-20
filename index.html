@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#2B2D31" id="themeColorMeta">
-<script>/* тёмная тема по умолчанию; светлая — если покупатель сам выбрал её кнопкой ☀️ */try{ if (localStorage.getItem('milaisss_theme') !== 'light') document.documentElement.setAttribute('data-theme','dark'); }catch(e){ document.documentElement.setAttribute('data-theme','dark'); }</script>
+<meta name="theme-color" content="#F2E9DF" id="themeColorMeta">
+<script>/* светлая (кремовая) тема по умолчанию; тёмная — если покупатель сам выбрал её кнопкой 🌙 */try{ if (localStorage.getItem('milaisss_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){}</script>
 <title>milaisss shop — интернет-магазин кроссовок</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -32,24 +32,22 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"milaisss","url":"https://milaisss.com/","logo":"https://milaisss.com/favicon-192x192.png","image":"https://milaisss.com/og.png","areaServed":"UZ","description":"Кроссовки и одежда с доставкой по Узбекистану"}</script>
 <meta property="og:url" content="https://milaisss.com/">
 <meta name="google-site-verification" content="QLeo5HznJQ2owHKI2oFHkqQVdqxb7G_StqUlit7m_HU" />
-<link rel="preload" as="image" href="banner.webp" media="(max-width:767px)" fetchpriority="high">
-<link rel="preload" as="image" href="banner-pc.webp" media="(min-width:768px)" fetchpriority="high">
 <script>setTimeout(function(){try{var r=document.getElementById("appRoot"),l=document.getElementById("appLoader");if(r&&r.style.opacity!=="1"){r.style.opacity="1";if(l)l.style.display="none";}}catch(e){}},4500);</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&display=swap" rel="stylesheet"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&family=Archivo:wght@800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Pacifico&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Forum&family=Archivo:wght@800;900&display=swap" rel="stylesheet"></noscript>
 <style>
   /* палитра «графит / серебро / жёлтый» (светлая тема); тёмная — ниже в html[data-theme="dark"] */
   :root{
-    --logofont:'Inter','Helvetica Neue',Arial,sans-serif; --bg:#D9DADC; --ink:#2B2D31; --stone:#E6E7E9; --line:#C3C4C7;
-    --orange:#FFC93C; --orange-dark:#E8B21F; --muted:#5D5F65; --navbg:#2B2D31; --icon-cat:#2B2D31;
-    --surface:#EFEFF0; --text-soft:#47494F; --on-ink:#FFFFFF; --colordot-border:#2B2D31; --pmr-selected-bg:#FFF1C7;
-    --on-stone:#2B2D31; --catcolor:#2B2D31; --bts-address-color:#2B2D31; --star:#7A4F00; --err-border:#B3261E;
-    --err-text:#962018; --on-orange:#2B2D31; --accent-strong:#2B2D31;
+    --logofont:'Inter','Helvetica Neue',Arial,sans-serif; --bg:#F2E9DF; --ink:#151112; --stone:#E9DDCF; --line:#D8C9B8;
+    --orange:#7A1C2B; --orange-dark:#5E1420; --muted:#6E6259; --navbg:#1C1614; --icon-cat:#151112;
+    --surface:#F7F0E8; --text-soft:#4A403A; --on-ink:#F2E9DF; --colordot-border:#151112; --pmr-selected-bg:#F3DCDC;
+    --on-stone:#151112; --catcolor:#151112; --bts-address-color:#7A1C2B; --star:#8A5A00; --err-border:#B3261E;
+    --err-text:#A3161F; --on-orange:#FFFFFF; --accent-strong:#7A1C2B;
   }
   :root{ color-scheme:light; }
   input, textarea, select{ color:var(--ink); -webkit-text-fill-color:var(--ink); caret-color:var(--accent-strong); }
@@ -770,11 +768,11 @@
   html.theme-anim, html.theme-anim *{ transition:background-color .45s ease, color .45s ease, border-color .45s ease, fill .45s ease !important; }
   html[data-theme="dark"]{
     color-scheme:dark;
-    --bg:#2B2D31; --ink:#F3F3F4; --stone:#34363B; --line:#45474E; --orange:#FFC93C;
-    --orange-dark:#E8B21F; --muted:#A7A9AE; --surface:#33353A; --text-soft:#D9DADC; --on-ink:#2B2D31;
-    --icon-cat:#FFC93C; --colordot-border:#D9DADC; --pmr-selected-bg:#3D3B30; --on-stone:#F3F3F4; --catcolor:#D9DADC;
-    --bts-address-color:#FFC93C; --support-bg:#2B2D31; --support-admin-bg:#3A3C42; --support-admin-text:#F3F3F4; --star:#FFC93C;
-    --err-border:#FF8A80; --err-text:#FF8A80; --on-orange:#2B2D31; --accent-strong:#FFC93C;
+    --bg:#17110F; --ink:#F2E9DF; --stone:#231B18; --line:#3B302B; --orange:#C2414F;
+    --orange-dark:#A3303D; --muted:#AA9D91; --surface:#1F1815; --text-soft:#D9CCBF; --on-ink:#17110F;
+    --icon-cat:#F2E9DF; --colordot-border:#F2E9DF; --pmr-selected-bg:#3A2226; --on-stone:#F2E9DF; --catcolor:#E9DDCF;
+    --bts-address-color:#E8848F; --support-bg:#1F1815; --support-admin-bg:#2C2320; --support-admin-text:#F2E9DF; --star:#E8B04A;
+    --err-border:#FF8A80; --err-text:#FF8A80; --on-orange:#FFFFFF; --accent-strong:#E8848F;
   }
   html[data-theme="dark"] input, html[data-theme="dark"] textarea, html[data-theme="dark"] select{ background:var(--stone); color:var(--ink); }
   html[data-theme="dark"] .search-box input{ background:transparent; }
@@ -1012,6 +1010,283 @@
   html:not([data-theme="dark"]) .offer-note a, html:not([data-theme="dark"]) .review-btn, html:not([data-theme="dark"]) .phone-pill-ico{ color:#2B2D31; text-decoration-color:#FFC93C; text-decoration-thickness:2px; }
   html:not([data-theme="dark"]) .offer-note a{ text-decoration:underline; }
   .field-err-msg{ color:var(--err-text); }
+  /* ================= Дизайн «крем / бордо» (по образцу ÉLVARO) =================
+     Всё новое — с префиксом nx-. Светлая тема — кремовая (по умолчанию), тёмная — по кнопке. */
+  body.bg-facets::before{ background:var(--bg) !important; }
+  body.bg-facets::after{ display:none !important; }
+  html:not([data-theme="dark"]) .logo .slash, html:not([data-theme="dark"]) .app-loader-logo .slash{ color:var(--orange) !important; }
+  html[data-theme="dark"] .logo .slash{ color:var(--orange) !important; }
+  html:not([data-theme="dark"]) .offer-note a, html:not([data-theme="dark"]) .review-btn, html:not([data-theme="dark"]) .phone-pill-ico{ color:var(--ink); text-decoration-color:var(--orange); }
+  html:not([data-theme="dark"]) .navitem{ color:rgba(20,16,14,.72); }
+  html:not([data-theme="dark"]) .navitem.active, html:not([data-theme="dark"]) .navitem.peek{ color:#141010; }
+  .nx-display{ font-family:'Archivo','Inter',sans-serif; font-weight:900; letter-spacing:-.02em; line-height:.95; text-transform:uppercase; }
+  .nx-h2{ font-family:'Archivo','Inter',sans-serif; font-weight:800; letter-spacing:-.02em; font-size:clamp(28px,4.2vw,46px); line-height:1.02; color:var(--ink); margin:0; }
+  .nx-eyebrow{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--orange); margin-bottom:10px; }
+  .nx-sub{ color:var(--muted); font-size:14px; line-height:1.55; margin-top:10px; max-width:520px; }
+  .nx-sec{ padding:56px 20px 8px; max-width:1240px; margin:0 auto; }
+  .nx-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:26px; }
+  .nx-link{ font-size:13px; font-weight:700; color:var(--ink); text-decoration:none; border-bottom:1.5px solid currentColor; padding-bottom:2px; white-space:nowrap; cursor:pointer; background:none; border-top:0; border-left:0; border-right:0; font-family:inherit; }
+  .nx-reveal{ opacity:0; transform:translateY(34px); filter:blur(8px); transition:opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1), filter .9s ease; }
+  .nx-reveal.in{ opacity:1; transform:none; filter:none; }
+  @media (prefers-reduced-motion:reduce){ .nx-reveal{ opacity:1; transform:none; filter:none; transition:none; } }
+  /* меню по центру шапки (ПК) */
+  .nx-nav{ display:none; }
+  @media (min-width:900px){
+    .nx-nav{ display:flex; gap:28px; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+    .nx-nav a{ font-size:13px; font-weight:600; color:inherit; text-decoration:none; opacity:.85; cursor:pointer; }
+    .nx-nav a:hover{ opacity:1; }
+  }
+  #heroPhoto{ display:none !important; }
+
+  /* ===== 1. ОРБИТА ===== */
+  .nx-hero{ position:relative; max-width:1320px; margin:0 auto; padding:calc(76px + env(safe-area-inset-top)) 20px 26px; min-height:min(100vh, 900px); min-height:min(100svh, 900px); display:grid; grid-template-columns:1fr; gap:6px; overflow:hidden; }
+  .nx-hero-info{ position:relative; z-index:3; order:2; }
+  .nx-idx{ font-size:11px; font-weight:800; letter-spacing:.14em; color:var(--muted); margin-bottom:8px; }
+  .nx-title{ font-size:clamp(38px,10vw,58px); color:var(--ink); height:1.92em; overflow:hidden; position:relative; }
+  .nx-title span{ display:block; transition:transform .75s cubic-bezier(.7,0,.2,1), opacity .5s ease; }
+  .nx-title span.out{ transform:translateY(-105%); opacity:0; position:absolute; inset:0 auto auto 0; }
+  .nx-title span.pre{ transform:translateY(105%); opacity:0; }
+  .nx-meta{ color:var(--muted); font-size:13px; margin-top:8px; min-height:18px; }
+  .nx-price{ font-family:'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:20px; color:var(--ink); margin:10px 0 12px; }
+  .nx-price s{ color:var(--muted); font-size:14px; margin-left:8px; font-weight:500; }
+  .nx-orbit{ position:relative; order:1; height:min(62vh, 520px); height:min(62svh, 520px); touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none; }
+  .nx-orbit.drag{ cursor:grabbing; }
+  .nx-orbit svg.nx-ring{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+  .nx-orbit svg.nx-ring ellipse{ fill:none; stroke:var(--line); stroke-width:1.2; }
+  .nx-item{ position:absolute; left:0; top:0; width:clamp(150px,34vw,330px); aspect-ratio:1/1.1; transform-origin:50% 60%; will-change:transform; cursor:pointer; }
+  .nx-item img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none; -webkit-user-drag:none; }
+  html:not([data-theme="dark"]) .nx-item img.blend{ mix-blend-mode:multiply; }
+  html[data-theme="dark"] .nx-item img.blend{ border-radius:18px; }
+  .nx-item i{ position:absolute; left:18%; right:18%; bottom:-4%; height:9%; border-radius:50%; background:radial-gradient(ellipse at center, rgba(40,20,10,.28), rgba(40,20,10,0) 70%); filter:blur(2px); }
+  html[data-theme="dark"] .nx-item i{ background:radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,0) 70%); }
+  .nx-ph{ position:absolute; inset:12%; border-radius:22px; background:var(--stone); display:grid; place-items:center; font-size:46px; }
+  .nx-drag{ position:relative; z-index:3; order:3; display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:6px; }
+  .nx-track{ position:relative; width:min(300px,80vw); height:26px; border-radius:13px; background:repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 8px); background-color:color-mix(in srgb, var(--stone) 70%, transparent); cursor:ew-resize; touch-action:none; }
+  .nx-knob{ position:absolute; top:50%; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 5px color-mix(in srgb, var(--orange) 18%, transparent); }
+  .nx-drag-lbl{ display:flex; justify-content:space-between; width:min(300px,80vw); font-size:10px; font-weight:800; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; }
+  .nx-sizes{ position:relative; z-index:3; order:4; margin-top:14px; }
+  .nx-sizes-h{ display:flex; justify-content:space-between; font-size:10px; font-weight:800; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; margin-bottom:8px; }
+  .nx-sizes-h button{ background:none; border:0; color:var(--ink); font:inherit; letter-spacing:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+  .nx-sz{ display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; }
+  .nx-sz button{ height:38px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--ink); font:600 12px 'Inter',sans-serif; cursor:pointer; transition:background .2s, color .2s, border-color .2s; }
+  .nx-sz button:hover{ border-color:var(--ink); }
+  .nx-sz button:disabled{ color:var(--muted); border-style:dashed; cursor:not-allowed; text-decoration:line-through; }
+  @media (min-width:900px){
+    .nx-hero{ grid-template-columns:minmax(300px,.9fr) 1.6fr; grid-template-rows:1fr auto; padding:calc(96px + env(safe-area-inset-top)) 48px 30px; align-items:center; }
+    .nx-hero-info{ order:0; grid-column:1; grid-row:1; align-self:center; }
+    .nx-orbit{ order:0; grid-column:1 / 3; grid-row:1 / 3; height:auto; min-height:640px; margin-left:22%; }
+    .nx-drag{ order:0; grid-column:1 / 3; grid-row:2; align-self:end; }
+    .nx-sizes{ order:0; position:absolute; right:48px; bottom:80px; width:210px; margin:0; }
+    .nx-sz{ grid-template-columns:repeat(3, 1fr); }
+    .nx-item{ width:clamp(220px,22vw,340px); }
+  }
+
+  /* ===== 2. КАТЕГОРИИ ===== */
+  .nx-cats{ display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; }
+  @media (min-width:900px){ .nx-cats{ grid-template-columns:repeat(4, 1fr); gap:16px; } }
+  .nx-cat{ position:relative; aspect-ratio:1/1.12; border-radius:6px; background:var(--stone); overflow:hidden; cursor:pointer; border:0; padding:0; text-align:left; font:inherit; color:var(--ink); }
+  .nx-cat img{ position:absolute; left:12%; right:12%; top:8%; width:76%; height:66%; object-fit:contain; transition:transform .6s cubic-bezier(.2,.7,.2,1); }
+  html:not([data-theme="dark"]) .nx-cat img.blend{ mix-blend-mode:multiply; }
+  .nx-cat:hover img{ transform:translateY(-6px) scale(1.04); }
+  .nx-cat .nx-ph{ inset:16% 22% 34%; }
+  .nx-cat-b{ position:absolute; left:14px; right:14px; bottom:14px; display:flex; align-items:flex-end; justify-content:space-between; gap:8px; }
+  .nx-cat-b b{ display:block; font-size:15px; font-weight:800; }
+  .nx-cat-b small{ display:block; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+  .nx-arrow{ width:34px; height:34px; flex:none; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; transition:background .25s, color .25s, border-color .25s; }
+  .nx-arrow svg{ width:15px; height:15px; }
+  .nx-cat:hover .nx-arrow{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+
+  /* ===== 3. ОБРАЗЫ ===== */
+  .nx-look > *{ min-width:0; } /* колонки могут сжиматься — иначе подписи шагов раздвигают блок за экран телефона */
+  .nx-look{ display:grid; grid-template-columns:1fr; gap:22px; border-top:1px solid var(--line); padding-top:34px; }
+  @media (min-width:900px){ .nx-look{ grid-template-columns:1fr 340px; gap:0; } .nx-look-side{ border-left:1px solid var(--line); padding-left:26px; } }
+  .nx-stage{ position:relative; height:min(66vh, 560px); height:min(66svh, 560px); overflow:hidden; touch-action:pan-y; }
+  .nx-fig{ position:absolute; bottom:0; left:50%; width:min(46%, 300px); height:92%; transition:transform .8s cubic-bezier(.65,0,.3,1), filter .8s ease, opacity .8s ease; cursor:pointer; }
+  .nx-fig img{ width:100%; height:100%; object-fit:contain; object-position:bottom; }
+  html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:multiply; }
+  .nx-figin{ position:relative; width:100%; height:100%; }
+  .nx-pin{ position:absolute; transform:translate(-11px,-50%); /* центр кружка — ровно в точке, подпись справа */ border:0; background:none; padding:0; cursor:pointer; display:flex; align-items:center; gap:6px; z-index:2; opacity:0; transition:opacity .4s ease .5s; }
+  .nx-fig[style*="scale(1)"] .nx-pin{ opacity:1; }
+  .nx-pin b{ width:22px; height:22px; border-radius:50%; background:#fff; color:#151112; font-size:11px; font-weight:800; display:grid; place-items:center; box-shadow:0 0 0 5px rgba(255,255,255,.35), 0 4px 12px rgba(0,0,0,.25); }
+  .nx-pin span{ font-size:11px; font-weight:700; color:var(--ink); background:var(--bg); padding:4px 8px; border-radius:12px; white-space:nowrap; opacity:0; transform:translateX(-4px); transition:opacity .25s, transform .25s; pointer-events:none; }
+  .nx-pin:hover span, .nx-pin:focus span{ opacity:1; transform:none; }
+  .nx-shot img.nx-real{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .nx-ctrl{ display:flex; align-items:center; gap:14px; margin-top:16px; }
+  .nx-cbtn{ width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--ink); display:grid; place-items:center; cursor:pointer; flex:none; }
+  .nx-cbtn svg{ width:16px; height:16px; }
+  .nx-steps{ flex:1; display:flex; gap:10px; overflow:hidden; }
+  .nx-step{ flex:1; font-size:10px; font-weight:800; letter-spacing:.1em; color:var(--muted); padding-top:8px; border-top:2px solid var(--line); cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:none; border-left:0; border-right:0; border-bottom:0; text-align:left; font-family:inherit; }
+  .nx-step.on{ color:var(--ink); border-top-color:var(--orange); }
+  .nx-side-h{ display:flex; justify-content:space-between; font-weight:800; font-size:15px; margin-bottom:12px; }
+  .nx-side-h small{ font-size:10px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
+  .nx-piece{ display:flex; align-items:center; gap:12px; padding:10px 8px; border-radius:8px; cursor:pointer; transition:background .2s; }
+  .nx-piece:hover{ background:var(--stone); }
+  .nx-piece .th{ position:relative; width:58px; height:58px; border-radius:6px; background:var(--stone); flex:none; overflow:hidden; }
+  .nx-piece .th img{ width:100%; height:100%; object-fit:contain; }
+  html:not([data-theme="dark"]) .nx-piece .th img.blend{ mix-blend-mode:multiply; }
+  .nx-piece .th b{ position:absolute; right:3px; top:3px; width:16px; height:16px; border-radius:50%; background:var(--ink); color:var(--bg); font-size:9px; display:grid; place-items:center; }
+  .nx-piece .nm{ flex:1; min-width:0; }
+  .nx-piece .nm small{ display:block; font-size:9px; font-weight:800; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
+  .nx-piece .nm div{ font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .nx-piece .nm span{ font-size:12px; color:var(--muted); }
+  .nx-plus{ width:30px; height:30px; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; flex:none; }
+  .nx-plus svg{ width:13px; height:13px; }
+  .nx-cta{ width:100%; height:48px; border:0; border-radius:24px; background:var(--orange); color:var(--on-orange); font:800 14px 'Inter',sans-serif; cursor:pointer; margin-top:16px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .nx-note{ font-size:11px; color:var(--muted); margin-top:16px; }
+
+  /* ===== 4. УЛИЧНЫЕ ФОТО ===== */
+  .nx-street{ display:grid; grid-template-columns:1fr; gap:22px; }
+  @media (min-width:900px){ .nx-street{ grid-template-columns:.85fr 1fr; gap:34px; align-items:start; } }
+  .nx-shot{ position:relative; border-radius:6px; overflow:hidden; background:linear-gradient(160deg, var(--stone), color-mix(in srgb, var(--stone) 70%, var(--ink) 30%)); }
+  .nx-shot img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .nx-shot .lbl{ position:absolute; left:12px; bottom:12px; height:30px; padding:0 12px; border-radius:15px; background:rgba(255,255,255,.9); color:#141010; font-size:11px; font-weight:700; display:inline-flex; align-items:center; gap:6px; }
+  .nx-shot .phc{ position:absolute; inset:0; display:grid; place-items:center; text-align:center; color:var(--muted); font-size:12px; font-weight:600; padding:20px; }
+  .nx-shot .phc svg{ width:30px; height:30px; display:block; margin:0 auto 8px; opacity:.6; }
+  .nx-small{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px; }
+  .nx-cap{ font-size:12px; font-weight:700; margin-top:8px; } .nx-cap small{ display:block; font-size:9px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin-top:2px; }
+
+  /* ===== 5. КАЧЕСТВО ===== */
+  .nx-fab{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+  .nx-fab .nx-shot{ aspect-ratio:1/1; }
+  .nx-feats{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:16px; }
+  .nx-feat{ opacity:.38; transition:opacity .5s ease; cursor:pointer; }
+  .nx-feat.on{ opacity:1; }
+  .nx-feat small{ font-size:10px; font-weight:800; color:var(--muted); }
+  .nx-feat b{ display:block; font-size:14px; margin:4px 0; }
+  .nx-feat p{ font-size:12px; color:var(--muted); line-height:1.5; margin:0; }
+  .nx-prog{ position:relative; height:1px; background:var(--line); margin-top:22px; }
+  .nx-prog i{ position:absolute; left:0; top:-1px; height:3px; background:var(--orange); width:0; }
+  @media (max-width:640px){ .nx-feats{ grid-template-columns:1fr; } .nx-feat{ display:none; } .nx-feat.on{ display:block; } }
+
+  /* ===== 6. БОРДОВЫЙ БЛОК + ПОДВАЛ ===== */
+  .nx-band{ background:var(--orange); color:#fff; margin-top:56px; }
+  .nx-band-in{ max-width:1240px; margin:0 auto; padding:56px 20px; display:grid; grid-template-columns:1fr; gap:28px; }
+  @media (min-width:900px){ .nx-band-in{ grid-template-columns:1.1fr .9fr; padding:72px 48px; align-items:center; } }
+  .nx-band h2{ font-family:'Archivo','Inter',sans-serif; font-weight:900; font-size:clamp(34px,5vw,60px); line-height:.98; letter-spacing:-.02em; margin:0 0 14px; }
+  .nx-band p{ color:rgba(255,255,255,.78); font-size:14px; line-height:1.55; max-width:460px; }
+  .nx-band .newsletter-block{ background:none !important; padding:0 !important; margin:22px 0 0 !important; text-align:left !important; border:0 !important; box-shadow:none !important; }
+  .nx-band .newsletter-block h3{ color:#fff !important; font-size:18px !important; text-align:left !important; }
+  .nx-band .newsletter-block p{ color:rgba(255,255,255,.75) !important; text-align:left !important; }
+  .nx-band .newsletter-row{ max-width:440px; }
+  .nx-band .newsletter-row input{ background:rgba(255,255,255,.12) !important; border:1px solid rgba(255,255,255,.35) !important; color:#fff !important; }
+  .nx-band .newsletter-row input::placeholder{ color:rgba(255,255,255,.6); }
+  .nx-band .newsletter-row button{ background:#fff !important; color:var(--orange) !important; }
+  .nx-band .nx-shot{ aspect-ratio:4/3; background:linear-gradient(160deg, rgba(255,255,255,.14), rgba(0,0,0,.2)); }
+  .nx-band .nx-shot .phc{ color:rgba(255,255,255,.7); }
+  .nx-foot{ background:var(--orange); color:#fff; border-top:1px solid rgba(255,255,255,.18); overflow:hidden; }
+  .nx-foot-in{ max-width:1240px; margin:0 auto; padding:40px 20px calc(110px + env(safe-area-inset-bottom)); }
+  .nx-cols{ display:grid; grid-template-columns:repeat(2, 1fr); gap:24px; }
+  @media (min-width:900px){ .nx-cols{ grid-template-columns:repeat(4, 1fr); } .nx-foot-in{ padding:56px 48px 40px; } }
+  .nx-cols h4{ font-size:10px; font-weight:800; letter-spacing:.14em; color:rgba(255,255,255,.6); text-transform:uppercase; margin:0 0 12px; }
+  .nx-cols a{ display:block; color:#fff; text-decoration:none; font-size:13px; margin-bottom:8px; cursor:pointer; opacity:.92; }
+  .nx-cols a:hover{ opacity:1; text-decoration:underline; }
+  .nx-water{ font-family:var(--logofont); font-weight:800; font-size:clamp(70px,19vw,250px); letter-spacing:-.05em; line-height:.9; color:rgba(255,255,255,.1); margin:34px 0 18px; white-space:nowrap; user-select:none; }
+  .nx-water span{ color:rgba(0,0,0,.18); }
+  .nx-legal{ display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; font-size:10px; font-weight:700; letter-spacing:.12em; color:rgba(255,255,255,.7); text-transform:uppercase; }
+  .nx-foot .footer-contacts, .nx-foot .footer-contacts *{ color:#fff !important; }
+  .nx-foot .legal-footer, .nx-foot .legal-footer *{ color:rgba(255,255,255,.75) !important; background:none !important; border-color:rgba(255,255,255,.2) !important; }
+  #shopFooter, .social-follow{ display:none !important; }
+  /* ===== правки 20.11 ===== */
+  :root{ --burgundy:#6A1626; }
+  /* 5. «/» в логотипе, бордовый блок и подвал — один тёмно-бордовый (в обеих темах) */
+  .logo .slash, .app-loader-logo .slash{ color:var(--burgundy) !important; }
+  html[data-theme="dark"] .logo .slash{ color:#B3364A !important; }
+  .nx-band, .nx-foot{ background:var(--burgundy) !important; }
+  .nx-band .newsletter-row button{ color:var(--burgundy) !important; }
+  /* 6. страница заканчивается бордовым подвалом, без полосы снизу */
+  .app:has(#home.active){ padding-bottom:0 !important; }
+  .nx-foot-in{ padding-bottom:calc(120px + env(safe-area-inset-bottom)) !important; }
+  /* 1–2. первый экран целиком в окне: название — в левом верхнем углу, ползунок орбиты виден сразу */
+  @media (min-width:900px){
+    .nx-hero{ height:100vh; height:100svh; min-height:640px; max-height:980px; padding-top:calc(88px + env(safe-area-inset-top)); padding-bottom:0; grid-template-rows:auto 1fr; align-items:start; }
+    .nx-hero-info{ grid-row:1; align-self:start; padding-top:4vh; }
+    .nx-title{ font-size:clamp(40px,4.3vw,72px); max-width:30vw; }
+    .nx-orbit{ grid-row:1 / 3; margin-left:34%; min-height:0; height:100%; }
+    .nx-drag{ position:absolute; left:50%; bottom:calc(118px + env(safe-area-inset-bottom)); transform:translateX(-50%); margin:0; }
+    .nx-sizes{ bottom:calc(118px + env(safe-area-inset-bottom)); }
+  }
+  /* 4. мягкое открытие карточки */
+  .nx-item.nx-pop img{ animation:nxPop .32s ease forwards; }
+  @keyframes nxPop{ to{ transform:scale(1.07); opacity:.55; } }
+  #detail.screen.active{ animation:nxIn .6s cubic-bezier(.2,.7,.2,1) backwards; }
+  @keyframes nxIn{ from{ opacity:0; transform:translateY(26px) scale(.985); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion:reduce){ #detail.screen.active{ animation:none; } }
+  /* 3. в плитках категорий фото плавно сменяются */
+  .nx-cat .nx-fade{ position:absolute; left:12%; right:12%; top:8%; height:66%; }
+  .nx-cat .nx-fade > *{ position:absolute; inset:0; opacity:0; transition:opacity 1.2s ease; }
+  .nx-cat .nx-fade > img{ width:100%; height:100%; object-fit:contain; left:0; top:0; }
+  .nx-cat .nx-fade > .on{ opacity:1; }
+  .nx-cat:hover .nx-fade{ transform:translateY(-6px) scale(1.04); transition:transform .6s cubic-bezier(.2,.7,.2,1); }
+  html:not([data-theme="dark"]) .nx-cat .nx-fade img.blend{ mix-blend-mode:multiply; }
+
+  /* ===== правки 20.11 (2) ===== */
+  /* 1. «В этом образе» едет вместе с прокруткой — виден и когда смотрим обувь модели */
+  @media (min-width:900px){ .nx-look-side{ position:sticky; top:calc(92px + env(safe-area-inset-top)); align-self:start; } }
+  /* 2. точки ставятся по самой картинке (её реальный размер внутри рамки) */
+  .nx-figin > img{ position:absolute; inset:0; }
+  /* 3. фото с фоном (не PNG) — края мягко растворяются в фоне плитки / орбиты */
+  /* фото с фоном: картинка вписана по своим пропорциям; под ней — размытая и чуть увеличенная копия, которая
+     продолжает фон фото за его края и мягко тает в фоне магазина. У самого фото растушёван только узкий край (фон), товар не задет */
+  .nx-pic{ position:absolute; inset:0; }
+  .nx-pic > img, .nx-pic > canvas{ position:absolute !important; left:50% !important; top:50% !important; right:auto !important; bottom:auto !important; transform:translate(-50%,-50%); max-width:none; object-fit:fill; }
+  .nx-pic > img{ width:100%; height:100%; object-fit:contain; }
+  .nx-pic > canvas{ filter:blur(6px); pointer-events:none; }
+  .nx-pic > img.nx-on{ -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 2%, #000 98%, transparent 100%), linear-gradient(180deg, transparent 0, #000 2%, #000 98%, transparent 100%); -webkit-mask-composite:source-in;
+            mask-image:linear-gradient(90deg, transparent 0, #000 2%, #000 98%, transparent 100%), linear-gradient(180deg, transparent 0, #000 2%, #000 98%, transparent 100%); mask-composite:intersect; }
+  .nx-pic > img.blend{ mix-blend-mode:normal !important; } /* смешиваем один раз — всю группу (фото + продолжение фона) */
+  html:not([data-theme="dark"]) .nx-cat .nx-fade > .nx-pic, html:not([data-theme="dark"]) .nx-piece .th .nx-pic{ mix-blend-mode:multiply; }
+  .nx-cat .nx-fade{ left:16%; right:16%; top:10%; height:60%; }
+
+  /* ===== правки 20.11 (3) ===== */
+  /* 1. карточка товара на ПК: фото едет вместе с прокруткой и занимает высоту экрана — нет пустоты под фото */
+  @media (min-width:900px){
+    .detail-layout.top-layout .detail-media{ position:sticky; top:calc(84px + env(safe-area-inset-top)); align-self:start; }
+    .detail-layout.top-layout .carousel{ aspect-ratio:auto; height:min(calc(100vh - 120px), 860px); height:min(calc(100svh - 120px), 860px); }
+  }
+  /* 3. переход по меню: заголовок блока встаёт под шапкой, а не прячется за ней */
+  #nxHero, #nxCatsSec, #nxLookSec, #productsAnchor, #faqSection, #nxStreetSec, #nxFabSec{ scroll-margin-top:calc(96px + env(safe-area-inset-top)); }
+  /* 5. «Таблица размеров» — в карточке товара; в орбите убрана */
+  #nxGuide{ display:none !important; }
+  .nx-sgl{ display:inline-flex !important; align-items:center; gap:6px; margin:10px 0 4px; font-size:12px; font-weight:700; color:var(--ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; font-family:inherit; }
+  .nx-sgl[hidden]{ display:none !important; }
+  /* таблица размеров */
+  .nx-modal{ position:fixed; inset:0; z-index:2000; display:none; align-items:flex-end; justify-content:center; background:rgba(20,12,10,.45); }
+  .nx-modal.show{ display:flex; animation:nxFade .3s ease; }
+  @keyframes nxFade{ from{ opacity:0; } }
+  .nx-mbox{ width:100%; max-width:520px; max-height:88vh; overflow:auto; background:var(--bg); color:var(--ink); border-radius:22px 22px 0 0; padding:22px 22px calc(26px + env(safe-area-inset-bottom)); animation:nxUp .45s cubic-bezier(.2,.7,.2,1); position:relative; }
+  @media (min-width:700px){ .nx-modal{ align-items:center; } .nx-mbox{ border-radius:20px; } }
+  @keyframes nxUp{ from{ transform:translateY(40px); opacity:0; } }
+  .nx-mbox h3{ font-family:'Archivo','Inter',sans-serif; font-weight:900; font-size:26px; margin:0 0 4px; letter-spacing:-.01em; }
+  .nx-mbox .lead{ font-weight:700; margin:0 0 10px; }
+  .nx-mbox p{ font-size:14px; line-height:1.55; color:var(--text-soft); margin:0 0 12px; }
+  .nx-mbox table{ width:100%; border-collapse:collapse; margin:6px 0 18px; font-size:14px; }
+  .nx-mbox th{ text-align:left; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:8px 6px; border-bottom:1px solid var(--line); }
+  .nx-mbox td{ padding:9px 6px; border-bottom:1px solid var(--line); font-weight:600; }
+  .nx-mbox td:last-child, .nx-mbox th:last-child{ text-align:right; }
+  .nx-mbox .nx-t4 th, .nx-mbox .nx-t4 td{ text-align:center; } .nx-mbox .nx-t4 th:first-child, .nx-mbox .nx-t4 td:first-child{ text-align:left; } .nx-mbox .nx-t4 th{ white-space:normal; line-height:1.3; }
+  .nx-mbox ol{ margin:0 0 14px 18px; padding:0; font-size:14px; line-height:1.7; }
+  .nx-mbox .note{ font-size:12px; font-style:italic; color:var(--muted); }
+  .nx-mbox .sign{ font-weight:800; margin-top:14px; }
+  .nx-x{ position:absolute; right:14px; top:14px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--ink); font-size:18px; cursor:pointer; }
+
+  /* шапка на креме: тёмный текст и без тени (старая шапка была рассчитана на тёмное фото) */
+  .site-header:not(.solid){ color:var(--ink) !important; background:color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
+  .site-header .logo{ text-shadow:none !important; }
+  .site-header .logo .slash{ opacity:1; }
+  .site-header:not(.solid) #langBtn.sh-lang{ background:var(--stone) !important; }
+  .site-header:not(.solid) .sh-btn .cart-badge{ background:var(--orange); color:#fff; }
+  /* белый фон обычных фото растворяем в креме: смешивание на самом элементе и на кремовой подложке */
+  .nx-hero, .nx-stage{ background:var(--bg); }
+  html:not([data-theme="dark"]) .nx-item.blend, html:not([data-theme="dark"]) .nx-fig.blend{ mix-blend-mode:multiply; }
+  html:not([data-theme="dark"]) .nx-item img.blend, html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:normal; }
+  .nx-hero-info{ z-index:60; pointer-events:none; } .nx-hero-info button{ pointer-events:auto; }
+
+  @media (max-width:899px){ .nx-item{ width:min(52vw,280px); } }
+  @media (min-width:900px){
+    .nx-item{ width:clamp(200px,18vw,290px); }
+  }
+
+  .nx-band .social-icons{ justify-content:flex-start !important; margin-top:18px; }
 </style>
 </head>
 <body class="bg-facets">
@@ -1024,6 +1299,7 @@
   <div class="screen active" id="home">
     <div class="site-header" id="siteHeader">
       <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">mila<span class="slash">/</span>isss</div>
+      <nav class="nx-nav"><a data-nxgo="#productsAnchor" data-nx="nav1">Каталог</a><a data-nxgo="#nxHero" data-nx="nav2">Новинки</a><a data-nxgo="#nxLookSec" data-nx="nav3">Образы</a><a data-nxgo="#faqSection" data-nx="nav4">Вопросы</a></nav>
       <div class="sh-actions">
         <button type="button" class="sh-btn" id="searchBtn" onclick="openSearch()" aria-label="Search" data-i18n-aria="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
         <div class="sh-btn sh-lang" id="langBtn" onclick="toggleLangMenu(event)" role="button" aria-label="Language">
@@ -1051,8 +1327,48 @@
 
     <div class="hero-photo" id="heroPhoto"><div class="hero-dots" id="heroDots"></div></div>
 
-    <div class="section-head" id="productsAnchor" style="margin-top:28px;">
-      <h3 class="display" data-i18n="allProducts">Все товары</h3>
+    <!-- ===== новая главная ===== -->
+    <section class="nx-hero" id="nxHero">
+      <div class="nx-hero-info">
+        <div class="nx-idx" id="nxIdx">01 / 07</div>
+        <h1 class="nx-title nx-display" id="nxTitle"><span>milaisss</span></h1>
+        <div class="nx-meta" id="nxMeta"></div>
+        <div class="nx-price" id="nxPrice"></div>
+        <button class="nx-link" id="nxMore"><span data-nx="more">Подробнее</span> →</button>
+      </div>
+      <div class="nx-orbit" id="nxOrbit"><svg class="nx-ring"><ellipse/></svg></div>
+      <div class="nx-drag"><div class="nx-track" id="nxTrack"><span class="nx-knob" id="nxKnob"></span></div><div class="nx-drag-lbl"><span>01</span><span data-nx="drag">Потяни орбиту</span><span id="nxDragTo">07</span></div></div>
+      <div class="nx-sizes" id="nxSizes"><div class="nx-sizes-h"><span data-nx="size">Размер</span><button id="nxGuide" data-nx="guide">Таблица размеров</button></div><div class="nx-sz" id="nxSz"></div></div>
+    </section>
+
+    <section class="nx-sec" id="nxCatsSec">
+      <div class="nx-head nx-reveal"><div><div class="nx-eyebrow" data-nx="catsE">Категории</div><h2 class="nx-h2" data-nx="catsH">Начни с фита.</h2></div><button class="nx-link" data-nxgo="#productsAnchor" data-nx="all">Смотреть все</button></div>
+      <div class="nx-cats" id="nxCats"></div>
+    </section>
+
+    <section class="nx-sec" id="nxLookSec">
+      <div class="nx-look">
+        <div>
+          <div class="nx-reveal"><div class="nx-eyebrow" data-nx="lookE">Лукбук</div><h2 class="nx-h2" data-nx="lookH">Собери образ.</h2><p class="nx-sub" data-nx="lookS"></p></div>
+          <div class="nx-stage" id="nxStage"></div>
+          <div class="nx-ctrl">
+            <button class="nx-cbtn" id="nxPrev" aria-label="prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+            <div class="nx-steps" id="nxSteps"></div>
+            <button class="nx-cbtn" id="nxPause" aria-label="pause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg></button>
+            <button class="nx-cbtn" id="nxNext" aria-label="next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <aside class="nx-look-side nx-reveal">
+          <div class="nx-side-h"><span data-nx="inLook">В этом образе</span><small id="nxPcs"></small></div>
+          <div id="nxPieces"></div>
+          <button class="nx-cta" id="nxLookCta"><span data-nx="lookCta">Смотреть вещи образа</span> →</button>
+        </aside>
+      </div>
+    </section>
+
+
+    <div class="section-head" id="productsAnchor" style="margin-top:56px;">
+      <div><div class="nx-eyebrow" data-nx="gridE">Каталог</div><h2 class="nx-h2" data-nx="gridH">Вещь на любой фит.</h2></div>
       <div class="view-toggle">
         <span class="vt-btn active" data-view="grid" onclick="setGridView('grid')">▦</span>
         <span class="vt-btn" data-view="list" onclick="setGridView('list')">☰</span>
@@ -1061,11 +1377,41 @@
     <div class="cat-pills-row" id="catPillsRow"></div>
     <div class="grid" id="mainGrid"></div>
 
+    <section class="nx-sec" id="nxStreetSec">
+      <div class="nx-street">
+        <div class="nx-shot nx-reveal" style="aspect-ratio:4/5"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-nx="streetPh"></span></div><span class="lbl" data-nxgo="#productsAnchor" onclick="event.stopPropagation()"><span data-nx="shopIt">Смотреть вещи</span> +</span></div>
+        <div class="nx-reveal">
+          <div class="nx-eyebrow" data-nx="streetE">Улица</div><h2 class="nx-h2" data-nx="streetH">Носят смело.</h2><p class="nx-sub" data-nx="streetS"></p>
+          <div class="nx-small">
+            <div><div class="nx-shot" style="aspect-ratio:4/5"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div></div><div class="nx-cap"><span data-nx="c1"></span><small>milaisss</small></div></div>
+            <div><div class="nx-shot" style="aspect-ratio:4/5"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div></div><div class="nx-cap"><span data-nx="c2"></span><small>milaisss</small></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nx-sec" id="nxFabSec">
+      <div class="nx-head nx-reveal"><div><div class="nx-eyebrow" data-nx="fabE">Качество</div><h2 class="nx-h2" data-nx="fabH">Сделано на совесть.</h2></div><p class="nx-sub" style="margin:0" data-nx="fabS"></p></div>
+      <div class="nx-fab nx-reveal">
+        <div class="nx-shot"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-nx="fabPh"></span></div></div>
+        <div class="nx-shot"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-nx="fabPh"></span></div></div>
+        <div class="nx-shot"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-nx="fabPh"></span></div></div>
+      </div>
+      <div class="nx-feats">
+        <div class="nx-feat"><small>01</small><b data-nx="f1"></b><p data-nx="f1p"></p></div>
+        <div class="nx-feat"><small>02</small><b data-nx="f2"></b><p data-nx="f2p"></p></div>
+        <div class="nx-feat"><small>03</small><b data-nx="f3"></b><p data-nx="f3p"></p></div>
+      </div>
+      <div class="nx-prog"><i></i></div>
+    </section>
+
+
     <div class="rating-summary" id="ratingSummary"></div>
 
     <div class="section-head"><h3 class="display" data-i18n="faqHeader">Частые вопросы</h3></div>
     <div class="faq-section" id="faqSection"></div>
 
+    <section class="nx-band"><div class="nx-band-in"><div class="nx-reveal"><h2 data-nx="bandH">Простые вещи. Смелый стиль.</h2><p data-nx="bandP"></p>
     <div class="newsletter-block">
       <h3 class="display" data-i18n="newsletterTitle">Будьте в курсе</h3>
       <p data-i18n="newsletterSub">Подпишись на новости о новых дропах и скидках</p>
@@ -1075,18 +1421,24 @@
       </div>
     </div>
 
-    <div class="social-follow">
-      <h3 class="display" style="text-align:center; margin-bottom:14px;" data-i18n="socialHeader">Мы в соцсетях</h3>
+    <div class="social-follow" style="display:block !important;padding:0;margin:0;background:none">
+      
       <div class="social-icons" id="socialIcons"></div>
     </div>
 
-    <div class="shop-footer" id="shopFooter">
-      <div class="logo" style="font-size:24px;">mila<span class="slash">/</span>isss</div>
-      <div class="footer-contacts" id="footerContacts"></div>
-      <div class="footer-copy">© 2026 milaisss</div>
-    </div>
-
-    <div class="legal-footer" id="legalFooter"></div>
+    </div><div class="nx-shot nx-reveal"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-nx="bandPh"></span></div></div></div></section>
+    <footer class="nx-foot"><div class="nx-foot-in">
+      <div class="nx-cols">
+        <div><h4 data-nx="fShop">Магазин</h4><a data-nxgo="#nxHero" data-nx="fNew"></a><a data-nxgo="#productsAnchor" data-nx="nav1"></a><a data-nxgo="#nxLookSec" data-nx="nav3"></a><a data-nxgo="favorites" data-nx="fFav"></a></div>
+        <div><h4 data-nx="fHelp">Помощь</h4><a data-nxgo="profile" data-nx="fOrders"></a><a data-nxgo="#faqSection" data-nx="fFaq"></a><a data-nxgo="support" data-nx="fSupport"></a><a data-nxgo="offer" data-nx="fOffer"></a></div>
+        <div><h4 data-nx="fAbout">milaisss</h4><a data-nx="fRet" style="cursor:default"></a><a data-nx="fShip" style="cursor:default"></a></div>
+        <div><h4 data-nx="fFollow">Мы в сети</h4><div class="footer-contacts" id="footerContacts"></div></div>
+      </div>
+      <div class="nx-water">mila<span>/</span>isss</div>
+      <div class="legal-footer" id="legalFooter"></div>
+      <div class="nx-legal"><span>© 2026 milaisss</span><span data-nx="fShip"></span></div>
+    </div></footer>
+    <div class="shop-footer" id="shopFooter" style="display:none"></div>
   </div>
 
   <div class="screen" id="infoDetail">
@@ -1125,6 +1477,7 @@
           </div>
           <div class="block-label" data-i18n="sizeLabel">Размер</div>
           <div class="sizes" id="sizeRow"></div>
+          <button type="button" class="nx-sgl" id="nxDetailGuide" hidden onclick="openSizeGuide(window.__nxGuideKind)">📏 <span data-nx="guide">Таблица размеров</span></button>
           <div class="block-label"><span data-i18n="colorLabelWord">Цвет</span>: <span id="colorLabel" style="color:var(--ink); font-weight:700;"></span></div>
           <div class="colors" id="colorRow"></div>
           <div class="block-label" data-i18n="descLabel">Описание</div>
@@ -1453,7 +1806,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261118-185";
+  const CURRENT_VERSION = "20261120-186";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2262,7 +2615,7 @@ function currentTheme(){ return document.documentElement.getAttribute('data-them
 function updateThemeButtons(){
   document.querySelectorAll('#themeSwitch button').forEach(b => b.classList.toggle('active', b.dataset.theme === currentTheme()));
   const meta = document.getElementById('themeColorMeta');
-  if (meta) meta.setAttribute('content', currentTheme() === 'dark' ? '#2B2D31' : '#D9DADC');
+  if (meta) meta.setAttribute('content', currentTheme() === 'dark' ? '#17110F' : '#F2E9DF');
 }
 function setTheme(theme){
   const root = document.documentElement;
@@ -3338,6 +3691,7 @@ try{ if (tg && tg.BackButton) tg.BackButton.onClick(() => history.back()); }catc
     if (el.offsetHeight === 0) return;
     if (getComputedStyle(el).position === 'fixed') return;
     if (el.id === 'heroPhoto' || el.id === 'siteHeader' || el.id === 'searchPop') return;
+    if (el.closest && el.closest('#nxHero, .nx-sec, .nx-band, .nx-foot')) return; // новые блоки анимируются сами
     // большие контейнеры (сетка товаров, список FAQ) разбираем на отдельные элементы
     if (el.offsetHeight > window.innerHeight * 0.6 && el.children.length && depth < 3){
       Array.from(el.children).forEach(c => collect(c, out, depth + 1));
@@ -3389,7 +3743,7 @@ try{ if (tg && tg.BackButton) tg.BackButton.onClick(() => history.back()); }catc
   // содержимое меняется (сменился экран, перерисовалась сетка) — пересобираем список блоков
   const root = document.getElementById('appRoot');
   if (root && window.MutationObserver){
-    new MutationObserver(muts => { if (muts.some(m => !(m.target.closest && m.target.closest('#heroPhoto,#siteHeader,#searchPop')))) markDirty(); }).observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(muts => { if (muts.some(m => !(m.target.closest && m.target.closest('#heroPhoto,#siteHeader,#searchPop,#nxHero,.nx-sec,.nx-band,.nx-foot')))) markDirty(); }).observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   }
   schedule();
 })();
@@ -5723,6 +6077,387 @@ authReady.then(() => { afterAuth(); logVisit(); });
   };
   window.addEventListener('touchend', end, { passive: true });
   window.addEventListener('touchcancel', end, { passive: true });
+})();
+</script>
+<script>
+/* ================= новая главная (орбита, категории, образы, уличные фото, качество) ================= */
+(function(){
+const NX = {
+  ru:{ nav1:'Каталог', nav2:'Новинки', nav3:'Образы', nav4:'Вопросы', drag:'Потяни орбиту', size:'Размер', guide:'Таблица размеров', more:'Подробнее', catsE:'Категории', catsH:'Начни с фита.', all:'Смотреть все', styles:'моделей',
+       lookE:'Лукбук', lookH:'Собери образ.', lookS:'Готовые образы с головы до ног. Нажми на вещь — откроется карточка.', inLook:'В этом образе', pcs:'вещи', lookCta:'Смотреть вещи образа', lookNote:'Фото моделей добавим из админки — пока образы собраны из товаров.',
+       gridE:'Каталог', gridH:'Вещь на любой фит.', streetE:'Улица', streetH:'Носят смело.', streetS:'Как наши вещи выглядят на улице. Отметь @milaisss — и твоё фото может оказаться здесь.', streetPh:'Здесь будут фото покупателей', shopIt:'Смотреть вещи',
+       c1:'Вечерняя парковка', c2:'Лестница, полдень', fabE:'Качество', fabH:'Сделано на совесть.', fabS:'Каждая вещь — плотная ткань, которую чувствуешь в руках, и швы, которые переживут сотню стирок.', fabPh:'Крупное фото ткани',
+       f1:'Плотный футер', f1p:'Мягкий начёс внутри, плотная петля снаружи, манжеты держат форму после стирок.', f2:'Двойной капюшон', f2p:'Два слоя ткани и плоские шнурки — капюшон не теряет форму.', f3:'Плотный хлопок', f3p:'Свободный крой, спущенное плечо, ворот в рубчик с двойной строчкой.',
+       bandH:'Простые вещи. Смелый стиль.', bandP:'Новые дропы, закрытые скидки и первыми — новости магазина.', bandPh:'Фото кампании', fShop:'Магазин', fHelp:'Помощь', fAbout:'milaisss', fFollow:'Мы в сети', fNew:'Новинки', fCart:'Корзина', fFav:'Избранное', fOrders:'Мои заказы', fFaq:'Вопросы', fSupport:'Поддержка', fOffer:'Оферта', fRet:'Возврат 7 дней', fShip:'Бесплатная доставка от 850 000 сум' },
+  uz:{ nav1:'Katalog', nav2:'Yangiliklar', nav3:'Obrazlar', nav4:'Savollar', drag:'Orbitani torting', size:'Oʻlcham', guide:'Oʻlchamlar jadvali', more:'Batafsil', catsE:'Kategoriyalar', catsH:'Fitdan boshlang.', all:'Hammasi', styles:'model',
+       lookE:'Lukbuk', lookH:'Obraz yig‘ing.', lookS:'Boshdan-oyoq tayyor obrazlar. Kiyimni bosing — kartochka ochiladi.', inLook:'Bu obrazda', pcs:'ta', lookCta:'Obraz kiyimlarini ko‘rish', lookNote:'Model fotolarini admin paneldan qo‘shamiz — hozircha obrazlar mahsulotlardan yig‘ilgan.',
+       gridE:'Katalog', gridH:'Har qanday fitga kiyim.', streetE:'Koʻcha', streetH:'Dadil kiyishadi.', streetS:'Kiyimlarimiz ko‘chada qanday ko‘rinadi. @milaisss deb belgilang — rasmingiz shu yerda chiqishi mumkin.', streetPh:'Bu yerda xaridorlar fotolari bo‘ladi', shopIt:'Kiyimlarni ko‘rish',
+       c1:'Kechki avtoturargoh', c2:'Zinapoya, tush', fabE:'Sifat', fabH:'Vijdonan tikilgan.', fabS:'Har bir kiyim — qo‘lda seziladigan zich mato va yuzlab yuvishga chidaydigan choklar.', fabPh:'Matoning yirik fotosi',
+       f1:'Zich futer', f1p:'Ichi yumshoq, tashqi tomoni zich, manjetlar yuvishdan keyin ham shaklini saqlaydi.', f2:'Ikki qavatli kapyushon', f2p:'Ikki qavat mato va yassi bog‘ichlar — kapyushon shaklini yo‘qotmaydi.', f3:'Zich paxta', f3p:'Erkin bichim, tushirilgan yelka, qo‘sh chokli yoqa.',
+       bandH:'Oddiy kiyim. Dadil uslub.', bandP:'Yangi droplar, yopiq chegirmalar va do‘kon yangiliklari birinchi bo‘lib.', bandPh:'Kampaniya fotosi', fShop:'Do‘kon', fHelp:'Yordam', fAbout:'milaisss', fFollow:'Tarmoqlarda', fNew:'Yangiliklar', fCart:'Savat', fFav:'Sevimlilar', fOrders:'Buyurtmalarim', fFaq:'Savollar', fSupport:'Qo‘llab-quvvatlash', fOffer:'Oferta', fRet:'Qaytarish 7 kun', fShip:'850 000 so‘mdan bepul yetkazish' },
+  tr:{ nav1:'Katalog', nav2:'Yeniler', nav3:'Kombinler', nav4:'SSS', drag:'Yörüngeyi çek', size:'Beden', guide:'Beden tablosu', more:'Detaylar', catsE:'Kategoriler', catsH:'Kalıpla başla.', all:'Tümü', styles:'model',
+       lookE:'Lookbook', lookH:'Kombini tamamla.', lookS:'Baştan aşağı hazır kombinler. Bir parçaya dokun — kartı açılır.', inLook:'Bu kombinde', pcs:'parça', lookCta:'Kombindeki parçalar', lookNote:'Model fotoğraflarını panelden ekleyeceğiz — şimdilik kombinler ürünlerden oluşuyor.',
+       gridE:'Katalog', gridH:'Her tarza bir parça.', streetE:'Sokak', streetH:'Cesurca giyiliyor.', streetS:'Ürünlerimiz sokakta nasıl duruyor. @milaisss etiketle — fotoğrafın burada olabilir.', streetPh:'Burada müşteri fotoğrafları olacak', shopIt:'Parçaları gör',
+       c1:'Gece otoparkı', c2:'Merdiven, öğlen', fabE:'Kalite', fabH:'Özenle yapıldı.', fabS:'Her parça elinde hissettiğin kalın bir kumaş ve yüzlerce yıkamaya dayanan dikişler.', fabPh:'Kumaşın yakın çekimi',
+       f1:'Kalın sweat kumaş', f1p:'İçi yumuşak şardonlu, dışı sık örgü; manşetler yıkamadan sonra formunu korur.', f2:'Çift kat kapüşon', f2p:'İki kat kumaş ve yassı ipler — kapüşon formunu kaybetmez.', f3:'Kalın pamuk', f3p:'Rahat kesim, düşük omuz, çift dikişli ribana yaka.',
+       bandH:'Sade parçalar. Cesur stil.', bandP:'Yeni droplar, özel indirimler ve mağaza haberleri ilk sende.', bandPh:'Kampanya fotoğrafı', fShop:'Mağaza', fHelp:'Yardım', fAbout:'milaisss', fFollow:'Bizi takip et', fNew:'Yeniler', fCart:'Sepet', fFav:'Favoriler', fOrders:'Siparişlerim', fFaq:'SSS', fSupport:'Destek', fOffer:'Sözleşme', fRet:'7 gün iade', fShip:'850 000 sum üzeri ücretsiz kargo' },
+  az:{ nav1:'Kataloq', nav2:'Yeniliklər', nav3:'Obrazlar', nav4:'Suallar', drag:'Orbiti çək', size:'Ölçü', guide:'Ölçü cədvəli', more:'Ətraflı', catsE:'Kateqoriyalar', catsH:'Fitdən başla.', all:'Hamısı', styles:'model',
+       lookE:'Lukbuk', lookH:'Obrazı topla.', lookS:'Başdan ayağa hazır obrazlar. Geyimə toxun — kartı açılacaq.', inLook:'Bu obrazda', pcs:'ədəd', lookCta:'Obrazın geyimlərinə bax', lookNote:'Model şəkillərini admin paneldən əlavə edəcəyik — hələlik obrazlar məhsullardan yığılıb.',
+       gridE:'Kataloq', gridH:'Hər fitə bir geyim.', streetE:'Küçə', streetH:'Cəsarətlə geyinirlər.', streetS:'Geyimlərimiz küçədə necə görünür. @milaisss qeyd et — şəklin burada ola bilər.', streetPh:'Burada alıcıların şəkilləri olacaq', shopIt:'Geyimlərə bax',
+       c1:'Axşam dayanacağı', c2:'Pilləkən, günorta', fabE:'Keyfiyyət', fabH:'Vicdanla tikilib.', fabS:'Hər geyim — əldə hiss olunan sıx parça və yüzlərlə yuyulmaya dözən tikişlər.', fabPh:'Parçanın yaxın planı',
+       f1:'Sıx futer', f1p:'İçi yumşaq, çölü sıx toxuma, manjetlər yuyulmadan sonra formasını saxlayır.', f2:'İkiqat kapüşon', f2p:'İki qat parça və yastı bağlar — kapüşon formasını itirmir.', f3:'Sıx pambıq', f3p:'Sərbəst biçim, düşük çiyin, ikiqat tikişli yaxa.',
+       bandH:'Sadə geyimlər. Cəsur üslub.', bandP:'Yeni droplar, qapalı endirimlər və mağaza xəbərləri ilk sənə.', bandPh:'Kampaniya şəkli', fShop:'Mağaza', fHelp:'Kömək', fAbout:'milaisss', fFollow:'Sosial şəbəkələr', fNew:'Yeniliklər', fCart:'Səbət', fFav:'Seçilmişlər', fOrders:'Sifarişlərim', fFaq:'Suallar', fSupport:'Dəstək', fOffer:'Oferta', fRet:'7 gün qaytarma', fShip:'850 000 sumdan pulsuz çatdırılma' },
+  en:{ nav1:'Shop', nav2:'New in', nav3:'Lookbook', nav4:'FAQ', drag:'Drag the orbit', size:'Size', guide:'Size guide', more:'View details', catsE:'Shop by category', catsH:'Start with the fit.', all:'View all', styles:'styles',
+       lookE:'The lookbook', lookH:'Shop the look.', lookS:'Looks styled head to toe. Tap a piece to open it.', inLook:'In this look', pcs:'pieces', lookCta:'Shop the pieces', lookNote:'Model photos will come from the admin panel — for now looks are built from products.',
+       gridE:'The catalog', gridH:'A piece for every fit.', streetE:'Street file', streetH:'Worn loud.', streetS:'How our pieces look on the street. Tag @milaisss to be featured.', streetPh:'Customer photos will appear here', shopIt:'Shop the pieces',
+       c1:'Night garage', c2:'Stairwell, noon', fabE:'Made to last', fabH:'Built heavy.', fabS:'Every piece starts with fabric you can feel, finished to survive a hundred washes.', fabPh:'Fabric close-up',
+       f1:'Heavy brushed fleece', f1p:'Brushed inside, dense loop outside, cuffs that keep their shape after washing.', f2:'Double-lined hood', f2p:'Two layers and flat drawcords — the hood keeps its shape.', f3:'Heavy cotton jersey', f3p:'Boxy fit, dropped shoulder, rib collar with twin-needle stitching.',
+       bandH:'Simple pieces. Loud style.', bandP:'New drops, private sales and shop news — first.', bandPh:'Campaign photo', fShop:'Shop', fHelp:'Help', fAbout:'milaisss', fFollow:'Follow', fNew:'New in', fCart:'Bag', fFav:'Favorites', fOrders:'My orders', fFaq:'FAQ', fSupport:'Support', fOffer:'Terms', fRet:'7-day returns', fShip:'Free delivery from 850 000 sum' }
+};
+const T = k => (NX[lang] && NX[lang][k]) || NX.ru[k] || k;
+const $ = id => document.getElementById(id);
+const escN = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const CAM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+
+const colorsOfN = p => (p.colors && p.colors.length) ? p.colors : [{ name:'Стандарт', stock:p.stock || 0 }];
+const sizesOfN = p => ((p.sizes && p.sizes.length) ? p.sizes : []).map(s => (s && typeof s === 'object') ? s.size : s);
+const okUrl = u => /^https:\/\//i.test(String(u || '').trim()) ? String(u).trim() : '';
+function imgOf(p){ const c = colorsOfN(p).find(c => c.image || (c.images && c.images[0])); return okUrl(p.image) || (c && okUrl(c.image || c.images[0])) || ''; }
+function picHTML(p){ // PNG без фона — как есть; обычное фото — белый фон растворяется в кремовом (multiply)
+  const png = okUrl(p.showcaseImage); if (png) return `<img src="${escN(png)}" alt="" loading="lazy" decoding="async">`;
+  const im = imgOf(p); if (!im) return `<div class="nx-ph">${escN(p.emoji || '👕')}</div>`;
+  const u = escN(im); // фон фото продолжается размытой копией и тает в фоне; сам товар не трогаем
+  return `<span class="nx-pic"><img class="blend nx-fg" src="${u}" alt="" loading="lazy" decoding="async"></span>`;
+}
+
+/* мягкие края фото с фоном: продолжаем фон за края, растягивая только крайние пиксели (товар в этом не участвует),
+   затем это продолжение размывается и тает в фоне магазина */
+const EXT = .32;
+function nxExtend(img){
+  const pic = img.parentElement; if (!pic || !img.naturalWidth) return;
+  const W = pic.clientWidth, H = pic.clientHeight; if (!W || !H) return;
+  const nw = img.naturalWidth, nh = img.naturalHeight, sc = Math.min(W / nw, H / nh) / (1 + EXT * .9);
+  const dw = nw * sc, dh = nh * sc;
+  img.style.width = dw + 'px'; img.style.height = dh + 'px'; img.classList.add('nx-on');
+  let cv = pic.querySelector('canvas');
+  if (!cv){
+    cv = document.createElement('canvas'); pic.insertBefore(cv, img);
+    const k = Math.min(1, 220 / Math.max(nw, nh)), w = Math.round(nw * k), h = Math.round(nh * k), mx = Math.round(w * EXT), my = Math.round(h * EXT);
+    cv.width = w + mx * 2; cv.height = h + my * 2;
+    const g = cv.getContext('2d'); const e = 2;
+    try{
+      g.drawImage(img, mx, my, w, h);
+      g.drawImage(img, 0, 0, e, nh, 0, my, mx, h);                 // слева
+      g.drawImage(img, nw - e, 0, e, nh, mx + w, my, mx, h);       // справа
+      g.drawImage(img, 0, 0, nw, e, mx, 0, w, my);                 // сверху
+      g.drawImage(img, 0, nh - e, nw, e, mx, my + h, w, my);       // снизу
+      g.drawImage(img, 0, 0, e, e, 0, 0, mx, my); g.drawImage(img, nw - e, 0, e, e, mx + w, 0, mx, my);
+      g.drawImage(img, 0, nh - e, e, e, 0, my + h, mx, my); g.drawImage(img, nw - e, nh - e, e, e, mx + w, my + h, mx, my);
+      // растворение продолжения: прозрачность уходит в ноль к краям холста (только поля, само фото — полностью)
+      g.globalCompositeOperation = 'destination-in';
+      const fx = mx / cv.width, fy = my / cv.height;
+      const gh = g.createLinearGradient(0, 0, cv.width, 0); gh.addColorStop(0, 'rgba(0,0,0,0)'); gh.addColorStop(fx, '#000'); gh.addColorStop(1 - fx, '#000'); gh.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gh; g.fillRect(0, 0, cv.width, cv.height);
+      const gv = g.createLinearGradient(0, 0, 0, cv.height); gv.addColorStop(0, 'rgba(0,0,0,0)'); gv.addColorStop(fy, '#000'); gv.addColorStop(1 - fy, '#000'); gv.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gv; g.fillRect(0, 0, cv.width, cv.height);
+      g.globalCompositeOperation = 'source-over';
+    }catch(err){ cv.remove(); return; }
+  }
+  cv.style.width = dw * (1 + EXT * 2) + 'px'; cv.style.height = dh * (1 + EXT * 2) + 'px';
+}
+document.addEventListener('load', e => { const t = e.target; if (t && t.classList && t.classList.contains('nx-fg')) nxExtend(t); }, true);
+function nxExtendAll(){ document.querySelectorAll('img.nx-fg').forEach(im => { if (im.complete && im.naturalWidth) nxExtend(im); }); }
+addEventListener('resize', () => { clearTimeout(nxExtendAll._t); nxExtendAll._t = setTimeout(nxExtendAll, 150); });
+
+const stockOf = p => colorsOfN(p).reduce((s, c) => s + (c.sizeStocks ? Object.values(c.sizeStocks).reduce((a, b) => a + (Number(b) || 0), 0) : (Number(c.stock) || 0)), 0) || Number(p.stock || 0);
+const nameOf = p => (typeof getTranslatedProductName === 'function' ? getTranslatedProductName(p) : p.name) || '';
+const inStockN = p => stockOf(p) > 0;
+
+
+const SG = {
+  ru:{ h:'Таблица размеров', lead:'Найди свой идеальный размер.', p:'Чтобы выбрать подходящий размер обуви, измерь длину своей стопы и сравни результат с таблицей ниже.', c1:'EU размер', c2:'Длина стопы', cm:'см', how:'Как правильно измерить стопу?', s:['Поставь ногу на лист бумаги.','Отметь край пятки и кончик самого длинного пальца.','Измерь расстояние между отметками.','Сравни полученный результат с таблицей.'], note:'Обрати внимание: размеры могут незначительно отличаться в зависимости от модели обуви. Если сомневаешься между двумя размерами, свяжись с нами — поможем подобрать подходящий.', sign:'MILAISSS — твой стиль, твой размер.' },
+  uz:{ h:'Oʻlchamlar jadvali', lead:'Oʻzingizga mos oʻlchamni toping.', p:'Mos poyabzal oʻlchamini tanlash uchun oyogʻingiz uzunligini oʻlchang va natijani quyidagi jadval bilan solishtiring.', c1:'EU oʻlcham', c2:'Oyoq uzunligi', cm:'sm', how:'Oyoqni qanday toʻgʻri oʻlchash kerak?', s:['Oyogʻingizni qogʻoz varagʻiga qoʻying.','Tovon chetini va eng uzun barmoq uchini belgilang.','Belgilar orasidagi masofani oʻlchang.','Natijani jadval bilan solishtiring.'], note:'Eʼtibor bering: oʻlchamlar poyabzal modeliga qarab biroz farq qilishi mumkin. Ikki oʻlcham orasida ikkilansangiz, biz bilan bogʻlaning — mosini tanlashga yordam beramiz.', sign:'MILAISSS — sizning uslubingiz, sizning oʻlchamingiz.' },
+  tr:{ h:'Beden tablosu', lead:'Mükemmel bedenini bul.', p:'Doğru ayakkabı numarasını seçmek için ayağının uzunluğunu ölç ve sonucu aşağıdaki tabloyla karşılaştır.', c1:'EU numara', c2:'Ayak uzunluğu', cm:'cm', how:'Ayak nasıl doğru ölçülür?', s:['Ayağını bir kâğıdın üzerine koy.','Topuğun kenarını ve en uzun parmağın ucunu işaretle.','İki işaret arasındaki mesafeyi ölç.','Sonucu tabloyla karşılaştır.'], note:'Not: numaralar ayakkabı modeline göre biraz farklılık gösterebilir. İki numara arasında kararsızsan bize yaz — doğru olanı seçmene yardım edelim.', sign:'MILAISSS — senin tarzın, senin numaran.' },
+  az:{ h:'Ölçü cədvəli', lead:'Öz ideal ölçünü tap.', p:'Uyğun ayaqqabı ölçüsünü seçmək üçün ayağının uzunluğunu ölç və nəticəni aşağıdakı cədvəllə müqayisə et.', c1:'EU ölçü', c2:'Ayaq uzunluğu', cm:'sm', how:'Ayağı necə düzgün ölçmək olar?', s:['Ayağını kağız vərəqinin üzərinə qoy.','Dabanın kənarını və ən uzun barmağın ucunu qeyd et.','Qeydlər arasındakı məsafəni ölç.','Nəticəni cədvəllə müqayisə et.'], note:'Diqqət: ölçülər ayaqqabı modelindən asılı olaraq bir qədər fərqlənə bilər. İki ölçü arasında tərəddüd edirsənsə, bizimlə əlaqə saxla — uyğun olanı seçməyə kömək edərik.', sign:'MILAISSS — sənin üslubun, sənin ölçün.' },
+  en:{ h:'Size guide', lead:'Find your perfect size.', p:'To choose the right shoe size, measure the length of your foot and compare it with the table below.', c1:'EU size', c2:'Foot length', cm:'cm', how:'How to measure your foot', s:['Place your foot on a sheet of paper.','Mark the edge of your heel and the tip of your longest toe.','Measure the distance between the marks.','Compare the result with the table.'], note:'Please note: sizes may vary slightly depending on the shoe model. If you are between two sizes, contact us — we will help you choose.', sign:'MILAISSS — your style, your size.' }
+};
+
+// таблица размеров для верха (худи, свитшоты, футболки, двойки)
+const SGT = {
+  ru:{ h:'Таблица размеров', lead:'Найди свой идеальный размер.', c:['Размер (US/EU)','Обхват груди','Длина изделия','Длина рукава'], cm:'см', how:'Как правильно измерить?',
+       s:[['Обхват груди','Измерь самый широкий участок груди, не затягивая сантиметр.'],['Длина изделия','Измерь от верхней точки плеча до низа изделия.'],['Длина рукава','Измерь от плечевого шва до конца рукава.']],
+       tipH:'Совет:', tip:'Если сомневаешься между двумя размерами — выбирай больший для более комфортной посадки.', sign:'MILAISSS — твой стиль, твой размер.' },
+  uz:{ h:'Oʻlchamlar jadvali', lead:'Oʻzingizga mos oʻlchamni toping.', c:['Oʻlcham (US/EU)','Koʻkrak aylanasi','Kiyim uzunligi','Yeng uzunligi'], cm:'sm', how:'Qanday toʻgʻri oʻlchash kerak?',
+       s:[['Koʻkrak aylanasi','Koʻkrakning eng keng joyini santimetrni tortmasdan oʻlchang.'],['Kiyim uzunligi','Yelkaning eng yuqori nuqtasidan kiyim pastigacha oʻlchang.'],['Yeng uzunligi','Yelka chokidan yeng uchigacha oʻlchang.']],
+       tipH:'Maslahat:', tip:'Ikki oʻlcham orasida ikkilansangiz — qulayroq boʻlishi uchun kattasini tanlang.', sign:'MILAISSS — sizning uslubingiz, sizning oʻlchamingiz.' },
+  tr:{ h:'Beden tablosu', lead:'Mükemmel bedenini bul.', c:['Beden (US/EU)','Göğüs çevresi','Ürün boyu','Kol boyu'], cm:'cm', how:'Nasıl doğru ölçülür?',
+       s:[['Göğüs çevresi','Göğsün en geniş yerini mezurayı sıkmadan ölç.'],['Ürün boyu','Omzun en üst noktasından ürünün altına kadar ölç.'],['Kol boyu','Omuz dikişinden kolun ucuna kadar ölç.']],
+       tipH:'İpucu:', tip:'İki beden arasında kararsızsan daha rahat bir kalıp için büyük olanı seç.', sign:'MILAISSS — senin tarzın, senin bedenin.' },
+  az:{ h:'Ölçü cədvəli', lead:'Öz ideal ölçünü tap.', c:['Ölçü (US/EU)','Sinə çevrəsi','Məhsulun uzunluğu','Qol uzunluğu'], cm:'sm', how:'Necə düzgün ölçmək olar?',
+       s:[['Sinə çevrəsi','Sinənin ən geniş hissəsini santimetri sıxmadan ölç.'],['Məhsulun uzunluğu','Çiyninin ən yuxarı nöqtəsindən məhsulun aşağısına qədər ölç.'],['Qol uzunluğu','Çiyin tikişindən qolun ucuna qədər ölç.']],
+       tipH:'Məsləhət:', tip:'İki ölçü arasında tərəddüd edirsənsə — daha rahat oturuş üçün böyüyünü seç.', sign:'MILAISSS — sənin üslubun, sənin ölçün.' },
+  en:{ h:'Size guide', lead:'Find your perfect size.', c:['Size (US/EU)','Chest','Body length','Sleeve length'], cm:'cm', how:'How to measure',
+       s:[['Chest','Measure around the widest part of your chest without pulling the tape tight.'],['Body length','Measure from the highest point of the shoulder to the hem.'],['Sleeve length','Measure from the shoulder seam to the end of the sleeve.']],
+       tipH:'Tip:', tip:'If you are between two sizes, choose the larger one for a more comfortable fit.', sign:'MILAISSS — your style, your size.' }
+};
+const SGT_ROWS = [['S (44)','88–94','68','62'],['M (46)','94–100','70','64'],['L (48)','100–106','72','66'],['XL (50)','106–112','74','68'],['XXL (52)','112–118','76','70']];
+const guideKind = p => !p ? null : (p.type === 'shoes' ? 'shoes' : (p.type === 'top' || p.type === 'set') ? 'top' : null);
+const SG_ROWS = [[36,'22,5'],[37,'23'],[38,'24'],[39,'24,5'],[40,'25'],[41,'26'],[42,'26,5'],[43,'27,5'],[44,'28'],[45,'29']];
+function openSizeGuide(kind){
+  if (kind === undefined) kind = guideKind(orb[active]) || 'shoes';
+  if (kind === 'top') return openTopGuide();
+  const g = SG[lang] || SG.ru, cm = v => (lang === 'en' || lang === 'tr') ? v.replace(',', '.') : v;
+  let m = document.getElementById('nxSizeGuide');
+  if (!m){ m = document.createElement('div'); m.id = 'nxSizeGuide'; m.className = 'nx-modal'; m.onclick = e => { if (e.target === m) m.classList.remove('show'); }; document.body.appendChild(m); }
+  m.innerHTML = `<div class="nx-mbox" role="dialog" aria-modal="true"><button class="nx-x" aria-label="×" onclick="document.getElementById('nxSizeGuide').classList.remove('show')">×</button>
+    <h3>${g.h}</h3><p class="lead">${g.lead}</p><p>${g.p}</p>
+    <table><thead><tr><th>${g.c1}</th><th>${g.c2}</th></tr></thead><tbody>${SG_ROWS.map(r => `<tr><td>${r[0]}</td><td>${cm(r[1])} ${g.cm}</td></tr>`).join('')}</tbody></table>
+    <p class="lead">${g.how}</p><ol>${g.s.map(x => `<li>${x}</li>`).join('')}</ol>
+    <p class="note">${g.note}</p><p class="sign">${g.sign}</p></div>`;
+  m.classList.add('show'); setTimeout(() => { const x = m.querySelector('.nx-x'); if (x) x.focus(); }, 30);
+}
+function openTopGuide(){
+  const g = SGT[lang] || SGT.ru;
+  let m = document.getElementById('nxSizeGuide');
+  if (!m){ m = document.createElement('div'); m.id = 'nxSizeGuide'; m.className = 'nx-modal'; m.onclick = e => { if (e.target === m) m.classList.remove('show'); }; document.body.appendChild(m); }
+  m.innerHTML = `<div class="nx-mbox" role="dialog" aria-modal="true"><button class="nx-x" aria-label="×" onclick="document.getElementById('nxSizeGuide').classList.remove('show')">×</button>
+    <h3>${g.h}</h3><p class="lead">${g.lead}</p>
+    <div style="overflow-x:auto"><table class="nx-t4"><thead><tr>${g.c.map((c, i) => `<th>${c}${i ? ` (${g.cm})` : ''}</th>`).join('')}</tr></thead>
+    <tbody>${SGT_ROWS.map(r => `<tr>${r.map((v, i) => `<td>${i ? v : `<b>${v}</b>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="lead">${g.how}</p><ol>${g.s.map(x => `<li><b>${x[0]}</b> — ${x[1]}</li>`).join('')}</ol>
+    <p class="note"><b>${g.tipH}</b> ${g.tip}</p><p class="sign">${g.sign}</p></div>`;
+  m.classList.add('show'); setTimeout(() => { const x = m.querySelector('.nx-x'); if (x) x.focus(); }, 30);
+}
+window.openSizeGuide = openSizeGuide;
+addEventListener('keydown', e => { if (e.key === 'Escape'){ const m = document.getElementById('nxSizeGuide'); if (m) m.classList.remove('show'); } });
+
+/* ---------- 1. орбита ---------- */
+let orb = [], pos = 0, target = 0, active = -1, raf = 0;
+function buildOrbit(){
+  const H = window.NXHOME || {}, chosen = (H.orbit || []).map(id => products.find(p => p.id === id)).filter(Boolean);
+  const list = chosen.length ? chosen.slice(0, 7) : products.filter(inStockN).slice(0, 7);
+  const sig = lang + '|' + list.map(p => p.id + (p.image || '') + (p.showcaseImage || '') + (p.name || '')).join('|');
+  if (sig === buildOrbit._sig) return; buildOrbit._sig = sig;
+  orb = list; const box = $('nxOrbit'); if (!box) return;
+  if (!orb.length){ $('nxTitle').innerHTML = '<span>milaisss</span>'; $('nxIdx').textContent = ''; $('nxMeta').textContent = ''; $('nxPrice').textContent = ''; $('nxSizes').style.visibility = 'hidden'; }
+  box.querySelectorAll('.nx-item').forEach(e => e.remove());
+  orb.forEach((p, i) => { const el = document.createElement('div'); const html = picHTML(p); el.className = 'nx-item' + (html.includes('blend') ? ' blend' : ''); el.dataset.i = i; el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', nameOf(p)); el.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); if (i === active) openProduct(p.id); else goTo(i); } }; el.innerHTML = html + '<i></i>'; box.appendChild(el); });
+  target = pos = Math.min(Math.floor(orb.length / 2), orb.length - 1); active = -1;
+  $('nxDragTo').textContent = String(orb.length).padStart(2, '0');
+  layout(); setActive(Math.round(pos));
+}
+function layout(){
+  const box = $('nxOrbit'); if (!box || !orb.length) return;
+  const W = box.clientWidth, H = box.clientHeight, wide = innerWidth >= 900;
+  const cx = W * (wide ? .46 : .5), cy = H * (wide ? .30 : .40), rx = W * (wide ? .56 : .9), ry = H * (wide ? .46 : .34);
+  const ring = box.querySelector('ellipse'); if (ring){ ring.setAttribute('cx', cx); ring.setAttribute('cy', cy + ry * .55); ring.setAttribute('rx', rx); ring.setAttribute('ry', ry * .55); }
+  box.querySelectorAll('.nx-item').forEach(el => {
+    const d = +el.dataset.i - pos, a = d * .5;                     // угол на орбите
+    const depth = (Math.cos(a) + 1) / 2;                          // 1 — впереди, 0 — сзади
+    const x = cx + Math.sin(a) * rx, y = cy + Math.cos(a) * ry * .55 + (1 - depth) * -ry * .25;
+    const s = .32 + .68 * Math.pow(depth, 1.6), w = el.offsetWidth, h = el.offsetHeight;
+    el.style.transform = `translate(${x - w/2}px, ${y - h*.55}px) scale(${s.toFixed(3)}) rotate(${(-d * 4).toFixed(2)}deg)`;
+    el.style.zIndex = Math.round(depth * 50);
+    el.style.opacity = Math.abs(d) > 3.4 ? 0 : (.35 + .65 * depth).toFixed(3);
+    el.style.filter = Math.abs(d) > .6 ? `blur(${Math.min(3, (Math.abs(d) - .6) * 1.1).toFixed(2)}px)` : 'none';
+  });
+  const k = $('nxKnob'); if (k) k.style.left = (orb.length > 1 ? pos / (orb.length - 1) * 100 : 50) + '%';
+}
+function animate(){
+  cancelAnimationFrame(raf);
+  (function step(){ pos += (target - pos) * .14; if (Math.abs(target - pos) < .002) pos = target; layout(); const r = Math.round(pos); if (r !== active) setActive(r); if (pos !== target) raf = requestAnimationFrame(step); })();
+}
+function goTo(i){ target = Math.max(0, Math.min(orb.length - 1, i)); animate(); }
+function setActive(i){
+  const p = orb[i]; if (!p) return; const first = active < 0; active = i;
+  $('nxIdx').textContent = `${String(i + 1).padStart(2, '0')} / ${String(orb.length).padStart(2, '0')}`;
+  const title = $('nxTitle'), old = title.querySelector('span:not(.out)');
+  const nu = document.createElement('span'); nu.textContent = nameOf(p);
+  if (first || !old){ title.innerHTML = ''; title.appendChild(nu); }
+  else { nu.className = 'pre'; title.appendChild(nu); old.classList.add('out'); requestAnimationFrame(() => requestAnimationFrame(() => nu.classList.remove('pre'))); setTimeout(() => old.remove(), 800); }
+  const c0 = colorsOfN(p)[0] || {};
+  $('nxMeta').textContent = [c0.name && c0.name !== 'Стандарт' ? c0.name : '', p.sub || ''].filter(Boolean).join(' · ');
+  $('nxPrice').innerHTML = (typeof discOf === 'function' && discOf(p)) ? `${fmt(effPrice(p))}<s>${fmt(p.price)}</s>` : fmt(p.price);
+  const sz = sizesOfN(p);
+  $('nxSz').innerHTML = sz.map(s => { const n = colorsOfN(p).reduce((a, c) => a + (typeof getSizeStock === 'function' ? getSizeStock(p, c, s) : 1), 0); return `<button ${n > 0 ? '' : 'disabled'} data-s="${escN(s)}">${escN(s)}</button>`; }).join('');
+  $('nxSizes').style.visibility = sz.length ? 'visible' : 'hidden';
+  $('nxGuide').style.visibility = guideKind(p) ? 'visible' : 'hidden'; // для низа таблицы пока нет
+}
+function wireOrbit(){
+  const box = $('nxOrbit'), track = $('nxTrack');
+  let drag = null;
+  box.addEventListener('pointerdown', e => { drag = { x:e.clientX, p:pos, moved:false }; box.setPointerCapture(e.pointerId); box.classList.add('drag'); });
+  box.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) drag.moved = true; if (!drag.moved) return; pos = target = Math.max(-.4, Math.min(orb.length - .6, drag.p - dx / Math.max(120, box.clientWidth * .22))); cancelAnimationFrame(raf); layout(); const r = Math.round(pos); if (r !== active && r >= 0 && r < orb.length) setActive(r); });
+  const end = e => { if (!drag) return; box.classList.remove('drag'); const was = drag; drag = null;
+    if (!was.moved){ const el = document.elementFromPoint(e.clientX, e.clientY); const it = el && el.closest('.nx-item'); if (it){ const i = +it.dataset.i; if (i === active){ it.classList.add('nx-pop'); setTimeout(() => { openProduct(orb[i].id); it.classList.remove('nx-pop'); }, 260); } else goTo(i); } return; }
+    goTo(Math.round(pos)); };
+  box.addEventListener('pointerup', end); box.addEventListener('pointercancel', () => { drag = null; box.classList.remove('drag'); goTo(Math.round(pos)); });
+  const fromTrack = e => { const r = track.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (orb.length - 1); };
+  let td = false;
+  track.addEventListener('pointerdown', e => { td = true; track.setPointerCapture(e.pointerId); target = fromTrack(e); animate(); });
+  track.addEventListener('pointermove', e => { if (td){ target = fromTrack(e); animate(); } });
+  track.addEventListener('pointerup', () => { td = false; goTo(Math.round(target)); });
+  $('nxSz').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (b && orb[active]) openProduct(orb[active].id, undefined, b.dataset.s); });
+  $('nxMore').onclick = () => { const it = document.querySelector(`.nx-item[data-i="${active}"]`); if (it) it.classList.add('nx-pop'); setTimeout(() => { orb[active] && openProduct(orb[active].id); if (it) it.classList.remove('nx-pop'); }, 260); };
+  // автовращение: каждые 1,5 с — следующий товар; пауза при наведении/перетаскивании и 5 с после касания
+  let idleUntil = 0, hover = false;
+  const touch = () => { idleUntil = Date.now() + 5000; };
+  box.addEventListener('pointerenter', () => { hover = true; }); box.addEventListener('pointerleave', () => { hover = false; });
+  box.addEventListener('pointerdown', touch); track.addEventListener('pointerdown', touch);
+  setInterval(() => {
+    if (!orb.length || orb.length < 2 || drag || hover || document.hidden || Date.now() < idleUntil || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const home = document.getElementById('home'); if (!home || !home.classList.contains('active')) return;
+    const r = box.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+    goTo(active + 1 >= orb.length ? 0 : active + 1);
+  }, 1500);
+  addEventListener('resize', layout);
+  addEventListener('keydown', e => { const tg = e.target; if (tg && (tg.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName))) return; if (!document.getElementById('home').classList.contains('active')) return; const sgm = document.getElementById('nxSizeGuide'); if (sgm && sgm.classList.contains('show')) return; const r = $('nxHero').getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; if (e.key === 'ArrowRight') goTo(active + 1); if (e.key === 'ArrowLeft') goTo(active - 1); });
+}
+
+/* ---------- 2. категории ---------- */
+function buildCats(){
+  const box = $('nxCats'); if (!box) return;
+  if (!products.length){ box.innerHTML = ''; return; } // товары ещё не пришли — не показываем «0 моделей»
+  const cats = (Array.isArray(CATEGORIES) ? CATEGORIES : []).filter(c => products.some(p => (p.category || '').trim().toLowerCase() === String(c).trim().toLowerCase()));
+  const list = cats.slice(0, 4); // только категории, в которых есть товары
+  box.innerHTML = list.map(c => {
+    const items = products.filter(p => (p.category || '').trim().toLowerCase() === String(c).trim().toLowerCase());
+    const pics = items.filter(p => okUrl(p.showcaseImage) || imgOf(p)).map(picHTML);
+    const tile = pics.length ? `<div class="nx-fade">${pics.map((h, k) => k === 0 ? h.replace('<img ', '<img data-on="1" ') : h).join('')}</div>` : (items[0] ? picHTML(items[0]) : '<div class="nx-ph">👕</div>');
+    return `<button class="nx-cat nx-reveal" data-c="${escN(c)}">${tile}<div class="nx-cat-b"><div><b>${escN(typeof translateCategory === 'function' ? translateCategory(c) : c)}</b><small>${items.length} ${T('styles')}</small></div><span class="nx-arrow">${ARROW}</span></div></button>`;
+  }).join('');
+  box.querySelectorAll('.nx-fade').forEach(f => { const first = f.firstElementChild; if (first) first.classList.add('on'); });
+  clearInterval(buildCats._t);
+  buildCats._t = setInterval(() => { // каждые 3 с — следующее фото; плитки сменяются по очереди, не все разом
+    if (document.hidden || !document.getElementById('home').classList.contains('active')) return;
+    box.querySelectorAll('.nx-fade').forEach((f, k) => setTimeout(() => { const kids = [...f.children]; if (kids.length < 2) return; const i = kids.findIndex(x => x.classList.contains('on')); kids[i].classList.remove('on'); kids[(i + 1) % kids.length].classList.add('on'); }, k * 450));
+  }, 3200);
+  box.querySelectorAll('.nx-cat').forEach(b => b.onclick = () => { selectMainCategory(b.dataset.c); const a = $('productsAnchor'); if (a) a.scrollIntoView({ behavior:'smooth', block:'start' }); });
+}
+
+/* ---------- 3. образы (пока собираются из товаров: верх + низ + обувь) ---------- */
+let looks = [], li = 0, lookTimer = 0, lookPaused = false;
+function buildLooks(){
+  const av = products.filter(inStockN), by = t => av.filter(p => p.type === t);
+  const tops = by('top').concat(by('set')), bottoms = by('bottom'), shoes = by('shoes');
+  const n = Math.min(5, Math.max(tops.length, 1));
+  looks = [];
+  for (let i = 0; i < n; i++){ const pieces = [tops[i % (tops.length || 1)], bottoms[i % (bottoms.length || 1)], shoes[i % (shoes.length || 1)]].filter(Boolean); if (pieces.length) looks.push(pieces); }
+  if (!looks.length && av.length) looks = [av.slice(0, 3)];
+  looks = looks.map(l => ({ pieces: l.map(p => ({ p })) }));
+  const HL = ((window.NXHOME || {}).looks || []).filter(l => l && typeof l === 'object').map(l => { const photo = okUrl(l.photo); return { photo, pieces: (l.pieces || []).filter(pc => pc && typeof pc === 'object').map(pc => ({ p: products.find(x => x.id === pc.id), x: photo ? pc.x : null, y: photo ? pc.y : null })).filter(pc => pc.p) }; }).filter(l => l.photo || l.pieces.length); // точки — только на собственном фото образа
+  if (HL.length) looks = HL;
+  li = Math.min(li, Math.max(0, looks.length - 1));
+  const stage = $('nxStage'); if (!stage) return;
+  if (!looks.length){ stage.innerHTML = ''; $('nxSteps').innerHTML = ''; $('nxPieces').innerHTML = ''; $('nxPcs').textContent = ''; clearInterval(lookTimer); return; }
+  stage.innerHTML = looks.map((l, i) => {
+    const h = l.photo ? `<img src="${escN(l.photo)}" alt="" loading="lazy">` : (l.pieces[0] ? picHTML(l.pieces[0].p) : '');
+    const pins = l.pieces.map((pc, k) => { const ok = v => v !== null && v !== undefined && v !== '' && isFinite(Number(v)); const x = Number(pc.x), y = Number(pc.y); return (ok(pc.x) && ok(pc.y)) ? `<button class="nx-pin" style="left:${x}%;top:${y}%" data-x="${x}" data-y="${y}" data-id="${escN(pc.p.id)}"><b>${k + 1}</b><span>${escN(nameOf(pc.p))}</span></button>` : ''; }).join('');
+    return `<div class="nx-fig${h.includes('blend') ? ' blend' : ''}" data-i="${i}"><div class="nx-figin">${h}${pins}</div></div>`; }).join('');
+  $('nxSteps').innerHTML = looks.map((l, i) => `<button class="nx-step" data-i="${i}">${String(i + 1).padStart(2, '0')} ${escN(l.pieces[0] ? nameOf(l.pieces[0].p).split(' ')[0] : '')}</button>`).join('');
+  $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.onclick = () => showLook(+b.dataset.i, true));
+  stage.querySelectorAll('.nx-figin > img').forEach(im => { if (im.complete) layoutPins(); else im.addEventListener('load', layoutPins, { once:true }); });
+  stage.querySelectorAll('.nx-pin').forEach(b => b.onclick = e => { e.stopPropagation(); if (+b.closest('.nx-fig').dataset.i === li) openProduct(b.dataset.id); });
+  stage.querySelectorAll('.nx-fig').forEach(f => f.onclick = () => { const i = +f.dataset.i; if (i === li){ const pc = looks[i].pieces[0]; if (pc) openProduct(pc.p.id); } else showLook(i, true); });
+  showLook(li); schedule();
+}
+// точка = процент от самой картинки; картинка вписана в рамку (contain, прижата вниз), поэтому пересчитываем в пиксели
+function layoutPins(){
+  document.querySelectorAll('#nxStage .nx-figin').forEach(box => {
+    const img = box.querySelector(':scope > img'); if (!img || !img.naturalWidth) return;
+    const W = box.clientWidth, H = box.clientHeight, sc = Math.min(W / img.naturalWidth, H / img.naturalHeight);
+    const dw = img.naturalWidth * sc, dh = img.naturalHeight * sc, ox = (W - dw) / 2, oy = H - dh;
+    box.querySelectorAll('.nx-pin').forEach(pn => { pn.style.left = (ox + pn.dataset.x / 100 * dw) + 'px'; pn.style.top = (oy + pn.dataset.y / 100 * dh) + 'px'; });
+  });
+}
+addEventListener('resize', () => layoutPins());
+function showLook(i, user){
+  if (!looks.length) return; li = (i + looks.length) % looks.length;
+  $('nxStage').querySelectorAll('.nx-fig').forEach(f => {
+    let d = +f.dataset.i - li; if (d > looks.length / 2) d -= looks.length; if (d < -looks.length / 2) d += looks.length;
+    const w = innerWidth < 640 ? 62 : 68;
+    f.style.transform = `translateX(calc(-50% + ${d * w}%)) scale(${d === 0 ? 1 : .86})`;
+    f.style.filter = d === 0 ? 'none' : 'blur(6px)'; f.style.opacity = Math.abs(d) > 2 ? 0 : (d === 0 ? 1 : .55); f.style.zIndex = 10 - Math.abs(d);
+  });
+  $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.classList.toggle('on', +b.dataset.i === li));
+  const l = looks[li].pieces.map(pc => pc.p);
+  $('nxPieces').innerHTML = l.map((p, k) => `<div class="nx-piece" data-id="${escN(p.id)}"><div class="th">${picHTML(p)}<b>${k + 1}</b></div><div class="nm"><small>milaisss · ${escN(typeof translateCategory === 'function' ? translateCategory(p.category || '') : (p.category || ''))}</small><div>${escN(nameOf(p))}</div><span>${fmt(typeof effPrice === 'function' ? effPrice(p) : p.price)}</span></div><span class="nx-plus">${PLUS}</span></div>`).join('');
+  $('nxPieces').querySelectorAll('.nx-piece').forEach(r => r.onclick = () => openProduct(r.dataset.id));
+  $('nxPcs').textContent = `${l.length} ${T('pcs')}`;
+  if (user) schedule();
+}
+const homeVisible = () => !document.hidden && document.getElementById('home') && document.getElementById('home').classList.contains('active');
+function schedule(){ clearInterval(lookTimer); if (!lookPaused && looks.length > 1) lookTimer = setInterval(() => { if (homeVisible()) showLook(li + 1); }, 6000); }
+function wireLooks(){
+  $('nxPrev').onclick = () => showLook(li - 1, true);
+  $('nxNext').onclick = () => showLook(li + 1, true);
+  $('nxPause').onclick = () => { lookPaused = !lookPaused; $('nxPause').innerHTML = lookPaused ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>'; schedule(); };
+  $('nxLookCta').onclick = () => { const l = looks[li]; if (l && l.pieces[0]) openProduct(l.pieces[0].p.id); };
+  let sx = null; const st = $('nxStage');
+  st.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive:true });
+  st.addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) showLook(li + (dx < 0 ? 1 : -1), true); sx = null; });
+}
+
+/* ---------- 5. качество: подписи по очереди ---------- */
+let fi = 0, fT = 0;
+function wireFab(){
+  const feats = [...document.querySelectorAll('.nx-feat')], bar = document.querySelector('.nx-prog i');
+  const show = i => { fi = (i + feats.length) % feats.length; feats.forEach((f, k) => f.classList.toggle('on', k === fi)); bar.style.transition = 'none'; bar.style.width = (fi / feats.length * 100) + '%'; requestAnimationFrame(() => { bar.style.transition = 'width 5s linear'; bar.style.width = ((fi + 1) / feats.length * 100) + '%'; }); };
+  feats.forEach((f, k) => f.onclick = () => { show(k); clearInterval(fT); fT = setInterval(() => show(fi + 1), 5000); });
+  show(0); fT = setInterval(() => show(fi + 1), 5000);
+}
+
+/* ---------- тексты на языке сайта ---------- */
+function texts(){ document.querySelectorAll('[data-nx]').forEach(el => { el.textContent = T(el.dataset.nx); }); }
+function revealSetup(){
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin:'0px 0px -8% 0px' }) : null;
+  const scan = () => document.querySelectorAll('.nx-reveal:not(.in)').forEach(el => io ? io.observe(el) : el.classList.add('in'));
+  scan(); return scan;
+}
+let rescan = () => {};
+let lastSig = '';
+function buildPhotos(){
+  const H = window.NXHOME || {};
+  const put = (el, url) => { if (!el) return; const old = el.querySelector('img.nx-real'); if (old) old.remove(); const ph = el.querySelector('.phc'); if (okUrl(url)){ const im = document.createElement('img'); im.className = 'nx-real'; im.src = url; im.alt = ''; im.loading = 'lazy'; el.prepend(im); if (ph) ph.style.display = 'none'; } else if (ph) ph.style.display = ''; };
+  const shots = document.querySelectorAll('#nxStreetSec .nx-shot');
+  (H.street || []).forEach((st, i) => { st = st || {}; put(shots[i], st.photo); const ids = (st.ids || []).filter(id => products.some(p => p.id === id)); if (shots[i]){ shots[i].onclick = ids.length ? () => openProduct(ids[0]) : null; shots[i].style.cursor = ids.length ? 'pointer' : ''; }
+    const cap = i > 0 && shots[i] && shots[i].parentElement.querySelector(':scope > .nx-cap span'); if (cap) cap.textContent = (st && st.caption) || T(cap.dataset.nx); }); // у большого фото подписи нет
+  const fab = document.querySelectorAll('#nxFabSec .nx-shot'); (H.fabric || []).forEach((f, i) => put(fab[i], f.photo));
+  put(document.querySelector('.nx-band .nx-shot'), (H.band || {}).photo);
+}
+window.nxRender = function(force){ // перестраиваем только когда изменились товары, категории или язык
+  try{
+    const sig = JSON.stringify(window.NXHOME || {}) + lang + '|' + (Array.isArray(CATEGORIES) ? CATEGORIES.join(',') : '') + '|' + products.map(p => p.id + ':' + colorsOfN(p).map(c => c.sizeStocks ? Object.keys(c.sizeStocks).filter(k => Number(c.sizeStocks[k]) > 0).join(',') : (Number(c.stock) > 0 ? 1 : 0)).join(';') + ':' + (p.price || 0) + ':' + (p.image || '') + ':' + (p.showcaseImage || '') + ':' + (p.name || '')).join('|');
+    if (!force && sig === lastSig) return; lastSig = sig;
+    texts(); buildOrbit(); buildCats(); buildLooks(); buildPhotos(); rescan(); setTimeout(nxExtendAll, 50);
+  }catch(e){ console.warn('nx', e); }
+};
+window.nxInit = function(){
+  texts(); wireOrbit(); wireLooks(); wireFab(); rescan = revealSetup();
+  document.querySelectorAll('[data-nxgo]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const g = a.dataset.nxgo;
+    if (g.startsWith('#')){ const el = document.querySelector(g); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }
+    else if (g === 'support'){ e.stopPropagation(); showScreen('profile'); setTimeout(() => { if (!document.body.classList.contains('sf-open')) toggleSupportMenu(); }, 60); } // меню WhatsApp/Telegram видно на экране профиля
+    else if (g === 'cart' || g === 'favorites' || g === 'profile') showScreen(g);
+    else if (g === 'offer') location.href = 'oferta.html';
+  }));
+  nxRender();
+};
+})();
+
+</script>
+<script>
+/* подключаем новую главную к данным сайта */
+(function(){
+  const _rmg = renderMainGrid; renderMainGrid = function(){ const r = _rmg.apply(this, arguments); try{ nxRender(); }catch(e){} return r; };
+  // таблица размеров в карточке: у верха/двоек и у обуви
+  const _op = openProduct; openProduct = function(){ const r = _op.apply(this, arguments);
+    try{ const kind = currentProduct ? (currentProduct.type === 'shoes' ? 'shoes' : (currentProduct.type === 'top' || currentProduct.type === 'set') ? 'top' : null) : null;
+      window.__nxGuideKind = kind; const b = document.getElementById('nxDetailGuide'); if (b) b.hidden = !kind; }catch(e){}
+    return r; };
+  try{ db.collection('settings').doc('home').onSnapshot(d => { window.NXHOME = d.exists ? d.data() : null; nxRender(true); }, e => console.warn('home', e)); }catch(e){}
+  nxInit();
 })();
 </script>
 </body>

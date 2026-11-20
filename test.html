@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F2E9DF" id="themeColorMeta">
-<script>/* тёмная тема по умолчанию; светлая — если покупатель сам выбрал её кнопкой ☀️ */try{ if (localStorage.getItem('milaisss_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){}</script>
+<script>/* светлая (кремовая) тема по умолчанию; тёмная — если покупатель сам выбрал её кнопкой 🌙 */try{ if (localStorage.getItem('milaisss_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){}</script>
 <title>milaisss shop — интернет-магазин кроссовок</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -33,8 +33,6 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"milaisss","url":"https://milaisss.com/","logo":"https://milaisss.com/favicon-192x192.png","image":"https://milaisss.com/og.png","areaServed":"UZ","description":"Кроссовки и одежда с доставкой по Узбекистану"}</script>
 <meta property="og:url" content="https://milaisss.com/">
 <meta name="google-site-verification" content="QLeo5HznJQ2owHKI2oFHkqQVdqxb7G_StqUlit7m_HU" />
-<link rel="preload" as="image" href="banner.webp" media="(max-width:767px)" fetchpriority="high">
-<link rel="preload" as="image" href="banner-pc.webp" media="(min-width:768px)" fetchpriority="high">
 <script>setTimeout(function(){try{var r=document.getElementById("appRoot"),l=document.getElementById("appLoader");if(r&&r.style.opacity!=="1"){r.style.opacity="1";if(l)l.style.display="none";}}catch(e){}},4500);</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1013,7 +1011,7 @@
   html:not([data-theme="dark"]) .offer-note a, html:not([data-theme="dark"]) .review-btn, html:not([data-theme="dark"]) .phone-pill-ico{ color:#2B2D31; text-decoration-color:#FFC93C; text-decoration-thickness:2px; }
   html:not([data-theme="dark"]) .offer-note a{ text-decoration:underline; }
   .field-err-msg{ color:var(--err-text); }
-  /* ================= ТЕСТ: новый дизайн «крем / бордо» (по образцу ÉLVARO) =================
+  /* ================= Дизайн «крем / бордо» (по образцу ÉLVARO) =================
      Всё новое — с префиксом nx-. Светлая тема — кремовая (по умолчанию), тёмная — по кнопке. */
   body.bg-facets::before{ background:var(--bg) !important; }
   body.bg-facets::after{ display:none !important; }
@@ -1042,17 +1040,17 @@
   #heroPhoto{ display:none !important; }
 
   /* ===== 1. ОРБИТА ===== */
-  .nx-hero{ position:relative; max-width:1320px; margin:0 auto; padding:calc(76px + env(safe-area-inset-top)) 20px 26px; min-height:min(100svh, 900px); display:grid; grid-template-columns:1fr; gap:6px; overflow:hidden; }
+  .nx-hero{ position:relative; max-width:1320px; margin:0 auto; padding:calc(76px + env(safe-area-inset-top)) 20px 26px; min-height:min(100vh, 900px); min-height:min(100svh, 900px); display:grid; grid-template-columns:1fr; gap:6px; overflow:hidden; }
   .nx-hero-info{ position:relative; z-index:3; order:2; }
   .nx-idx{ font-size:11px; font-weight:800; letter-spacing:.14em; color:var(--muted); margin-bottom:8px; }
-  .nx-title{ font-size:clamp(40px,11vw,104px); color:var(--ink); height:1.92em; overflow:hidden; position:relative; }
+  .nx-title{ font-size:clamp(38px,10vw,58px); color:var(--ink); height:1.92em; overflow:hidden; position:relative; }
   .nx-title span{ display:block; transition:transform .75s cubic-bezier(.7,0,.2,1), opacity .5s ease; }
   .nx-title span.out{ transform:translateY(-105%); opacity:0; position:absolute; inset:0 auto auto 0; }
   .nx-title span.pre{ transform:translateY(105%); opacity:0; }
   .nx-meta{ color:var(--muted); font-size:13px; margin-top:8px; min-height:18px; }
   .nx-price{ font-family:'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:20px; color:var(--ink); margin:10px 0 12px; }
   .nx-price s{ color:var(--muted); font-size:14px; margin-left:8px; font-weight:500; }
-  .nx-orbit{ position:relative; order:1; height:min(62svh, 520px); touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none; }
+  .nx-orbit{ position:relative; order:1; height:min(62vh, 520px); height:min(62svh, 520px); touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none; }
   .nx-orbit.drag{ cursor:grabbing; }
   .nx-orbit svg.nx-ring{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
   .nx-orbit svg.nx-ring ellipse{ fill:none; stroke:var(--line); stroke-width:1.2; }
@@ -1100,9 +1098,10 @@
   .nx-cat:hover .nx-arrow{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
 
   /* ===== 3. ОБРАЗЫ ===== */
+  .nx-look > *{ min-width:0; } /* колонки могут сжиматься — иначе подписи шагов раздвигают блок за экран телефона */
   .nx-look{ display:grid; grid-template-columns:1fr; gap:22px; border-top:1px solid var(--line); padding-top:34px; }
   @media (min-width:900px){ .nx-look{ grid-template-columns:1fr 340px; gap:0; } .nx-look-side{ border-left:1px solid var(--line); padding-left:26px; } }
-  .nx-stage{ position:relative; height:min(66svh, 560px); overflow:hidden; touch-action:pan-y; }
+  .nx-stage{ position:relative; height:min(66vh, 560px); height:min(66svh, 560px); overflow:hidden; touch-action:pan-y; }
   .nx-fig{ position:absolute; bottom:0; left:50%; width:min(46%, 300px); height:92%; transition:transform .8s cubic-bezier(.65,0,.3,1), filter .8s ease, opacity .8s ease; cursor:pointer; }
   .nx-fig img{ width:100%; height:100%; object-fit:contain; object-position:bottom; }
   html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:multiply; }
@@ -1200,7 +1199,7 @@
   .nx-foot-in{ padding-bottom:calc(120px + env(safe-area-inset-bottom)) !important; }
   /* 1–2. первый экран целиком в окне: название — в левом верхнем углу, ползунок орбиты виден сразу */
   @media (min-width:900px){
-    .nx-hero{ height:100svh; min-height:640px; max-height:980px; padding-top:calc(88px + env(safe-area-inset-top)); padding-bottom:0; grid-template-rows:auto 1fr; align-items:start; }
+    .nx-hero{ height:100vh; height:100svh; min-height:640px; max-height:980px; padding-top:calc(88px + env(safe-area-inset-top)); padding-bottom:0; grid-template-rows:auto 1fr; align-items:start; }
     .nx-hero-info{ grid-row:1; align-self:start; padding-top:4vh; }
     .nx-title{ font-size:clamp(40px,4.3vw,72px); max-width:30vw; }
     .nx-orbit{ grid-row:1 / 3; margin-left:34%; min-height:0; height:100%; }
@@ -1210,7 +1209,7 @@
   /* 4. мягкое открытие карточки */
   .nx-item.nx-pop img{ animation:nxPop .32s ease forwards; }
   @keyframes nxPop{ to{ transform:scale(1.07); opacity:.55; } }
-  #detail.screen.active{ animation:nxIn .6s cubic-bezier(.2,.7,.2,1) both; }
+  #detail.screen.active{ animation:nxIn .6s cubic-bezier(.2,.7,.2,1) backwards; }
   @keyframes nxIn{ from{ opacity:0; transform:translateY(26px) scale(.985); } to{ opacity:1; transform:none; } }
   @media (prefers-reduced-motion:reduce){ #detail.screen.active{ animation:none; } }
   /* 3. в плитках категорий фото плавно сменяются */
@@ -1243,7 +1242,7 @@
   /* 1. карточка товара на ПК: фото едет вместе с прокруткой и занимает высоту экрана — нет пустоты под фото */
   @media (min-width:900px){
     .detail-layout.top-layout .detail-media{ position:sticky; top:calc(84px + env(safe-area-inset-top)); align-self:start; }
-    .detail-layout.top-layout .carousel{ aspect-ratio:auto; height:min(calc(100svh - 120px), 860px); }
+    .detail-layout.top-layout .carousel{ aspect-ratio:auto; height:min(calc(100vh - 120px), 860px); height:min(calc(100svh - 120px), 860px); }
   }
   /* 3. переход по меню: заголовок блока встаёт под шапкой, а не прячется за ней */
   #nxHero, #nxCatsSec, #nxLookSec, #productsAnchor, #faqSection, #nxStreetSec, #nxFabSec{ scroll-margin-top:calc(96px + env(safe-area-inset-top)); }
@@ -1281,13 +1280,10 @@
   .nx-hero, .nx-stage{ background:var(--bg); }
   html:not([data-theme="dark"]) .nx-item.blend, html:not([data-theme="dark"]) .nx-fig.blend{ mix-blend-mode:multiply; }
   html:not([data-theme="dark"]) .nx-item img.blend, html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:normal; }
-  .nx-title{ font-size:clamp(38px,10vw,58px); }
   .nx-hero-info{ z-index:60; pointer-events:none; } .nx-hero-info button{ pointer-events:auto; }
 
   @media (max-width:899px){ .nx-item{ width:min(52vw,280px); } }
   @media (min-width:900px){
-    .nx-title{ font-size:clamp(46px,5.4vw,86px); max-width:38vw; }
-    .nx-orbit{ margin-left:30%; }
     .nx-item{ width:clamp(200px,18vw,290px); }
   }
 
@@ -1332,7 +1328,7 @@
 
     <div class="hero-photo" id="heroPhoto"><div class="hero-dots" id="heroDots"></div></div>
 
-    <!-- ===== ТЕСТ: новая главная ===== -->
+    <!-- ===== новая главная ===== -->
     <section class="nx-hero" id="nxHero">
       <div class="nx-hero-info">
         <div class="nx-idx" id="nxIdx">01 / 07</div>
@@ -1385,7 +1381,7 @@
 
     <section class="nx-sec" id="nxStreetSec">
       <div class="nx-street">
-        <div class="nx-shot nx-reveal" style="aspect-ratio:4/5"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-nx="streetPh"></span></div><span class="lbl" data-nxgo="#productsAnchor"><span data-nx="shopIt">Смотреть вещи</span> +</span></div>
+        <div class="nx-shot nx-reveal" style="aspect-ratio:4/5"><div class="phc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-nx="streetPh"></span></div><span class="lbl" data-nxgo="#productsAnchor" onclick="event.stopPropagation()"><span data-nx="shopIt">Смотреть вещи</span> +</span></div>
         <div class="nx-reveal">
           <div class="nx-eyebrow" data-nx="streetE">Улица</div><h2 class="nx-h2" data-nx="streetH">Носят смело.</h2><p class="nx-sub" data-nx="streetS"></p>
           <div class="nx-small">
@@ -2621,7 +2617,7 @@ function currentTheme(){ return document.documentElement.getAttribute('data-them
 function updateThemeButtons(){
   document.querySelectorAll('#themeSwitch button').forEach(b => b.classList.toggle('active', b.dataset.theme === currentTheme()));
   const meta = document.getElementById('themeColorMeta');
-  if (meta) meta.setAttribute('content', currentTheme() === 'dark' ? '#2B2D31' : '#D9DADC');
+  if (meta) meta.setAttribute('content', currentTheme() === 'dark' ? '#17110F' : '#F2E9DF');
 }
 function setTheme(theme){
   const root = document.documentElement;
@@ -3749,7 +3745,7 @@ try{ if (tg && tg.BackButton) tg.BackButton.onClick(() => history.back()); }catc
   // содержимое меняется (сменился экран, перерисовалась сетка) — пересобираем список блоков
   const root = document.getElementById('appRoot');
   if (root && window.MutationObserver){
-    new MutationObserver(muts => { if (muts.some(m => !(m.target.closest && m.target.closest('#heroPhoto,#siteHeader,#searchPop')))) markDirty(); }).observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(muts => { if (muts.some(m => !(m.target.closest && m.target.closest('#heroPhoto,#siteHeader,#searchPop,#nxHero,.nx-sec,.nx-band,.nx-foot')))) markDirty(); }).observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   }
   schedule();
 })();
@@ -6086,7 +6082,7 @@ authReady.then(() => { afterAuth(); logVisit(); });
 })();
 </script>
 <script>
-/* ================= ТЕСТ: новая главная (орбита, категории, образы, уличные фото, качество) ================= */
+/* ================= новая главная (орбита, категории, образы, уличные фото, качество) ================= */
 (function(){
 const NX = {
   ru:{ nav1:'Каталог', nav2:'Новинки', nav3:'Образы', nav4:'Вопросы', drag:'Потяни орбиту', size:'Размер', guide:'Таблица размеров', more:'Подробнее', catsE:'Категории', catsH:'Начни с фита.', all:'Смотреть все', styles:'моделей',
@@ -6222,7 +6218,7 @@ function openSizeGuide(kind){
     <table><thead><tr><th>${g.c1}</th><th>${g.c2}</th></tr></thead><tbody>${SG_ROWS.map(r => `<tr><td>${r[0]}</td><td>${cm(r[1])} ${g.cm}</td></tr>`).join('')}</tbody></table>
     <p class="lead">${g.how}</p><ol>${g.s.map(x => `<li>${x}</li>`).join('')}</ol>
     <p class="note">${g.note}</p><p class="sign">${g.sign}</p></div>`;
-  m.classList.add('show');
+  m.classList.add('show'); setTimeout(() => { const x = m.querySelector('.nx-x'); if (x) x.focus(); }, 30);
 }
 function openTopGuide(){
   const g = SGT[lang] || SGT.ru;
@@ -6234,20 +6230,22 @@ function openTopGuide(){
     <tbody>${SGT_ROWS.map(r => `<tr>${r.map((v, i) => `<td>${i ? v : `<b>${v}</b>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
     <p class="lead">${g.how}</p><ol>${g.s.map(x => `<li><b>${x[0]}</b> — ${x[1]}</li>`).join('')}</ol>
     <p class="note"><b>${g.tipH}</b> ${g.tip}</p><p class="sign">${g.sign}</p></div>`;
-  m.classList.add('show');
+  m.classList.add('show'); setTimeout(() => { const x = m.querySelector('.nx-x'); if (x) x.focus(); }, 30);
 }
 window.openSizeGuide = openSizeGuide;
+addEventListener('keydown', e => { if (e.key === 'Escape'){ const m = document.getElementById('nxSizeGuide'); if (m) m.classList.remove('show'); } });
 
 /* ---------- 1. орбита ---------- */
 let orb = [], pos = 0, target = 0, active = -1, raf = 0;
 function buildOrbit(){
   const H = window.NXHOME || {}, chosen = (H.orbit || []).map(id => products.find(p => p.id === id)).filter(Boolean);
   const list = chosen.length ? chosen.slice(0, 7) : products.filter(inStockN).slice(0, 7);
-  const sig = list.map(p => p.id + (p.image || '') + (p.showcaseImage || '')).join('|');
+  const sig = lang + '|' + list.map(p => p.id + (p.image || '') + (p.showcaseImage || '') + (p.name || '')).join('|');
   if (sig === buildOrbit._sig) return; buildOrbit._sig = sig;
   orb = list; const box = $('nxOrbit'); if (!box) return;
+  if (!orb.length){ $('nxTitle').innerHTML = '<span>milaisss</span>'; $('nxIdx').textContent = ''; $('nxMeta').textContent = ''; $('nxPrice').textContent = ''; $('nxSizes').style.visibility = 'hidden'; }
   box.querySelectorAll('.nx-item').forEach(e => e.remove());
-  orb.forEach((p, i) => { const el = document.createElement('div'); const html = picHTML(p); el.className = 'nx-item' + (html.includes('blend') ? ' blend' : ''); el.dataset.i = i; el.innerHTML = html + '<i></i>'; box.appendChild(el); });
+  orb.forEach((p, i) => { const el = document.createElement('div'); const html = picHTML(p); el.className = 'nx-item' + (html.includes('blend') ? ' blend' : ''); el.dataset.i = i; el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', nameOf(p)); el.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); if (i === active) openProduct(p.id); else goTo(i); } }; el.innerHTML = html + '<i></i>'; box.appendChild(el); });
   target = pos = Math.min(Math.floor(orb.length / 2), orb.length - 1); active = -1;
   $('nxDragTo').textContent = String(orb.length).padStart(2, '0');
   layout(); setActive(Math.round(pos));
@@ -6305,27 +6303,27 @@ function wireOrbit(){
   track.addEventListener('pointerup', () => { td = false; goTo(Math.round(target)); });
   $('nxSz').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (b && orb[active]) openProduct(orb[active].id, undefined, b.dataset.s); });
   $('nxMore').onclick = () => { const it = document.querySelector(`.nx-item[data-i="${active}"]`); if (it) it.classList.add('nx-pop'); setTimeout(() => { orb[active] && openProduct(orb[active].id); if (it) it.classList.remove('nx-pop'); }, 260); };
-  $('nxGuide').onclick = openSizeGuide;
   // автовращение: каждые 1,5 с — следующий товар; пауза при наведении/перетаскивании и 5 с после касания
   let idleUntil = 0, hover = false;
   const touch = () => { idleUntil = Date.now() + 5000; };
   box.addEventListener('pointerenter', () => { hover = true; }); box.addEventListener('pointerleave', () => { hover = false; });
   box.addEventListener('pointerdown', touch); track.addEventListener('pointerdown', touch);
   setInterval(() => {
-    if (!orb.length || orb.length < 2 || drag || hover || document.hidden || Date.now() < idleUntil) return;
+    if (!orb.length || orb.length < 2 || drag || hover || document.hidden || Date.now() < idleUntil || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const home = document.getElementById('home'); if (!home || !home.classList.contains('active')) return;
     const r = box.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
     goTo(active + 1 >= orb.length ? 0 : active + 1);
   }, 1500);
   addEventListener('resize', layout);
-  addEventListener('keydown', e => { if (!document.getElementById('home').classList.contains('active')) return; const r = $('nxHero').getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; if (e.key === 'ArrowRight') goTo(active + 1); if (e.key === 'ArrowLeft') goTo(active - 1); });
+  addEventListener('keydown', e => { const tg = e.target; if (tg && (tg.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName))) return; if (!document.getElementById('home').classList.contains('active')) return; const sgm = document.getElementById('nxSizeGuide'); if (sgm && sgm.classList.contains('show')) return; const r = $('nxHero').getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; if (e.key === 'ArrowRight') goTo(active + 1); if (e.key === 'ArrowLeft') goTo(active - 1); });
 }
 
 /* ---------- 2. категории ---------- */
 function buildCats(){
   const box = $('nxCats'); if (!box) return;
+  if (!products.length){ box.innerHTML = ''; return; } // товары ещё не пришли — не показываем «0 моделей»
   const cats = (Array.isArray(CATEGORIES) ? CATEGORIES : []).filter(c => products.some(p => (p.category || '').trim().toLowerCase() === String(c).trim().toLowerCase()));
-  const list = (cats.length ? cats : CATEGORIES || []).slice(0, 4);
+  const list = cats.slice(0, 4); // только категории, в которых есть товары
   box.innerHTML = list.map(c => {
     const items = products.filter(p => (p.category || '').trim().toLowerCase() === String(c).trim().toLowerCase());
     const pics = items.filter(p => okUrl(p.showcaseImage) || imgOf(p)).map(picHTML);
@@ -6335,6 +6333,7 @@ function buildCats(){
   box.querySelectorAll('.nx-fade').forEach(f => { const first = f.firstElementChild; if (first) first.classList.add('on'); });
   clearInterval(buildCats._t);
   buildCats._t = setInterval(() => { // каждые 3 с — следующее фото; плитки сменяются по очереди, не все разом
+    if (document.hidden || !document.getElementById('home').classList.contains('active')) return;
     box.querySelectorAll('.nx-fade').forEach((f, k) => setTimeout(() => { const kids = [...f.children]; if (kids.length < 2) return; const i = kids.findIndex(x => x.classList.contains('on')); kids[i].classList.remove('on'); kids[(i + 1) % kids.length].classList.add('on'); }, k * 450));
   }, 3200);
   box.querySelectorAll('.nx-cat').forEach(b => b.onclick = () => { selectMainCategory(b.dataset.c); const a = $('productsAnchor'); if (a) a.scrollIntoView({ behavior:'smooth', block:'start' }); });
@@ -6350,13 +6349,14 @@ function buildLooks(){
   for (let i = 0; i < n; i++){ const pieces = [tops[i % (tops.length || 1)], bottoms[i % (bottoms.length || 1)], shoes[i % (shoes.length || 1)]].filter(Boolean); if (pieces.length) looks.push(pieces); }
   if (!looks.length && av.length) looks = [av.slice(0, 3)];
   looks = looks.map(l => ({ pieces: l.map(p => ({ p })) }));
-  const HL = ((window.NXHOME || {}).looks || []).map(l => ({ photo: okUrl(l.photo), pieces: (l.pieces || []).map(pc => ({ p: products.find(x => x.id === pc.id), x: pc.x, y: pc.y })).filter(pc => pc.p) })).filter(l => l.photo || l.pieces.length);
+  const HL = ((window.NXHOME || {}).looks || []).filter(l => l && typeof l === 'object').map(l => { const photo = okUrl(l.photo); return { photo, pieces: (l.pieces || []).filter(pc => pc && typeof pc === 'object').map(pc => ({ p: products.find(x => x.id === pc.id), x: photo ? pc.x : null, y: photo ? pc.y : null })).filter(pc => pc.p) }; }).filter(l => l.photo || l.pieces.length); // точки — только на собственном фото образа
   if (HL.length) looks = HL;
   li = Math.min(li, Math.max(0, looks.length - 1));
   const stage = $('nxStage'); if (!stage) return;
+  if (!looks.length){ stage.innerHTML = ''; $('nxSteps').innerHTML = ''; $('nxPieces').innerHTML = ''; $('nxPcs').textContent = ''; clearInterval(lookTimer); return; }
   stage.innerHTML = looks.map((l, i) => {
     const h = l.photo ? `<img src="${escN(l.photo)}" alt="" loading="lazy">` : (l.pieces[0] ? picHTML(l.pieces[0].p) : '');
-    const pins = l.pieces.map((pc, k) => pc.x != null ? `<button class="nx-pin" style="left:${pc.x}%;top:${pc.y}%" data-x="${pc.x}" data-y="${pc.y}" data-id="${escN(pc.p.id)}"><b>${k + 1}</b><span>${escN(nameOf(pc.p))}</span></button>` : '').join('');
+    const pins = l.pieces.map((pc, k) => { const ok = v => v !== null && v !== undefined && v !== '' && isFinite(Number(v)); const x = Number(pc.x), y = Number(pc.y); return (ok(pc.x) && ok(pc.y)) ? `<button class="nx-pin" style="left:${x}%;top:${y}%" data-x="${x}" data-y="${y}" data-id="${escN(pc.p.id)}"><b>${k + 1}</b><span>${escN(nameOf(pc.p))}</span></button>` : ''; }).join('');
     return `<div class="nx-fig${h.includes('blend') ? ' blend' : ''}" data-i="${i}"><div class="nx-figin">${h}${pins}</div></div>`; }).join('');
   $('nxSteps').innerHTML = looks.map((l, i) => `<button class="nx-step" data-i="${i}">${String(i + 1).padStart(2, '0')} ${escN(l.pieces[0] ? nameOf(l.pieces[0].p).split(' ')[0] : '')}</button>`).join('');
   $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.onclick = () => showLook(+b.dataset.i, true));
@@ -6390,7 +6390,8 @@ function showLook(i, user){
   $('nxPcs').textContent = `${l.length} ${T('pcs')}`;
   if (user) schedule();
 }
-function schedule(){ clearInterval(lookTimer); if (!lookPaused && looks.length > 1) lookTimer = setInterval(() => showLook(li + 1), 6000); }
+const homeVisible = () => !document.hidden && document.getElementById('home') && document.getElementById('home').classList.contains('active');
+function schedule(){ clearInterval(lookTimer); if (!lookPaused && looks.length > 1) lookTimer = setInterval(() => { if (homeVisible()) showLook(li + 1); }, 6000); }
 function wireLooks(){
   $('nxPrev').onclick = () => showLook(li - 1, true);
   $('nxNext').onclick = () => showLook(li + 1, true);
@@ -6423,14 +6424,14 @@ function buildPhotos(){
   const H = window.NXHOME || {};
   const put = (el, url) => { if (!el) return; const old = el.querySelector('img.nx-real'); if (old) old.remove(); const ph = el.querySelector('.phc'); if (okUrl(url)){ const im = document.createElement('img'); im.className = 'nx-real'; im.src = url; im.alt = ''; im.loading = 'lazy'; el.prepend(im); if (ph) ph.style.display = 'none'; } else if (ph) ph.style.display = ''; };
   const shots = document.querySelectorAll('#nxStreetSec .nx-shot');
-  (H.street || []).forEach((st, i) => { put(shots[i], st.photo); const ids = (st.ids || []).filter(id => products.some(p => p.id === id)); if (shots[i]){ shots[i].onclick = ids.length ? () => openProduct(ids[0]) : null; shots[i].style.cursor = ids.length ? 'pointer' : ''; }
-    const cap = shots[i] && shots[i].parentElement.querySelector('.nx-cap span'); if (cap && st.caption) cap.textContent = st.caption; });
+  (H.street || []).forEach((st, i) => { st = st || {}; put(shots[i], st.photo); const ids = (st.ids || []).filter(id => products.some(p => p.id === id)); if (shots[i]){ shots[i].onclick = ids.length ? () => openProduct(ids[0]) : null; shots[i].style.cursor = ids.length ? 'pointer' : ''; }
+    const cap = i > 0 && shots[i] && shots[i].parentElement.querySelector(':scope > .nx-cap span'); if (cap) cap.textContent = (st && st.caption) || T(cap.dataset.nx); }); // у большого фото подписи нет
   const fab = document.querySelectorAll('#nxFabSec .nx-shot'); (H.fabric || []).forEach((f, i) => put(fab[i], f.photo));
   put(document.querySelector('.nx-band .nx-shot'), (H.band || {}).photo);
 }
 window.nxRender = function(force){ // перестраиваем только когда изменились товары, категории или язык
   try{
-    const sig = JSON.stringify(window.NXHOME || {}) + lang + '|' + (Array.isArray(CATEGORIES) ? CATEGORIES.join(',') : '') + '|' + products.map(p => p.id + ':' + stockOf(p) + ':' + (p.price || 0) + ':' + (p.image || '') + ':' + (p.showcaseImage || '') + ':' + (p.name || '')).join('|');
+    const sig = JSON.stringify(window.NXHOME || {}) + lang + '|' + (Array.isArray(CATEGORIES) ? CATEGORIES.join(',') : '') + '|' + products.map(p => p.id + ':' + colorsOfN(p).map(c => c.sizeStocks ? Object.keys(c.sizeStocks).filter(k => Number(c.sizeStocks[k]) > 0).join(',') : (Number(c.stock) > 0 ? 1 : 0)).join(';') + ':' + (p.price || 0) + ':' + (p.image || '') + ':' + (p.showcaseImage || '') + ':' + (p.name || '')).join('|');
     if (!force && sig === lastSig) return; lastSig = sig;
     texts(); buildOrbit(); buildCats(); buildLooks(); buildPhotos(); rescan(); setTimeout(nxExtendAll, 50);
   }catch(e){ console.warn('nx', e); }
@@ -6439,7 +6440,8 @@ window.nxInit = function(){
   texts(); wireOrbit(); wireLooks(); wireFab(); rescan = revealSetup();
   document.querySelectorAll('[data-nxgo]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const g = a.dataset.nxgo;
     if (g.startsWith('#')){ const el = document.querySelector(g); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }
-    else if (g === 'cart' || g === 'favorites' || g === 'profile' || g === 'support') showScreen(g);
+    else if (g === 'support'){ e.stopPropagation(); showScreen('profile'); setTimeout(() => { if (!document.body.classList.contains('sf-open')) toggleSupportMenu(); }, 60); } // меню WhatsApp/Telegram видно на экране профиля
+    else if (g === 'cart' || g === 'favorites' || g === 'profile') showScreen(g);
     else if (g === 'offer') location.href = 'oferta.html';
   }));
   nxRender();
@@ -6451,7 +6453,6 @@ window.nxInit = function(){
 /* подключаем новую главную к данным сайта */
 (function(){
   const _rmg = renderMainGrid; renderMainGrid = function(){ const r = _rmg.apply(this, arguments); try{ nxRender(); }catch(e){} return r; };
-  const _al = applyLang; applyLang = function(){ const r = _al.apply(this, arguments); try{ nxRender(true); }catch(e){} return r; };
   // ТЕСТ: оформление заказа отключено, чтобы никто не оплатил тестовый товар
   const _op = openProduct; openProduct = function(){ const r = _op.apply(this, arguments);
     try{ const kind = currentProduct ? (currentProduct.type === 'shoes' ? 'shoes' : (currentProduct.type === 'top' || currentProduct.type === 'set') ? 'top' : null) : null;

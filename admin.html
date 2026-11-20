@@ -138,6 +138,19 @@
   textarea[id^="f_deliveryPolicy_"][id*="_en_"], textarea[id^="f_deliveryPolicy_"][id*="_uz_"], textarea[id^="f_deliveryPolicy_"][id*="_tr_"], textarea[id^="f_deliveryPolicy_"][id*="_az_"],
   textarea[id^="f_careInstructions_"][id*="_en_"], textarea[id^="f_careInstructions_"][id*="_uz_"], textarea[id^="f_careInstructions_"][id*="_tr_"], textarea[id^="f_careInstructions_"][id*="_az_"],
   .color-row-block .c-name-tr{ display:none !important; }
+  /* вкладка «Главная» */
+  .hm-pick{ display:flex; flex-wrap:wrap; gap:8px; }
+  .hm-chip{ display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border:1px solid #ccc; border-radius:20px; font-size:13px; cursor:pointer; }
+  .hm-chip input{ display:none; } .hm-chip.on{ border-color:#7a1c2b; background:#fbeef0; }
+  .hm-chip b{ width:18px; height:18px; border-radius:50%; background:#7a1c2b; color:#fff; font-size:11px; display:inline-grid; place-items:center; }
+  .hm-box{ border:1px solid #e3e3e3; border-radius:12px; padding:12px; margin-top:10px; }
+  .hm-row{ display:flex; align-items:center; gap:8px; margin-top:8px; } .hm-row select{ flex:1; min-width:0; }
+  .hm-n{ width:22px; height:22px; border-radius:50%; background:#222; color:#fff; font-size:12px; display:grid; place-items:center; flex:none; }
+  .hm-pinbtn{ padding:6px 10px !important; } .hm-pinbtn.on{ background:#7a1c2b !important; color:#fff !important; }
+  .hm-stage{ position:relative; margin:10px auto 0; width:fit-content; max-width:100%; background:#f2e9df; border-radius:10px; overflow:hidden; cursor:crosshair; }
+  .hm-stage img{ display:block; width:auto; height:auto; max-width:100%; max-height:420px; }
+  .hm-pin{ position:absolute; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:#fff; color:#111; font-size:11px; font-weight:800; display:grid; place-items:center; box-shadow:0 2px 8px rgba(0,0,0,.35); }
+  .hm-prev{ display:block; max-width:160px; max-height:120px; object-fit:contain; margin-top:8px; border-radius:8px; background:#f2e9df; }
 </style>
 </head>
 <body>
@@ -166,6 +179,7 @@
     <div class="tab" data-tab="subscribers" onclick="switchTab('subscribers')">Подписки</div>
     <div class="tab" data-tab="analytics" onclick="switchTab('analytics')">Аналитика</div>
     <div class="tab" data-tab="design" onclick="switchTab('design')">Оформление</div>
+    <div class="tab" data-tab="home" onclick="switchTab('home')">Главная</div>
   </div>
 
   <div class="wrap">
@@ -179,6 +193,46 @@
         <div class="hint" style="margin:0 0 10px;">Заполнит пустые переводы (en, uz, tr, az) у всех уже добавленных товаров: название, описание, политики, цвета. Переводы, которые ты писал вручную, не трогает. «Скрыть» — товар пропадёт из магазина, но все его данные останутся здесь.</div>
         <div id="prodList"></div>
       </div>
+    </div>
+
+    <div class="tab-panel" id="tab-home">
+      <div class="card">
+        <h1>Главная страница</h1>
+        <div class="hint">Блоки главной страницы магазина. Фото — ссылкой (postimages.org или imgur.com, ссылка заканчивается на .png / .jpg / .webp).</div>
+        <button type="button" class="btn secondary" style="margin-top:12px;" onclick="hmFromTest()">⬆️ Перенести из теста: главную и фото товаров</button>
+        <div class="hint" id="hmCopyMsg">Берёт из тестовой админки блоки главной и у товаров только «Фото без фона» и главное фото. Остатки, цены, размеры и цвета не трогает.</div>
+      </div>
+
+      <div class="card">
+        <h1>Орбита (первый экран)</h1>
+        <div class="hint">Отметьте до 7 товаров — в том порядке, в каком отмечаете. Если ничего не отмечено — берутся первые 7 в наличии.</div>
+        <div id="hmOrbit" class="hm-pick"></div>
+      </div>
+
+      <div class="card">
+        <h1>Лукбук — образы</h1>
+        <div class="hint">До 5 образов. Фото модели в полный рост (лучше PNG без фона). Выберите вещи образа, затем нажмите «📍» у вещи и коснитесь места на фото — там появится номер.</div>
+        <div id="hmLooks"></div>
+        <button type="button" class="btn secondary" style="margin-top:10px;" onclick="hmAddLook()">+ Добавить образ</button>
+      </div>
+
+      <div class="card">
+        <h1>Уличные фото</h1>
+        <div class="hint">3 фото: первое — большое, два — маленькие. Подпись и вещи на фото — по желанию.</div>
+        <div id="hmStreet"></div>
+      </div>
+
+      <div class="card">
+        <h1>Качество — фото ткани</h1>
+        <div id="hmFabric"></div>
+      </div>
+
+      <div class="card">
+        <h1>Бордовый блок — фото</h1>
+        <div id="hmBand"></div>
+      </div>
+
+      <button type="button" class="btn" id="hmSaveBtn" style="width:100%; margin:6px 0 30px;" onclick="hmSave()">Сохранить главную</button>
     </div>
 
     <div class="tab-panel" id="tab-reviews">
@@ -598,7 +652,7 @@ function openAdmin(){
   if (_adminOpened) return; _adminOpened = true;
   document.getElementById('lockScreen').style.display = 'none';
   document.getElementById('adminWrap').style.display = 'block';
-  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSubscribers(); loadVisits(); loadAccounting(); loadRestock(); loadPromos();
+  loadProducts(); loadSettings(); loadReviews(); loadOrders(); loadSubscribers(); loadVisits(); loadAccounting(); loadRestock(); loadPromos(); hmInit();
   PRODUCT_TYPES.forEach(t => addColorRow(`colorRows_${t.key}`, null, t.key));
 }
 function checkPassword(){
@@ -2595,6 +2649,109 @@ function exportAccExpenses(){
   const ex = accExpenses.filter(e => (!fromTs || (e.ts||0) >= fromTs) && (!toTs || (e.ts||0) <= toTs));
   downloadCsv('milaisss_rashody.csv', [['Дата','Категория','Сумма','Примечание']].concat(ex.map(e => [e.date, e.category, e.amount, e.note||''])));
 }
+</script>
+<script>
+/* ================= вкладка «Главная»: блоки главной страницы (settings/home) ================= */
+let HM = { orbit:[], looks:[], street:[{},{},{}], fabric:[{},{},{}], band:{} }, hmProducts = [], hmPin = null, hmHomeOk = false, hmProdOk = false, hmProdSig = '';
+const hmNum = v => { if (v === null || v === undefined || v === '') return null; const n = Number(v); return (isFinite(n) && n >= 0 && n <= 100) ? n : null; }; // «нет точки» остаётся null, а не 0
+function hmReady(){ const b = document.getElementById('hmSaveBtn'); if (!b) return; const ok = hmHomeOk && hmProdOk; b.disabled = !ok; if (!ok && !b.dataset.err) b.textContent = 'Загрузка…'; else if (ok) b.textContent = 'Сохранить главную'; }
+const hmEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hmUrl = u => /^https:\/\//i.test(String(u || '').trim()) ? String(u).trim() : '';
+function hmOpts(sel){ return '<option value="">— не выбрано —</option>' + hmProducts.map(p => `<option value="${hmEsc(p.id)}" ${p.id === sel ? 'selected' : ''}>${hmEsc(p.name || p.id)}</option>`).join(''); }
+function hmImgField(label, val, onch){ return `<label>${label}</label><input type="url" placeholder="https://...png" value="${hmEsc(val || '')}" onchange="${onch}">${hmUrl(val) ? `<img class="hm-prev" src="${hmEsc(val)}" alt="">` : ''}`; }
+function hmRender(){
+  const ob = document.getElementById('hmOrbit');
+  ob.innerHTML = hmProducts.map(p => { const i = HM.orbit.indexOf(p.id); return `<label class="hm-chip ${i >= 0 ? 'on' : ''}"><input type="checkbox" ${i >= 0 ? 'checked' : ''} onchange="hmToggleOrbitIdx(${hmProducts.indexOf(p)}, this.checked)">${i >= 0 ? `<b>${i + 1}</b>` : ''}${hmEsc(p.name || p.id)}</label>`; }).join('') || '<div class="hint">Товаров пока нет — добавьте их во вкладке «Товары».</div>';
+  document.getElementById('hmLooks').innerHTML = HM.looks.map((l, li) => `
+    <div class="hm-box">
+      <div class="hm-row"><b>Образ ${li + 1}</b><button type="button" class="btn secondary" style="padding:4px 10px;font-size:12px" onclick="hmDelLook(${li})">Удалить</button></div>
+      <label>Фото модели</label><input type="url" placeholder="https://...png" value="${hmEsc(l.photo || '')}" onchange="HM.looks[${li}].photo=this.value.trim(); hmRender()">
+      ${hmUrl(l.photo) ? `<div class="hm-stage" onclick="hmPlace(event, ${li})"><img src="${hmEsc(l.photo)}" alt="">${(l.pieces || []).map((pc, k) => hmNum(pc.x) != null && hmNum(pc.y) != null ? `<span class="hm-pin" style="left:${hmNum(pc.x)}%;top:${hmNum(pc.y)}%">${k + 1}</span>` : '').join('')}</div>` : ''}
+      ${[0,1,2].map(k => { const pc = (l.pieces || [])[k] || {}; const act = hmPin && hmPin.li === li && hmPin.k === k; return `<div class="hm-row"><span class="hm-n">${k + 1}</span><select onchange="hmSetPiece(${li},${k},this.value)">${hmOpts(pc.id)}</select><button type="button" class="btn secondary hm-pinbtn ${act ? 'on' : ''}" title="Поставить точку на фото" onclick="hmStartPin(${li},${k})">📍</button></div>`; }).join('')}
+      ${hmPin && hmPin.li === li ? '<div class="hint" style="color:#7a1c2b">Коснитесь фото — там встанет точка ' + (hmPin.k + 1) + '</div>' : ''}
+    </div>`).join('') || '<div class="hint">Образов пока нет — на сайте они собираются автоматически из товаров.</div>';
+  document.getElementById('hmStreet').innerHTML = HM.street.map((s, i) => `<div class="hm-box"><b>${i === 0 ? 'Большое фото' : 'Маленькое фото ' + i}</b>
+    ${hmImgField('Фото', s.photo, `HM.street[${i}].photo=this.value.trim(); hmRender()`)}
+    ${i > 0 ? `<label>Подпись (по желанию)</label><input type="text" value="${hmEsc(s.caption || '')}" placeholder="Вечерняя парковка" onchange="HM.street[${i}].caption=this.value.trim()">` : ''}
+    <label>Вещи на фото</label><div class="hm-row"><select onchange="hmStreetId(${i},0,this.value)">${hmOpts((s.ids || [])[0])}</select><select onchange="hmStreetId(${i},1,this.value)">${hmOpts((s.ids || [])[1])}</select></div></div>`).join('');
+  document.getElementById('hmFabric').innerHTML = HM.fabric.map((f, i) => `<div class="hm-box"><b>Фото ${i + 1}</b>${hmImgField('Ссылка', f.photo, `HM.fabric[${i}].photo=this.value.trim(); hmRender()`)}</div>`).join('');
+  document.getElementById('hmBand').innerHTML = hmImgField('Ссылка', HM.band.photo, `HM.band.photo=this.value.trim(); hmRender()`);
+}
+// не перерисовываем, пока владелец печатает в поле вкладки — иначе несохранённый текст пропадёт
+let hmPending = false;
+function hmRenderSafe(){ const a = document.activeElement, tab = document.getElementById('tab-home'); if (a && tab && tab.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){ if (!hmPending){ hmPending = true; a.addEventListener('blur', () => setTimeout(() => { hmPending = false; hmRender(); }, 0), { once:true }); } return; } hmRender(); }
+function hmToggleOrbitIdx(i, on){ const p = hmProducts[i]; if (p) hmToggleOrbit(p.id, on); }
+function hmToggleOrbit(id, on){ HM.orbit = HM.orbit.filter(x => x !== id && hmProducts.some(p => p.id === x)); if (on){ if (HM.orbit.length >= 7){ alert('Максимум 7 товаров'); } else HM.orbit.push(id); } hmRender(); }
+function hmAddLook(){ if (HM.looks.length >= 5) return alert('Максимум 5 образов'); HM.looks.push({ photo:'', pieces:[{},{},{}] }); hmRender(); }
+function hmDelLook(i){ if (confirm('Удалить образ?')){ HM.looks.splice(i, 1); hmPin = null; hmRender(); } }
+function hmSetPiece(li, k, id){ const l = HM.looks[li]; l.pieces = l.pieces || [{},{},{}]; l.pieces[k] = Object.assign({}, l.pieces[k], { id }); hmRender(); }
+function hmStartPin(li, k){ hmPin = (hmPin && hmPin.li === li && hmPin.k === k) ? null : { li, k }; hmRender(); }
+function hmPlace(e, li){
+  if (!hmPin || hmPin.li !== li) return;
+  const r = e.currentTarget.querySelector('img').getBoundingClientRect();
+  const x = Math.round((e.clientX - r.left) / r.width * 1000) / 10, y = Math.round((e.clientY - r.top) / r.height * 1000) / 10;
+  if (x < 0 || x > 100 || y < 0 || y > 100) return;
+  const l = HM.looks[li]; l.pieces = l.pieces || [{},{},{}]; l.pieces[hmPin.k] = Object.assign({}, l.pieces[hmPin.k], { x, y }); hmPin = null; hmRender();
+}
+function hmStreetId(i, k, id){ const s = HM.street[i]; s.ids = s.ids || []; s.ids[k] = id; }
+function hmClean(src, ids){ // в базу — только нужные поля, точки — только числа 0…100
+  src = src || HM; const urlOk = u => hmUrl(u) || '', has = id => typeof id === 'string' && (!ids || ids.has(id));
+  return {
+    orbit: (src.orbit || []).filter(has).slice(0, 7),
+    looks: (src.looks || []).filter(l => l && typeof l === 'object').filter(l => hmUrl(l.photo) || (l.pieces || []).some(p => p && p.id)).slice(0, 5).map(l => { const photo = urlOk(l.photo); return { photo, pieces: (l.pieces || []).filter(p => p && has(p.id)).slice(0, 3).map(p => { const x = hmNum(p.x), y = hmNum(p.y); return (!photo || x == null || y == null) ? { id:p.id, x:null, y:null } : { id:p.id, x, y }; }) }; }), // без фото образа точек нет // точка — только целиком
+    street: (src.street || []).slice(0, 3).map(s => (s = s && typeof s === 'object' ? s : {}, { photo: urlOk(s && s.photo), caption: String((s && s.caption) || '').slice(0, 80), ids: ((s && s.ids) || []).filter(has).slice(0, 2) })),
+    fabric: (src.fabric || []).slice(0, 3).map(f => ({ photo: urlOk(f && f.photo) })),
+    band: { photo: urlOk(src.band && src.band.photo) },
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+}
+async function hmSave(){
+  if (!(hmHomeOk && hmProdOk)){ alert('Данные главной ещё не загрузились — сохранять нельзя, чтобы не стереть то, что уже есть. Обновите страницу.'); return; }
+  const b = document.getElementById('hmSaveBtn'); b.disabled = true; b.textContent = 'Сохраняем...';
+  try{ await db.collection('settings').doc('home').set(hmClean(HM, new Set(hmProducts.map(p => p.id)))); b.textContent = '✓ Сохранено — уже на сайте'; }
+  catch(e){ alert('Не сохранилось: ' + (e.code || e.message) + (e.code === 'permission-denied' ? '\n\nНет прав на запись — проверьте правила Firebase.' : '')); b.textContent = 'Сохранить главную'; }
+  setTimeout(() => hmReady(), 2500);
+}
+async function hmFromTest(){
+  if (!confirm('Перенести из теста блоки главной и фото товаров на основной сайт?\n\nБлоки главной на сайте заменятся тестовыми (несохранённые правки в этой вкладке пропадут). У товаров меняются только «Фото без фона» и главное фото. Остатки, цены, размеры и цвета не трогаются.')) return;
+  const msg = document.getElementById('hmCopyMsg'); if (hmFromTest.busy) return; hmFromTest.busy = true; msg.textContent = 'Переносим...';
+  try{
+    const [home, ts, live] = await Promise.all([db.collection('test_settings').doc('home').get(), db.collection('test_products').get(), db.collection('products').get()]);
+    const liveMap = {}; live.forEach(d => { liveMap[d.id] = d.data(); });
+    let batch = db.batch(), n = 0, changed = 0;
+    for (const d of ts.docs){
+      const lp = liveMap[d.id]; if (!lp) continue;               // товара нет на основном сайте — пропускаем
+      const t = d.data(), upd = {};
+      if (hmUrl(t.showcaseImage) && t.showcaseImage.trim() !== lp.showcaseImage) upd.showcaseImage = t.showcaseImage.trim();
+      if (hmUrl(t.image) && t.image.trim() !== lp.image) upd.image = t.image.trim();
+      if (!Object.keys(upd).length) continue;
+      batch.update(db.collection('products').doc(d.id), upd); n++; changed++;   // только эти два поля
+      if (n >= 400){ await batch.commit(); batch = db.batch(); n = 0; }
+    }
+    if (n) await batch.commit();
+    if (home.exists){ // главная — после фото; та же очистка, что при обычном сохранении: только нужные поля, https, точки — числа, только существующие товары
+      await db.collection('settings').doc('home').set(hmClean(home.data(), new Set(Object.keys(liveMap))));
+    }
+    msg.textContent = `✓ Готово: главная ${home.exists ? 'перенесена' : '— в тесте пусто'}, обновлено фото у товаров: ${changed}.`;
+    hmHomeOk = false; hmReady();
+    db.collection('settings').doc('home').get().then(d => { if (d.exists){ const v = d.data(); HM = { orbit: v.orbit || [], looks: (v.looks || []).map(l => ({ photo:l.photo || '', pieces: [0,1,2].map(k => (l.pieces || [])[k] || {}) })), street: [0,1,2].map(i => (v.street || [])[i] || {}), fabric: [0,1,2].map(i => (v.fabric || [])[i] || {}), band: v.band || {} }; } hmHomeOk = true; hmReady(); hmRender(); }).catch(err => { msg.textContent += ' Обновите страницу, чтобы увидеть результат.'; });
+  }catch(e){ msg.textContent = 'Ошибка: ' + (e.code || e.message) + ' — можно нажать ещё раз, повтор безопасен.'; }
+  finally{ hmFromTest.busy = false; }
+}
+function hmInit(){
+  hmReady();
+  db.collection('products').onSnapshot(s => {
+    hmProducts = s.docs.map(d => ({ id:d.id, ...d.data() })).sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru'));
+    hmProdOk = true; hmReady();
+    const sig = hmProducts.map(p => p.id + ':' + (p.name || '')).join('|'); // остатки меняются при каждом заказе — перерисовываем, только если сменился список товаров
+    if (sig !== hmProdSig){ hmProdSig = sig; hmRenderSafe(); }
+  }, e => { console.warn(e); const b = document.getElementById('hmSaveBtn'); if (b){ b.dataset.err = '1'; b.textContent = 'Товары не загрузились — обновите страницу'; } });
+  db.collection('settings').doc('home').get().then(d => {
+    if (d.exists){ const v = d.data(); HM = { orbit: v.orbit || [], looks: (v.looks || []).map(l => ({ photo:l.photo || '', pieces: [0,1,2].map(k => (l.pieces || [])[k] || {}) })), street: [0,1,2].map(i => (v.street || [])[i] || {}), fabric: [0,1,2].map(i => (v.fabric || [])[i] || {}), band: v.band || {} }; }
+    hmHomeOk = true; hmReady(); hmRender();
+  }).catch(e => { console.warn(e); const b = document.getElementById('hmSaveBtn'); if (b){ b.dataset.err = '1'; b.disabled = true; b.textContent = 'Главная не загрузилась — обновите страницу (сохранение отключено)'; } hmRender(); });
+}
+
 </script>
 </body>
 </html>
