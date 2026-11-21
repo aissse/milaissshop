@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F2E9DF" id="themeColorMeta">
-<script>/* светлая (кремовая) тема по умолчанию; тёмная — если покупатель сам выбрал её кнопкой 🌙 */try{ if (localStorage.getItem('milaisss_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){}</script>
+<script>/* светлая (кремовая) тема по умолчанию; тёмно-синяя — если выбрана, или «как в системе» и телефон в тёмном режиме */try{ var _t = localStorage.getItem('milaisss_theme'); if (_t === 'dark' || (_t === 'system' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)){ document.documentElement.setAttribute('data-theme','dark'); var _m = document.getElementById('themeColorMeta'); if (_m) _m.setAttribute('content','#0F1B2D'); } }catch(e){}</script>
 <title>milaisss shop — интернет-магазин кроссовок</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -1365,6 +1365,54 @@
     #nxHero, #nxCatsSec, #productsAnchor, #faqSection, #nxStreetSec, #nxFabSec{ scroll-margin-top:calc(136px + env(safe-area-inset-top)); }
     #nxLookSec, #ratingSummary{ scroll-margin-top:calc(100px + env(safe-area-inset-top)); }
   }
+
+  /* ===== тёмная тема = тёмно-синяя (вместо чёрной) ===== */
+  html[data-theme="dark"]{
+    --bg:#0F1B2D; --surface:#16243A; --stone:#1D2D47; --line:#2B3F5F; --ink:#EAF0F8; --muted:#9DADC6; --text-soft:#CAD5E6;
+    --on-ink:#0F1B2D; --icon-cat:#EAF0F8; --colordot-border:#EAF0F8; --on-stone:#EAF0F8; --catcolor:#DCE5F2; --pmr-selected-bg:#33304A;
+    --support-bg:#16243A; --support-admin-bg:#23365A; --support-admin-text:#EAF0F8;
+  }
+  html[data-theme="dark"] .bottomnav{ background:linear-gradient(135deg, rgba(48,72,112,.6), rgba(15,27,45,.4)) !important; }
+  html[data-theme="dark"] .site-header.solid #langBtn, html[data-theme="dark"] .site-header.solid #menuBtn, html[data-theme="dark"] .drawer-panel #langBtn{ box-shadow:0 0 0 1px var(--line); color:var(--ink); }
+  html[data-theme="dark"] .card .imgwrap.oos::before{ background:rgba(15,27,45,.8); }
+  html[data-theme="dark"] .trk{ --ic-off:#3A4E6E; }
+  html[data-theme="dark"] .size-pill.oos{ color:#8E9DB5; }
+  html[data-theme="dark"] .ship-opt small.ship-soon, html[data-theme="dark"] .nx-rav{ color:#0F1B2D; }
+  html[data-theme="dark"] .theme-switch button.active{ border-color:var(--ink); }
+  /* ===== настройки: 3 темы, доставка, уведомления ===== */
+  .theme-switch button{ flex-direction:column; gap:6px; padding:14px 6px; font-size:13px; text-align:center; line-height:1.2; }
+  .settings-block + .settings-block{ margin-top:22px; }
+  .settings-block:last-child{ padding-bottom:30px; }
+  .set-card{ background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:16px; }
+  .set-card .block-label{ margin-top:14px; }
+  .set-card .block-label:first-child{ margin-top:0; }
+  .set-card input[type="text"]{ width:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-size:14px; font-family:inherit; background:var(--bg); outline:none; }
+  .set-card input[type="text"]:focus{ border-color:var(--accent-strong); box-shadow:0 0 0 3px rgba(255,201,60,.28); }
+  .set-card .phone-pill{ background:var(--bg); }
+  .set-card .phone-pill input#sdPhone{ flex:1; min-width:0; border:0 !important; background:transparent !important; box-shadow:none !important; outline:none; padding:9px 0; font-size:15px; font-weight:600; letter-spacing:.02em; font-family:inherit; }
+  .sd-from-profile{ font-size:14px; font-weight:600; color:var(--ink); padding:10px 0 2px; }
+  .sd-sel{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; font-weight:700; color:var(--bts-address-color, var(--orange)); margin-top:8px; }
+  .sd-sel button{ border:0; background:var(--stone); color:var(--ink); width:26px; height:26px; border-radius:50%; font-size:16px; line-height:1; cursor:pointer; flex:0 0 auto; }
+  #sdBtsRes{ max-height:180px; overflow-y:auto; margin-top:6px; }
+  .sd-more{ margin-top:16px; border-top:1px solid var(--line); padding-top:12px; }
+  .sd-more summary{ cursor:pointer; font-size:14px; font-weight:700; color:var(--ink); list-style:none; display:flex; justify-content:space-between; align-items:center; }
+  .sd-more summary::-webkit-details-marker{ display:none; }
+  .sd-more summary::after{ content:'+'; font-size:20px; font-weight:400; color:var(--muted); }
+  .sd-more[open] summary::after{ content:'−'; }
+  .sd-btns{ display:flex; gap:10px; align-items:center; margin-top:16px; }
+  .sd-btns .checkout-btn{ flex:1; margin:0; }
+  .sd-clear{ border:0; background:none; color:var(--muted); font:inherit; font-size:14px; font-weight:600; cursor:pointer; padding:12px 8px; }
+  .sn-row{ display:flex; align-items:center; gap:12px; }
+  .sn-ico{ width:42px; height:42px; border-radius:50%; background:var(--stone); color:var(--muted); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .sn-ico svg{ width:20px; height:20px; }
+  .sn-ico.on{ background:var(--orange); color:var(--on-orange); }
+  .sn-txt{ flex:1; min-width:0; } .sn-txt b{ display:block; font-size:15px; color:var(--ink); } .sn-txt small{ display:block; font-size:12px; color:var(--muted); margin-top:2px; line-height:1.35; }
+  .sn-badge{ font-size:12px; font-weight:700; color:var(--ink); background:var(--stone); border-radius:999px; padding:6px 10px; white-space:nowrap; }
+  .sn-connect{ display:block; text-align:center; text-decoration:none; margin:14px 0 0; }
+  .sn-h{ font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:18px 0 8px; }
+  .sn-what ul{ margin:0; padding-left:18px; font-size:14px; color:var(--text-soft); line-height:1.6; }
+  .sn-item{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:6px; cursor:pointer; background:var(--bg); font-size:14px; color:var(--ink); }
+  .sn-item small{ color:var(--muted); font-size:12px; white-space:nowrap; }
 </style>
 </head>
 <body class="bg-facets">
@@ -1774,9 +1822,43 @@
     <div class="settings-block">
       <div class="block-label" data-i18n="themeLabel">Тема оформления</div>
       <div class="theme-switch" id="themeSwitch">
+        <button type="button" data-theme="system" onclick="setTheme('system')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 6v10"/><path d="M12 6a5 5 0 0 1 0 10"/></svg> <span data-i18n="themeSystem">Как в системе</span></button>
         <button type="button" data-theme="light" onclick="setTheme('light')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffaa00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> <span data-i18n="themeLight">Светлая</span></button>
-        <button type="button" data-theme="dark" onclick="setTheme('dark')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg> <span data-i18n="themeDark">Тёмная</span></button>
+        <button type="button" data-theme="dark" onclick="setTheme('dark')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A7BD0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg> <span data-i18n="themeDark">Тёмно-синяя</span></button>
       </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="block-label" data-i18n="sdTitle">Данные для доставки</div>
+      <div class="set-card">
+        <label class="block-label" for="sdPhone" data-i18n="sdPhone">Телефон для курьера</label>
+        <div class="sd-from-profile" id="sdPhoneProfile" style="display:none"></div>
+        <div class="phone-pill" id="sdPhoneWrap"><span class="phone-pill-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><input type="tel" inputmode="numeric" id="sdPhone" placeholder="+998 90 123 45 67" maxlength="17" autocomplete="tel" oninput="fmtUzPhone(this)" onfocus="fmtUzPhone(this,true)"></div>
+        <label class="block-label" for="sdBtsInput" data-i18n="sdBts">Пункт БТС по умолчанию</label>
+        <input type="text" id="sdBtsInput" data-i18n-ph="btsPlaceholder" placeholder="Начните вводить город или улицу..." oninput="sdFilterBts(this.value)" autocomplete="off">
+        <div class="sd-sel" id="sdBtsSel" style="display:none"></div>
+        <div id="sdBtsRes"></div>
+        <details class="sd-more">
+          <summary data-i18n="sdAbroad">Для доставки за рубеж</summary>
+          <label class="block-label" for="sdAbName" data-i18n="abroadName">Имя и фамилия получателя</label>
+          <input type="text" id="sdAbName" maxlength="80" autocomplete="name" data-i18n-ph="abroadNamePh" placeholder="Как в паспорте">
+          <label class="block-label" for="sdAbPhone" data-i18n="abroadPhone">Телефон получателя (с кодом страны)</label>
+          <input type="text" id="sdAbPhone" maxlength="24" autocomplete="tel" inputmode="tel" placeholder="+7 701 123 45 67">
+          <label class="block-label" for="sdAbCity" data-i18n="abroadCity">Город</label>
+          <input type="text" id="sdAbCity" maxlength="60" autocomplete="address-level2">
+          <label class="block-label" for="sdAbAddress" data-i18n="abroadAddress">Адрес (улица, дом, квартира)</label>
+          <input type="text" id="sdAbAddress" maxlength="160" autocomplete="street-address">
+          <label class="block-label" for="sdAbZip" data-i18n="abroadZip">Почтовый индекс (если знаете)</label>
+          <input type="text" id="sdAbZip" maxlength="12" autocomplete="postal-code" inputmode="numeric">
+        </details>
+        <div class="sd-btns"><button type="button" class="checkout-btn" onclick="saveDelivery()" data-i18n="sdSave">Сохранить</button><button type="button" class="sd-clear" onclick="clearDelivery()" data-i18n="sdClear">Очистить</button></div>
+        <div class="pay-note" data-i18n="sdNote">Хранятся только на этом устройстве и сами подставляются при оформлении заказа.</div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="block-label" data-i18n="snTitle">Уведомления</div>
+      <div class="set-card" id="setNotif"></div>
     </div>
   </div>
 
@@ -2011,6 +2093,7 @@ function loadCustomerProfile(){
     }
     renderProfileHeader();
     renderTelegramLoginWidget();
+    try{ renderNotifSettings(); }catch(e){}
     if (!first && !was && notifyIsOn()) showToast('🔔 ' + t('notifOn'));
     first = false;
   }, () => {});
@@ -2689,22 +2772,48 @@ const STR_FIX172 = {
 };
 Object.keys(STR_FIX172).forEach(l => Object.assign(STR[l], STR_FIX172[l]));
 
-/* ---------- тема: светлая / тёмная ---------- */
+/* ---------- настройки: строки ---------- */
+const STR_SET = {
+  ru:{ themeSystem:"Как в системе", themeDark:"Тёмно-синяя", sdTitle:"Данные для доставки", sdPhone:"Телефон для курьера", sdPhoneFromProfile:"Из профиля", sdBts:"Пункт БТС по умолчанию", sdAbroad:"Для доставки за рубеж", sdSave:"Сохранить", sdClear:"Очистить", sdSaved:"Данные сохранены ✓", sdCleared:"Данные очищены", sdNote:"Хранятся только на этом устройстве и сами подставляются при оформлении заказа.",
+       snTitle:"Уведомления", snOn:"Включены", snOnSub:"Сообщения приходят в Telegram-бот магазина", snOffSub:"Пока не подключены — это займёт 5 секунд", snConnect:"Подключить в Telegram", snWhat:"Что приходит", snW1:"Изменения статуса ваших заказов", snW2:"Товар снова в наличии в вашем размере", snWaiting:"Жду поступления", snWaitEmpty:"Пусто. Если нужного размера нет — нажмите «{btn}» в карточке товара." },
+  uz:{ themeSystem:"Tizimdagidek", themeDark:"To‘q ko‘k", sdTitle:"Yetkazib berish ma’lumotlari", sdPhone:"Kuryer uchun telefon", sdPhoneFromProfile:"Profildan", sdBts:"Asosiy BTS punkti", sdAbroad:"Xorijga yetkazish uchun", sdSave:"Saqlash", sdClear:"Tozalash", sdSaved:"Saqlandi ✓", sdCleared:"Tozalandi", sdNote:"Faqat shu qurilmada saqlanadi va buyurtma berishda o‘zi qo‘yiladi.",
+       snTitle:"Bildirishnomalar", snOn:"Yoqilgan", snOnSub:"Xabarlar do‘kon Telegram-botiga keladi", snOffSub:"Hali ulanmagan — bu 5 soniya oladi", snConnect:"Telegram’da ulash", snWhat:"Nima keladi", snW1:"Buyurtmalaringiz holati o‘zgarishi", snW2:"Mahsulot o‘lchamingizda yana sotuvda", snWaiting:"Kutayotganlarim", snWaitEmpty:"Bo‘sh. Kerakli o‘lcham bo‘lmasa — mahsulot sahifasida «{btn}» tugmasini bosing." },
+  tr:{ themeSystem:"Sistem", themeDark:"Lacivert", sdTitle:"Teslimat bilgileri", sdPhone:"Kurye için telefon", sdPhoneFromProfile:"Profilden", sdBts:"Varsayılan BTS noktası", sdAbroad:"Yurt dışı teslimat için", sdSave:"Kaydet", sdClear:"Temizle", sdSaved:"Kaydedildi ✓", sdCleared:"Temizlendi", sdNote:"Yalnızca bu cihazda saklanır ve sipariş verirken otomatik doldurulur.",
+       snTitle:"Bildirimler", snOn:"Açık", snOnSub:"Mesajlar mağazanın Telegram botuna gelir", snOffSub:"Henüz bağlı değil — 5 saniye sürer", snConnect:"Telegram’da bağla", snWhat:"Neler gelir", snW1:"Siparişlerinizin durum değişiklikleri", snW2:"Ürün bedeninizde yeniden stokta", snWaiting:"Stok beklediklerim", snWaitEmpty:"Boş. İstediğiniz beden yoksa ürün sayfasında «{btn}» düğmesine basın." },
+  az:{ themeSystem:"Sistem kimi", themeDark:"Tünd göy", sdTitle:"Çatdırılma məlumatları", sdPhone:"Kuryer üçün telefon", sdPhoneFromProfile:"Profildən", sdBts:"Əsas BTS məntəqəsi", sdAbroad:"Xaricə çatdırılma üçün", sdSave:"Yadda saxla", sdClear:"Təmizlə", sdSaved:"Yadda saxlanıldı ✓", sdCleared:"Təmizləndi", sdNote:"Yalnız bu cihazda saxlanılır və sifariş zamanı avtomatik doldurulur.",
+       snTitle:"Bildirişlər", snOn:"Aktiv", snOnSub:"Mesajlar mağazanın Telegram botuna gəlir", snOffSub:"Hələ qoşulmayıb — 5 saniyə çəkir", snConnect:"Telegram-da qoş", snWhat:"Nə gəlir", snW1:"Sifarişlərinizin status dəyişiklikləri", snW2:"Məhsul ölçünüzdə yenidən stokdadır", snWaiting:"Gözlədiklərim", snWaitEmpty:"Boşdur. Lazım olan ölçü yoxdursa — məhsul səhifəsində «{btn}» düyməsinə basın." },
+  en:{ themeSystem:"System", themeDark:"Dark blue", sdTitle:"Delivery details", sdPhone:"Phone for the courier", sdPhoneFromProfile:"From your profile", sdBts:"Default BTS pickup point", sdAbroad:"For delivery abroad", sdSave:"Save", sdClear:"Clear", sdSaved:"Saved ✓", sdCleared:"Cleared", sdNote:"Stored only on this device and filled in automatically at checkout.",
+       snTitle:"Notifications", snOn:"On", snOnSub:"Messages arrive in the shop’s Telegram bot", snOffSub:"Not connected yet — takes 5 seconds", snConnect:"Connect in Telegram", snWhat:"What you’ll get", snW1:"Status changes of your orders", snW2:"An item is back in stock in your size", snWaiting:"Waiting for restock", snWaitEmpty:"Empty. If your size is sold out, tap “{btn}” on the product page." }
+};
+Object.keys(STR_SET).forEach(l => Object.assign(STR[l], STR_SET[l]));
+
+/* ---------- тема: как в системе / светлая / тёмно-синяя ---------- */
+const _mqDark = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : { matches:false };
+function themePref(){ try{ const v = localStorage.getItem('milaisss_theme'); return (v === 'dark' || v === 'system') ? v : 'light'; }catch(e){ return 'light'; } }
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+function applyThemePref(){
+  const p = themePref(), dark = p === 'dark' || (p === 'system' && _mqDark.matches);
+  if (dark) document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme');
+  updateThemeButtons();
+}
 function updateThemeButtons(){
-  document.querySelectorAll('#themeSwitch button').forEach(b => b.classList.toggle('active', b.dataset.theme === currentTheme()));
+  const p = themePref();
+  document.querySelectorAll('#themeSwitch button').forEach(b => b.classList.toggle('active', b.dataset.theme === p));
   const meta = document.getElementById('themeColorMeta');
-  if (meta) meta.setAttribute('content', currentTheme() === 'dark' ? '#17110F' : '#F2E9DF');
+  if (meta) meta.setAttribute('content', currentTheme() === 'dark' ? '#0F1B2D' : '#F2E9DF');
 }
 function setTheme(theme){
   const root = document.documentElement;
   root.classList.add('theme-anim');
-  if (theme === 'dark') root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme');
   try { localStorage.setItem('milaisss_theme', theme); } catch(e){}
-  updateThemeButtons();
+  applyThemePref();
   clearTimeout(setTheme._t);
   setTheme._t = setTimeout(() => root.classList.remove('theme-anim'), 600);
 }
+(function(){ // телефон сам переключил светлый/тёмный режим — сайт следом, если выбрано «Как в системе»
+  const on = () => { if (themePref() !== 'system') return; const r = document.documentElement; r.classList.add('theme-anim'); applyThemePref(); setTimeout(() => r.classList.remove('theme-anim'), 600); };
+  try{ if (_mqDark.addEventListener) _mqDark.addEventListener('change', on); else if (_mqDark.addListener) _mqDark.addListener(on); }catch(e){}
+})();
 
 let lang = localStorage.getItem('milaisss_lang') || 'en';
 function t(key){ return (STR[lang] && STR[lang][key]) || STR.ru[key] || key; }
@@ -2878,6 +2987,7 @@ function setLang(l){
   lang = l; localStorage.setItem('milaisss_lang', l);
   document.getElementById('langMenu').classList.remove('open');
   applyLang();
+  try{ if (document.getElementById('settings').classList.contains('active')) renderNotifSettings(); }catch(e){}
 }
 
 /* ---------- toast ---------- */
@@ -3368,6 +3478,8 @@ function openSettings(){
   toggleDrawer();
   showScreen('settings');
   updateThemeButtons();
+  try{ subscribeMyRestock(); }catch(e){}
+  renderSettings();
 }
 function toggleDrawerInfo(id){
   const el = document.getElementById(`drawer-info-${id}`);
@@ -5006,9 +5118,10 @@ function subscribeMyRestock(){
   if (_restockUnsub){ _restockUnsub(); _restockUnsub = null; }
   _restockUid = cid;
   _restockUnsub = db.collection('restock_requests').where('customerId', '==', cid).onSnapshot(snap => {
-    myRestock = {};
-    snap.forEach(d => { const r = d.data(); if (!r.notified) myRestock[restockKey(r.productId, r.colorName, r.size)] = true; });
-    updateRestockBtn();
+    myRestock = {}; myRestockList = [];
+    snap.forEach(d => { const r = d.data(); if (!r.notified){ myRestock[restockKey(r.productId, r.colorName, r.size)] = true; myRestockList.push(r); } });
+    myRestockList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    updateRestockBtn(); try{ renderNotifSettings(); }catch(e){}
   }, () => {});
 }
 const BELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
@@ -5063,6 +5176,79 @@ function subscribeRestock(){
     updateRestockBtn();
   }, 'restock');
 }
+
+
+/* ---------- настройки: данные для доставки (только на этом устройстве) ---------- */
+const DLV_KEY = 'milaisss_delivery';
+const DLV_AB = [['sdAbName','abName'],['sdAbPhone','abPhone'],['sdAbCity','abCity'],['sdAbAddress','abAddress'],['sdAbZip','abZip']];
+function getDelivery(){ try{ const d = JSON.parse(localStorage.getItem(DLV_KEY) || 'null'); return (d && typeof d === 'object') ? d : {}; }catch(e){ return {}; } }
+function putDelivery(d){ try{ localStorage.setItem(DLV_KEY, JSON.stringify(d)); }catch(e){} }
+let sdBts = '';
+function renderDeliverySettings(){
+  const d = getDelivery(), prof = customerProfile && customerProfile.phone;
+  const wrap = document.getElementById('sdPhoneWrap'), pp = document.getElementById('sdPhoneProfile'); if (!wrap) return;
+  wrap.style.display = prof ? 'none' : '';
+  pp.style.display = prof ? '' : 'none'; if (prof) pp.textContent = customerProfile.phone + ' · ' + t('sdPhoneFromProfile');
+  document.getElementById('sdPhone').value = d.phone || '';
+  DLV_AB.forEach(([id, k]) => { const el = document.getElementById(id); if (el) el.value = d[k] || ''; });
+  sdBts = d.bts || ''; document.getElementById('sdBtsInput').value = ''; document.getElementById('sdBtsRes').innerHTML = ''; sdShowBts();
+}
+function sdShowBts(){
+  const el = document.getElementById('sdBtsSel'); if (!el) return;
+  el.style.display = sdBts ? '' : 'none';
+  el.innerHTML = sdBts ? `<span>✓ ${escH(sdBts)}</span><button type="button" aria-label="×" onclick="sdBts='';sdShowBts()">×</button>` : '';
+}
+function sdFilterBts(query){
+  const wrap = document.getElementById('sdBtsRes'), q = String(query || '').trim().toLowerCase();
+  if (!q){ wrap.innerHTML = ''; return; }
+  const m = btsBranches.filter(b => String(b).toLowerCase().includes(q)).slice(0, 20);
+  if (!m.length){ wrap.innerHTML = `<p class="pay-note">${t('btsNoResults')}</p>`; return; }
+  wrap.innerHTML = m.map((b, i) => `<div class="bts-result-item" data-k="${i}">${escH(b)}</div>`).join('');
+  wrap.querySelectorAll('.bts-result-item').forEach(el => el.onclick = () => { sdBts = m[+el.dataset.k]; document.getElementById('sdBtsInput').value = ''; wrap.innerHTML = ''; sdShowBts(); });
+}
+function saveDelivery(){
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  const phEl = document.getElementById('sdPhone'), phone = v('sdPhone'), emptyPh = !phone.replace(/\D/g, '') || phone.replace(/\D/g, '') === '998';
+  if (phEl) phEl.classList.remove('field-bad');
+  if (!emptyPh && !uzPhoneOk(phone)){ if (phEl){ phEl.classList.add('field-bad'); phEl.focus(); } showToast(t('phoneErrLen')); return; }
+  const abEl = document.getElementById('sdAbPhone'); if (abEl) abEl.classList.remove('field-bad');
+  if (v('sdAbPhone') && !intlPhoneOk(v('sdAbPhone'))){ if (abEl){ abEl.classList.add('field-bad'); abEl.closest('details').open = true; abEl.focus(); } showToast(t('errAbroadPhone')); return; }
+  const d = { phone: emptyPh ? '' : phone, bts: sdBts };
+  DLV_AB.forEach(([id, k]) => { d[k] = v(id); });
+  putDelivery(d); showToast(t('sdSaved'));
+}
+function clearDelivery(){ putDelivery({}); renderDeliverySettings(); showToast(t('sdCleared')); }
+// при оформлении: подставляем сохранённое в пустые поля
+function applyDeliveryToCheckout(){
+  const d = getDelivery();
+  const ph = document.getElementById('phoneInput');
+  if (ph && !(customerProfile && customerProfile.phone) && d.phone && !ph.value) ph.value = d.phone;
+  if (d.bts && (!btsBranches.length || btsBranches.includes(d.bts))) selectBtsBranch(d.bts);
+  DLV_AB.forEach(([id, k]) => { const el = document.getElementById(id.replace('sdAb', 'ab')); if (el && !el.value && d[k]) el.value = d[k]; });
+}
+// после заказа запоминаем введённое — только то, чего ещё нет в настройках (своё «по умолчанию» не перетираем)
+function rememberDelivery(part){
+  const d = getDelivery(); let ch = false;
+  Object.keys(part).forEach(k => { if (part[k] && !d[k]){ d[k] = part[k]; ch = true; } });
+  if (ch) putDelivery(d);
+}
+
+/* ---------- настройки: уведомления ---------- */
+let myRestockList = [];
+function renderNotifSettings(){
+  const box = document.getElementById('setNotif'); if (!box) return;
+  const on = (typeof isTelegramUser === 'function' && isTelegramUser()) || notifyIsOn();
+  let h = `<div class="sn-row"><span class="sn-ico${on ? ' on' : ''}">${BELL_SVG}</span><div class="sn-txt"><b>${escH(t('notifTitle'))}</b><small>${escH(t(on ? 'snOnSub' : 'snOffSub'))}</small></div>${on ? `<span class="sn-badge">✓ ${escH(t('snOn'))}</span>` : ''}</div>`;
+  if (!on) h += `<a class="checkout-btn sn-connect" href="${NOTIFY_BOT_LINK + '?start=' + notifyLinkPayload()}" target="_blank" rel="noopener" onclick="showToast(t('notifTap'))">${escH(t('snConnect'))}</a>`;
+  h += `<div class="sn-what"><div class="sn-h">${escH(t('snWhat'))}</div><ul><li>${escH(t('snW1'))}</li><li>${escH(t('snW2'))}</li></ul></div>`;
+  h += `<div class="sn-h">${escH(t('snWaiting'))}</div>`;
+  h += myRestockList.length
+    ? myRestockList.map((r, i) => { const p = products.find(x => x.id === r.productId); return `<div class="sn-item" data-k="${i}"><span>${escH(p ? (p.name || r.productName) : r.productName || '')}</span><small>${escH([r.colorName && r.colorName !== 'Стандарт' ? r.colorName : '', r.size].filter(Boolean).join(' · '))}</small></div>`; }).join('')
+    : `<p class="pay-note">${escH(t('snWaitEmpty').replace('{btn}', t('restockBtn')))}</p>`;
+  box.innerHTML = h;
+  box.querySelectorAll('.sn-item').forEach(el => el.onclick = () => { const r = myRestockList[+el.dataset.k]; if (r && products.some(x => x.id === r.productId)) openProduct(r.productId); });
+}
+function renderSettings(){ try{ renderDeliverySettings(); }catch(e){} try{ renderNotifSettings(); }catch(e){} }
 
 /* ---------- cart ---------- */
 function refreshInCart(){
@@ -5183,6 +5369,7 @@ function goToCheckoutFlow(){
     phoneBlock.style.display = 'block';
     document.getElementById('phoneInput').value = '';
   }
+  try{ applyDeliveryToCheckout(); }catch(e){}
 
   showScreen('checkoutFlow');
 }
@@ -5302,6 +5489,7 @@ function confirmPayment(){
 
   window._payTapAt = Date.now(); // момент нажатия «Перейти к оплате» — нужен, чтобы сразу открыть приложение Uzum
   if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
+  try{ rememberDelivery({ phone: (customerProfile && customerProfile.phone) ? '' : phone, bts: branch }); }catch(e){}
   finalizeOrder(phone, branch);
 }
 
@@ -5325,6 +5513,7 @@ function confirmAbroad(){
   };
   // строка «куда отправить» — в том же поле, что и пункт БТС, чтобы админка, бот и уведомления показали её без изменений
   const branch = `🌍 BTS Global → ${countryRu}, ${val('abCity')}, ${val('abAddress')}${zip ? ', ' + zip : ''} · получатель: ${val('abName')}`;
+  try{ rememberDelivery({ abName: val('abName'), abPhone: val('abPhone'), abCity: val('abCity'), abAddress: val('abAddress'), abZip: zip }); }catch(e){}
   finalizeOrder(val('abPhone'), branch);
 }
 
