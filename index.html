@@ -1045,6 +1045,14 @@
     .nx-nav a{ font-size:13px; font-weight:600; color:inherit; text-decoration:none; opacity:.85; cursor:pointer; }
     .nx-nav a:hover{ opacity:1; }
   }
+  /* меню на телефоне: вторая строка шапки, листается вбок */
+  @media (max-width:899px){
+    .site-header{ flex-wrap:wrap; row-gap:6px; }
+    .site-header .nx-nav{ display:flex; order:3; flex:0 0 calc(100% + 32px); gap:6px; margin:0 -14px 0 -18px; padding:0 14px 2px 18px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .site-header .nx-nav::-webkit-scrollbar{ display:none; }
+    .site-header .nx-nav a{ flex:0 0 auto; font-size:13px; font-weight:600; line-height:1; padding:8px 14px; border-radius:999px; background:var(--stone); color:inherit; text-decoration:none; white-space:nowrap; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+    .site-header .nx-nav a:active{ transform:scale(.95); }
+  }
   #heroPhoto{ display:none !important; }
 
   /* ===== 1. ОРБИТА ===== */
@@ -1350,6 +1358,12 @@
   @media (prefers-reduced-motion:reduce){ .nx-rmq{ overflow-x:auto; } .nx-rtrack{ animation:none; } .nx-rset[aria-hidden]{ display:none; } }
   @media (max-width:640px){ .nx-rmq .nx-rcard{ flex-basis:270px; width:270px; } }
   @media (max-width:640px){ .nx-rrow{ grid-auto-columns:82%; margin:0 -20px; padding:0 20px 6px; scroll-padding:0 20px; } .nx-rnum{ font-size:44px; } }
+  /* телефон: шапка стала выше (строка меню) — сдвигаем контент и точки прокрутки */
+  @media (max-width:899px){
+    .nx-hero{ padding-top:calc(118px + env(safe-area-inset-top)); }
+    #nxHero, #nxCatsSec, #productsAnchor, #faqSection, #nxStreetSec, #nxFabSec{ scroll-margin-top:calc(136px + env(safe-area-inset-top)); }
+    #nxLookSec, #ratingSummary{ scroll-margin-top:calc(100px + env(safe-area-inset-top)); }
+  }
 </style>
 </head>
 <body class="bg-facets">
@@ -1869,7 +1883,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261121-199";
+  const CURRENT_VERSION = "20261122-200";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -6486,24 +6500,26 @@ function wireOrbit(){
   const end = e => { if (!drag) return; box.classList.remove('drag'); const was = drag; drag = null;
     if (!was.moved){ const el = document.elementFromPoint(e.clientX, e.clientY); const it = el && el.closest('.nx-item'); if (it){ const i = +it.dataset.i; if (i === active){ touch(); const pid = orb[i].id; it.classList.add('nx-pop'); setTimeout(() => { openProduct(pid); it.classList.remove('nx-pop'); }, 260); } else goTo(i); } return; }
     goTo(Math.round(pos)); };
-  box.addEventListener('pointerup', end); box.addEventListener('pointercancel', () => { drag = null; box.classList.remove('drag'); goTo(Math.round(pos)); });
+  const cancel = () => { if (!drag) return; drag = null; box.classList.remove('drag'); goTo(Math.round(pos)); };
+  box.addEventListener('pointerup', end); box.addEventListener('pointercancel', cancel);
+  box.addEventListener('lostpointercapture', cancel); // страховка: если «отпускание» потерялось, орбита не зависает навсегда
   const fromTrack = e => { const r = track.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (orb.length - 1); };
   let td = false;
   track.addEventListener('pointerdown', e => { td = true; track.setPointerCapture(e.pointerId); target = fromTrack(e); animate(); });
   track.addEventListener('pointermove', e => { if (td){ target = fromTrack(e); animate(); } });
-  track.addEventListener('pointerup', () => { td = false; goTo(Math.round(target)); });
+  const tEnd = () => { if (!td) return; td = false; goTo(Math.round(target)); };
+  track.addEventListener('pointerup', tEnd); track.addEventListener('pointercancel', tEnd); track.addEventListener('lostpointercapture', tEnd);
   $('nxSz').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (b && orb[active]) openProduct(orb[active].id, undefined, b.dataset.s); });
   $('nxMore').onclick = () => { // запоминаем товар в момент нажатия и останавливаем вращение — иначе орбита успевала повернуться и открывался соседний товар
     touch(); const i = active, p = orb[i]; if (!p) return;
     const it = document.querySelector(`.nx-item[data-i="${i}"]`); if (it) it.classList.add('nx-pop');
     setTimeout(() => { openProduct(p.id); if (it) it.classList.remove('nx-pop'); }, 260); };
-  // автовращение: каждые 1,5 с — следующий товар; пауза при наведении/перетаскивании и 5 с после касания
-  let idleUntil = 0, hover = false;
-  const touch = () => { idleUntil = Date.now() + 5000; };
-  box.addEventListener('pointerenter', () => { hover = true; }); box.addEventListener('pointerleave', () => { hover = false; });
-  box.addEventListener('pointerdown', touch); track.addEventListener('pointerdown', touch);
+  // автовращение: каждые 1,5 с — следующий товар; стоп ТОЛЬКО пока орбиту держат мышкой/пальцем, отпустили — снова крутится
+  // (наведение мышкой и режим «меньше движения» на телефоне больше не останавливают орбиту — из-за них она «иногда не двигалась»)
+  let idleUntil = 0;
+  const touch = () => { idleUntil = Date.now() + 1200; }; // короткая пауза только когда открываем товар, чтобы не открылся соседний
   setInterval(() => {
-    if (!orb.length || orb.length < 2 || drag || hover || document.hidden || Date.now() < idleUntil || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!orb.length || orb.length < 2 || drag || td || document.hidden || Date.now() < idleUntil) return;
     const home = document.getElementById('home'); if (!home || !home.classList.contains('active')) return;
     const r = box.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
     goTo(active + 1 >= orb.length ? 0 : active + 1);
