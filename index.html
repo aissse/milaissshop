@@ -1124,6 +1124,7 @@
   .nx-fig{ position:absolute; bottom:0; left:50%; width:min(46%, 300px); height:92%; transition:transform .8s cubic-bezier(.65,0,.3,1), filter .8s ease, opacity .8s ease; cursor:pointer; }
   .nx-fig img{ width:100%; height:100%; object-fit:contain; object-position:bottom; }
   html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:multiply; }
+  html:not([data-theme="dark"]) .nx-figin > img:not(.blend){ mix-blend-mode:multiply; } /* светлый фон фото модели сливается с фоном сайта */
   .nx-figin{ position:relative; width:100%; height:100%; }
   .nx-pin{ position:absolute; transform:translate(-11px,-50%); /* центр кружка — ровно в точке, подпись справа */ border:0; background:none; padding:0; cursor:pointer; display:flex; align-items:center; gap:6px; z-index:2; opacity:0; transition:opacity .4s ease .5s; }
   .nx-fig[style*="scale(1)"] .nx-pin{ opacity:1; }
@@ -1965,7 +1966,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261122-202";
+  const CURRENT_VERSION = "20261122-203";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -6773,6 +6774,14 @@ function layoutPins(){
     const W = box.clientWidth, H = box.clientHeight, sc = Math.min(W / img.naturalWidth, H / img.naturalHeight);
     const dw = img.naturalWidth * sc, dh = img.naturalHeight * sc, ox = (W - dw) / 2, oy = H - dh;
     box.querySelectorAll('.nx-pin').forEach(pn => { pn.style.left = (ox + pn.dataset.x / 100 * dw) + 'px'; pn.style.top = (oy + pn.dataset.y / 100 * dh) + 'px'; });
+    if (!img.classList.contains('blend')){
+      // края собственного фото образа мягко растворяем — иначе граница снимка видна линиями слева/справа и снизу
+      const fx = Math.max(8, dw * .12), fy = Math.max(4, dh * .04);
+      const mh = `linear-gradient(90deg, transparent ${ox}px, #000 ${ox + fx}px, #000 ${ox + dw - fx}px, transparent ${ox + dw}px)`;
+      const mv = `linear-gradient(0deg, transparent 0px, #000 ${fy}px, #000 ${dh - fy}px, transparent ${dh}px)`;
+      img.style.webkitMaskImage = mh + ',' + mv; img.style.maskImage = mh + ',' + mv;
+      img.style.webkitMaskComposite = 'source-in'; img.style.maskComposite = 'intersect';
+    }
   });
 }
 addEventListener('resize', () => layoutPins());
@@ -6794,15 +6803,37 @@ function showLook(i, user){
   if (user) schedule();
 }
 const homeVisible = () => !document.hidden && document.getElementById('home') && document.getElementById('home').classList.contains('active');
-function schedule(){ clearInterval(lookTimer); if (!lookPaused && looks.length > 1) lookTimer = setInterval(() => { if (homeVisible()) showLook(li + 1); }, 6000); }
+// автопрокрутка образов — как у орбиты: шаг каждые 2 с без остановок. Ждём только пока образ держат пальцем/мышкой,
+// пока покупатель выбирает вещь справа (наведение или открытый выбор размера) и пару секунд после его собственного нажатия.
+let lookHold = false, lookIdleUntil = 0;
+function schedule(){
+  clearInterval(lookTimer); lookIdleUntil = Date.now() + 2500;
+  if (lookPaused || looks.length < 2) return;
+  lookTimer = setInterval(() => {
+    if (!homeVisible() || lookHold || Date.now() < lookIdleUntil) return;
+    const st = $('nxStage'); if (!st) return;
+    const r = st.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; // блок не на экране — не крутим впустую
+    if (document.querySelector('#nxPieces .nx-szpick.open')) return; // выбирают размер — не перерисовываем список под пальцем
+    showLook(li + 1);
+  }, 2000);
+}
 function wireLooks(){
   $('nxPrev').onclick = () => showLook(li - 1, true);
   $('nxNext').onclick = () => showLook(li + 1, true);
   $('nxPause').onclick = () => { lookPaused = !lookPaused; $('nxPause').innerHTML = lookPaused ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>'; schedule(); };
   $('nxLookCta').onclick = () => { const l = looks[li]; if (l && l.pieces[0]) openProduct(l.pieces[0].p.id); };
   let sx = null; const st = $('nxStage');
-  st.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive:true });
-  st.addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) showLook(li + (dx < 0 ? 1 : -1), true); sx = null; });
+  st.addEventListener('touchstart', e => { sx = e.touches[0].clientX; lookHold = true; }, { passive:true });
+  st.addEventListener('touchend', e => { lookHold = false; lookIdleUntil = Date.now() + 1500; if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) showLook(li + (dx < 0 ? 1 : -1), true); sx = null; });
+  st.addEventListener('touchcancel', () => { lookHold = false; sx = null; });
+  st.addEventListener('mousedown', () => { lookHold = true; });
+  addEventListener('mouseup', () => { if (lookHold){ lookHold = false; lookIdleUntil = Date.now() + 1500; } });
+  const side = document.querySelector('.nx-look-side');
+  if (side){
+    side.addEventListener('mouseenter', () => { lookHold = true; });
+    side.addEventListener('mouseleave', () => { lookHold = false; });
+    side.addEventListener('touchstart', () => { lookIdleUntil = Date.now() + 5000; }, { passive:true }); // нажали на вещь/«+» — даём спокойно выбрать
+  }
 }
 
 /* ---------- «+» у вещи образа: в корзину / убрать из корзины ---------- */
