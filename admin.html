@@ -2245,8 +2245,8 @@ function preorderAdminHTML(o){
   if (o.status === PRE_WAIT && o.depositPaid === true && o.paid !== true){
     const days = o.depositPaidAt ? Math.floor((Date.now() - (o.depositPaidAt.toDate ? o.depositPaidAt.toDate() : new Date(o.depositPaidAt)).getTime()) / 86400000) : null;
     if (days !== null) h += `<div class="oline" style="${days > 25 ? 'color:#b3261e; font-weight:700;' : ''}">Ждём товар: ${days} дн. из 25${days > 25 ? ' — срок прошёл, покупатель может отменить и вернуть 30%' : ''}</div>`;
-    h += `<div class="oline" style="margin-top:8px; font-weight:700;">📸 Фото поступившего товара (1–3, обязательно) — уйдёт покупателю в Telegram:</div>
-      <input type="file" accept="image/*" multiple class="pre-photo-input" style="margin-top:4px; width:100%;">
+    h += `<div class="oline" style="margin-top:8px; font-weight:700;">📸 Фото поступившего товара (обязательно) — уйдёт покупателю в Telegram:</div>
+      <input type="file" accept="image/*" class="pre-photo-input" style="margin-top:4px; width:100%;">
       <div class="pre-photo-prev" style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;"></div>
       <button type="button" class="btn pre-arrived-btn" style="margin-top:8px;">📦 Товар прибыл — отправить фото и ссылку на доплату</button>`;
   }
@@ -2278,7 +2278,7 @@ async function markPreorderBalance(o, btn){
 }
 async function markPreorderArrived(o, btn, extend, photos){
   if (!confirm(extend ? 'Продлить срок доплаты ещё на 3 дня?\nПокупателю снова придёт сообщение со ссылкой на доплату.' : 'Товар по этому предзаказу прибыл?\nПокупателю придёт сообщение: доплатить 70% в течение 3 дней.')) return;
-  if (!extend && !(photos && photos.length)){ adminToast('Сначала прикрепите фото поступившего товара (1–3)'); return; }
+  if (!extend && !(photos && photos.length)){ adminToast('Сначала прикрепите фото поступившего товара'); return; }
   btn.disabled = true;
   // свежие данные: пока было открыто окно подтверждения, могла прийти оплата
   try{ const fr = await db.collection('orders').doc(o.id).get(); if (fr.exists){ const d = fr.data(); if (d.paid === true || d.depositPaid !== true || d.status === 'Отменён'){ btn.disabled = false; adminToast('Заказ изменился (оплачен или отменён) — обновите страницу'); return; } } }catch(_){}
@@ -2296,7 +2296,7 @@ async function markPreorderArrived(o, btn, extend, photos){
   // фото — первой строкой: Telegram показывает превью первой ссылки прямо в сообщении
   const L = (o.lang && PRE_PHOTO_TXT[o.lang]) ? o.lang : 'ru';
   const ph = Array.isArray(o.arrivalPhotos) ? o.arrivalPhotos : [];
-  const photoTxt = ph.length ? `${PRE_PHOTO_TXT[L]}\n${ph.join('\n')}\n\n` : '';
+  const photoTxt = ph.length ? `${PRE_PHOTO_TXT[L]}\n${ph[0]}\n\n` : '';
   const ok = await tgSend(await resolveChatId(o.customerId), photoTxt + buildStatusText(o, PRE_ARRIVED));
   adminToast(ok ? 'Готово: покупателю отправлена ссылка на доплату ✅' : 'Сохранено, но Telegram не доставил (клиент не запускал бота?) — напишите ему сами');
 }
@@ -2392,10 +2392,10 @@ function renderAdminOrderCard(o, wrap){
     const arrBtn = card.querySelector('.pre-arrived-btn');
     const phIn = card.querySelector('.pre-photo-input');
     if (phIn) phIn.onchange = () => {
-      const files = Array.from(phIn.files || []).slice(0, 3);
+      const files = Array.from(phIn.files || []).slice(0, 1);
       card.querySelector('.pre-photo-prev').innerHTML = files.map(f => `<img src="${URL.createObjectURL(f)}" style="width:72px; height:72px; object-fit:cover; border-radius:8px;">`).join('');
     };
-    if (arrBtn) arrBtn.onclick = () => markPreorderArrived(o, arrBtn, false, phIn ? Array.from(phIn.files || []).slice(0, 3) : []);
+    if (arrBtn) arrBtn.onclick = () => markPreorderArrived(o, arrBtn, false, phIn ? Array.from(phIn.files || []).slice(0, 1) : []);
     card.querySelectorAll('.pre-dep-btn').forEach(b => b.onclick = () => markPreorderDeposit(o, b.dataset.m, b));
     const balBtn = card.querySelector('.pre-bal-btn');
     if (balBtn) balBtn.onclick = () => markPreorderBalance(o, balBtn);
