@@ -1163,6 +1163,41 @@
   .nx-plus.on svg:not(.ck){ opacity:0; transform:scale(.3) rotate(90deg); }
   .nx-plus.on .ck{ opacity:1; transform:none; }
   .nx-szpick{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; max-height:0; overflow:hidden; opacity:0; padding:0 8px 0 78px; transition:max-height .35s ease, opacity .3s ease, padding .35s ease; }
+  .nx-ls{ position:fixed; inset:0; z-index:4000; pointer-events:none; }
+  .nx-ls-bg{ position:absolute; inset:0; background:rgba(15,10,9,.45); opacity:0; transition:opacity .3s ease; }
+  .nx-ls-sheet{ position:absolute; left:0; right:0; bottom:0; margin:0 auto; max-width:560px; max-height:92vh; max-height:92dvh; display:flex; flex-direction:column; background:var(--bg); color:var(--ink); border-radius:24px 24px 0 0; transform:translateY(104%); transition:transform .42s cubic-bezier(.2,.8,.2,1); box-shadow:0 -10px 40px rgba(0,0,0,.18); }
+  .nx-ls.open{ pointer-events:auto; } .nx-ls.open .nx-ls-bg{ opacity:1; } .nx-ls.open .nx-ls-sheet{ transform:none; }
+  html.nx-ls-open, html.nx-ls-open body{ overflow:hidden; }
+  .nx-ls-x{ position:absolute; top:10px; right:12px; z-index:3; width:36px; height:36px; border-radius:50%; border:0; background:var(--surface, rgba(0,0,0,.06)); color:var(--ink); font-size:22px; line-height:36px; cursor:pointer; }
+  .nx-ls-body{ overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 18px 8px; flex:1; }
+  .nx-ls-top{ display:flex; justify-content:center; margin:6px 0 10px; }
+  .nx-ls-photo{ max-height:42vh; max-width:100%; object-fit:contain; display:block; }
+  html:not([data-theme="dark"]) .nx-ls-photo{ mix-blend-mode:multiply; }
+  .nx-ls-collage{ display:flex; gap:8px; justify-content:center; width:100%; }
+  .nx-ls-collage > div{ flex:1; max-width:160px; aspect-ratio:3/4; position:relative; }
+  .nx-ls-collage .nx-pic, .nx-ls-th .nx-pic{ position:absolute; inset:0; }
+  .nx-ls-h{ display:flex; justify-content:space-between; align-items:baseline; margin:6px 0 8px; }
+  .nx-ls-h small{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-strong); }
+  .nx-ls-h b{ font-size:13px; color:var(--text-soft); }
+  .nx-ls-it{ display:grid; grid-template-columns:26px 64px 1fr; gap:12px; align-items:start; padding:12px 0; border-top:1px solid var(--line); }
+  .nx-ls-chk{ width:24px; height:24px; margin-top:20px; border-radius:7px; border:1.5px solid var(--line); background:transparent; cursor:pointer; padding:0; position:relative; transition:background .2s, border-color .2s; }
+  .nx-ls-it.on .nx-ls-chk{ background:var(--accent-strong); border-color:var(--accent-strong); }
+  .nx-ls-it.on .nx-ls-chk::after{ content:''; position:absolute; left:7px; top:3px; width:6px; height:11px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+  .nx-ls-th{ width:64px; height:64px; position:relative; border-radius:12px; overflow:hidden; cursor:pointer; }
+  .nx-ls-nm{ font-weight:700; font-size:14px; line-height:1.3; cursor:pointer; }
+  .nx-ls-pr{ font-size:13px; font-weight:700; margin:2px 0 8px; color:var(--ink); } .nx-ls-pr .old{ text-decoration:line-through; color:var(--text-soft); font-weight:500; margin-right:6px; }
+  .nx-ls-sz{ display:flex; flex-wrap:wrap; gap:6px; }
+  .nx-ls-sz button{ height:32px; min-width:40px; padding:0 10px; border-radius:16px; border:1px solid var(--line); background:transparent; color:var(--ink); font:600 12px 'Inter',sans-serif; cursor:pointer; }
+  .nx-ls-sz button.sel{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .nx-ls-it.need .nx-ls-sz{ animation:revNudge .4s; } .nx-ls-it.need .nx-ls-sz button{ border-color:var(--accent-strong); }
+  .nx-ls-it:not(.on) .nx-ls-th, .nx-ls-it:not(.on) .nx-ls-nm, .nx-ls-it:not(.on) .nx-ls-pr{ opacity:.5; }
+  .nx-ls-it.none .nx-ls-chk{ opacity:.35; cursor:default; }
+  .nx-ls-no{ font-size:12px; color:var(--text-soft); }
+  .nx-ls-foot{ display:flex; align-items:center; gap:14px; padding:12px 18px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); background:var(--bg); border-radius:0 0 0 0; }
+  .nx-ls-sum{ flex:1; min-width:0; } .nx-ls-sum small{ display:block; font-size:11px; color:var(--text-soft); } .nx-ls-sum b{ font-size:20px; font-weight:800; }
+  .nx-ls-go{ height:50px; padding:0 22px; border-radius:25px; border:0; background:var(--accent-strong); color:#fff; font:700 15px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; }
+  .nx-ls-go:disabled{ opacity:.45; cursor:default; }
+  html[data-theme="dark"] .nx-ls-go{ color:#17110F; }
   .nx-szpick.open{ max-height:120px; opacity:1; padding:2px 8px 10px 78px; }
   .nx-szpick span{ font-size:10px; font-weight:800; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
   .nx-szpick button{ height:30px; min-width:38px; padding:0 10px; border-radius:15px; border:1px solid var(--line); background:transparent; color:var(--ink); font:600 12px 'Inter',sans-serif; cursor:pointer; }
@@ -1970,7 +2005,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261126-205";
+  const CURRENT_VERSION = "20261126-206";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -6443,31 +6478,31 @@ authReady.then(() => { afterAuth(); logVisit(); });
 (function(){
 const NX = {
   ru:{ nav1:'Каталог', nav2:'Новинки', nav3:'Образы', nav4:'Вопросы', nav5:'Отзывы', drag:'Потяни орбиту', size:'Размер', guide:'Таблица размеров', more:'Подробнее', catsE:'Категории', catsH:'Начни с фита.', all:'Смотреть все', styles:'моделей',
-       lookE:'Лукбук', lookH:'Собери образ.', lookS:'Готовые образы с головы до ног. Нажми на вещь — откроется карточка.', inLook:'В этом образе', pcs:'вещи', lookCta:'Смотреть вещи образа', lookNote:'Фото моделей добавим из админки — пока образы собраны из товаров.',
+       lookE:'Лукбук', lookH:'Собери образ.', lookS:'Готовые образы с головы до ног. Нажми на вещь — откроется карточка.', inLook:'В этом образе', pcs:'вещи', lookCta:'Смотреть вещи образа', lsTotal:'Итого', lsCheckout:'Оформить заказ', lsPick:'Выберите размер', lsNone:'Нет в наличии', lsSel:'Выбрано', lsLook:'Образ', lookNote:'Фото моделей добавим из админки — пока образы собраны из товаров.',
        gridE:'Каталог', gridH:'Вещь на любой фит.', streetE:'Улица', streetH:'Носят смело.', streetS:'Как наши вещи выглядят на улице. Отметь @milaisss — и твоё фото может оказаться здесь.', streetPh:'Здесь будут фото покупателей', shopIt:'Смотреть вещи',
        c1:'Вечерняя парковка', c2:'Лестница, полдень', fabE:'Качество', fabH:'Сделано на совесть.', fabS:'Каждая вещь — плотная ткань, которую чувствуешь в руках, и швы, которые переживут сотню стирок.', fabPh:'Крупное фото ткани',
        f1:'Плотный футер', f1p:'Мягкий начёс внутри, плотная петля снаружи, манжеты держат форму после стирок.', f2:'Двойной капюшон', f2p:'Два слоя ткани и плоские шнурки — капюшон не теряет форму.', f3:'Плотный хлопок', f3p:'Свободный крой, спущенное плечо, ворот в рубчик с двойной строчкой.',
        bandH:'Простые вещи. Смелый стиль.', bandP:'Новые дропы, закрытые скидки и первыми — новости магазина.', bandPh:'Фото кампании', fShop:'Магазин', fHelp:'Помощь', fAbout:'milaisss', fFollow:'Мы в сети', fNew:'Новинки', fCart:'Корзина', fFav:'Избранное', fOrders:'Мои заказы', fFaq:'Вопросы', fSupport:'Поддержка', fOffer:'Оферта', fRet:'Возврат 7 дней', fShip:'Бесплатная доставка от 850 000 сум' },
   uz:{ nav1:'Katalog', nav2:'Yangiliklar', nav3:'Obrazlar', nav4:'Savollar', nav5:'Sharhlar', drag:'Orbitani torting', size:'Oʻlcham', guide:'Oʻlchamlar jadvali', more:'Batafsil', catsE:'Kategoriyalar', catsH:'Fitdan boshlang.', all:'Hammasi', styles:'model',
-       lookE:'Lukbuk', lookH:'Obraz yig‘ing.', lookS:'Boshdan-oyoq tayyor obrazlar. Kiyimni bosing — kartochka ochiladi.', inLook:'Bu obrazda', pcs:'ta', lookCta:'Obraz kiyimlarini ko‘rish', lookNote:'Model fotolarini admin paneldan qo‘shamiz — hozircha obrazlar mahsulotlardan yig‘ilgan.',
+       lookE:'Lukbuk', lookH:'Obraz yig‘ing.', lookS:'Boshdan-oyoq tayyor obrazlar. Kiyimni bosing — kartochka ochiladi.', inLook:'Bu obrazda', pcs:'ta', lookCta:'Obraz kiyimlarini ko‘rish', lsTotal:'Jami', lsCheckout:'Buyurtma berish', lsPick:'O‘lchamni tanlang', lsNone:'Mavjud emas', lsSel:'Tanlandi', lsLook:'Obraz', lookNote:'Model fotolarini admin paneldan qo‘shamiz — hozircha obrazlar mahsulotlardan yig‘ilgan.',
        gridE:'Katalog', gridH:'Har qanday fitga kiyim.', streetE:'Koʻcha', streetH:'Dadil kiyishadi.', streetS:'Kiyimlarimiz ko‘chada qanday ko‘rinadi. @milaisss deb belgilang — rasmingiz shu yerda chiqishi mumkin.', streetPh:'Bu yerda xaridorlar fotolari bo‘ladi', shopIt:'Kiyimlarni ko‘rish',
        c1:'Kechki avtoturargoh', c2:'Zinapoya, tush', fabE:'Sifat', fabH:'Vijdonan tikilgan.', fabS:'Har bir kiyim — qo‘lda seziladigan zich mato va yuzlab yuvishga chidaydigan choklar.', fabPh:'Matoning yirik fotosi',
        f1:'Zich futer', f1p:'Ichi yumshoq, tashqi tomoni zich, manjetlar yuvishdan keyin ham shaklini saqlaydi.', f2:'Ikki qavatli kapyushon', f2p:'Ikki qavat mato va yassi bog‘ichlar — kapyushon shaklini yo‘qotmaydi.', f3:'Zich paxta', f3p:'Erkin bichim, tushirilgan yelka, qo‘sh chokli yoqa.',
        bandH:'Oddiy kiyim. Dadil uslub.', bandP:'Yangi droplar, yopiq chegirmalar va do‘kon yangiliklari birinchi bo‘lib.', bandPh:'Kampaniya fotosi', fShop:'Do‘kon', fHelp:'Yordam', fAbout:'milaisss', fFollow:'Tarmoqlarda', fNew:'Yangiliklar', fCart:'Savat', fFav:'Sevimlilar', fOrders:'Buyurtmalarim', fFaq:'Savollar', fSupport:'Qo‘llab-quvvatlash', fOffer:'Oferta', fRet:'Qaytarish 7 kun', fShip:'850 000 so‘mdan bepul yetkazish' },
   tr:{ nav1:'Katalog', nav2:'Yeniler', nav3:'Kombinler', nav4:'SSS', nav5:'Yorumlar', drag:'Yörüngeyi çek', size:'Beden', guide:'Beden tablosu', more:'Detaylar', catsE:'Kategoriler', catsH:'Kalıpla başla.', all:'Tümü', styles:'model',
-       lookE:'Lookbook', lookH:'Kombini tamamla.', lookS:'Baştan aşağı hazır kombinler. Bir parçaya dokun — kartı açılır.', inLook:'Bu kombinde', pcs:'parça', lookCta:'Kombindeki parçalar', lookNote:'Model fotoğraflarını panelden ekleyeceğiz — şimdilik kombinler ürünlerden oluşuyor.',
+       lookE:'Lookbook', lookH:'Kombini tamamla.', lookS:'Baştan aşağı hazır kombinler. Bir parçaya dokun — kartı açılır.', inLook:'Bu kombinde', pcs:'parça', lookCta:'Kombindeki parçalar', lsTotal:'Toplam', lsCheckout:'Siparişi tamamla', lsPick:'Beden seçin', lsNone:'Stokta yok', lsSel:'Seçildi', lsLook:'Kombin', lookNote:'Model fotoğraflarını panelden ekleyeceğiz — şimdilik kombinler ürünlerden oluşuyor.',
        gridE:'Katalog', gridH:'Her tarza bir parça.', streetE:'Sokak', streetH:'Cesurca giyiliyor.', streetS:'Ürünlerimiz sokakta nasıl duruyor. @milaisss etiketle — fotoğrafın burada olabilir.', streetPh:'Burada müşteri fotoğrafları olacak', shopIt:'Parçaları gör',
        c1:'Gece otoparkı', c2:'Merdiven, öğlen', fabE:'Kalite', fabH:'Özenle yapıldı.', fabS:'Her parça elinde hissettiğin kalın bir kumaş ve yüzlerce yıkamaya dayanan dikişler.', fabPh:'Kumaşın yakın çekimi',
        f1:'Kalın sweat kumaş', f1p:'İçi yumuşak şardonlu, dışı sık örgü; manşetler yıkamadan sonra formunu korur.', f2:'Çift kat kapüşon', f2p:'İki kat kumaş ve yassı ipler — kapüşon formunu kaybetmez.', f3:'Kalın pamuk', f3p:'Rahat kesim, düşük omuz, çift dikişli ribana yaka.',
        bandH:'Sade parçalar. Cesur stil.', bandP:'Yeni droplar, özel indirimler ve mağaza haberleri ilk sende.', bandPh:'Kampanya fotoğrafı', fShop:'Mağaza', fHelp:'Yardım', fAbout:'milaisss', fFollow:'Bizi takip et', fNew:'Yeniler', fCart:'Sepet', fFav:'Favoriler', fOrders:'Siparişlerim', fFaq:'SSS', fSupport:'Destek', fOffer:'Sözleşme', fRet:'7 gün iade', fShip:'850 000 sum üzeri ücretsiz kargo' },
   az:{ nav1:'Kataloq', nav2:'Yeniliklər', nav3:'Obrazlar', nav4:'Suallar', nav5:'Rəylər', drag:'Orbiti çək', size:'Ölçü', guide:'Ölçü cədvəli', more:'Ətraflı', catsE:'Kateqoriyalar', catsH:'Fitdən başla.', all:'Hamısı', styles:'model',
-       lookE:'Lukbuk', lookH:'Obrazı topla.', lookS:'Başdan ayağa hazır obrazlar. Geyimə toxun — kartı açılacaq.', inLook:'Bu obrazda', pcs:'ədəd', lookCta:'Obrazın geyimlərinə bax', lookNote:'Model şəkillərini admin paneldən əlavə edəcəyik — hələlik obrazlar məhsullardan yığılıb.',
+       lookE:'Lukbuk', lookH:'Obrazı topla.', lookS:'Başdan ayağa hazır obrazlar. Geyimə toxun — kartı açılacaq.', inLook:'Bu obrazda', pcs:'ədəd', lookCta:'Obrazın geyimlərinə bax', lsTotal:'Cəmi', lsCheckout:'Sifarişi rəsmiləşdir', lsPick:'Ölçü seçin', lsNone:'Mövcud deyil', lsSel:'Seçildi', lsLook:'Obraz', lookNote:'Model şəkillərini admin paneldən əlavə edəcəyik — hələlik obrazlar məhsullardan yığılıb.',
        gridE:'Kataloq', gridH:'Hər fitə bir geyim.', streetE:'Küçə', streetH:'Cəsarətlə geyinirlər.', streetS:'Geyimlərimiz küçədə necə görünür. @milaisss qeyd et — şəklin burada ola bilər.', streetPh:'Burada alıcıların şəkilləri olacaq', shopIt:'Geyimlərə bax',
        c1:'Axşam dayanacağı', c2:'Pilləkən, günorta', fabE:'Keyfiyyət', fabH:'Vicdanla tikilib.', fabS:'Hər geyim — əldə hiss olunan sıx parça və yüzlərlə yuyulmaya dözən tikişlər.', fabPh:'Parçanın yaxın planı',
        f1:'Sıx futer', f1p:'İçi yumşaq, çölü sıx toxuma, manjetlər yuyulmadan sonra formasını saxlayır.', f2:'İkiqat kapüşon', f2p:'İki qat parça və yastı bağlar — kapüşon formasını itirmir.', f3:'Sıx pambıq', f3p:'Sərbəst biçim, düşük çiyin, ikiqat tikişli yaxa.',
        bandH:'Sadə geyimlər. Cəsur üslub.', bandP:'Yeni droplar, qapalı endirimlər və mağaza xəbərləri ilk sənə.', bandPh:'Kampaniya şəkli', fShop:'Mağaza', fHelp:'Kömək', fAbout:'milaisss', fFollow:'Sosial şəbəkələr', fNew:'Yeniliklər', fCart:'Səbət', fFav:'Seçilmişlər', fOrders:'Sifarişlərim', fFaq:'Suallar', fSupport:'Dəstək', fOffer:'Oferta', fRet:'7 gün qaytarma', fShip:'850 000 sumdan pulsuz çatdırılma' },
   en:{ nav1:'Shop', nav2:'New in', nav3:'Lookbook', nav4:'FAQ', nav5:'Reviews', drag:'Drag the orbit', size:'Size', guide:'Size guide', more:'View details', catsE:'Shop by category', catsH:'Start with the fit.', all:'View all', styles:'styles',
-       lookE:'The lookbook', lookH:'Shop the look.', lookS:'Looks styled head to toe. Tap a piece to open it.', inLook:'In this look', pcs:'pieces', lookCta:'Shop the pieces', lookNote:'Model photos will come from the admin panel — for now looks are built from products.',
+       lookE:'The lookbook', lookH:'Shop the look.', lookS:'Looks styled head to toe. Tap a piece to open it.', inLook:'In this look', pcs:'pieces', lookCta:'Shop the pieces', lsTotal:'Total', lsCheckout:'Checkout', lsPick:'Choose a size', lsNone:'Out of stock', lsSel:'Selected', lsLook:'Look', lookNote:'Model photos will come from the admin panel — for now looks are built from products.',
        gridE:'The catalog', gridH:'A piece for every fit.', streetE:'Street file', streetH:'Worn loud.', streetS:'How our pieces look on the street. Tag @milaisss to be featured.', streetPh:'Customer photos will appear here', shopIt:'Shop the pieces',
        c1:'Night garage', c2:'Stairwell, noon', fabE:'Made to last', fabH:'Built heavy.', fabS:'Every piece starts with fabric you can feel, finished to survive a hundred washes.', fabPh:'Fabric close-up',
        f1:'Heavy brushed fleece', f1p:'Brushed inside, dense loop outside, cuffs that keep their shape after washing.', f2:'Double-lined hood', f2p:'Two layers and flat drawcords — the hood keeps its shape.', f3:'Heavy cotton jersey', f3p:'Boxy fit, dropped shoulder, rib collar with twin-needle stitching.',
@@ -6803,7 +6838,7 @@ function buildLooks(){
   $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.onclick = () => showLook(+b.dataset.i, true));
   stage.querySelectorAll('.nx-figin > img').forEach(im => { if (im.complete) layoutPins(); else im.addEventListener('load', layoutPins, { once:true }); });
   stage.querySelectorAll('.nx-pin').forEach(b => b.onclick = e => { e.stopPropagation(); if (+b.closest('.nx-fig').dataset.i === li) openProduct(b.dataset.id); });
-  stage.querySelectorAll('.nx-fig').forEach(f => f.onclick = () => { const i = +f.dataset.i; if (i === li){ const pc = looks[i].pieces[0]; if (pc) openProduct(pc.p.id); } else showLook(i, true); });
+  stage.querySelectorAll('.nx-fig').forEach(f => f.onclick = () => { const i = +f.dataset.i; if (i === li) nxOpenLookSheet(i); else showLook(i, true); });
   showLook(li); schedule();
 }
 // точка = процент от самой картинки; картинка вписана в рамку (contain, прижата вниз), поэтому пересчитываем в пиксели
@@ -6860,7 +6895,7 @@ function wireLooks(){
   $('nxPrev').onclick = () => showLook(li - 1, true);
   $('nxNext').onclick = () => showLook(li + 1, true);
   $('nxPause').onclick = () => { lookPaused = !lookPaused; $('nxPause').innerHTML = lookPaused ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>'; schedule(); };
-  $('nxLookCta').onclick = () => { const l = looks[li]; if (l && l.pieces[0]) openProduct(l.pieces[0].p.id); };
+  $('nxLookCta').onclick = () => nxOpenLookSheet(li);
   let sx = null; const st = $('nxStage');
   st.addEventListener('touchstart', e => { sx = e.touches[0].clientX; lookHold = true; }, { passive:true });
   st.addEventListener('touchend', e => { lookHold = false; lookIdleUntil = Date.now() + 1500; if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) showLook(li + (dx < 0 ? 1 : -1), true); sx = null; });
@@ -6904,6 +6939,88 @@ function nxTogglePiece(id){
   box.querySelectorAll('button').forEach(b => b.onclick = e => { e.stopPropagation(); const o = opts[+b.dataset.k]; if (nxPutInCart(p, o.c, o.sz)) box.classList.remove('open'); });
   document.querySelectorAll('#nxPieces .nx-szpick.open').forEach(x => x !== box && x.classList.remove('open'));
   box.classList.add('open');
+}
+
+/* ---------- «Смотреть вещи образа»: окно с этим образом, всеми его вещами, итоговой суммой и оформлением ---------- */
+let _ls = null;
+function nxOpenLookSheet(i){
+  const l = looks[i]; if (!l) return;
+  const items = l.pieces.map(pc => pc.p).filter(Boolean).map(p => {
+    const colors = colorsOfN(p), sizes = sizesOfN(p), opts = [];
+    if (sizes.length) colors.forEach(c => sizes.forEach(sz => { if (getSizeStock(p, c, sz) > 0) opts.push({ c, sz }); }));
+    else colors.forEach(c => { if (getSizeStock(p, c, undefined) > 0) opts.push({ c, sz: undefined }); });
+    const multi = new Set(opts.map(o => o.c.name)).size > 1;
+    return { p, opts, multi, on: opts.length > 0, pick: opts.length === 1 ? 0 : -1 };
+  });
+  _ls = { i, items };
+  let el = document.getElementById('nxLs');
+  if (!el){
+    el = document.createElement('div'); el.id = 'nxLs'; el.className = 'nx-ls';
+    el.innerHTML = `<div class="nx-ls-bg"></div><div class="nx-ls-sheet" role="dialog" aria-modal="true"><button class="nx-ls-x" type="button" aria-label="×">×</button><div class="nx-ls-body"></div><div class="nx-ls-foot"><div class="nx-ls-sum"><small></small><b></b></div><button class="nx-ls-go" type="button"></button></div></div>`;
+    document.body.appendChild(el);
+    el.querySelector('.nx-ls-bg').onclick = nxCloseLookSheet;
+    el.querySelector('.nx-ls-x').onclick = nxCloseLookSheet;
+    el.querySelector('.nx-ls-go').onclick = nxLookCheckout;
+  }
+  const photo = l.photo ? `<img class="nx-ls-photo" src="${escN(l.photo)}" alt="">`
+    : `<div class="nx-ls-collage">${items.map(it => `<div>${picHTML(it.p)}</div>`).join('')}</div>`;
+  el.querySelector('.nx-ls-body').innerHTML = `
+    <div class="nx-ls-top">${photo}</div>
+    <div class="nx-ls-h"><small>${escN(T('lsLook'))} ${String(i + 1).padStart(2, '0')} / ${String(looks.length).padStart(2, '0')}</small><b>${items.length} ${escN(T('pcs'))}</b></div>
+    <div class="nx-ls-list">${items.map((it, k) => `
+      <div class="nx-ls-it${it.opts.length ? '' : ' none'}" data-k="${k}">
+        <button type="button" class="nx-ls-chk" aria-label="${escN(T('lsSel'))}"></button>
+        <div class="nx-ls-th">${picHTML(it.p)}</div>
+        <div class="nx-ls-info">
+          <div class="nx-ls-nm">${escN(nameOf(it.p))}</div>
+          <div class="nx-ls-pr">${priceHTML(it.p)}</div>
+          <div class="nx-ls-sz">${it.opts.length ? it.opts.map((o, j) => `<button type="button" data-j="${j}">${escN(o.sz == null ? '—' : o.sz)}${it.multi ? ' · ' + escN(o.c.name) : ''}</button>`).join('') : `<span class="nx-ls-no">${escN(T('lsNone'))}</span>`}</div>
+        </div>
+      </div>`).join('')}</div>`;
+  el.querySelectorAll('.nx-ls-it').forEach(row => {
+    const it = _ls.items[+row.dataset.k];
+    row.querySelector('.nx-ls-chk').onclick = () => { if (!it.opts.length) return; it.on = !it.on; nxLsSync(); };
+    row.querySelector('.nx-ls-th').onclick = () => { nxCloseLookSheet(); openProduct(it.p.id); };
+    row.querySelector('.nx-ls-nm').onclick = () => { nxCloseLookSheet(); openProduct(it.p.id); };
+    row.querySelectorAll('.nx-ls-sz button').forEach(b => b.onclick = () => { it.pick = +b.dataset.j; it.on = true; row.classList.remove('need'); nxLsSync(); });
+  });
+  nxLsSync();
+  lookHold = true; // пока окно открыто — образы за ним не листаются
+  document.documentElement.classList.add('nx-ls-open');
+  requestAnimationFrame(() => el.classList.add('open'));
+}
+function nxLsSync(){
+  const el = document.getElementById('nxLs'); if (!el || !_ls) return;
+  let sum = 0, n = 0;
+  _ls.items.forEach((it, k) => {
+    const row = el.querySelector(`.nx-ls-it[data-k="${k}"]`); if (!row) return;
+    row.classList.toggle('on', it.on);
+    row.querySelectorAll('.nx-ls-sz button').forEach(b => b.classList.toggle('sel', +b.dataset.j === it.pick));
+    if (it.on){ sum += effPrice(it.p); n++; }
+  });
+  el.querySelector('.nx-ls-sum small').textContent = `${T('lsTotal')} · ${n} ${T('pcs')}`;
+  el.querySelector('.nx-ls-sum b').textContent = fmt(sum);
+  const go = el.querySelector('.nx-ls-go'); go.textContent = T('lsCheckout'); go.disabled = n === 0;
+}
+function nxCloseLookSheet(){
+  const el = document.getElementById('nxLs'); if (!el) return;
+  el.classList.remove('open'); document.documentElement.classList.remove('nx-ls-open');
+  lookHold = false; lookIdleUntil = Date.now() + 1500;
+}
+function nxLookCheckout(){
+  if (!_ls) return;
+  const el = document.getElementById('nxLs');
+  const chosen = _ls.items.filter(it => it.on);
+  const miss = chosen.filter(it => it.pick < 0);
+  if (miss.length){ // не выбран размер — подсвечиваем и подсказываем
+    miss.forEach(it => { const row = el.querySelector(`.nx-ls-it[data-k="${_ls.items.indexOf(it)}"]`); if (row){ row.classList.remove('need'); void row.offsetWidth; row.classList.add('need'); } });
+    showToast(T('lsPick')); return;
+  }
+  let ok = 0;
+  chosen.forEach(it => { const o = it.opts[it.pick]; if (o && nxPutInCart(it.p, o.c, o.sz)) ok++; });
+  if (!ok) return;
+  nxPieceStates(); nxCloseLookSheet();
+  goToCheckoutFlow(); // дальше — обычное оформление заказа, как из корзины
 }
 
 /* ---------- 5. качество: подписи по очереди ---------- */
