@@ -191,6 +191,12 @@
         <h1>Список товаров</h1>
         <button type="button" class="btn secondary" id="bulkTrBtn" style="margin:8px 0 6px;" onclick="translateAllProducts()">🌐 Перевести все товары автоматически</button>
         <div class="hint" style="margin:0 0 10px;">Заполнит пустые переводы (en, uz, tr, az) у всех уже добавленных товаров: название, описание, политики, цвета. Переводы, которые ты писал вручную, не трогает. «Скрыть» — товар пропадёт из магазина, но все его данные останутся здесь.</div>
+        <div id="prodStockFilter" style="display:flex; gap:6px; margin:0 0 10px; flex-wrap:wrap;">
+          <button type="button" class="btn secondary on" data-f="all" onclick="setProdStockFilter('all')" style="width:auto; padding:6px 12px;">Все</button>
+          <button type="button" class="btn secondary" data-f="in" onclick="setProdStockFilter('in')" style="width:auto; padding:6px 12px;">✅ В наличии</button>
+          <button type="button" class="btn secondary" data-f="out" onclick="setProdStockFilter('out')" style="width:auto; padding:6px 12px;">⏳ Нет в наличии</button>
+        </div>
+        <style>#prodStockFilter button.on{ background:var(--ink, #111); color:#fff; } .stock-tag{ font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; margin-left:6px; vertical-align:1px; } .stock-tag.in{ background:#E3F4E8; color:#1E6B3A; } .stock-tag.out{ background:#F4ECE3; color:#8A5A1E; }</style>
         <div id="prodList"></div>
       </div>
     </div>
@@ -703,6 +709,19 @@ function ikpuSelectHTML(suf){
   return `<select id="f_ikpu_${suf}"><option value="">— не выбран —</option>${IKPU_LIST.map(x => `<option value="${x.code}">${x.label} · ${x.code}</option>`).join('')}</select>`;
 }
 const SIZE_OPTIONS = ['S','M','L','XL','XXL'];
+const SHOE_GRID_A = ['38','39','40','41','42','43','44','45'];
+// сколько штук всего в наличии у товара (по всем цветам и размерам)
+function prodStockTotal(p){
+  const cs = (p.colors && p.colors.length) ? p.colors : null;
+  if (!cs) return Number(p.stock) || 0;
+  return cs.reduce((s, c) => s + ((c.sizeStocks && Object.keys(c.sizeStocks).length) ? Object.values(c.sizeStocks).reduce((a, b) => a + (Number(b) || 0), 0) : (Number(c.stock) || 0)), 0);
+}
+let prodStockFilter = 'all';
+function setProdStockFilter(f){
+  prodStockFilter = f;
+  document.querySelectorAll('#prodStockFilter button').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+  document.querySelectorAll('#prodList .prod-row').forEach(r => { r.style.display = (f === 'all' || r.dataset.stock === f) ? '' : 'none'; });
+}
 
 function sizeFieldHTML(suf, mode){
   if (mode === 'free'){
@@ -1042,8 +1061,9 @@ function resetForm(type){
   document.getElementById(`f_ikpu_${suf}`).value = IKPU_DEFAULT_BY_TYPE[suf] || '';
   document.getElementById(`f_image_${suf}`).value = '';
   document.getElementById(`f_showcase_${suf}`).value = '';
-  if (typeConfig.sizeMode === 'free'){ document.getElementById(`f_sizes_${suf}`).value = ''; }
-  else { document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => cb.checked = false); }
+  // новый товар: сразу вся сетка размеров (обувь 38–45, одежда S–XXL) — остаётся только проставить наличие
+  if (typeConfig.sizeMode === 'free'){ document.getElementById(`f_sizes_${suf}`).value = SHOE_GRID_A.join(', '); }
+  else { document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => cb.checked = true); }
   clearColorRows(`colorRows_${suf}`); addColorRow(`colorRows_${suf}`, null, suf);
   document.getElementById(`f_cardcolor_${suf}`).value = '#f4f1ec';
   document.getElementById(`f_desc_${suf}`).value = '';
@@ -1088,9 +1108,12 @@ function editProduct(id, p){
   });
 
   if (typeConfig.sizeMode === 'free'){
-    document.getElementById(`f_sizes_${suf}`).value = labelList.join(', ');
+    // у обуви всегда полная сетка 38–45 (+ свои размеры товара, если есть особые)
+    const numeric = !labelList.length || labelList.every(v => /^\d{2}(\.5)?$/.test(String(v).trim()));
+    const merged = numeric ? Array.from(new Set(labelList.concat(SHOE_GRID_A))).sort((a, b) => parseFloat(a) - parseFloat(b)) : labelList;
+    document.getElementById(`f_sizes_${suf}`).value = merged.join(', ');
   } else {
-    document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => { cb.checked = labelList.includes(cb.value); });
+    document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => { cb.checked = true; }); // одежда: всегда S–XXL
   }
 
   clearColorRows(`colorRows_${suf}`);
@@ -1145,11 +1168,13 @@ function loadProducts(){
       allProducts.push(p);
       const row = document.createElement('div');
       row.className = 'prod-row' + (p.hidden ? ' is-hidden' : '');
+      const _tot = prodStockTotal(p); row.dataset.stock = _tot > 0 ? 'in' : 'out';
+      if (prodStockFilter !== 'all' && row.dataset.stock !== prodStockFilter) row.style.display = 'none';
       const thumb = p.image ? `<img src="${p.image}">` : `<div class="ph">👟</div>`;
       row.innerHTML = `
         ${thumb}
         <div class="meta">
-          <div class="name">${p.name}${p.hidden ? '<span class="hidden-badge">скрыт</span>' : ''}</div>
+          <div class="name">${p.name}${p.hidden ? '<span class="hidden-badge">скрыт</span>' : ''}${_tot > 0 ? '<span class="stock-tag in">в наличии</span>' : '<span class="stock-tag out">нет в наличии</span>'}</div>
           <div class="info">${TYPE_LABELS[p.type] || 'Обувь'} · ${Number(p.price||0).toLocaleString('ru-RU')} сум${p.discount ? ' · скидка −' + p.discount + '%' : ''} · в наличии: ${p.stock||0}${(p.ikpu || IKPU_DEFAULT_BY_TYPE[p.type || 'shoes']) ? '' : ' · <b style="color:#b3261e;">нет ИКПУ</b>'}</div>
         </div>
         <div class="acts">

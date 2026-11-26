@@ -212,6 +212,10 @@
   .sizes{ display:flex; gap:8px; flex-wrap:wrap; }
   .size-pill{ width:44px; height:40px; border-radius:12px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; cursor:pointer; background:var(--bg); }
   .size-pill.oos{ opacity:.4; text-decoration:line-through; cursor:pointer; }
+  .card .imgwrap{ position:relative; }
+  .stock-chip{ position:absolute; left:8px; bottom:8px; z-index:2; font-size:10px; font-weight:800; letter-spacing:.04em; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.92); color:#1E6B3A; box-shadow:0 1px 4px rgba(0,0,0,.08); pointer-events:none; }
+  .stock-chip::before{ content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:#2E9B57; margin-right:5px; vertical-align:1px; }
+  html[data-theme="dark"] .stock-chip{ background:rgba(20,22,28,.85); color:#7FD69F; }
   .size-pill.oos.active{ opacity:.75; }
   .size-pill.active{ background:var(--ink); color:var(--on-ink); border-color:var(--ink); }
 
@@ -3046,6 +3050,7 @@ new MutationObserver(() => lazyBgScan()).observe(document.documentElement, { chi
 
 /* ---------- categories (dynamic from settings) ---------- */
 const SALE_CAT = 'Скидки';
+const INSTOCK_CAT = 'В наличии';
 const SALE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>';
 function allCats(){ return (products.some(p => discOf(p) > 0) && !CATEGORIES.includes(SALE_CAT)) ? [...CATEGORIES, SALE_CAT] : CATEGORIES; }
 let CATEGORIES = ["Тренды","Oversize","Минимализм","Лимитки"];
@@ -3087,6 +3092,7 @@ function catIconFor(key, idx){
   if (key === 'Все') return categoryIcons['Все'] || '';
   if (!_settingsReady && !categoryIcons[key]) return '';
   if (key === SALE_CAT) return categoryIcons[key] || SALE_ICON;
+  if (key === INSTOCK_CAT) return categoryIcons[key] || '✅';
   return categoryIcons[key] || DEFAULT_CAT_ICONS[idx % DEFAULT_CAT_ICONS.length];
 }
 function catIconColorFor(key){
@@ -3097,7 +3103,7 @@ function catIconColorFor(key){
 function renderCatPills(){
   const wrap = document.getElementById('catPillsRow');
   if (!wrap) return;
-  const items = [{ key: 'Все' }, ...allCats().map(c => ({ key: c }))];
+  const items = [{ key: 'Все' }, ...(products.some(productInStock) ? [{ key: INSTOCK_CAT }] : []), ...allCats().filter(c => c !== INSTOCK_CAT).map(c => ({ key: c }))];
   _pillKeys = items.map(it => it.key);
   wrap.innerHTML = items.map((it, i) => {
     const iconColor = catIconColorFor(it.key);
@@ -3315,6 +3321,7 @@ function filteredProducts(){
     list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
   }
   else if (activeCategory === SALE_CAT) list = list.filter(p => discOf(p) > 0);
+  else if (activeCategory === INSTOCK_CAT) list = list.filter(productInStock);
   else if (activeCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === activeCategory.trim().toLowerCase());
   return list;
 }
@@ -3389,7 +3396,7 @@ function applyPriceFilter(){
 
 function renderShopAllCats(){
   const wrap = document.getElementById('shopAllCats');
-  const items = ['Все', ...allCats()];
+  const items = ['Все', ...(products.some(productInStock) ? [INSTOCK_CAT] : []), ...allCats().filter(c => c !== INSTOCK_CAT)];
   wrap.innerHTML = items.map((cat, i) => {
     const iconColor = catIconColorFor(cat);
     const borderStyle = '';
@@ -3414,6 +3421,7 @@ function renderShopAllGrid(){
   if (categoryAutoPopular[shopAllCategory]){
     list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
   } else if (shopAllCategory === SALE_CAT) list = list.filter(p => discOf(p) > 0);
+  else if (shopAllCategory === INSTOCK_CAT) list = list.filter(productInStock);
   else if (shopAllCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === shopAllCategory.trim().toLowerCase());
   if (priceMin !== null) list = list.filter(p => effPrice(p) >= priceMin);
   if (priceMax !== null) list = list.filter(p => effPrice(p) <= priceMax);
@@ -3492,6 +3500,7 @@ function toggleDrawerInfo(id){
 function translateCategory(cat){
   if (cat === 'Все') return t('allCat');
   if (cat === SALE_CAT && !(categoryTranslations[cat] && categoryTranslations[cat][lang])) return t('catSale');
+  if (cat === INSTOCK_CAT && !(categoryTranslations[cat] && categoryTranslations[cat][lang])) return t('inStockWord');
   if (cat === 'До 500 000') return categoryTranslations['До 500 000'] && categoryTranslations['До 500 000'][lang] ? categoryTranslations['До 500 000'][lang] : cat;
   return (categoryTranslations[cat] && categoryTranslations[cat][lang]) ? categoryTranslations[cat][lang] : cat;
 }
@@ -3569,6 +3578,7 @@ function productCardHTML(p){
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${p.image ? '' : (p.emoji || '👟')}
       ${discBadge(p)}<div class="heart-btn" data-fav="${p.id}">${heartIcon(isFavorite(p.id))}</div>
+      ${productInStock(p) ? `<span class="stock-chip">${t('inStockWord')}</span>` : ''}
     </div>
     <div class="info">
       <div class="name">${getTranslatedProductName(p)}</div>
@@ -4779,6 +4789,30 @@ function getTranslatedProductName(p){
   return p.name || '';
 }
 
+/* ---------- полная сетка размеров: у обуви всегда 38–45, у одежды S–XXL ----------
+   Размеров, которых нет в наличии, нет и в базе — они показываются зачёркнутыми, по ним можно «Сообщить о поступлении». */
+const SHOE_GRID = ['38','39','40','41','42','43','44','45'];
+const CLOTH_GRID = ['S','M','L','XL','XXL'];
+function sizeGridFor(p, own){
+  const isNum = v => /^\d{2}(\.5)?$/.test(String(v).trim());
+  const isLetter = v => /^(XXS|XS|S|M|L|XL|XXL|XXXL|2XL|3XL)$/i.test(String(v).trim());
+  if (own.length ? own.every(isNum) : (p && p.type === 'shoes')) return SHOE_GRID;
+  if (own.length ? own.every(isLetter) : (p && ['top','bottom','set'].includes(p.type))) return CLOTH_GRID;
+  return []; // особые размеры (например, «Universal») — сетку не навязываем
+}
+function fullSizeLabels(p, own){
+  const grid = sizeGridFor(p, own);
+  const all = own.slice(); grid.forEach(g => { if (!all.includes(g)) all.push(g); });
+  const ord = v => { const n = parseFloat(v); if (!isNaN(n)) return n; const i = ['XXS','XS','S','M','L','XL','XXL','XXXL'].indexOf(String(v).toUpperCase()); return i < 0 ? 999 : 100 + i; };
+  return all.sort((a, b) => ord(a) - ord(b));
+}
+// есть ли у товара хоть один размер в наличии (для значка «В наличии» и фильтра)
+function productInStock(p){
+  const own = ((p.sizes && p.sizes.length) ? p.sizes : []).map(s => (s && typeof s === 'object') ? s.size : s);
+  const colors = (p.colors && p.colors.length) ? p.colors : [null];
+  if (!own.length) return colors.some(c => getSizeStock(p, c, undefined) > 0);
+  return colors.some(c => own.some(sz => getSizeStock(p, c, sz) > 0));
+}
 function getSizeStock(product, color, sizeLabel){
   if (!color) return Number((product && product.stock) || 0);
   if (color.sizeStocks && Object.prototype.hasOwnProperty.call(color.sizeStocks, sizeLabel)) return Number(color.sizeStocks[sizeLabel]) || 0;
@@ -4888,12 +4922,14 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
   if (!currentProduct) return;
   renderPolicyAccordion();
   const rawSizes = (currentProduct.sizes && currentProduct.sizes.length) ? currentProduct.sizes : ["38","39","40","41","42","43"];
-  const sizeLabels = rawSizes.map(s => (s && typeof s === 'object') ? s.size : s);
+  const ownSizeLabels = rawSizes.map(s => (s && typeof s === 'object') ? s.size : s);
+  const sizeLabels = fullSizeLabels(currentProduct, ownSizeLabels);
   const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", nameTranslations:{ en:"Standard", uz:"Standart", tr:"Standart", az:"Standart" }, hex:"#f4f1ec", stock: currentProduct.stock || 0}];
   currentColors = colors;
   selectedColorIdx = 0;
 
   function getColorSizeStock(colorIdx, sizeLabel){
+    if (!ownSizeLabels.includes(sizeLabel)) return 0; // размер из полной сетки, которого у товара нет — «нет в наличии»
     return getSizeStock(currentProduct, colors[colorIdx], sizeLabel);
   }
   function pickInitialSize(colorIdx){
