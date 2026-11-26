@@ -1880,6 +1880,16 @@ const PRE_PERCENT = 30, PRE_BALANCE_MS = 3 * 24 * 60 * 60 * 1000;
 const preDeposit = total => Math.round((Number(total) || 0) * PRE_PERCENT / 100);
 const fmtWhen = v => { if (!v) return ''; const d = v.toDate ? v.toDate() : new Date(v); return isNaN(d) ? '' : d.toLocaleString('ru-RU'); };
 // предзаказ ждёт действий владельца: предоплата внесена, полной оплаты ещё нет
+// фото поступившего товара: загружаем на imgbb (тот же сервис, что и фото в отзывах на сайте)
+const PRE_IMGBB_KEY = "d4617fcdfd254bb703e1b70afc19e540";
+async function preUploadPhoto(file){
+  const fd = new FormData(); fd.append('image', file);
+  const r = await fetch(`https://api.imgbb.com/1/upload?key=${PRE_IMGBB_KEY}`, { method:'POST', body: fd });
+  const j = await r.json();
+  if (j && j.success && j.data && j.data.url) return j.data.url;
+  throw new Error('upload');
+}
+const PRE_PHOTO_TXT = { ru:'📸 Ваш товар приехал — вот фото:', uz:'📸 Mahsulotingiz keldi — mana surati:', tr:'📸 Ürününüz geldi — işte fotoğrafı:', az:'📸 Məhsulunuz gəldi — budur şəkli:', en:'📸 Your item has arrived — here is the photo:' };
 function isOpenPreorder(o){ return o && o.preorder === true && o.testOrder !== true && o.status !== 'Отменён' && o.paid !== true && (o.depositPaid === true || o.paymentCheckNeeded === true); }
 
 /* ---------- уведомления клиентам в Telegram (от бота магазина) ---------- */
@@ -2220,6 +2230,8 @@ function preorderAdminHTML(o){
     <div class="oline">${depOk ? '✅' : '⏳'} Предоплата ${PRE_PERCENT}%: <b>${dep.toLocaleString('ru-RU')} сум</b>${depOk && o.depositPaidAt ? ' · ' + fmtWhen(o.depositPaidAt) : ''}${o.depositMethod ? ' · ' + escH(o.depositMethod) : ''}${o.depositClickTransId ? ' · Click ' + escH(o.depositClickTransId) : ''}${o.depositUzumTransId ? ' · Uzum ' + escH(o.depositUzumTransId) : ''}</div>
     <div class="oline">${balOk ? '✅' : '⏳'} Доплата ${100 - PRE_PERCENT}%: <b>${bal.toLocaleString('ru-RU')} сум</b>${balOk && o.balancePaidAt ? ' · ' + fmtWhen(o.balancePaidAt) : ''}${o.balanceMethod ? ' · ' + escH(o.balanceMethod) : ''}</div>`;
   if (o.depositStatus === 'REVERSED') h += `<div class="oline" style="color:#b3261e; font-weight:700;">↩️ Предоплату вернули (отмена в банке)</div>`;
+  if (Array.isArray(o.arrivalPhotos) && o.arrivalPhotos.length)
+    h += `<div class="oline" style="margin-top:6px;">📸 Фото поступления (отправлено покупателю):</div><div style="display:flex; gap:6px; margin-top:4px;">${o.arrivalPhotos.filter(u => /^https:\/\//.test(u)).map(u => `<a href="${escH(u)}" target="_blank" rel="noopener"><img src="${escH(u)}" style="width:72px; height:72px; object-fit:cover; border-radius:8px;"></a>`).join('')}</div>`;
   // банк подтвердил предоплату, но отметка не записалась — владелец отмечает вручную (после проверки в кабинете Click / Uzum)
   const _rev = o.depositStatus === 'REVERSED' || o.paymentStatus === 'REVERSED';
   if (o.paymentCheckNeeded === true && _rev)
@@ -2233,7 +2245,10 @@ function preorderAdminHTML(o){
   if (o.status === PRE_WAIT && o.depositPaid === true && o.paid !== true){
     const days = o.depositPaidAt ? Math.floor((Date.now() - (o.depositPaidAt.toDate ? o.depositPaidAt.toDate() : new Date(o.depositPaidAt)).getTime()) / 86400000) : null;
     if (days !== null) h += `<div class="oline" style="${days > 25 ? 'color:#b3261e; font-weight:700;' : ''}">Ждём товар: ${days} дн. из 25${days > 25 ? ' — срок прошёл, покупатель может отменить и вернуть 30%' : ''}</div>`;
-    h += `<button type="button" class="btn pre-arrived-btn" style="margin-top:8px;">📦 Товар прибыл — отправить ссылку на доплату</button>`;
+    h += `<div class="oline" style="margin-top:8px; font-weight:700;">📸 Фото поступившего товара (1–3, обязательно) — уйдёт покупателю в Telegram:</div>
+      <input type="file" accept="image/*" multiple class="pre-photo-input" style="margin-top:4px; width:100%;">
+      <div class="pre-photo-prev" style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;"></div>
+      <button type="button" class="btn pre-arrived-btn" style="margin-top:8px;">📦 Товар прибыл — отправить фото и ссылку на доплату</button>`;
   }
   if (o.status === PRE_ARRIVED && o.paid !== true && o.depositPaid === true){
     const left = (Number(o.arrivedAt) || 0) + PRE_BALANCE_MS - Date.now();
@@ -2261,17 +2276,28 @@ async function markPreorderBalance(o, btn){
   catch(err){ btn.disabled = false; adminToast('Не удалось сохранить: ' + (err && err.message || err)); return; }
   Object.assign(o, upd); adminToast('Доплата отмечена ✅ Чек пробейте вручную в кабинете.'); try{ filterAndRenderOrders(); }catch(_){}
 }
-async function markPreorderArrived(o, btn, extend){
+async function markPreorderArrived(o, btn, extend, photos){
   if (!confirm(extend ? 'Продлить срок доплаты ещё на 3 дня?\nПокупателю снова придёт сообщение со ссылкой на доплату.' : 'Товар по этому предзаказу прибыл?\nПокупателю придёт сообщение: доплатить 70% в течение 3 дней.')) return;
+  if (!extend && !(photos && photos.length)){ adminToast('Сначала прикрепите фото поступившего товара (1–3)'); return; }
   btn.disabled = true;
   // свежие данные: пока было открыто окно подтверждения, могла прийти оплата
   try{ const fr = await db.collection('orders').doc(o.id).get(); if (fr.exists){ const d = fr.data(); if (d.paid === true || d.depositPaid !== true || d.status === 'Отменён'){ btn.disabled = false; adminToast('Заказ изменился (оплачен или отменён) — обновите страницу'); return; } } }catch(_){}
   const upd = { status: PRE_ARRIVED, arrivedAt: Date.now() };
+  if (!extend){
+    const old = btn.textContent; btn.textContent = 'Загружаю фото…';
+    try{ upd.arrivalPhotos = await Promise.all(photos.map(preUploadPhoto)); }
+    catch(_){ btn.disabled = false; btn.textContent = old; adminToast('Не удалось загрузить фото — попробуйте ещё раз'); return; }
+    btn.textContent = old;
+  }
   try{ await db.collection('orders').doc(o.id).update(upd); }
   catch(err){ btn.disabled = false; adminToast('Не удалось сохранить: ' + (err && err.message || err)); return; }
   Object.assign(o, upd);
   try{ filterAndRenderOrders(); }catch(_){}
-  const ok = await tgSend(await resolveChatId(o.customerId), buildStatusText(o, PRE_ARRIVED));
+  // фото — первой строкой: Telegram показывает превью первой ссылки прямо в сообщении
+  const L = (o.lang && PRE_PHOTO_TXT[o.lang]) ? o.lang : 'ru';
+  const ph = Array.isArray(o.arrivalPhotos) ? o.arrivalPhotos : [];
+  const photoTxt = ph.length ? `${PRE_PHOTO_TXT[L]}\n${ph.join('\n')}\n\n` : '';
+  const ok = await tgSend(await resolveChatId(o.customerId), photoTxt + buildStatusText(o, PRE_ARRIVED));
   adminToast(ok ? 'Готово: покупателю отправлена ссылка на доплату ✅' : 'Сохранено, но Telegram не доставил (клиент не запускал бота?) — напишите ему сами');
 }
 function filterAndRenderOrders(){
@@ -2364,7 +2390,12 @@ function renderAdminOrderCard(o, wrap){
       </select>
     `;
     const arrBtn = card.querySelector('.pre-arrived-btn');
-    if (arrBtn) arrBtn.onclick = () => markPreorderArrived(o, arrBtn);
+    const phIn = card.querySelector('.pre-photo-input');
+    if (phIn) phIn.onchange = () => {
+      const files = Array.from(phIn.files || []).slice(0, 3);
+      card.querySelector('.pre-photo-prev').innerHTML = files.map(f => `<img src="${URL.createObjectURL(f)}" style="width:72px; height:72px; object-fit:cover; border-radius:8px;">`).join('');
+    };
+    if (arrBtn) arrBtn.onclick = () => markPreorderArrived(o, arrBtn, false, phIn ? Array.from(phIn.files || []).slice(0, 3) : []);
     card.querySelectorAll('.pre-dep-btn').forEach(b => b.onclick = () => markPreorderDeposit(o, b.dataset.m, b));
     const balBtn = card.querySelector('.pre-bal-btn');
     if (balBtn) balBtn.onclick = () => markPreorderBalance(o, balBtn);

@@ -273,6 +273,8 @@
   .trk-bal button{ flex:1; min-width:120px; height:44px; border:0; border-radius:14px; background:var(--accent-strong, var(--orange)); color:#fff; font-weight:700; font-size:13px; cursor:pointer; }
   html[data-theme="dark"] .trk-bal button{ color:#17110F; }
   .trk-bal-note{ width:100%; font-size:12px; color:var(--muted); }
+  .trk-aph{ margin-top:8px; } .trk-aph small{ display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+  .trk-aph > div{ display:flex; gap:6px; } .trk-aph img{ width:64px; height:64px; border-radius:10px; object-fit:cover; cursor:zoom-in; }
   .card .stock-chip.pre{ color:#8A4B0B; } .card .stock-chip.pre::before{ background:#F29A1F; }
   html[data-theme="dark"] .card .stock-chip.pre{ color:#F6C27A; }
   .restock-note a{ color:var(--ink); font-weight:700; }
@@ -2045,7 +2047,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261127-209";
+  const CURRENT_VERSION = "20261127-210";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2761,7 +2763,7 @@ const STR_PROMO = {
 Object.keys(STR_PROMO).forEach(l => Object.assign(STR[l], STR_PROMO[l]));
 /* Предзаказ: 30% сейчас, 70% когда товар приедет (срок 20–25 дней) */
 const STR_PREORDER = {
-  ru:{ preBtn:"Сделать предзаказ", preSub:"Предоплата 30% · поступление 20–25 дней", preTitle:"Условия предзаказа",
+  ru:{ preBtn:"Сделать предзаказ", preArrPhoto:"Фото поступившего товара", preSub:"Предоплата 30% · поступление 20–25 дней", preTitle:"Условия предзаказа",
        preTerms:"<li>Сейчас вы оплачиваете <b>30% — {dep}</b>. Остаток 70% — когда товар приедет.</li><li>Срок поступления: <b>20–25 дней</b>.</li><li>Если товар не приедет за 25 дней — вы можете отменить предзаказ и получить <b>30% обратно полностью</b>.</li><li>После оплаты отменить предзаказ можно только в этом случае.</li><li>Когда товар приедет, придёт уведомление в Telegram и в профиль. На доплату даётся <b>3 дня</b>.</li><li>Если не доплатить за 3 дня — предоплата не возвращается.</li><li>Отправка через BTS — после полной оплаты. Фискальный чек выдаётся на полную сумму после полной оплаты.</li>",
        preAgree:"Я прочитал(а) условия предзаказа и согласен(на) с ними", preNeedAgree:"Отметьте согласие с условиями предзаказа",
        preNow:"К оплате сейчас (30%)", preLater:"Доплата, когда товар приедет (70%)", prePayBtn:"Оплатить предоплату 30%",
@@ -2773,7 +2775,7 @@ const STR_PREORDER = {
        faqQPre2:"Сколько нужно оплатить за предзаказ?", faqAPre2:"Сразу — <b>30%</b> стоимости. Остальные <b>70%</b> — когда товар приедет: вам придёт уведомление в Telegram и в профиль, на доплату даётся <b>3 дня</b>. Отправляем через BTS после полной оплаты.",
        faqQPre3:"Можно ли отменить предзаказ?", faqAPre3:"После оплаты — только если товар не приехал за <b>25 дней</b>: тогда мы полностью вернём предоплату 30%. Если товар задержался, а вы готовы подождать — просто доплатите 70%, когда он приедет, предоплата засчитывается в цену.",
        faqQPre4:"Что будет, если не доплатить?", faqAPre4:"Если товар приехал, а доплата не поступила в течение 3 дней, предзаказ отменяется, а предоплата не возвращается — товар был заказан специально под вас." },
-  uz:{ preBtn:"Oldindan buyurtma berish", preSub:"30% oldindan to‘lov · 20–25 kunda keladi", preTitle:"Oldindan buyurtma shartlari",
+  uz:{ preBtn:"Oldindan buyurtma berish", preArrPhoto:"Kelgan mahsulot surati", preSub:"30% oldindan to‘lov · 20–25 kunda keladi", preTitle:"Oldindan buyurtma shartlari",
        preTerms:"<li>Hozir <b>30% — {dep}</b> to‘laysiz. Qolgan 70% — mahsulot kelganda.</li><li>Kelish muddati: <b>20–25 kun</b>.</li><li>Mahsulot 25 kun ichida kelmasa — buyurtmani bekor qilib, <b>30% ni to‘liq qaytarib olishingiz</b> mumkin.</li><li>To‘lovdan keyin buyurtmani faqat shu holatda bekor qilish mumkin.</li><li>Mahsulot kelganda Telegram va profilga xabar keladi. Qo‘shimcha to‘lov uchun <b>3 kun</b> beriladi.</li><li>3 kun ichida to‘lanmasa — oldindan to‘lov qaytarilmaydi.</li><li>BTS orqali yuborish — to‘liq to‘lovdan keyin. Fiskal chek to‘liq to‘lovdan keyin to‘liq summaga beriladi.</li>",
        preAgree:"Oldindan buyurtma shartlarini o‘qidim va roziman", preNeedAgree:"Oldindan buyurtma shartlariga rozilikni belgilang",
        preNow:"Hozir to‘lanadi (30%)", preLater:"Mahsulot kelganda (70%)", prePayBtn:"30% oldindan to‘lovni to‘lash",
@@ -2785,7 +2787,7 @@ const STR_PREORDER = {
        faqQPre2:"Oldindan buyurtma uchun qancha to‘lash kerak?", faqAPre2:"Darhol — narxning <b>30%</b>. Qolgan <b>70%</b> — mahsulot kelganda: Telegram va profilga xabar keladi, to‘lov uchun <b>3 kun</b> beriladi. To‘liq to‘lovdan keyin BTS orqali yuboramiz.",
        faqQPre3:"Oldindan buyurtmani bekor qilsa bo‘ladimi?", faqAPre3:"To‘lovdan keyin — faqat mahsulot <b>25 kun</b> ichida kelmasa: unda 30% oldindan to‘lovni to‘liq qaytaramiz. Agar kechiksa-yu, kutishga tayyor bo‘lsangiz — kelganda 70% ni to‘lang, oldindan to‘lov narxga hisoblanadi.",
        faqQPre4:"Qolgan to‘lovni to‘lamasam nima bo‘ladi?", faqAPre4:"Mahsulot kelib, 3 kun ichida to‘lov tushmasa, buyurtma bekor qilinadi va oldindan to‘lov qaytarilmaydi — mahsulot aynan siz uchun buyurtma qilingan." },
-  tr:{ preBtn:"Ön sipariş ver", preSub:"%30 ön ödeme · 20–25 günde gelir", preTitle:"Ön sipariş koşulları",
+  tr:{ preBtn:"Ön sipariş ver", preArrPhoto:"Gelen ürünün fotoğrafı", preSub:"%30 ön ödeme · 20–25 günde gelir", preTitle:"Ön sipariş koşulları",
        preTerms:"<li>Şimdi <b>%30 — {dep}</b> ödersiniz. Kalan %70 ürün geldiğinde.</li><li>Teslim süresi: <b>20–25 gün</b>.</li><li>Ürün 25 gün içinde gelmezse ön siparişi iptal edip <b>%30’un tamamını geri alabilirsiniz</b>.</li><li>Ödemeden sonra ön sipariş yalnızca bu durumda iptal edilebilir.</li><li>Ürün geldiğinde Telegram’a ve profilinize bildirim gelir. Kalan ödeme için <b>3 gün</b> verilir.</li><li>3 gün içinde ödenmezse ön ödeme iade edilmez.</li><li>BTS ile gönderim — tam ödemeden sonra. Mali fiş tam ödemeden sonra toplam tutar için verilir.</li>",
        preAgree:"Ön sipariş koşullarını okudum ve kabul ediyorum", preNeedAgree:"Ön sipariş koşullarını kabul ettiğinizi işaretleyin",
        preNow:"Şimdi ödenecek (%30)", preLater:"Ürün geldiğinde (%70)", prePayBtn:"%30 ön ödemeyi yap",
@@ -2797,7 +2799,7 @@ const STR_PREORDER = {
        faqQPre2:"Ön sipariş için ne kadar ödemem gerekiyor?", faqAPre2:"Hemen — fiyatın <b>%30</b>’u. Kalan <b>%70</b> ürün geldiğinde: Telegram’a ve profilinize bildirim gelir, ödeme için <b>3 gün</b> verilir. Tam ödemeden sonra BTS ile göndeririz.",
        faqQPre3:"Ön siparişi iptal edebilir miyim?", faqAPre3:"Ödemeden sonra — yalnızca ürün <b>25 gün</b> içinde gelmezse: o zaman %30 ön ödemenin tamamını iade ederiz. Ürün gecikir ama beklemeye hazırsanız, geldiğinde %70’i ödeyin; ön ödeme fiyata sayılır.",
        faqQPre4:"Kalanı ödemezsem ne olur?", faqAPre4:"Ürün geldi ve 3 gün içinde ödeme yapılmadıysa ön sipariş iptal edilir, ön ödeme iade edilmez — ürün özellikle sizin için sipariş edildi." },
-  az:{ preBtn:"Öncədən sifariş et", preSub:"30% ilkin ödəniş · 20–25 günə gəlir", preTitle:"Öncədən sifariş şərtləri",
+  az:{ preBtn:"Öncədən sifariş et", preArrPhoto:"Gələn məhsulun şəkli", preSub:"30% ilkin ödəniş · 20–25 günə gəlir", preTitle:"Öncədən sifariş şərtləri",
        preTerms:"<li>İndi <b>30% — {dep}</b> ödəyirsiniz. Qalan 70% — məhsul gələndə.</li><li>Gəlmə müddəti: <b>20–25 gün</b>.</li><li>Məhsul 25 gün ərzində gəlməsə — sifarişi ləğv edib <b>30%-i tam geri ala bilərsiniz</b>.</li><li>Ödənişdən sonra sifarişi yalnız bu halda ləğv etmək olar.</li><li>Məhsul gələndə Telegram-a və profilə bildiriş gələcək. Qalan ödəniş üçün <b>3 gün</b> verilir.</li><li>3 gün ərzində ödənilməsə — ilkin ödəniş qaytarılmır.</li><li>BTS ilə göndəriş — tam ödənişdən sonra. Fiskal çek tam ödənişdən sonra tam məbləğə verilir.</li>",
        preAgree:"Öncədən sifariş şərtlərini oxudum və razıyam", preNeedAgree:"Öncədən sifariş şərtləri ilə razılığı qeyd edin",
        preNow:"İndi ödəniləcək (30%)", preLater:"Məhsul gələndə (70%)", prePayBtn:"30% ilkin ödənişi et",
@@ -2809,7 +2811,7 @@ const STR_PREORDER = {
        faqQPre2:"Öncədən sifariş üçün nə qədər ödəmək lazımdır?", faqAPre2:"Dərhal — qiymətin <b>30%</b>-i. Qalan <b>70%</b> — məhsul gələndə: Telegram-a və profilə bildiriş gələcək, ödəniş üçün <b>3 gün</b> verilir. Tam ödənişdən sonra BTS ilə göndəririk.",
        faqQPre3:"Öncədən sifarişi ləğv etmək olar?", faqAPre3:"Ödənişdən sonra — yalnız məhsul <b>25 gün</b> ərzində gəlməsə: onda 30% ilkin ödənişi tam qaytarırıq. Məhsul gecikdi, amma gözləməyə hazırsınızsa — gələndə 70%-i ödəyin, ilkin ödəniş qiymətə hesablanır.",
        faqQPre4:"Qalanını ödəməsəm nə olar?", faqAPre4:"Məhsul gəldi və 3 gün ərzində ödəniş daxil olmadısa, sifariş ləğv edilir və ilkin ödəniş qaytarılmır — məhsul məhz sizin üçün sifariş edilib." },
-  en:{ preBtn:"Pre-order", preSub:"30% deposit · arrives in 20–25 days", preTitle:"Pre-order terms",
+  en:{ preBtn:"Pre-order", preArrPhoto:"Photo of the arrived item", preSub:"30% deposit · arrives in 20–25 days", preTitle:"Pre-order terms",
        preTerms:"<li>Now you pay <b>30% — {dep}</b>. The remaining 70% — when the item arrives.</li><li>Arrival time: <b>20–25 days</b>.</li><li>If the item doesn’t arrive within 25 days, you can cancel and get the <b>30% back in full</b>.</li><li>After payment, the pre-order can only be cancelled in that case.</li><li>When the item arrives, you’ll get a notification in Telegram and in your profile. You have <b>3 days</b> to pay the rest.</li><li>If the rest isn’t paid within 3 days, the deposit is not refunded.</li><li>Shipping via BTS — after full payment. The fiscal receipt is issued for the full amount after full payment.</li>",
        preAgree:"I have read and agree to the pre-order terms", preNeedAgree:"Please accept the pre-order terms",
        preNow:"To pay now (30%)", preLater:"When the item arrives (70%)", prePayBtn:"Pay the 30% deposit",
@@ -6473,6 +6475,8 @@ function preorderInfoHTML(o){
   let h = `<div class="trk-pre"><span class="pre-badge">${escH(t('preBadge'))}</span>
     <div class="pr-row"><span>${escH(t('preDep'))} · ${fmt(dep)}</span><span class="${depOk ? 'ok' : 'no'}">${depOk ? '✓ ' + escH(t('prePaid')) : escH(t('preNotPaid'))}</span></div>
     <div class="pr-row"><span>${escH(t('preBal'))} · ${fmt(bal)}</span><span class="${balOk ? 'ok' : 'no'}">${balOk ? '✓ ' + escH(t('prePaid')) : escH(t('preNotPaid'))}</span></div>`;
+  const aph = (Array.isArray(o.arrivalPhotos) ? o.arrivalPhotos : []).filter(u => safeUrl(u)).slice(0, 3);
+  if (aph.length) h += `<div class="trk-aph"><small>${escH(t('preArrPhoto'))}</small><div>${aph.map((u, k) => `<img src="${safeUrl(u)}" alt="" loading="lazy" onclick="openLightbox(Array.from(this.parentNode.querySelectorAll('img')).map(i => i.getAttribute('src')), ${k})">`).join('')}</div></div>`;
   if (balanceOpen(o)){
     if (balanceLeftMs(o) > 0){
       const until = new Date(Number(o.arrivedAt) + BALANCE_WINDOW_MS).toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
