@@ -3051,6 +3051,9 @@ new MutationObserver(() => lazyBgScan()).observe(document.documentElement, { chi
 /* ---------- categories (dynamic from settings) ---------- */
 const SALE_CAT = 'Скидки';
 const INSTOCK_CAT = 'В наличии';
+// иконки по присланным картинкам: коробка с галочкой — «В наличии», календарь с часами — «Предзаказ» (линией, в цвет темы, как остальные)
+const INSTOCK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5V7.5L12 4 4 7.5v9L12 20l2-.9"/><path d="M4 7.5l8 3.5 8-3.5"/><path d="M12 11v9"/><path d="M8 5.8l8 3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M17 17.6l1 1 2-2.1"/></svg>';
+const PREORDER_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3.5"/><path d="M8 3v4M16 3v4M4 10h16"/><circle cx="17.5" cy="17.5" r="4"/><path d="M17.5 15.6v2l1.3 1"/></svg>';
 const SALE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>';
 function allCats(){ return (products.some(p => discOf(p) > 0) && !CATEGORIES.includes(SALE_CAT)) ? [...CATEGORIES, SALE_CAT] : CATEGORIES; }
 let CATEGORIES = ["Тренды","Oversize","Минимализм","Лимитки"];
@@ -3092,7 +3095,7 @@ function catIconFor(key, idx){
   if (key === 'Все') return categoryIcons['Все'] || '';
   if (!_settingsReady && !categoryIcons[key]) return '';
   if (key === SALE_CAT) return categoryIcons[key] || SALE_ICON;
-  if (key === INSTOCK_CAT) return categoryIcons[key] || '✅';
+  if (key === INSTOCK_CAT) return categoryIcons[key] || INSTOCK_ICON;
   return categoryIcons[key] || DEFAULT_CAT_ICONS[idx % DEFAULT_CAT_ICONS.length];
 }
 function catIconColorFor(key){
