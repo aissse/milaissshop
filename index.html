@@ -1176,6 +1176,7 @@
   .nx-ls-collage{ display:flex; gap:8px; justify-content:center; width:100%; }
   .nx-ls-collage > div{ flex:1; max-width:160px; aspect-ratio:3/4; position:relative; }
   .nx-ls-collage .nx-pic, .nx-ls-th .nx-pic{ position:absolute; inset:0; }
+  .nx-ls-th > img, .nx-ls-collage > div > img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; } /* фото без фона (PNG) — вписываем целиком, иначе виден только угол большой картинки */
   .nx-ls-h{ display:flex; justify-content:space-between; align-items:baseline; margin:6px 0 8px; }
   .nx-ls-h small{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-strong); }
   .nx-ls-h b{ font-size:13px; color:var(--text-soft); }
@@ -2006,7 +2007,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261126-207";
+  const CURRENT_VERSION = "20261126-208";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
