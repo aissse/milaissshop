@@ -1873,7 +1873,14 @@ function saveSocialLink(key, value){
   saveSetting('socialLinks', socialLinks);
 }
 
-const STATUS_OPTIONS = ['Проверяется оплата','Принято','Собирается','В пути','В ПВЗ','Доставлен','Отменён'];
+const STATUS_OPTIONS = ['Проверяется оплата','Предзаказ: ждём поступления','Прибыл, ждём доплату','Принято','Собирается','В пути','В ПВЗ','Доставлен','Отменён'];
+// ---------- предзаказ ----------
+const PRE_WAIT = 'Предзаказ: ждём поступления', PRE_ARRIVED = 'Прибыл, ждём доплату';
+const PRE_PERCENT = 30, PRE_BALANCE_MS = 3 * 24 * 60 * 60 * 1000;
+const preDeposit = total => Math.round((Number(total) || 0) * PRE_PERCENT / 100);
+const fmtWhen = v => { if (!v) return ''; const d = v.toDate ? v.toDate() : new Date(v); return isNaN(d) ? '' : d.toLocaleString('ru-RU'); };
+// предзаказ ждёт действий владельца: предоплата внесена, полной оплаты ещё нет
+function isOpenPreorder(o){ return o && o.preorder === true && o.testOrder !== true && o.status !== 'Отменён' && o.paid !== true && (o.depositPaid === true || o.paymentCheckNeeded === true); }
 
 /* ---------- уведомления клиентам в Telegram (от бота магазина) ---------- */
 async function tgSend(customerId, text){
@@ -1888,6 +1895,8 @@ async function tgSend(customerId, text){
 async function resolveChatId(customerId){ return customerId ? String(customerId) : ''; }
 const STATUS_TXT = {
   'Проверяется оплата':{ ru:'Проверяется оплата', uz:'To‘lov tekshirilmoqda', tr:'Ödeme kontrol ediliyor', az:'Ödəniş yoxlanılır', en:'Checking payment' },
+  'Предзаказ: ждём поступления':{ ru:'Предзаказ: ждём поступления', uz:'Oldindan buyurtma: kelishini kutyapmiz', tr:'Ön sipariş: ürün bekleniyor', az:'Öncədən sifariş: gəlməsini gözləyirik', en:'Pre-order: waiting for arrival' },
+  'Прибыл, ждём доплату':{ ru:'Товар приехал — ждём доплату', uz:'Mahsulot keldi — qolgan to‘lov kutilmoqda', tr:'Ürün geldi — kalan ödeme bekleniyor', az:'Məhsul gəldi — qalan ödəniş gözlənilir', en:'Item arrived — waiting for the rest' },
   'Принято':{ ru:'Принято', uz:'Qabul qilindi', tr:'Alındı', az:'Qəbul edildi', en:'Accepted' },
   'Собирается':{ ru:'Собирается', uz:'Yig‘ilmoqda', tr:'Hazırlanıyor', az:'Yığılır', en:'Being packed' },
   'В пути':{ ru:'В пути', uz:'Yo‘lda', tr:'Yolda', az:'Yoldadır', en:'On the way' },
@@ -1909,6 +1918,15 @@ function buildStatusText(o, status){
   const items = (o.items || []).map(i => `• ${i.name} (${i.size}) × ${i.qty}`).join('\n');
   let txt = `${H.title}\n\n${items}\n\n${H.st}: ${label}`;
   if (status === 'В ПВЗ') txt += `\n📍 ${H.pickup}${o.btsBranch ? ': ' + o.btsBranch : ''}`;
+  if (status === PRE_ARRIVED && o.preorder === true){
+    const bal = (Number(o.total) - preDeposit(o.total)).toLocaleString('ru-RU');
+    const PA = { ru:`💳 Доплатите ${100 - PRE_PERCENT}% — ${bal} сум в течение 3 дней: Профиль → Мои заказы → «Доплатить»`,
+      uz:`💳 Qolgan ${100 - PRE_PERCENT}% — ${bal} so‘mni 3 kun ichida to‘lang: Profil → Buyurtmalarim → «To‘lash»`,
+      tr:`💳 Kalan %${100 - PRE_PERCENT}’i — ${bal} sum, 3 gün içinde ödeyin: Profil → Siparişlerim → «Öde»`,
+      az:`💳 Qalan ${100 - PRE_PERCENT}%-i — ${bal} sum 3 gün ərzində ödəyin: Profil → Sifarişlərim → «Ödə»`,
+      en:`💳 Pay the remaining ${100 - PRE_PERCENT}% — ${bal} sum within 3 days: Profile → My orders → “Pay”` };
+    txt += `\n\n${PA[L] || PA.ru}\n${SHOP_URL}`;
+  }
   if (status === 'Доставлен') txt += `\n\n${H.thanks}\n\n${H.review}\n${SHOP_URL}?review=${encodeURIComponent(o.id)}\n\n${H.shop}\n${SHOP_URL}`;
   return txt;
 }
@@ -2193,6 +2211,69 @@ function clearPhoneSearch(){
   const i = document.getElementById('orderPhoneSearch');
   if (i){ i.value = ''; filterAndRenderOrders(); i.focus(); }
 }
+// блок предзаказа в карточке заказа: обе оплаты рядом + кнопка «Товар прибыл»
+function preorderAdminHTML(o){
+  const dep = preDeposit(o.total), bal = Number(o.total) - dep;
+  const depOk = o.depositPaid === true || o.paid === true, balOk = o.paid === true;
+  let h = `<div style="margin:8px 0; padding:10px 12px; border:2px solid #E3A33B; border-radius:12px; background:#FFF8EC;">
+    <div style="font-weight:800; color:#8A4B0B; margin-bottom:4px;">🕓 ПРЕДЗАКАЗ</div>
+    <div class="oline">${depOk ? '✅' : '⏳'} Предоплата ${PRE_PERCENT}%: <b>${dep.toLocaleString('ru-RU')} сум</b>${depOk && o.depositPaidAt ? ' · ' + fmtWhen(o.depositPaidAt) : ''}${o.depositMethod ? ' · ' + escH(o.depositMethod) : ''}${o.depositClickTransId ? ' · Click ' + escH(o.depositClickTransId) : ''}${o.depositUzumTransId ? ' · Uzum ' + escH(o.depositUzumTransId) : ''}</div>
+    <div class="oline">${balOk ? '✅' : '⏳'} Доплата ${100 - PRE_PERCENT}%: <b>${bal.toLocaleString('ru-RU')} сум</b>${balOk && o.balancePaidAt ? ' · ' + fmtWhen(o.balancePaidAt) : ''}${o.balanceMethod ? ' · ' + escH(o.balanceMethod) : ''}</div>`;
+  if (o.depositStatus === 'REVERSED') h += `<div class="oline" style="color:#b3261e; font-weight:700;">↩️ Предоплату вернули (отмена в банке)</div>`;
+  // банк подтвердил предоплату, но отметка не записалась — владелец отмечает вручную (после проверки в кабинете Click / Uzum)
+  const _rev = o.depositStatus === 'REVERSED' || o.paymentStatus === 'REVERSED';
+  if (o.paymentCheckNeeded === true && _rev)
+    h += `<div class="oline" style="margin-top:6px; color:#b3261e; font-weight:700;">❗ Банк вернул часть оплаты по этому предзаказу. Заказ оплачен НЕ полностью — не отправляйте; сверьте оплаты в кабинетах Click / Uzum и решите с покупателем.</div>`;
+  // доплата подтверждена банком, но не отмечена — отметить вручную (после проверки в кабинете)
+  if (o.paymentCheckNeeded === true && !_rev && o.depositPaid === true && o.paid !== true && o.status === PRE_ARRIVED)
+    h += `<div class="oline" style="margin-top:6px; color:#b3261e; font-weight:700;">❗ Банк подтвердил доплату 70%, но она не отмечена.</div><button type="button" class="btn secondary pre-bal-btn" style="margin-top:6px;">Отметить доплату вручную (${escH(o.depositMethod || '')})</button>`;
+  if (o.paymentCheckNeeded === true && !_rev && o.depositPaid !== true && o.paid !== true && o.status !== 'Отменён')
+    h += `<div class="oline" style="margin-top:6px; color:#b3261e; font-weight:700;">❗ Банк подтвердил предоплату, но она не отмечена. Проверьте в кабинете Click / Uzum и отметьте:</div>
+      <div style="display:flex; gap:6px; margin-top:6px;"><button type="button" class="btn secondary pre-dep-btn" data-m="Click" style="margin-top:0;">Отметить предоплату: Click</button><button type="button" class="btn secondary pre-dep-btn" data-m="Uzum Bank" style="margin-top:0;">Отметить: Uzum</button></div>`;
+  if (o.status === PRE_WAIT && o.depositPaid === true && o.paid !== true){
+    const days = o.depositPaidAt ? Math.floor((Date.now() - (o.depositPaidAt.toDate ? o.depositPaidAt.toDate() : new Date(o.depositPaidAt)).getTime()) / 86400000) : null;
+    if (days !== null) h += `<div class="oline" style="${days > 25 ? 'color:#b3261e; font-weight:700;' : ''}">Ждём товар: ${days} дн. из 25${days > 25 ? ' — срок прошёл, покупатель может отменить и вернуть 30%' : ''}</div>`;
+    h += `<button type="button" class="btn pre-arrived-btn" style="margin-top:8px;">📦 Товар прибыл — отправить ссылку на доплату</button>`;
+  }
+  if (o.status === PRE_ARRIVED && o.paid !== true && o.depositPaid === true){
+    const left = (Number(o.arrivedAt) || 0) + PRE_BALANCE_MS - Date.now();
+    h += left > 0 ? `<div class="oline">Ждём доплату до ${new Date((Number(o.arrivedAt) || 0) + PRE_BALANCE_MS).toLocaleString('ru-RU')}</div>`
+                  : `<div class="oline" style="color:#b3261e; font-weight:700;">Срок доплаты (3 дня) истёк — оплатить уже нельзя, предоплата не возвращается. Отмените предзаказ (статус «Отменён») или, если покупатель всё же хочет оплатить, продлите срок кнопкой ниже.</div>`;
+    h += `<button type="button" class="btn secondary pre-extend-btn" style="margin-top:8px;">⏳ Продлить срок доплаты на 3 дня</button>`;
+  }
+  if (!balOk && o.status === 'Отменён' && o.depositPaid === true) h += `<div class="oline" style="font-weight:700;">Предзаказ отменён, предоплата ${dep.toLocaleString('ru-RU')} сум осталась у магазина (если не возвращали покупателю вручную)</div>`;
+  if (balOk) h += `<div class="oline" style="color:#1f7a4d; font-weight:700;">Оплачен полностью — можно отправлять. Фискальный чек: ${o.balanceMethod === 'Uzum Bank' ? 'оплата через Uzum Bank — проверьте чек в кабинете Uzum' : o.receiptStatus === 'SENT' ? 'отправлен ✅' : o.receiptStatus === 'FAILED' ? 'не отправлен ⚠️ — пробейте вручную' : 'отправляется'}</div>`;
+  return h + '</div>';
+}
+async function markPreorderDeposit(o, method, btn){
+  if (!confirm(`Отметить, что предоплата ${PRE_PERCENT}% (${preDeposit(o.total).toLocaleString('ru-RU')} сум) получена через ${method}?\nСделайте это, только если оплата точно есть в кабинете ${method}.`)) return;
+  btn.disabled = true;
+  const upd = { depositPaid: true, depositMethod: method, depositPaidAt: new Date(), depositManual: true, paymentCheckNeeded: false, status: PRE_WAIT };
+  try{ await db.collection('orders').doc(o.id).update(upd); }
+  catch(err){ btn.disabled = false; adminToast('Не удалось сохранить: ' + (err && err.message || err)); return; }
+  Object.assign(o, upd); adminToast('Предоплата отмечена ✅'); try{ filterAndRenderOrders(); }catch(_){}
+}
+async function markPreorderBalance(o, btn){
+  if (!confirm(`Отметить, что доплата ${100 - PRE_PERCENT}% (${(Number(o.total) - preDeposit(o.total)).toLocaleString('ru-RU')} сум) получена через ${o.depositMethod || 'банк'}?\nСделайте это, только если оплата точно есть в кабинете. Заказ станет «Принято» (оплачен полностью).`)) return;
+  btn.disabled = true;
+  const upd = { paid: true, paymentStatus: 'CONFIRMED', balancePaid: true, balanceMethod: o.depositMethod || '', balancePaidAt: new Date(), balanceManual: true, paymentCheckNeeded: false, paidAt: new Date(), status: 'Принято' };
+  try{ await db.collection('orders').doc(o.id).update(upd); }
+  catch(err){ btn.disabled = false; adminToast('Не удалось сохранить: ' + (err && err.message || err)); return; }
+  Object.assign(o, upd); adminToast('Доплата отмечена ✅ Чек пробейте вручную в кабинете.'); try{ filterAndRenderOrders(); }catch(_){}
+}
+async function markPreorderArrived(o, btn, extend){
+  if (!confirm(extend ? 'Продлить срок доплаты ещё на 3 дня?\nПокупателю снова придёт сообщение со ссылкой на доплату.' : 'Товар по этому предзаказу прибыл?\nПокупателю придёт сообщение: доплатить 70% в течение 3 дней.')) return;
+  btn.disabled = true;
+  // свежие данные: пока было открыто окно подтверждения, могла прийти оплата
+  try{ const fr = await db.collection('orders').doc(o.id).get(); if (fr.exists){ const d = fr.data(); if (d.paid === true || d.depositPaid !== true || d.status === 'Отменён'){ btn.disabled = false; adminToast('Заказ изменился (оплачен или отменён) — обновите страницу'); return; } } }catch(_){}
+  const upd = { status: PRE_ARRIVED, arrivedAt: Date.now() };
+  try{ await db.collection('orders').doc(o.id).update(upd); }
+  catch(err){ btn.disabled = false; adminToast('Не удалось сохранить: ' + (err && err.message || err)); return; }
+  Object.assign(o, upd);
+  try{ filterAndRenderOrders(); }catch(_){}
+  const ok = await tgSend(await resolveChatId(o.customerId), buildStatusText(o, PRE_ARRIVED));
+  adminToast(ok ? 'Готово: покупателю отправлена ссылка на доплату ✅' : 'Сохранено, но Telegram не доставил (клиент не запускал бота?) — напишите ему сами');
+}
 function filterAndRenderOrders(){
   const fromVal = document.getElementById('dateFrom').value;
   const toVal = document.getElementById('dateTo').value;
@@ -2209,16 +2290,17 @@ function filterAndRenderOrders(){
   }
 
   // две категории: оплаченные (их нужно отправлять) и всё остальное — не оплачены, отмены, возвраты, тестовые
-  const paidList = orders.filter(isPaidOrder), otherList = orders.filter(o => !isPaidOrder(o));
+  const paidList = orders.filter(isPaidOrder), preList = orders.filter(o => !isPaidOrder(o) && isOpenPreorder(o)), otherList = orders.filter(o => !isPaidOrder(o) && !isOpenPreorder(o));
   const tabs = document.getElementById('ordersTabs');
   tabs.innerHTML = `
     <button type="button" class="btn ${ordersView === 'paid' ? '' : 'secondary'}" style="margin-top:0; flex:1;" data-ov="paid">✅ Оплаченные (${paidList.length})</button>
+    <button type="button" class="btn ${ordersView === 'pre' ? '' : 'secondary'}" style="margin-top:0; flex:1;" data-ov="pre">🕓 Предзаказы (${preList.length})</button>
     <button type="button" class="btn ${ordersView === 'other' ? '' : 'secondary'}" style="margin-top:0; flex:1;" data-ov="other">Не оплаченные, отмены, тесты (${otherList.length})</button>`;
   tabs.querySelectorAll('[data-ov]').forEach(b => { b.onclick = () => { ordersView = b.dataset.ov; filterAndRenderOrders(); }; });
-  orders = ordersView === 'paid' ? paidList : otherList;
+  orders = ordersView === 'paid' ? paidList : ordersView === 'pre' ? preList : otherList;
   document.getElementById('ordersCount').textContent = `Заказов: ${orders.length}`;
   const wrap = document.getElementById('ordersAdminList');
-  if (orders.length === 0){ wrap.innerHTML = `<p class="hint">${ordersView === 'paid' ? 'Оплаченных заказов за этот период нет' : 'Здесь пусто'}</p>`; return; }
+  if (orders.length === 0){ wrap.innerHTML = `<p class="hint">${ordersView === 'paid' ? 'Оплаченных заказов за этот период нет' : ordersView === 'pre' ? 'Предзаказов с внесённой предоплатой нет' : 'Здесь пусто'}</p>`; return; }
   wrap.innerHTML = '';
   orders.forEach(o => renderAdminOrderCard(o, wrap));
 }
@@ -2261,13 +2343,14 @@ function renderPhoneSearch(q){
 function renderAdminOrderCard(o, wrap){
     const card = document.createElement('div');
     card.className = 'order-admin-card';
-    const _rs = isPaidOrder(o) ? null : orderReason(o);
+    const _rs = isPaidOrder(o) ? null : (isOpenPreorder(o) ? null : orderReason(o));
     card.innerHTML = `
       ${_rs ? `<div style="display:inline-block; font-size:12px; font-weight:700; color:${_rs[1]}; border:1px solid ${_rs[1]}; border-radius:20px; padding:3px 10px; margin-bottom:6px;">${_rs[0]}</div>` : ''}
       <div class="who">${escH(o.customerName || 'Покупатель')}</div>
       <div class="odate">${new Date(o.createdAt).toLocaleString('ru-RU')}</div>
       ${(o.items||[]).map(it => `<div class="oline">${escH(it.name)} (${escH(it.size)}, ${escH(it.colorName)}) × ${Number(it.qty)||0} — ${Number(it.price*it.qty).toLocaleString('ru-RU')} сум</div>`).join('')}
       <div class="ototal">Итого: ${Number(o.total).toLocaleString('ru-RU')} сум</div>
+      ${o.preorder === true ? preorderAdminHTML(o) : ''}
       ${o.phone ? `<div class="oline">📞 ${escH(o.phone)}</div>` : ''}
       ${o.btsBranch ? `<div class="oline">📍 ${escH(o.btsBranch)}</div>` : ''}
       ${o.deliveryType === 'abroad' ? `<div class="oline" style="font-weight:700;">🌍 За рубеж · доставка ${Number(o.shippingFee || 0).toLocaleString('ru-RU')} сум (товары ${Number(o.subtotal || 0).toLocaleString('ru-RU')} сум)</div>` : ''}
@@ -2280,11 +2363,31 @@ function renderAdminOrderCard(o, wrap){
         ${STATUS_OPTIONS.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
       </select>
     `;
+    const arrBtn = card.querySelector('.pre-arrived-btn');
+    if (arrBtn) arrBtn.onclick = () => markPreorderArrived(o, arrBtn);
+    card.querySelectorAll('.pre-dep-btn').forEach(b => b.onclick = () => markPreorderDeposit(o, b.dataset.m, b));
+    const balBtn = card.querySelector('.pre-bal-btn');
+    if (balBtn) balBtn.onclick = () => markPreorderBalance(o, balBtn);
+    const extBtn = card.querySelector('.pre-extend-btn');
+    if (extBtn) extBtn.onclick = () => markPreorderArrived(o, extBtn, true);
     const tcb = card.querySelector('.test-order-cb');
     if (tcb) tcb.onchange = (e) => toggleTestOrder(o.id, e.target.checked);
     card.querySelector('.status-select').onchange = async (e) => {
       const st = e.target.value;
       const upd = { status: st };
+      // «Прибыл, ждём доплату»: только для предзаказа с внесённой предоплатой; с этой минуты у покупателя 3 дня на доплату 70%
+      // свежие данные оплаты: заказ мог измениться, пока страница была открыта (оплата, возврат в банке)
+      try{ const fr = await db.collection('orders').doc(o.id).get(); if (fr.exists){ const d = fr.data(); Object.assign(o, { paid: d.paid, depositPaid: d.depositPaid, paymentStatus: d.paymentStatus, status: d.status, arrivedAt: d.arrivedAt }); } }catch(_){}
+      if ((st === PRE_ARRIVED || st === PRE_WAIT) && !(o.preorder === true && o.depositPaid === true && o.paid !== true)){
+        alert('Статусы предзаказа — только для предзаказа, по которому внесена предоплата 30% и ещё нет полной оплаты.');
+        e.target.value = o.status || ''; return;
+      }
+      if (st === PRE_ARRIVED && o.status !== PRE_ARRIVED) upd.arrivedAt = Date.now();
+      // предзаказ оплачен не полностью (только 30%) — статусы отправки только с явным подтверждением
+      if (o.preorder === true && o.paid !== true && ['Принято','Собирается','В пути','В ПВЗ','Доставлен'].includes(st)
+          && !confirm('Внимание: по этому предзаказу оплачено не полностью (максимум предоплата 30%).\nВсё равно поставить статус «' + st + '»? Покупателю уйдёт сообщение.')){
+        e.target.value = o.status || ''; return;
+      }
       if (st !== 'Проверяется оплата' && st !== 'Отменён' && !o.unitCosts){
         const uc = (o.items || []).map(it => unitCostFromTable(it.productId));
         if (uc.some(x => x != null)) upd.unitCosts = uc.map(x => x == null ? null : x);
@@ -2299,7 +2402,7 @@ function renderAdminOrderCard(o, wrap){
       }
       let restocked = false;
       try{
-        if (st === 'Отменён' && o.status !== 'Отменён' && o.stockRestored !== true
+        if (st === 'Отменён' && o.status !== 'Отменён' && o.stockRestored !== true && o.preorder !== true
             && confirm('Вернуть товар из этого заказа в наличие?')){
           restocked = await cancelAndRestock(o.id);
           if (restocked){ upd.stockRestored = true; }

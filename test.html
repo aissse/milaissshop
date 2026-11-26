@@ -241,8 +241,41 @@
   .buybar .restock-btn.show{ display:flex; }
   .buybar .restock-btn.done{ background:var(--stone); color:var(--ink); cursor:default; }
   .buybar .restock-btn svg{ width:18px; height:18px; flex-shrink:0; }
+  .buybar .preorder-btn{ flex:0 0 100%; display:none; flex-direction:column; align-items:center; justify-content:center; gap:2px; background:var(--accent-strong, var(--orange)); color:#fff; padding:12px 16px; }
+  .buybar .preorder-btn.show{ display:flex; }
+  .buybar .preorder-btn .pb-row{ display:flex; align-items:center; gap:8px; } .buybar .preorder-btn svg{ width:18px; height:18px; flex-shrink:0; }
+  .buybar .preorder-btn small{ font-size:11px; font-weight:600; opacity:.85; }
+  html[data-theme="dark"] .buybar .preorder-btn{ color:#17110F; }
   .restock-note{ display:none; flex:0 0 100%; font-size:12px; line-height:1.45; color:var(--muted); text-align:center; }
   .restock-note.show{ display:block; }
+  /* предзаказ на оформлении */
+  .pre-box{ display:none; margin:0 0 16px; padding:16px; border:1px solid var(--line); border-radius:18px; background:var(--surface, transparent); }
+  #checkoutFlow.pre-mode .pre-box{ display:block; }
+  #checkoutFlow.pre-mode #shipTypeBlock, #checkoutFlow.pre-mode #promoField, #checkoutFlow.pre-mode #abroadBlock{ display:none !important; }
+  .pre-item{ display:flex; gap:12px; align-items:center; }
+  .pre-item .pi-img{ width:58px; height:58px; border-radius:12px; background:var(--stone) center/cover no-repeat; flex-shrink:0; }
+  .pre-item b{ display:block; font-size:14px; line-height:1.3; } .pre-item small{ font-size:12px; color:var(--muted); }
+  .pre-badge{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#8A4B0B; background:#FCE9C8; border-radius:999px; padding:3px 8px; margin-bottom:4px; }
+  .pre-sum{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 4px; }
+  .pre-sum > div{ border-radius:14px; padding:10px 12px; background:var(--stone); }
+  .pre-sum small{ display:block; font-size:11px; color:var(--muted); line-height:1.3; } .pre-sum b{ font-size:17px; }
+  .pre-sum .now{ background:var(--accent-strong, var(--orange)); color:#fff; } .pre-sum .now small{ color:rgba(255,255,255,.85); }
+  html[data-theme="dark"] .pre-sum .now{ color:#17110F; } html[data-theme="dark"] .pre-sum .now small{ color:rgba(23,17,15,.75); }
+  .pre-terms{ margin-top:12px; font-size:12.5px; line-height:1.5; }
+  .pre-terms ul{ margin:6px 0 0; padding-left:18px; } .pre-terms li{ margin:3px 0; }
+  .pre-agree{ display:flex; gap:10px; align-items:flex-start; margin-top:12px; font-size:13px; font-weight:600; cursor:pointer; }
+  .pre-agree input{ width:20px; height:20px; margin:0; flex-shrink:0; accent-color:var(--accent-strong, var(--orange)); }
+  .pre-agree.bad{ color:#b3261e; animation:revNudge .4s; }
+  /* предзаказ в «Моих заказах» */
+  .trk-pre{ margin:8px 0 2px; font-size:12.5px; line-height:1.5; }
+  .trk-pre .pr-row{ display:flex; justify-content:space-between; gap:8px; } .trk-pre .ok{ color:#1E6B3A; font-weight:700; } .trk-pre .no{ color:var(--muted); }
+  html[data-theme="dark"] .trk-pre .ok{ color:#7FD69F; }
+  .trk-bal{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .trk-bal button{ flex:1; min-width:120px; height:44px; border:0; border-radius:14px; background:var(--accent-strong, var(--orange)); color:#fff; font-weight:700; font-size:13px; cursor:pointer; }
+  html[data-theme="dark"] .trk-bal button{ color:#17110F; }
+  .trk-bal-note{ width:100%; font-size:12px; color:var(--muted); }
+  .card .stock-chip.pre{ color:#8A4B0B; } .card .stock-chip.pre::before{ background:#F29A1F; }
+  html[data-theme="dark"] .card .stock-chip.pre{ color:#F6C27A; }
   .restock-note a{ color:var(--ink); font-weight:700; }
 
   .detail-badge{ display:none; background:var(--stone); color:var(--muted); font-size:11px; font-weight:700; padding:6px 12px; border-radius:100px; margin-bottom:10px; letter-spacing:.02em; }
@@ -1396,6 +1429,9 @@
   .nx-runit{ gap:12px; padding-right:60px; }
   .nx-rmq .nx-rcard{ flex:0 0 300px; width:300px; }
   .nx-rmq.hold .nx-rtrack{ animation-play-state:paused; }
+  .nx-rmq.js{ overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; -webkit-overflow-scrolling:touch; cursor:grab; }
+  .nx-rmq.js::-webkit-scrollbar{ display:none; }
+  .nx-rmq.js .nx-rtrack{ animation:none !important; will-change:auto; }
   @media (hover:hover){ .nx-rmq:hover .nx-rtrack{ animation-play-state:paused; } }
   @keyframes nxRevMarq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
   @media (prefers-reduced-motion:reduce){ .nx-rmq{ overflow-x:auto; } .nx-rtrack{ animation:none; } .nx-rset[aria-hidden]{ display:none; } }
@@ -1661,6 +1697,7 @@
         <div class="buybar" id="buyBar">
           <div class="incart-note" id="inCartNote"></div>
           <button class="add-btn restock-btn" id="restockBtn" onclick="subscribeRestock()"></button>
+          <button class="add-btn preorder-btn" id="preorderBtn" onclick="startPreorder()"></button>
           <div class="restock-note" id="restockNote"></div>
           <button class="add-btn" id="addBtn" onclick="addToCart()" data-i18n="addToCart">Добавить в корзину</button>
           <button class="add-btn buy-btn" id="buyNowBtn" onclick="buyNow()" data-i18n="buyNow">Заказать сразу</button>
@@ -1694,6 +1731,7 @@
       <div></div>
     </div>
     <div class="cart-title"><h2 class="display" data-i18n="checkoutTitle">Оплата и доставка</h2></div>
+    <div id="preBox" class="pre-box"></div>
 
     <div class="pay-field" style="margin-bottom:14px;">
       <label class="block-label" data-i18n="paymentMethodLabel" style="margin-top:0;">Способ оплаты</label>
@@ -1767,7 +1805,7 @@
       <div class="pay-note" data-i18n="noteHint">Не обязательно, но можно — например, пожелания по доставке</div>
     </div>
 
-    <div class="pay-field" style="margin-bottom:16px;">
+    <div class="pay-field" id="promoField" style="margin-bottom:16px;">
       <label class="block-label" data-i18n="promoLabel" style="margin-top:0;">Промокод</label>
       <div class="promo-row">
         <input type="text" id="promoInput" maxlength="30" autocomplete="off" autocapitalize="characters" spellcheck="false" data-i18n-ph="promoPlaceholder" placeholder="Введите промокод" oninput="onPromoInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyPromo();}">
@@ -2723,6 +2761,70 @@ const STR_PROMO = {
        promoOff:"This promo code is not active right now", promoNoDiscount:"no discount", promoCheckErr:"Couldn’t check the promo code, please try again", promoEnter:"Enter a promo code" }
 };
 Object.keys(STR_PROMO).forEach(l => Object.assign(STR[l], STR_PROMO[l]));
+/* Предзаказ: 30% сейчас, 70% когда товар приедет (срок 20–25 дней) */
+const STR_PREORDER = {
+  ru:{ preBtn:"Сделать предзаказ", preSub:"Предоплата 30% · поступление 20–25 дней", preTitle:"Условия предзаказа",
+       preTerms:"<li>Сейчас вы оплачиваете <b>30% — {dep}</b>. Остаток 70% — когда товар приедет.</li><li>Срок поступления: <b>20–25 дней</b>.</li><li>Если товар не приедет за 25 дней — вы можете отменить предзаказ и получить <b>30% обратно полностью</b>.</li><li>После оплаты отменить предзаказ можно только в этом случае.</li><li>Когда товар приедет, придёт уведомление в Telegram и в профиль. На доплату даётся <b>3 дня</b>.</li><li>Если не доплатить за 3 дня — предоплата не возвращается.</li><li>Отправка через BTS — после полной оплаты. Фискальный чек выдаётся на полную сумму после полной оплаты.</li>",
+       preAgree:"Я прочитал(а) условия предзаказа и согласен(на) с ними", preNeedAgree:"Отметьте согласие с условиями предзаказа",
+       preNow:"К оплате сейчас (30%)", preLater:"Доплата, когда товар приедет (70%)", prePayBtn:"Оплатить предоплату 30%",
+       preBadge:"Предзаказ", statusPreWait:"Предзаказ: ждём поступления", statusPreArrived:"Товар приехал — ждём доплату",
+       preDep:"Предоплата 30%", preBal:"Доплата 70%", prePaid:"оплачено", preNotPaid:"не оплачено",
+       prePayBalance:"Доплатить 70%", preUntil:"оплатить до", preBalanceExpired:"Срок доплаты истёк — напишите нам в чат",
+       prePayVia:"Оплатить через", preNoProduct:"Этот товар сейчас нельзя заказать",
+       faqQPre1:"Что такое предзаказ?", faqAPre1:"Если нужного размера нет в наличии, выберите его и нажмите «Сделать предзаказ». Мы закажем товар специально для вас — он приедет за <b>20–25 дней</b>.",
+       faqQPre2:"Сколько нужно оплатить за предзаказ?", faqAPre2:"Сразу — <b>30%</b> стоимости. Остальные <b>70%</b> — когда товар приедет: вам придёт уведомление в Telegram и в профиль, на доплату даётся <b>3 дня</b>. Отправляем через BTS после полной оплаты.",
+       faqQPre3:"Можно ли отменить предзаказ?", faqAPre3:"После оплаты — только если товар не приехал за <b>25 дней</b>: тогда мы полностью вернём предоплату 30%. Если товар задержался, а вы готовы подождать — просто доплатите 70%, когда он приедет, предоплата засчитывается в цену.",
+       faqQPre4:"Что будет, если не доплатить?", faqAPre4:"Если товар приехал, а доплата не поступила в течение 3 дней, предзаказ отменяется, а предоплата не возвращается — товар был заказан специально под вас." },
+  uz:{ preBtn:"Oldindan buyurtma berish", preSub:"30% oldindan to‘lov · 20–25 kunda keladi", preTitle:"Oldindan buyurtma shartlari",
+       preTerms:"<li>Hozir <b>30% — {dep}</b> to‘laysiz. Qolgan 70% — mahsulot kelganda.</li><li>Kelish muddati: <b>20–25 kun</b>.</li><li>Mahsulot 25 kun ichida kelmasa — buyurtmani bekor qilib, <b>30% ni to‘liq qaytarib olishingiz</b> mumkin.</li><li>To‘lovdan keyin buyurtmani faqat shu holatda bekor qilish mumkin.</li><li>Mahsulot kelganda Telegram va profilga xabar keladi. Qo‘shimcha to‘lov uchun <b>3 kun</b> beriladi.</li><li>3 kun ichida to‘lanmasa — oldindan to‘lov qaytarilmaydi.</li><li>BTS orqali yuborish — to‘liq to‘lovdan keyin. Fiskal chek to‘liq to‘lovdan keyin to‘liq summaga beriladi.</li>",
+       preAgree:"Oldindan buyurtma shartlarini o‘qidim va roziman", preNeedAgree:"Oldindan buyurtma shartlariga rozilikni belgilang",
+       preNow:"Hozir to‘lanadi (30%)", preLater:"Mahsulot kelganda (70%)", prePayBtn:"30% oldindan to‘lovni to‘lash",
+       preBadge:"Oldindan buyurtma", statusPreWait:"Oldindan buyurtma: kelishini kutyapmiz", statusPreArrived:"Mahsulot keldi — qolgan to‘lov kutilmoqda",
+       preDep:"Oldindan to‘lov 30%", preBal:"Qolgan to‘lov 70%", prePaid:"to‘langan", preNotPaid:"to‘lanmagan",
+       prePayBalance:"70% ni to‘lash", preUntil:"to‘lash muddati", preBalanceExpired:"To‘lov muddati o‘tdi — chatga yozing",
+       prePayVia:"To‘lov usuli", preNoProduct:"Bu mahsulotni hozir buyurtma qilib bo‘lmaydi",
+       faqQPre1:"Oldindan buyurtma nima?", faqAPre1:"Kerakli o‘lcham mavjud bo‘lmasa, uni tanlab «Oldindan buyurtma berish» tugmasini bosing. Mahsulotni siz uchun buyurtma qilamiz — u <b>20–25 kunda</b> keladi.",
+       faqQPre2:"Oldindan buyurtma uchun qancha to‘lash kerak?", faqAPre2:"Darhol — narxning <b>30%</b>. Qolgan <b>70%</b> — mahsulot kelganda: Telegram va profilga xabar keladi, to‘lov uchun <b>3 kun</b> beriladi. To‘liq to‘lovdan keyin BTS orqali yuboramiz.",
+       faqQPre3:"Oldindan buyurtmani bekor qilsa bo‘ladimi?", faqAPre3:"To‘lovdan keyin — faqat mahsulot <b>25 kun</b> ichida kelmasa: unda 30% oldindan to‘lovni to‘liq qaytaramiz. Agar kechiksa-yu, kutishga tayyor bo‘lsangiz — kelganda 70% ni to‘lang, oldindan to‘lov narxga hisoblanadi.",
+       faqQPre4:"Qolgan to‘lovni to‘lamasam nima bo‘ladi?", faqAPre4:"Mahsulot kelib, 3 kun ichida to‘lov tushmasa, buyurtma bekor qilinadi va oldindan to‘lov qaytarilmaydi — mahsulot aynan siz uchun buyurtma qilingan." },
+  tr:{ preBtn:"Ön sipariş ver", preSub:"%30 ön ödeme · 20–25 günde gelir", preTitle:"Ön sipariş koşulları",
+       preTerms:"<li>Şimdi <b>%30 — {dep}</b> ödersiniz. Kalan %70 ürün geldiğinde.</li><li>Teslim süresi: <b>20–25 gün</b>.</li><li>Ürün 25 gün içinde gelmezse ön siparişi iptal edip <b>%30’un tamamını geri alabilirsiniz</b>.</li><li>Ödemeden sonra ön sipariş yalnızca bu durumda iptal edilebilir.</li><li>Ürün geldiğinde Telegram’a ve profilinize bildirim gelir. Kalan ödeme için <b>3 gün</b> verilir.</li><li>3 gün içinde ödenmezse ön ödeme iade edilmez.</li><li>BTS ile gönderim — tam ödemeden sonra. Mali fiş tam ödemeden sonra toplam tutar için verilir.</li>",
+       preAgree:"Ön sipariş koşullarını okudum ve kabul ediyorum", preNeedAgree:"Ön sipariş koşullarını kabul ettiğinizi işaretleyin",
+       preNow:"Şimdi ödenecek (%30)", preLater:"Ürün geldiğinde (%70)", prePayBtn:"%30 ön ödemeyi yap",
+       preBadge:"Ön sipariş", statusPreWait:"Ön sipariş: ürün bekleniyor", statusPreArrived:"Ürün geldi — kalan ödeme bekleniyor",
+       preDep:"Ön ödeme %30", preBal:"Kalan ödeme %70", prePaid:"ödendi", preNotPaid:"ödenmedi",
+       prePayBalance:"%70’i öde", preUntil:"son ödeme", preBalanceExpired:"Ödeme süresi doldu — sohbetten bize yazın",
+       prePayVia:"Ödeme yöntemi", preNoProduct:"Bu ürün şu anda sipariş edilemiyor",
+       faqQPre1:"Ön sipariş nedir?", faqAPre1:"İstediğiniz beden stokta yoksa onu seçip «Ön sipariş ver»e dokunun. Ürünü sizin için sipariş ederiz — <b>20–25 günde</b> gelir.",
+       faqQPre2:"Ön sipariş için ne kadar ödemem gerekiyor?", faqAPre2:"Hemen — fiyatın <b>%30</b>’u. Kalan <b>%70</b> ürün geldiğinde: Telegram’a ve profilinize bildirim gelir, ödeme için <b>3 gün</b> verilir. Tam ödemeden sonra BTS ile göndeririz.",
+       faqQPre3:"Ön siparişi iptal edebilir miyim?", faqAPre3:"Ödemeden sonra — yalnızca ürün <b>25 gün</b> içinde gelmezse: o zaman %30 ön ödemenin tamamını iade ederiz. Ürün gecikir ama beklemeye hazırsanız, geldiğinde %70’i ödeyin; ön ödeme fiyata sayılır.",
+       faqQPre4:"Kalanı ödemezsem ne olur?", faqAPre4:"Ürün geldi ve 3 gün içinde ödeme yapılmadıysa ön sipariş iptal edilir, ön ödeme iade edilmez — ürün özellikle sizin için sipariş edildi." },
+  az:{ preBtn:"Öncədən sifariş et", preSub:"30% ilkin ödəniş · 20–25 günə gəlir", preTitle:"Öncədən sifariş şərtləri",
+       preTerms:"<li>İndi <b>30% — {dep}</b> ödəyirsiniz. Qalan 70% — məhsul gələndə.</li><li>Gəlmə müddəti: <b>20–25 gün</b>.</li><li>Məhsul 25 gün ərzində gəlməsə — sifarişi ləğv edib <b>30%-i tam geri ala bilərsiniz</b>.</li><li>Ödənişdən sonra sifarişi yalnız bu halda ləğv etmək olar.</li><li>Məhsul gələndə Telegram-a və profilə bildiriş gələcək. Qalan ödəniş üçün <b>3 gün</b> verilir.</li><li>3 gün ərzində ödənilməsə — ilkin ödəniş qaytarılmır.</li><li>BTS ilə göndəriş — tam ödənişdən sonra. Fiskal çek tam ödənişdən sonra tam məbləğə verilir.</li>",
+       preAgree:"Öncədən sifariş şərtlərini oxudum və razıyam", preNeedAgree:"Öncədən sifariş şərtləri ilə razılığı qeyd edin",
+       preNow:"İndi ödəniləcək (30%)", preLater:"Məhsul gələndə (70%)", prePayBtn:"30% ilkin ödənişi et",
+       preBadge:"Öncədən sifariş", statusPreWait:"Öncədən sifariş: gəlməsini gözləyirik", statusPreArrived:"Məhsul gəldi — qalan ödəniş gözlənilir",
+       preDep:"İlkin ödəniş 30%", preBal:"Qalan ödəniş 70%", prePaid:"ödənilib", preNotPaid:"ödənilməyib",
+       prePayBalance:"70%-i ödə", preUntil:"son ödəniş", preBalanceExpired:"Ödəniş müddəti bitdi — çatda bizə yazın",
+       prePayVia:"Ödəniş üsulu", preNoProduct:"Bu məhsulu hazırda sifariş etmək olmur",
+       faqQPre1:"Öncədən sifariş nədir?", faqAPre1:"Lazımi ölçü mövcud deyilsə, onu seçib «Öncədən sifariş et» düyməsinə toxunun. Məhsulu sizin üçün sifariş edəcəyik — <b>20–25 günə</b> gələcək.",
+       faqQPre2:"Öncədən sifariş üçün nə qədər ödəmək lazımdır?", faqAPre2:"Dərhal — qiymətin <b>30%</b>-i. Qalan <b>70%</b> — məhsul gələndə: Telegram-a və profilə bildiriş gələcək, ödəniş üçün <b>3 gün</b> verilir. Tam ödənişdən sonra BTS ilə göndəririk.",
+       faqQPre3:"Öncədən sifarişi ləğv etmək olar?", faqAPre3:"Ödənişdən sonra — yalnız məhsul <b>25 gün</b> ərzində gəlməsə: onda 30% ilkin ödənişi tam qaytarırıq. Məhsul gecikdi, amma gözləməyə hazırsınızsa — gələndə 70%-i ödəyin, ilkin ödəniş qiymətə hesablanır.",
+       faqQPre4:"Qalanını ödəməsəm nə olar?", faqAPre4:"Məhsul gəldi və 3 gün ərzində ödəniş daxil olmadısa, sifariş ləğv edilir və ilkin ödəniş qaytarılmır — məhsul məhz sizin üçün sifariş edilib." },
+  en:{ preBtn:"Pre-order", preSub:"30% deposit · arrives in 20–25 days", preTitle:"Pre-order terms",
+       preTerms:"<li>Now you pay <b>30% — {dep}</b>. The remaining 70% — when the item arrives.</li><li>Arrival time: <b>20–25 days</b>.</li><li>If the item doesn’t arrive within 25 days, you can cancel and get the <b>30% back in full</b>.</li><li>After payment, the pre-order can only be cancelled in that case.</li><li>When the item arrives, you’ll get a notification in Telegram and in your profile. You have <b>3 days</b> to pay the rest.</li><li>If the rest isn’t paid within 3 days, the deposit is not refunded.</li><li>Shipping via BTS — after full payment. The fiscal receipt is issued for the full amount after full payment.</li>",
+       preAgree:"I have read and agree to the pre-order terms", preNeedAgree:"Please accept the pre-order terms",
+       preNow:"To pay now (30%)", preLater:"When the item arrives (70%)", prePayBtn:"Pay the 30% deposit",
+       preBadge:"Pre-order", statusPreWait:"Pre-order: waiting for arrival", statusPreArrived:"Item arrived — waiting for the rest",
+       preDep:"Deposit 30%", preBal:"Remaining 70%", prePaid:"paid", preNotPaid:"not paid",
+       prePayBalance:"Pay the remaining 70%", preUntil:"pay by", preBalanceExpired:"The payment period has ended — message us in the chat",
+       prePayVia:"Pay with", preNoProduct:"This item can’t be ordered right now",
+       faqQPre1:"What is a pre-order?", faqAPre1:"If the size you need is out of stock, select it and tap “Pre-order”. We’ll order the item especially for you — it arrives in <b>20–25 days</b>.",
+       faqQPre2:"How much do I pay for a pre-order?", faqAPre2:"Right away — <b>30%</b> of the price. The remaining <b>70%</b> — when the item arrives: you’ll get a notification in Telegram and in your profile, and you have <b>3 days</b> to pay. We ship via BTS after full payment.",
+       faqQPre3:"Can I cancel a pre-order?", faqAPre3:"After payment — only if the item hasn’t arrived within <b>25 days</b>: then we refund the 30% deposit in full. If it’s late but you’re happy to wait, just pay the 70% when it arrives — the deposit counts towards the price.",
+       faqQPre4:"What if I don’t pay the rest?", faqAPre4:"If the item has arrived and the payment isn’t made within 3 days, the pre-order is cancelled and the deposit is not refunded — the item was ordered especially for you." }
+};
+Object.keys(STR_PREORDER).forEach(l => Object.assign(STR[l], STR_PREORDER[l]));
 /* Доставка за рубеж (BTS Global) */
 const STR_ABROAD = {
   ru:{ shipSoon:"скоро", shipSoonToast:"Доставка за рубеж скоро будет доступна", shipWhereLabel:"Куда доставить?", shipUz:"По Узбекистану", shipAbroad:"За рубеж", abroadCountry:"Страна",
@@ -2880,6 +2982,7 @@ function applyLang(){
   renderSupportMsgs();
   if (!faqCustomized){ faqItems = defaultFaqItems(); }
   renderFaq();                 // и свой список из админки: встроенный вопрос «Как отследить заказ?» тоже переводится
+  try{ if (preorderItem) renderPreBox(); }catch(e){} // предзаказ на оформлении: условия и кнопка «Оплатить предоплату» на новом языке
   renderRatingSummary();       // строка со звёздами «N отзывов покупателей» на главной
   try{ renderAbroad(); }catch(e){} // названия стран и итог доставки за рубеж
   try{ if (appliedPromo) renderPromoStatus(appliedPromo); }catch(e){}
@@ -3088,6 +3191,7 @@ new MutationObserver(() => lazyBgScan()).observe(document.documentElement, { chi
 /* ---------- categories (dynamic from settings) ---------- */
 const SALE_CAT = 'Скидки';
 const INSTOCK_CAT = 'В наличии';
+const PREORDER_CAT = 'Предзаказ';
 // иконки по присланным картинкам: коробка с галочкой — «В наличии», календарь с часами — «Предзаказ» (линией, в цвет темы, как остальные)
 const INSTOCK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5V7.5L12 4 4 7.5v9L12 20l2-.9"/><path d="M4 7.5l8 3.5 8-3.5"/><path d="M12 11v9"/><path d="M8 5.8l8 3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M17 17.6l1 1 2-2.1"/></svg>';
 const PREORDER_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3.5"/><path d="M8 3v4M16 3v4M4 10h16"/><circle cx="17.5" cy="17.5" r="4"/><path d="M17.5 15.6v2l1.3 1"/></svg>';
@@ -3133,6 +3237,7 @@ function catIconFor(key, idx){
   if (!_settingsReady && !categoryIcons[key]) return '';
   if (key === SALE_CAT) return categoryIcons[key] || SALE_ICON;
   if (key === INSTOCK_CAT) return categoryIcons[key] || INSTOCK_ICON;
+  if (key === PREORDER_CAT) return categoryIcons[key] || PREORDER_ICON;
   return categoryIcons[key] || DEFAULT_CAT_ICONS[idx % DEFAULT_CAT_ICONS.length];
 }
 function catIconColorFor(key){
@@ -3143,7 +3248,7 @@ function catIconColorFor(key){
 function renderCatPills(){
   const wrap = document.getElementById('catPillsRow');
   if (!wrap) return;
-  const items = [{ key: 'Все' }, ...(products.some(productInStock) ? [{ key: INSTOCK_CAT }] : []), ...allCats().filter(c => c !== INSTOCK_CAT).map(c => ({ key: c }))];
+  const items = [{ key: 'Все' }, ...(products.some(productInStock) ? [{ key: INSTOCK_CAT }] : []), ...(products.some(p => !productInStock(p)) ? [{ key: PREORDER_CAT }] : []), ...allCats().filter(c => c !== INSTOCK_CAT && c !== PREORDER_CAT).map(c => ({ key: c }))];
   _pillKeys = items.map(it => it.key);
   wrap.innerHTML = items.map((it, i) => {
     const iconColor = catIconColorFor(it.key);
@@ -3224,12 +3329,48 @@ function renderRatingSummary(){
   wrap.querySelectorAll('.nx-rset[aria-hidden] a, .nx-rset .nx-runit + .nx-runit a').forEach(a => a.setAttribute('tabindex', '-1'));
   wrap.querySelectorAll('a[data-pid]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); openProduct(a.dataset.pid); }));
   const mq = wrap.querySelector('.nx-rmq');
-  if (mq){
-    const hold = on => mq.classList.toggle('hold', on);
-    mq.addEventListener('touchstart', () => hold(true), { passive:true });
-    mq.addEventListener('touchend', () => hold(false));
-    mq.addEventListener('touchcancel', () => hold(false));
-  }
+  if (mq) nxRevMarquee(mq);
+}
+// лента отзывов: едет сама справа налево по кругу, а пальцем/мышкой/колёсиком её можно прокрутить в обе стороны.
+// Пока держат — стоит; через 2,5 с после касания снова едет с того места, где оставили.
+function nxRevMarquee(mq){
+  const track = mq.querySelector('.nx-rtrack'); if (!track) return;
+  mq.classList.add('js');
+  if (mq._raf) cancelAnimationFrame(mq._raf);
+  const setW = () => { const st = track.querySelector('.nx-rset'); return st ? st.offsetWidth : 0; };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SPEED = 45; // пикселей в секунду
+  let hold = false, idle = 0, last = performance.now(), pos = 0, wrapping = false;
+  // бесшовный круг: лента = два одинаковых набора; ушли за первый набор — перескакиваем на ту же картинку в другом наборе
+  const wrapPos = () => {
+    const w = setW(); if (w <= 0 || reduce) return; // без анимации второй набор скрыт — круг не нужен
+    let x = mq.scrollLeft;
+    if (x >= w) x -= w; else if (x <= 0) x += w; else return;
+    wrapping = true; mq.scrollLeft = x; pos = x; wrapping = false;
+  };
+  requestAnimationFrame(() => { const w = setW(); if (w > 0){ mq.scrollLeft = 1; pos = 1; } });
+  const step = now => {
+    if (!mq.isConnected) return;
+    const dt = Math.min(64, now - last); last = now;
+    const w = setW();
+    if (!reduce && !hold && now > idle && w > 0 && !document.hidden){
+      pos += SPEED * dt / 1000;
+      if (pos >= w) pos -= w;
+      mq.scrollLeft = pos;
+    }
+    mq._raf = requestAnimationFrame(step);
+  };
+  const grab = () => { hold = true; };
+  const release = () => { hold = false; idle = performance.now() + 2500; pos = mq.scrollLeft; };
+  mq.addEventListener('touchstart', grab, { passive:true });
+  mq.addEventListener('touchend', release, { passive:true });
+  mq.addEventListener('touchcancel', release, { passive:true });
+  // только настоящая мышь: на телефоне после касания браузер шлёт «наведение», и лента бы застывала
+  mq.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') grab(); });
+  mq.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') release(); });
+  mq.addEventListener('wheel', () => { idle = performance.now() + 2500; }, { passive:true });
+  mq.addEventListener('scroll', () => { if (wrapping) return; if (hold || performance.now() < idle) { wrapPos(); pos = mq.scrollLeft; } }, { passive:true });
+  mq._raf = requestAnimationFrame(step);
 }
 
 function submitNewsletter(){
@@ -3336,7 +3477,10 @@ function renderFaq(){
   // «Как отследить заказ?» показываем всегда — и к стандартным вопросам, и к своим из админки
   // (если в админке уже есть свой вопрос про отслеживание — второй не добавляем)
   const hasTrack = faqItems.some(f => /отслед|kuzat|takip|izlə|track/i.test(String(f && f.q || '')));
-  const list = hasTrack ? faqItems : faqItems.concat([{ q: t('faqQTrack'), a: t('faqATrack') }]);
+  let list = hasTrack ? faqItems : faqItems.concat([{ q: t('faqQTrack'), a: t('faqATrack') }]);
+  // вопросы о предзаказе — всегда (если в админке своих вопросов о предзаказе нет)
+  const hasPre = faqItems.some(f => /предзаказ|oldindan|ön sipariş|öncədən|pre-?order/i.test(String(f && f.q || '')));
+  if (!hasPre) list = list.concat([1, 2, 3, 4].map(n => ({ q: t('faqQPre' + n), a: t('faqAPre' + n) })));
   wrap.innerHTML = list.map((f, i) => `
     <div class="faq-item" id="faq-${i}">
       <div class="faq-q" onclick="toggleFaq(${i})"><span>${f.q}</span><span class="chev">⌄</span></div>
@@ -3362,6 +3506,7 @@ function filteredProducts(){
   }
   else if (activeCategory === SALE_CAT) list = list.filter(p => discOf(p) > 0);
   else if (activeCategory === INSTOCK_CAT) list = list.filter(productInStock);
+  else if (activeCategory === PREORDER_CAT) list = list.filter(p => !productInStock(p));
   else if (activeCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === activeCategory.trim().toLowerCase());
   return list;
 }
@@ -3436,7 +3581,7 @@ function applyPriceFilter(){
 
 function renderShopAllCats(){
   const wrap = document.getElementById('shopAllCats');
-  const items = ['Все', ...(products.some(productInStock) ? [INSTOCK_CAT] : []), ...allCats().filter(c => c !== INSTOCK_CAT)];
+  const items = ['Все', ...(products.some(productInStock) ? [INSTOCK_CAT] : []), ...(products.some(p => !productInStock(p)) ? [PREORDER_CAT] : []), ...allCats().filter(c => c !== INSTOCK_CAT && c !== PREORDER_CAT)];
   wrap.innerHTML = items.map((cat, i) => {
     const iconColor = catIconColorFor(cat);
     const borderStyle = '';
@@ -3462,6 +3607,7 @@ function renderShopAllGrid(){
     list = list.filter(p => (Number(p.orderCount)||0) > 3).sort((a,b) => (Number(b.orderCount)||0) - (Number(a.orderCount)||0));
   } else if (shopAllCategory === SALE_CAT) list = list.filter(p => discOf(p) > 0);
   else if (shopAllCategory === INSTOCK_CAT) list = list.filter(productInStock);
+  else if (shopAllCategory === PREORDER_CAT) list = list.filter(p => !productInStock(p));
   else if (shopAllCategory !== 'Все') list = list.filter(p => (p.category||'').trim().toLowerCase() === shopAllCategory.trim().toLowerCase());
   if (priceMin !== null) list = list.filter(p => effPrice(p) >= priceMin);
   if (priceMax !== null) list = list.filter(p => effPrice(p) <= priceMax);
@@ -3541,6 +3687,7 @@ function translateCategory(cat){
   if (cat === 'Все') return t('allCat');
   if (cat === SALE_CAT && !(categoryTranslations[cat] && categoryTranslations[cat][lang])) return t('catSale');
   if (cat === INSTOCK_CAT && !(categoryTranslations[cat] && categoryTranslations[cat][lang])) return t('inStockWord');
+  if (cat === PREORDER_CAT && !(categoryTranslations[cat] && categoryTranslations[cat][lang])) return t('preBadge');
   if (cat === 'До 500 000') return categoryTranslations['До 500 000'] && categoryTranslations['До 500 000'][lang] ? categoryTranslations['До 500 000'][lang] : cat;
   return (categoryTranslations[cat] && categoryTranslations[cat][lang]) ? categoryTranslations[cat][lang] : cat;
 }
@@ -3618,7 +3765,7 @@ function productCardHTML(p){
   return `
     <div class="imgwrap${oosClass}" data-oos-label="${t('outOfStock')}" ${imgStyle}>${p.image ? '' : (p.emoji || '👟')}
       ${discBadge(p)}<div class="heart-btn" data-fav="${p.id}">${heartIcon(isFavorite(p.id))}</div>
-      ${productInStock(p) ? `<span class="stock-chip">${t('inStockWord')}</span>` : ''}
+      ${productInStock(p) ? `<span class="stock-chip">${t('inStockWord')}</span>` : `<span class="stock-chip pre">${t('preBadge')}</span>`}
     </div>
     <div class="info">
       <div class="name">${getTranslatedProductName(p)}</div>
@@ -4963,6 +5110,7 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
   renderPolicyAccordion();
   const rawSizes = (currentProduct.sizes && currentProduct.sizes.length) ? currentProduct.sizes : ["38","39","40","41","42","43"];
   const ownSizeLabels = rawSizes.map(s => (s && typeof s === 'object') ? s.size : s);
+  currentOwnSizes = ownSizeLabels.slice();
   const sizeLabels = fullSizeLabels(currentProduct, ownSizeLabels);
   const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : [{name:"Стандарт", nameTranslations:{ en:"Standard", uz:"Standart", tr:"Standart", az:"Standart" }, hex:"#f4f1ec", stock: currentProduct.stock || 0}];
   currentColors = colors;
@@ -5207,8 +5355,13 @@ function updateRestockBtn(){
   const btn = document.getElementById('restockBtn'), note = document.getElementById('restockNote');
   if (!btn || !note) return;
   const chosen = currentProduct && currentColors[selectedColorIdx];
-  const out = !!chosen && getSizeStock(currentProduct, chosen, selectedSize) <= 0;
+  const out = !!chosen && pageSizeStock(chosen, selectedSize) <= 0;
   btn.classList.toggle('show', out);
+  const pb = document.getElementById('preorderBtn');
+  if (pb){
+    pb.classList.toggle('show', out && !currentProduct.hidden);
+    pb.innerHTML = `<span class="pb-row">${PREORDER_ICON}<span>${t('preBtn')}</span></span><small>${t('preSub')}</small>`;
+  }
   if (!out){ note.classList.remove('show'); return; }
   const done = !!myRestock[restockKey(currentProduct.id, chosen.name, selectedSize)];
   btn.classList.toggle('done', done);
@@ -5428,6 +5581,11 @@ function renderCart(){
 function goToCheckoutFlow(){
   if (cart.length === 0) return;
   if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
+  preorderItem = null; setPreMode(false); // обычное оформление из корзины
+  prepCheckoutForm();
+  showScreen('checkoutFlow');
+}
+function prepCheckoutForm(){
   selectPayMethod('');
 
   selectedBtsBranch = '';
@@ -5447,8 +5605,6 @@ function goToCheckoutFlow(){
     document.getElementById('phoneInput').value = '';
   }
   try{ applyDeliveryToCheckout(); }catch(e){}
-
-  showScreen('checkoutFlow');
 }
 
 let selectedBtsBranch = '';
@@ -5552,7 +5708,11 @@ function uzPhoneOk(v){
 
 function confirmPayment(){
   unlockSfx(); // iOS разрешает звук только в момент касания — «разблокируем» его сейчас, проиграем позже
-  if (shipType === 'abroad') return confirmAbroad();
+  if (preorderItem){
+    const ag = document.getElementById('preAgree');
+    if (!ag || !ag.checked){ const row = document.getElementById('preAgreeRow'); if (row){ row.classList.remove('bad'); void row.offsetWidth; row.classList.add('bad'); row.scrollIntoView({ block:'center', behavior:'smooth' }); } showToast(t('preNeedAgree')); return; }
+  }
+  if (shipType === 'abroad' && !preorderItem) return confirmAbroad();
   const phone = document.getElementById('phoneInput').value.trim();
   const branch = selectedBtsBranch;
 
@@ -5565,7 +5725,7 @@ function confirmPayment(){
   if (!selectedPayMethod){ showToast(t('choosePay')); return; }
 
   window._payTapAt = Date.now(); // момент нажатия «Перейти к оплате» — нужен, чтобы сразу открыть приложение Uzum
-  if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
+  if (!preorderItem && cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
   try{ rememberDelivery({ phone: (customerProfile && customerProfile.phone) ? '' : phone, bts: branch }); }catch(e){}
   finalizeOrder(phone, branch);
 }
@@ -5595,6 +5755,54 @@ function confirmAbroad(){
 }
 
 const PAY_METHOD_LABELS = { uzum:'Uzum Bank', click:'Click', card:'Карта' };
+/* ---------- предзаказ: 30% сейчас, 70% когда товар приедет ----------
+   Предзаказ — обычный заказ с preorder: true; со склада ничего не списывается (товара нет).
+   Предоплата оплачивается по номеру заказа, доплата — по номеру «{номер}_b». Суммы перепроверяет платёжный воркер. */
+const PREORDER_PERCENT = 30;
+const PRE_WAIT = 'Предзаказ: ждём поступления', PRE_ARRIVED = 'Прибыл, ждём доплату';
+const BALANCE_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+const depositOf = total => Math.round((Number(total) || 0) * PREORDER_PERCENT / 100);
+var preorderItem = null;
+var currentOwnSizes = [];
+// остаток размера в открытой карточке: размеры из полной сетки, которых у товара нет, — всегда 0
+function pageSizeStock(color, size){
+  if (size !== undefined && size !== null && currentOwnSizes.length && !currentOwnSizes.includes(size)) return 0;
+  return getSizeStock(currentProduct, color, size);
+}
+function startPreorder(){
+  if (!currentProduct || currentProduct.hidden){ showToast(t('preNoProduct')); return; }
+  const c = currentColors[selectedColorIdx]; if (!c) return;
+  if (!selectedSize && currentOwnSizes.length) return;
+  const p = currentProduct;
+  goToPreorderFlow({ productId:p.id, name:p.name, image:c.image || p.image || '', emoji:p.emoji || '👟', price:effPrice(p), oldPrice:Number(p.price || 0), discount:discOf(p), size:selectedSize, colorName:c.name, qty:1 });
+}
+function renderPreBox(){
+  const box = document.getElementById('preBox'); if (!box) return;
+  const it = preorderItem; if (!it){ box.innerHTML = ''; return; }
+  const pr = products.find(x => x.id === it.productId);
+  const nm = pr ? getTranslatedProductName(pr) : it.name;
+  const total = it.price * it.qty, dep = depositOf(total);
+  const img = it.image ? `background-image:url('${String(it.image).replace(/'/g, '%27')}')` : '';
+  box.innerHTML = `
+    <div class="pre-item"><div class="pi-img" style="${img}"></div><div><span class="pre-badge">${escH(t('preBadge'))}</span><b>${escH(nm)}</b><small>${escH(String(it.size == null ? '' : it.size))}${it.colorName ? ' · ' + escH(it.colorName) : ''} · ${fmt(total)}</small></div></div>
+    <div class="pre-sum"><div class="now"><small>${escH(t('preNow'))}</small><b>${fmt(dep)}</b></div><div><small>${escH(t('preLater'))}</small><b>${fmt(total - dep)}</b></div></div>
+    <div class="pre-terms"><b>${escH(t('preTitle'))}</b><ul>${t('preTerms').replace('{dep}', fmt(dep))}</ul></div>
+    <label class="pre-agree" id="preAgreeRow"><input type="checkbox" id="preAgree" onchange="document.getElementById('preAgreeRow').classList.remove('bad')"><span>${escH(t('preAgree'))}</span></label>`;
+  const btn = document.getElementById('confirmPaymentBtn');
+  if (btn) btn.textContent = `${t('prePayBtn')} · ${fmt(dep)}`;
+}
+function setPreMode(on){
+  const scr = document.getElementById('checkoutFlow'); if (scr) scr.classList.toggle('pre-mode', !!on);
+  const btn = document.getElementById('confirmPaymentBtn');
+  if (on) renderPreBox(); else { const box = document.getElementById('preBox'); if (box) box.innerHTML = ''; if (btn) btn.textContent = t('confirmTransferBtn'); }
+}
+function goToPreorderFlow(item){
+  preorderItem = item;
+  prepCheckoutForm();
+  setShipType('uz');
+  setPreMode(true);
+  showScreen('checkoutFlow');
+}
 /* ---------- онлайн-оплата через Click ---------- */
 const CLICK_SERVICE_ID = '114488';
 const CLICK_MERCHANT_ID = '66057';
@@ -5639,6 +5847,13 @@ function closeUzumModal(){
   const hd = document.querySelector('#profile .orders-toggle');
   if (hd && !hd.classList.contains('is-open')) toggleSec(hd);
 }
+// номер платежа → документ заказа и «оплачено ли»: {id} — заказ или предоплата предзаказа, {id}_b — доплата 70%
+const payDocId = pid => String(pid || '').replace(/_b$/, '');
+function payDone(pid, o){
+  if (!o) return false;
+  if (/_b$/.test(String(pid))) return o.paid === true;
+  return o.paid === true || (o.preorder === true && o.depositPaid === true);
+}
 function goToOnlinePay(method, orderId, total){
   if (method === 'uzum') goToUzumPay(orderId, total); else goToClickPay(orderId, total);
 }
@@ -5654,9 +5869,9 @@ function checkUzumReturn(){
     let tries = 0;
     const tick = () => {
       if (document.visibilityState === 'hidden'){ checkUzumReturn._busy = false; return; }
-      db.collection('orders').doc(w.id).get().then(d => {
+      db.collection('orders').doc(payDocId(w.id)).get().then(d => {
         const o = d.exists ? d.data() : null;
-        if (o && o.paid === true){
+        if (payDone(w.id, o)){
           try{ localStorage.removeItem('milaisss_uzum_wait'); }catch(e){}
           checkUzumReturn._busy = false;
           try{ document.getElementById('uzumPayModal').classList.remove('open'); }catch(e){}
@@ -5694,9 +5909,26 @@ function payOrderAgain(orderId){
   if (payLeftMs(o) <= 0){ showToast(t('payExpired')); return; }
   if (o.paymentMethod === 'Uzum Bank'){
     try{ localStorage.setItem('milaisss_uzum_wait', JSON.stringify({ id: o.id, t: Date.now() })); }catch(e){}
-    _uzumUrl = uzumPayUrl(o.id, o.total); openUzumLink(_uzumUrl); return;
+    _uzumUrl = uzumPayUrl(o.id, o.preorder ? depositOf(o.total) : o.total); openUzumLink(_uzumUrl); return;
   }
-  goToOnlinePay('click', o.id, o.total);
+  goToOnlinePay('click', o.id, o.preorder ? depositOf(o.total) : o.total);
+}
+// доплата 70% по предзаказу, когда товар приехал (3 дня с момента «Прибыл»)
+function balanceOpen(o){ return o && o.preorder === true && o.depositPaid === true && o.paid !== true && o.status === PRE_ARRIVED && Number(o.arrivedAt) > 0; }
+function balanceLeftMs(o){ return (Number(o.arrivedAt) || 0) + BALANCE_WINDOW_MS - Date.now(); }
+function payBalance(orderId, method){
+  const o = (_lastOrders || []).find(x => x.id === orderId);
+  if (!balanceOpen(o)) return;
+  if (balanceLeftMs(o) <= 0){ showToast(t('preBalanceExpired')); return; }
+  // доплата — тем же способом, что и предоплата (так пробивается один чек на полную сумму)
+  if (o.depositMethod === 'Click') method = 'click'; else if (o.depositMethod === 'Uzum Bank') method = 'uzum';
+  const pid = o.id + '_b', amount = Number(o.total) - depositOf(o.total);
+  window._payTapAt = Date.now();
+  if (method === 'uzum'){
+    try{ localStorage.setItem('milaisss_uzum_wait', JSON.stringify({ id: pid, t: Date.now() })); }catch(e){}
+    _uzumUrl = uzumPayUrl(pid, amount); openUzumLink(_uzumUrl); return;
+  }
+  goToClickPay(pid, amount);
 }
 const PAY_WINDOW_MS = 15 * 60 * 1000; // сколько минут клиенту даётся на оплату, потом заказ отменяется, товар возвращается в наличие
 function payLeftMs(o){ return (Number(o && o.createdAt) || 0) + PAY_WINDOW_MS - Date.now(); }
@@ -5725,9 +5957,9 @@ setInterval(() => {
       let tries = 0;
       const check = () => {
         if (shown) return;
-        db.collection('orders').doc(oid).get().then(d => {
+        db.collection('orders').doc(payDocId(oid)).get().then(d => {
           const o = d.exists ? d.data() : null;
-          if (o && o.paid === true){ showOk(); return; }
+          if (payDone(oid, o)){ showOk(); return; }
           if (++tries < 10){ setTimeout(check, 1500); }
           else { showToast(t('payReturn')); }
         }).catch(() => { if (++tries < 10) setTimeout(check, 1500); else showToast(t('payReturn')); });
@@ -5908,14 +6140,22 @@ async function applyPromo(){
 }
 
 function finalizeOrder(phone, branch){
-  if (_ordering || !cart.length) return;
-  syncCartWithProducts(); // актуальные цены (если ты изменил цену, пока клиент был на оформлении)
+  const pre = preorderItem;
+  if (_ordering || (!pre && !cart.length)) return;
+  if (pre){
+    // предзаказ: актуальная цена товара из каталога
+    const pp = products.find(x => x.id === pre.productId);
+    if (!pp || pp.hidden){ showToast(t('preNoProduct')); return; }
+    pre.price = effPrice(pp); pre.oldPrice = Number(pp.price || 0); pre.discount = discOf(pp); pre.qty = 1;
+  } else {
+    syncCartWithProducts(); // актуальные цены (если ты изменил цену, пока клиент был на оформлении)
+  }
   _ordering = true;
   const _payMethod = selectedPayMethod;
   let total = 0;
-  let text = "Здравствуйте! Хочу оформить заказ:\n\n";
+  let text = pre ? "Здравствуйте! Хочу оформить ПРЕДЗАКАЗ (предоплата " + PREORDER_PERCENT + "%):\n\n" : "Здравствуйте! Хочу оформить заказ:\n\n";
   const orderItems = [];
-  cart.forEach(item => {
+  (pre ? [pre] : cart).forEach(item => {
     total += item.price * item.qty;
     text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
     orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price, oldPrice:item.oldPrice||item.price, discount:item.discount||0, image:item.image||'' });
@@ -5925,7 +6165,7 @@ function finalizeOrder(phone, branch){
   // промокод: срок перепроверяем в момент оформления (вдруг наступила полночь и он истёк)
   const subtotal = total;
   let promoFields = {};
-  if (appliedPromo){
+  if (appliedPromo && !pre){
     if (promoState(appliedPromo) !== 'ok'){
       renderPromoStatus(appliedPromo); appliedPromo = null; _ordering = false;
       showToast(t('promoExpired')); return;
@@ -5938,7 +6178,7 @@ function finalizeOrder(phone, branch){
   }
   // доставка за рубеж: фиксированная цена по стране прибавляется к сумме товаров
   let abroadFields = {};
-  const ab = (shipType === 'abroad') ? window._abroadOrder : null;
+  const ab = (shipType === 'abroad' && !pre) ? window._abroadOrder : null;
   window._abroadOrder = null;
   if (ab){
     total += ab.shippingFee;
@@ -5959,18 +6199,24 @@ function finalizeOrder(phone, branch){
   if (confirmBtn){ confirmBtn.disabled = true; confirmBtn.textContent = t('confirmingText'); }
 
   const notifyChatId = '';
-  // проверка наличия, списание и запись заказа — одна транзакция по свежим данным сервера
-  const orderRef = db.collection('orders').doc();
-  decrementStockForOrder(orderItems, orderRef, {
+  const deposit = pre ? depositOf(total) : 0;
+  if (pre) text += `\n🕓 Предзаказ: предоплата ${PREORDER_PERCENT}% — ${fmt(deposit)}, остаток ${fmt(total - deposit)} при поступлении`;
+  const payAmount = pre ? deposit : total; // сколько платим сейчас
+  const orderData = {
     customerId, customerName, items: orderItems, total,
     btsBranch: branch, phone, paymentMethod: methodLabel, note: orderNote, source: detectSource(),
     status: 'Проверяется оплата', createdAt: Date.now(),
-    lang, notifyChatId, ...promoFields, ...abroadFields
-  }).then(() => {
+    lang, notifyChatId, ...promoFields, ...abroadFields,
+    ...(pre ? { preorder: true, depositPercent: PREORDER_PERCENT, deposit } : {})
+  };
+  // обычный заказ: проверка наличия, списание и запись заказа — одна транзакция по свежим данным сервера.
+  // предзаказ: товара нет в наличии — только записываем заказ, остатки не трогаем
+  const orderRef = db.collection('orders').doc();
+  (pre ? orderRef.set(orderData) : decrementStockForOrder(orderItems, orderRef, orderData)).then(() => {
     const orderId = orderRef.id;
     const payOnline = ONLINE_PAY_METHODS.includes(selectedPayMethod) && orderId;
-    const _custNote = workerNotify('customer', buildOrderNotifyText(orderItems, total, branch));
-    cart = []; updateCartBadge();
+    const _custNote = workerNotify('customer', buildOrderNotifyText(orderItems, total, branch) + (pre ? `\n\n🕓 ${t('preBadge')}: ${t('preDep')} — ${fmt(deposit)}, ${t('preBal')} — ${fmt(total - deposit)}` : ''));
+    if (pre){ preorderItem = null; setPreMode(false); } else { cart = []; updateCartBadge(); }
     clearPromo(true);
     document.getElementById('phoneInput').value = '';
     const _n2 = document.getElementById('orderNoteInput'); if (_n2) _n2.value = '';
@@ -5982,11 +6228,11 @@ function finalizeOrder(phone, branch){
     if (payOnline && _payMethod === 'uzum'){
       // уведомления уходят в фоне (keepalive), а приложение Uzum открываем сразу, без ожидания
       const left = UZUM_TAP_WINDOW_MS - (Date.now() - (window._payTapAt || 0)) - 150;
-      if (left > 0) Promise.race([Promise.all([_admNote, _custNote]), new Promise(r => setTimeout(r, left))]).then(() => goToUzumPay(orderId, total));
-      else goToUzumPay(orderId, total);
+      if (left > 0) Promise.race([Promise.all([_admNote, _custNote]), new Promise(r => setTimeout(r, left))]).then(() => goToUzumPay(orderId, payAmount));
+      else goToUzumPay(orderId, payAmount);
       return;
     }
-    if (payOnline){ Promise.race([Promise.all([_admNote, _custNote]), new Promise(r => setTimeout(r, 4000))]).then(() => goToOnlinePay(_payMethod, orderId, total)); return; }
+    if (payOnline){ Promise.race([Promise.all([_admNote, _custNote]), new Promise(r => setTimeout(r, 4000))]).then(() => goToOnlinePay(_payMethod, orderId, payAmount)); return; }
     showSuccessAnimation(() => { showScreen('home'); afterOrderNotice(); });
   }).catch(err => {
     _ordering = false;
@@ -6149,6 +6395,8 @@ function closePaymentModal(goProfile){
 
 /* ---------- profile / orders / reviews ---------- */
 function translateStatus(status){
+  if (status === PRE_WAIT) return t('statusPreWait');
+  if (status === PRE_ARRIVED) return t('statusPreArrived');
   const map = { 'Проверяется оплата':'statusPaying', 'Собирается':'statusPacking', 'В пути':'statusShipping', 'Доставлен':'statusDelivered', 'Принято':'trkAccepted', 'В ПВЗ':'trkPickup', 'Отменён':'statusCancelled' };
   return map[status] ? t(map[status]) : status;
 }
@@ -6160,7 +6408,7 @@ function toggleSec(head){
   head.classList.toggle('is-open', body.classList.contains('open'));
 }
 let _lastOrders = [];
-const ORDER_STEP = { 'Проверяется оплата':0, 'Принято':1, 'Собирается':1, 'В пути':2, 'В ПВЗ':3, 'Доставлен':4 };
+const ORDER_STEP = { 'Предзаказ: ждём поступления':0, 'Прибыл, ждём доплату':0, 'Проверяется оплата':0, 'Принято':1, 'Собирается':1, 'В пути':2, 'В ПВЗ':3, 'Доставлен':4 };
 const TRK_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const TRK_ICONS = [
  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>',
@@ -6215,9 +6463,26 @@ function _renderStatusListInner(wrap, orders){
       }).join('')}
       ${o.status === 'Доставлен' ? (o.items||[]).map((it, ii) => reviewFormHTML(o, it, ii)).join('') : ''}
       <div class="trk-state"><span>${new Date(o.createdAt).toLocaleDateString('ru-RU')}</span><b>${translateStatus(o.status)}</b></div>
-      ${isUnpaidOnline(o) ? `<button class="trk-pay" type="button" data-exp="${(Number(o.createdAt)||0) + PAY_WINDOW_MS}" onclick="payOrderAgain('${String(o.id).replace(/[^A-Za-z0-9_-]/g,'')}')">${t('payNow')} · ${fmt(o.total)} · <span class="cd">${fmtLeft(payLeftMs(o))}</span></button>` : ''}
+      ${o.preorder === true ? preorderInfoHTML(o) : ''}
+      ${isUnpaidOnline(o) ? `<button class="trk-pay" type="button" data-exp="${(Number(o.createdAt)||0) + PAY_WINDOW_MS}" onclick="payOrderAgain('${String(o.id).replace(/[^A-Za-z0-9_-]/g,'')}')">${t('payNow')} · ${fmt(o.preorder ? depositOf(o.total) : o.total)} · <span class="cd">${fmtLeft(payLeftMs(o))}</span></button>` : ''}
       ${o.status === 'Отменён' ? `<div class="trk-expired">${t('payExpired')}</div>` : trackHTML(o.status)}
     </div>`).join('');
+}
+function preorderInfoHTML(o){
+  const id = String(o.id).replace(/[^A-Za-z0-9_-]/g, '');
+  const dep = depositOf(o.total), bal = Number(o.total) - dep;
+  const depOk = o.depositPaid === true || o.paid === true, balOk = o.paid === true;
+  let h = `<div class="trk-pre"><span class="pre-badge">${escH(t('preBadge'))}</span>
+    <div class="pr-row"><span>${escH(t('preDep'))} · ${fmt(dep)}</span><span class="${depOk ? 'ok' : 'no'}">${depOk ? '✓ ' + escH(t('prePaid')) : escH(t('preNotPaid'))}</span></div>
+    <div class="pr-row"><span>${escH(t('preBal'))} · ${fmt(bal)}</span><span class="${balOk ? 'ok' : 'no'}">${balOk ? '✓ ' + escH(t('prePaid')) : escH(t('preNotPaid'))}</span></div>`;
+  if (balanceOpen(o)){
+    if (balanceLeftMs(o) > 0){
+      const until = new Date(Number(o.arrivedAt) + BALANCE_WINDOW_MS).toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      h += `<div class="trk-bal"><div class="trk-bal-note">${escH(t('prePayBalance'))} · <b>${fmt(bal)}</b> · ${escH(t('preUntil'))} ${escH(until)}</div>
+        ${o.depositMethod === 'Uzum Bank' ? '' : `<button type="button" onclick="payBalance('${id}','click')">Click</button>`}${o.depositMethod === 'Click' ? '' : `<button type="button" onclick="payBalance('${id}','uzum')">Uzum Bank</button>`}</div>`;
+    } else h += `<div class="trk-expired">${escH(t('preBalanceExpired'))}</div>`;
+  }
+  return h + '</div>';
 }
 function renderMyReviews(){
   const wrap = document.getElementById('myReviewsList'); if (!wrap) return;

@@ -54,7 +54,7 @@ const REQUISITES = {
   email:    "",   // эл. почта
   hours:    ""    // например: ежедневно 09:00–20:00
 };
-const EDITION = "21.10.2026";
+const EDITION = "26.11.2026";
 
 const LANGS = { ru:'RU', uz:'UZ', tr:'TR', az:'AZ', en:'EN' };
 
@@ -103,7 +103,13 @@ const T = {
      ["11. Разрешение споров",[
        "Споры решаются путём переговоров. Письменная претензия рассматривается в течение 15 рабочих дней. Если согласие не достигнуто, спор передаётся на рассмотрение суда в соответствии с законодательством Республики Узбекистан."]],
      ["12. Изменение условий",[
-       "Продавец вправе изменять условия оферты. Новая редакция вступает в силу с момента публикации на Сайте и применяется к заказам, оформленным после этой даты."]]
+       "Продавец вправе изменять условия оферты. Новая редакция вступает в силу с момента публикации на Сайте и применяется к заказам, оформленным после этой даты."]],
+     ["13. Предзаказ",[
+       "Если нужного размера или Товара нет в наличии, Покупатель может оформить предзаказ. При оформлении Покупатель оплачивает предоплату в размере 30% стоимости Товара; остаток 70% оплачивается после поступления Товара.",
+       "Ориентировочный срок поступления Товара — 20–25 дней с момента оплаты предоплаты. Если Товар не поступил в течение 25 дней, Покупатель вправе отказаться от предзаказа и получить предоплату обратно в полном объёме. Если Покупатель согласен ожидать Товар дольше, предоплата засчитывается в его стоимость.",
+       "После оплаты предоплаты Покупатель не вправе отказаться от предзаказа, за исключением случая, указанного выше.",
+       "О поступлении Товара Продавец сообщает через Telegram-бот и в личном кабинете. Остаток стоимости должен быть оплачен в течение 3 дней с момента уведомления. Если остаток не оплачен в этот срок, предзаказ аннулируется, а предоплата не возвращается, так как Товар был заказан специально для Покупателя.",
+       "Отправка Товара через BTS производится после полной оплаты. Фискальный чек выдаётся на полную стоимость Товара после полной оплаты."]]
     ]
   },
   uz:{
@@ -150,7 +156,13 @@ const T = {
      ["11. Nizolarni hal etish",[
        "Nizolar muzokaralar yo‘li bilan hal qilinadi. Yozma da’vo 15 ish kuni ichida ko‘rib chiqiladi. Kelishuvga erishilmasa, nizo O‘zbekiston Respublikasi qonunchiligiga muvofiq sudga topshiriladi."]],
      ["12. Shartlarni o‘zgartirish",[
-       "Sotuvchi oferta shartlarini o‘zgartirish huquqiga ega. Yangi tahrir Saytda e’lon qilingan paytdan kuchga kiradi va shu sanadan keyin rasmiylashtirilgan buyurtmalarga nisbatan qo‘llaniladi."]]
+       "Sotuvchi oferta shartlarini o‘zgartirish huquqiga ega. Yangi tahrir Saytda e’lon qilingan paytdan kuchga kiradi va shu sanadan keyin rasmiylashtirilgan buyurtmalarga nisbatan qo‘llaniladi."]],
+     ["13. Oldindan buyurtma",[
+       "Kerakli o‘lcham yoki Mahsulot mavjud bo‘lmasa, Xaridor oldindan buyurtma berishi mumkin. Buyurtma berishda Xaridor Mahsulot narxining 30% miqdorida oldindan to‘lov qiladi; qolgan 70% Mahsulot kelgandan keyin to‘lanadi.",
+       "Mahsulotning taxminiy kelish muddati — oldindan to‘lov qilingan kundan boshlab 20–25 kun. Agar Mahsulot 25 kun ichida kelmasa, Xaridor oldindan buyurtmadan voz kechib, oldindan to‘lovni to‘liq qaytarib olishga haqli. Agar Xaridor uzoqroq kutishga rozi bo‘lsa, oldindan to‘lov Mahsulot narxiga hisoblanadi.",
+       "Oldindan to‘lovdan keyin Xaridor yuqorida ko‘rsatilgan holatdan tashqari oldindan buyurtmadan voz kechishga haqli emas.",
+       "Mahsulot kelgani haqida Sotuvchi Telegram-bot va shaxsiy kabinet orqali xabar beradi. Qolgan summa xabardan keyin 3 kun ichida to‘lanishi kerak. Agar shu muddatda to‘lanmasa, oldindan buyurtma bekor qilinadi va oldindan to‘lov qaytarilmaydi, chunki Mahsulot aynan Xaridor uchun buyurtma qilingan.",
+       "Mahsulot BTS orqali to‘liq to‘lovdan keyin yuboriladi. Fiskal chek to‘liq to‘lovdan keyin Mahsulotning to‘liq narxiga beriladi."]]
     ]
   },
   tr:{
@@ -197,7 +209,13 @@ const T = {
      ["11. Uyuşmazlıkların çözümü",[
        "Uyuşmazlıklar görüşme yoluyla çözülür. Yazılı talep 15 iş günü içinde incelenir. Uzlaşma sağlanamazsa uyuşmazlık, Özbekistan Cumhuriyeti mevzuatına uygun olarak mahkemeye götürülür."]],
      ["12. Koşulların değiştirilmesi",[
-       "Satıcı teklifin koşullarını değiştirme hakkına sahiptir. Yeni sürüm Sitede yayımlandığı andan itibaren yürürlüğe girer ve bu tarihten sonra verilen siparişlere uygulanır."]]
+       "Satıcı teklifin koşullarını değiştirme hakkına sahiptir. Yeni sürüm Sitede yayımlandığı andan itibaren yürürlüğe girer ve bu tarihten sonra verilen siparişlere uygulanır."]],
+     ["13. Ön sipariş",[
+       "İstenen beden veya Ürün stokta yoksa Alıcı ön sipariş verebilir. Ön sipariş verirken Alıcı, Ürün bedelinin %30’u oranında ön ödeme yapar; kalan %70 Ürün geldikten sonra ödenir.",
+       "Ürünün tahmini geliş süresi ön ödemeden itibaren 20–25 gündür. Ürün 25 gün içinde gelmezse Alıcı ön siparişten vazgeçip ön ödemenin tamamını geri alma hakkına sahiptir. Alıcı daha uzun beklemeyi kabul ederse ön ödeme Ürün bedeline sayılır.",
+       "Ön ödemeden sonra Alıcı, yukarıda belirtilen durum dışında ön siparişten vazgeçemez.",
+       "Satıcı, Ürünün geldiğini Telegram botu ve kişisel hesap üzerinden bildirir. Kalan tutar bildirimden itibaren 3 gün içinde ödenmelidir. Bu süre içinde ödenmezse ön sipariş iptal edilir ve ön ödeme iade edilmez; çünkü Ürün özellikle Alıcı için sipariş edilmiştir.",
+       "Ürün, tam ödemeden sonra BTS ile gönderilir. Mali fiş, tam ödemeden sonra Ürünün toplam bedeli için verilir."]]
     ]
   },
   az:{
@@ -244,7 +262,13 @@ const T = {
      ["11. Mübahisələrin həlli",[
        "Mübahisələr danışıqlar yolu ilə həll edilir. Yazılı iddia 15 iş günü ərzində baxılır. Razılığa gəlinmədikdə mübahisə Özbəkistan Respublikasının qanunvericiliyinə uyğun olaraq məhkəməyə verilir."]],
      ["12. Şərtlərin dəyişdirilməsi",[
-       "Satıcı təklifin şərtlərini dəyişmək hüququna malikdir. Yeni redaksiya Saytda dərc olunduğu andan qüvvəyə minir və bu tarixdən sonra rəsmiləşdirilmiş sifarişlərə tətbiq olunur."]]
+       "Satıcı təklifin şərtlərini dəyişmək hüququna malikdir. Yeni redaksiya Saytda dərc olunduğu andan qüvvəyə minir və bu tarixdən sonra rəsmiləşdirilmiş sifarişlərə tətbiq olunur."]],
+     ["13. Öncədən sifariş",[
+       "Lazımi ölçü və ya Məhsul mövcud olmadıqda Alıcı öncədən sifariş verə bilər. Sifariş zamanı Alıcı Məhsulun dəyərinin 30%-i həcmində ilkin ödəniş edir; qalan 70% Məhsul gəldikdən sonra ödənilir.",
+       "Məhsulun təxmini gəlmə müddəti ilkin ödənişdən 20–25 gündür. Məhsul 25 gün ərzində gəlməsə, Alıcı öncədən sifarişdən imtina edib ilkin ödənişi tam geri almaq hüququna malikdir. Alıcı daha uzun gözləməyə razıdırsa, ilkin ödəniş Məhsulun dəyərinə hesablanır.",
+       "İlkin ödənişdən sonra Alıcı yuxarıda göstərilən hal istisna olmaqla öncədən sifarişdən imtina edə bilməz.",
+       "Satıcı Məhsulun gəlməsi barədə Telegram-bot və şəxsi kabinet vasitəsilə məlumat verir. Qalan məbləğ bildirişdən sonra 3 gün ərzində ödənilməlidir. Bu müddətdə ödənilməsə, öncədən sifariş ləğv edilir və ilkin ödəniş qaytarılmır, çünki Məhsul məhz Alıcı üçün sifariş edilib.",
+       "Məhsul tam ödənişdən sonra BTS ilə göndərilir. Fiskal çek tam ödənişdən sonra Məhsulun tam dəyərinə verilir."]]
     ]
   },
   en:{
@@ -291,7 +315,13 @@ const T = {
      ["11. Dispute resolution",[
        "Disputes are resolved through negotiation. A written claim is reviewed within 15 business days. If no agreement is reached, the dispute is referred to court in accordance with the legislation of the Republic of Uzbekistan."]],
      ["12. Changes to the terms",[
-       "The Seller may amend the terms of this offer. The new version takes effect when it is published on the Website and applies to orders placed after that date."]]
+       "The Seller may amend the terms of this offer. The new version takes effect when it is published on the Website and applies to orders placed after that date."]],
+     ["13. Pre-orders",[
+       "If the required size or Product is out of stock, the Buyer may place a pre-order. When placing it, the Buyer pays a deposit of 30% of the Product price; the remaining 70% is paid after the Product arrives.",
+       "The estimated arrival time is 20–25 days from the deposit payment. If the Product has not arrived within 25 days, the Buyer may cancel the pre-order and receive the deposit back in full. If the Buyer agrees to wait longer, the deposit counts towards the price of the Product.",
+       "After paying the deposit, the Buyer may not cancel the pre-order except in the case described above.",
+       "The Seller notifies the Buyer of the Product’s arrival via the Telegram bot and the personal account. The remaining amount must be paid within 3 days of the notification. If it is not paid within this period, the pre-order is cancelled and the deposit is not refunded, as the Product was ordered specifically for the Buyer.",
+       "The Product is shipped via BTS after full payment. The fiscal receipt is issued for the full price of the Product after full payment."]]
     ]
   }
 };
