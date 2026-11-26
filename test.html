@@ -1360,6 +1360,7 @@
   html:not([data-theme="dark"]) .nx-item.blend, html:not([data-theme="dark"]) .nx-fig.blend{ mix-blend-mode:multiply; }
   html:not([data-theme="dark"]) .nx-item img.blend, html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:normal; }
   .nx-hero-info{ z-index:60; pointer-events:none; } .nx-hero-info button{ pointer-events:auto; }
+  body .bottomnav{ z-index:65; } /* нижняя панель всегда поверх названия и цены товара в орбите */
 
   @media (max-width:899px){ .nx-item{ width:min(52vw,280px); } }
   @media (min-width:900px){

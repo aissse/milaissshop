@@ -1359,6 +1359,7 @@
   html:not([data-theme="dark"]) .nx-item.blend, html:not([data-theme="dark"]) .nx-fig.blend{ mix-blend-mode:multiply; }
   html:not([data-theme="dark"]) .nx-item img.blend, html:not([data-theme="dark"]) .nx-fig img.blend{ mix-blend-mode:normal; }
   .nx-hero-info{ z-index:60; pointer-events:none; } .nx-hero-info button{ pointer-events:auto; }
+  body .bottomnav{ z-index:65; } /* нижняя панель всегда поверх названия и цены товара в орбите */
 
   @media (max-width:899px){ .nx-item{ width:min(52vw,280px); } }
   @media (min-width:900px){
@@ -2005,7 +2006,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261126-206";
+  const CURRENT_VERSION = "20261126-207";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
