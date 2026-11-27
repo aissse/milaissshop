@@ -6192,7 +6192,14 @@ function decrementStockForOrder(orderItems, orderRef, orderData){
   return db.runTransaction(tx => {
     return Promise.all(refs.map(ref => tx.get(ref))).then(docs => {
       const dataById = {};
-      docs.forEach((doc, i) => { dataById[productIds[i]] = doc.exists ? JSON.parse(JSON.stringify(doc.data())) : null; });
+      // копируем только то, что меняем (stock / sizeStocks) — остальные поля цветов остаются как в базе,
+      // иначе правила базы видят «изменённые» поля цвета и отклоняют заказ
+      docs.forEach((doc, i) => {
+        if (!doc.exists){ dataById[productIds[i]] = null; return; }
+        const d = Object.assign({}, doc.data());
+        if (Array.isArray(d.colors)) d.colors = d.colors.map(c => (c && typeof c === 'object') ? Object.assign({}, c, c.sizeStocks && typeof c.sizeStocks === 'object' ? { sizeStocks: Object.assign({}, c.sizeStocks) } : {}) : c);
+        dataById[productIds[i]] = d;
+      });
 
       const updates = {};
       for (const productId of productIds){
@@ -6219,7 +6226,11 @@ function decrementStockForOrder(orderItems, orderRef, orderData){
               color.stock = cur - qty;
             }
           });
-          updates[productId] = { colors, stock: colors.reduce((s,c) => s + (Number(c.stock)||0), 0) };
+          updates[productId] = { colors };
+          if ('stock' in data){
+            const sum = colors.reduce((s,c) => s + (Number(c && c.stock)||0), 0);
+            updates[productId].stock = Math.max(0, Math.min(Number(data.stock) || 0, sum));
+          }
         } else {
           let stock = Number(data.stock || 0);
           items.forEach(it => {
@@ -6227,7 +6238,7 @@ function decrementStockForOrder(orderItems, orderRef, orderData){
             if (stock < qty) throw new Error('OUT_OF_STOCK');
             stock -= qty;
           });
-          updates[productId] = { stock };
+          updates[productId] = { stock: Math.max(0, stock) };
         }
         const orderedQty = items.reduce((sum, it) => sum + (it.qty || 0), 0);
         updates[productId].orderCount = Number(data.orderCount || 0) + orderedQty;
@@ -6360,7 +6371,8 @@ function finalizeOrder(phone, branch){
   cart.forEach(item => {
     total += preLineSum(item);
     text += `• ${item.pre ? '🕓 ПРЕДЗАКАЗ: ' : ''}${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
-    orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:Math.round(Number(item.price) || 0), oldPrice:item.oldPrice||item.price, discount:item.discount||0, image:item.image||'', ...(item.pre ? { pre:true } : {}) });
+    // без undefined: база отклоняет такие поля целиком
+    orderItems.push({ productId:String(item.productId || ''), name:String(item.name || ''), size:(item.size == null ? '' : item.size), colorName:(item.colorName == null ? '' : item.colorName), qty:Number(item.qty) || 1, price:Math.round(Number(item.price) || 0), oldPrice:Number(item.oldPrice || item.price) || 0, discount:Number(item.discount) || 0, image:item.image || '', ...(item.pre ? { pre:true } : {}) });
   });
   const methodLabel = PAY_METHOD_LABELS[selectedPayMethod] || selectedPayMethod || 'Уточняется';
   const orderNote = ((document.getElementById('orderNoteInput')||{}).value || '').trim().slice(0,300);
@@ -6446,7 +6458,10 @@ function finalizeOrder(phone, branch){
       showToast(t('cartFixItems'));
       verifyCartWithServer().catch(() => {}).then(() => { try{ showScreen('cart'); }catch(e){} });
     } else {
-      showToast(t('orderFail'));
+      const code = String((err && (err.code || err.message)) || err || 'error').slice(0, 80);
+      showToast(t('orderFail') + ' [' + code + ']');
+      try{ notifyAdmin(`⚠️ Не удалось оформить заказ (${code})\nПокупатель: ${customerName}\n${pre ? 'С предзаказом, к оплате ' + fmtRu(payAmount) + '\n' : ''}` + orderItems.map(i => `• ${i.pre ? '🕓 ' : ''}${i.name} (${i.size}, ${i.colorName}) × ${i.qty} — ${fmtRu(preLineSum(i))}`).join('\n') + `\nИтого: ${fmtRu(total)}`); }catch(_){}
+      try{ console.error('order failed', err); }catch(_){}
     }
   }).finally(() => {
     if (confirmBtn){ confirmBtn.disabled = false; confirmBtn.textContent = cart.length ? confirmBtnOriginalText : t('confirmTransferBtn'); }
