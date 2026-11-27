@@ -159,6 +159,7 @@
   .cat-pill .icon svg[fill]:not([fill="none"]), .cat-pill-mini .icon svg[fill]:not([fill="none"]){ fill:currentColor !important; }
   .cat-pill.active .icon, .cat-pill-mini.active .icon{ color:var(--on-ink) !important; }
   .cat-pill .icon{ font-size:19px; line-height:1; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; height:100%; position:relative; top:1px; }
+  .cat-pill .icon svg, .cat-pill .icon img, .cat-pill-mini .icon svg, .cat-pill-mini .icon img{ width:22px !important; height:22px !important; max-width:22px; max-height:22px; flex-shrink:0; } /* своя иконка из админки не вылезает за кнопку */
   .cat-pill .label{ display:inline-block; max-width:0; opacity:0; overflow:hidden; white-space:nowrap; margin-left:0; font-family:var(--catfont, inherit); transition:max-width .55s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin-left .55s cubic-bezier(.22,1,.36,1); }
   .cat-pill.active{ background:var(--ink); color:var(--on-ink); border-color:var(--ink); padding:0 18px 0 14px; }
   .cat-pill.active .label{ max-width:140px; opacity:1; margin-left:8px; transition-delay:.15s; }
@@ -3196,6 +3197,7 @@ const INSTOCK_CAT = 'В наличии';
 const PREORDER_CAT = 'Предзаказ';
 // иконки по присланным картинкам: коробка с галочкой — «В наличии», календарь с часами — «Предзаказ» (линией, в цвет темы, как остальные)
 const INSTOCK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5V7.5L12 4 4 7.5v9L12 20l2-.9"/><path d="M4 7.5l8 3.5 8-3.5"/><path d="M12 11v9"/><path d="M8 5.8l8 3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M17 17.6l1 1 2-2.1"/></svg>';
+const GLASSES_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12.5c0-1 .8-1.5 2-1.5h4.5c1.2 0 2 .6 2 1.6v.4c0 2-1.4 3.5-3.4 3.5H6c-2.3 0-4-1.6-4-4z"/><path d="M22 12.5c0-1-.8-1.5-2-1.5h-4.5c-1.2 0-2 .6-2 1.6v.4c0 2 1.4 3.5 3.4 3.5H18c2.3 0 4-1.6 4-4z"/><path d="M10.5 12.3c1-.6 2-.6 3 0"/><path d="M2.3 11.4L4 7.5M21.7 11.4L20 7.5"/></svg>';
 const PREORDER_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3.5"/><path d="M8 3v4M16 3v4M4 10h16"/><circle cx="17.5" cy="17.5" r="4"/><path d="M17.5 15.6v2l1.3 1"/></svg>';
 const SALE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>';
 function allCats(){ return (products.some(p => discOf(p) > 0) && !CATEGORIES.includes(SALE_CAT)) ? [...CATEGORIES, SALE_CAT] : CATEGORIES; }
@@ -3240,6 +3242,7 @@ function catIconFor(key, idx){
   if (key === SALE_CAT) return categoryIcons[key] || SALE_ICON;
   if (key === INSTOCK_CAT) return categoryIcons[key] || INSTOCK_ICON;
   if (key === PREORDER_CAT) return categoryIcons[key] || PREORDER_ICON;
+  if (/аксессуар|aksessuar|aksesuar|accessor/i.test(String(key))) return GLASSES_ICON; // аккуратные очки линией, в стиле остальных иконок
   return categoryIcons[key] || DEFAULT_CAT_ICONS[idx % DEFAULT_CAT_ICONS.length];
 }
 function catIconColorFor(key){
