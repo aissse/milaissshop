@@ -244,6 +244,7 @@
   .buybar .restock-btn svg{ width:18px; height:18px; flex-shrink:0; }
   .buybar .preorder-btn{ flex:0 0 100%; display:none; flex-direction:column; align-items:center; justify-content:center; gap:2px; background:var(--accent-strong, var(--orange)); color:#fff; padding:12px 16px; }
   .buybar .preorder-btn.show{ display:flex; }
+  .buybar .buy-btn.pre-hide{ display:none; }
   .buybar .preorder-btn .pb-row{ display:flex; align-items:center; gap:8px; } .buybar .preorder-btn svg{ width:18px; height:18px; flex-shrink:0; }
   .buybar .preorder-btn small{ font-size:11px; font-weight:600; opacity:.85; }
   html[data-theme="dark"] .buybar .preorder-btn{ color:#17110F; }
@@ -254,6 +255,8 @@
   #checkoutFlow.pre-mode .pre-box{ display:block; }
   #checkoutFlow.pre-mode #shipTypeBlock, #checkoutFlow.pre-mode #promoField, #checkoutFlow.pre-mode #abroadBlock{ display:none !important; }
   .pre-item{ display:flex; gap:12px; align-items:center; }
+  .pre-list{ display:flex; flex-direction:column; gap:10px; }
+  .pre-mix{ margin-top:12px; padding:9px 12px; border-radius:12px; background:var(--stone); font-size:12.5px; line-height:1.45; }
   .pre-item .pi-img{ width:58px; height:58px; border-radius:12px; background:var(--stone) center/cover no-repeat; flex-shrink:0; }
   .pre-item b{ display:block; font-size:14px; line-height:1.3; } .pre-item small{ font-size:12px; color:var(--muted); }
   .pre-badge{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#8A4B0B; background:#FCE9C8; border-radius:999px; padding:3px 8px; margin-bottom:4px; }
@@ -269,6 +272,8 @@
   .pre-agree.bad{ color:#b3261e; animation:revNudge .4s; }
   /* предзаказ в «Моих заказах» */
   .trk-pre{ margin:8px 0 2px; font-size:12.5px; line-height:1.5; }
+  .trk-pre .pr-mix{ margin:2px 0 4px; color:var(--muted); }
+  .trk-info .pre-badge{ margin-bottom:2px; }
   .trk-pre .pr-row{ display:flex; justify-content:space-between; gap:8px; } .trk-pre .ok{ color:#1E6B3A; font-weight:700; } .trk-pre .no{ color:var(--muted); }
   html[data-theme="dark"] .trk-pre .ok{ color:#7FD69F; }
   .trk-bal{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
@@ -378,6 +383,13 @@
   .cart-item.is-oos{ border-color:var(--err-border, #c0392b); }
   .cart-item.is-oos .thumb{ opacity:.5; }
   .cart-oos{ color:var(--err-text, #c0392b); font-size:12px; font-weight:700; margin-top:4px; }
+  .cart-item.is-pre .pre-badge{ margin-bottom:3px; }
+  .cart-to-pre{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:6px 12px; border:0; border-radius:999px; background:#FCE9C8; color:#8A4B0B; font:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+  .cart-to-pre svg{ width:14px; height:14px; }
+  .sum-row.pre-now{ color:var(--ink); font-weight:800; }
+  .cart-pre-note{ margin:12px 20px 0; padding:10px 14px; border-radius:12px; background:#FFF6E6; color:#8A4B0B; font-size:12.5px; line-height:1.45; }
+  html[data-theme="dark"] .cart-pre-note{ background:rgba(252,233,200,.1); color:#F3C98B; }
+  html[data-theme="dark"] .cart-to-pre{ background:rgba(252,233,200,.16); color:#F3C98B; }
   .cart-oos-banner{ margin:14px 20px 0; padding:10px 14px; border-radius:12px; background:rgba(192,57,43,.1); color:var(--err-text, #c0392b); font-size:13px; font-weight:600; line-height:1.4; }
   .checkout-btn:disabled{ opacity:.45; cursor:not-allowed; }
   .cart-item .remove{ align-self:flex-start; color:var(--muted); font-size:12px; cursor:pointer; }
@@ -2058,7 +2070,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261127-214";
+  const CURRENT_VERSION = "20261127-215";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2553,7 +2565,7 @@ function bellBtnHTML(){
 function buildOrderNotifyText(items, total, branch){
   const m = tgMsg();
   const st = (TG_STATUS['Проверяется оплата'][lang]) || 'Проверяется оплата';
-  return `${m.orderTitle}\n\n` + items.map(i => `• ${i.name} (${i.size}) × ${i.qty}`).join('\n') +
+  return `${m.orderTitle}\n\n` + items.map(i => `• ${i.pre ? '🕓 ' : ''}${i.name} (${i.size}) × ${i.qty}`).join('\n') +
     `\n\n${m.total}: ${fmt(total)}\n📍 ${m.pickup}: ${branch}\n📦 ${m.status}: ${st}\n\n${m.hint}`;
 }
 
@@ -2838,6 +2850,45 @@ const STR_PREORDER = {
        faqQPre4:"What if I don’t pay the rest?", faqAPre4:"If the item has arrived and the payment isn’t made within 3 days, the pre-order is cancelled and the deposit is not refunded — the item was ordered especially for you." }
 };
 Object.keys(STR_PREORDER).forEach(l => Object.assign(STR[l], STR_PREORDER[l]));
+/* Предзаказ в корзине: можно вместе с товарами в наличии и несколько предзаказов сразу */
+const STR_PRECART = {
+  ru:{ preNowInStock:"Часть предзаказа появилась в наличии — сумма обновлена, проверьте и нажмите ещё раз", preMixShipped:"Товары в наличии отправлены, предзаказ — когда приедет.", preCart:"В корзину · предзаказ", preAdded:"Добавлено в корзину — предзаказ", preNeedSize:"Выберите размер", preMaxQty:"Не больше {n} шт одной вещи в предзаказе",
+       preToPre:"Оформить как предзаказ", preDays:"20–25 дней",
+       preNowMix:"К оплате сейчас", preLaterMix:"Доплата за предзаказ, когда приедет (70%)",
+       preCartNote:"В корзине предзаказ: сейчас оплачиваете 30%, остальные 70% — когда товар приедет (20–25 дней).",
+       preCartNoteMix:"Товары в наличии оплачиваются полностью и отправляются сразу. За предзаказ — сейчас 30%, остальные 70% — когда товар приедет (20–25 дней).",
+       preMixInStock:"Товары в наличии ({sum}) оплачиваются полностью и отправляются сразу.", prePayMixBtn:"Оплатить",
+       preMixShip:"Товары в наличии отправляем сразу, предзаказ — когда приедет.", prePayBalanceMix:"Доплатить за предзаказ" },
+  uz:{ preNowInStock:"Oldindan buyurtmaning bir qismi mavjud bo‘ldi — summa yangilandi, tekshirib, yana bosing", preMixShipped:"Mavjud mahsulotlar yuborildi, oldindan buyurtma — kelganda.", preCart:"Savatga · oldindan buyurtma", preAdded:"Savatga qo‘shildi — oldindan buyurtma", preNeedSize:"O‘lchamni tanlang", preMaxQty:"Oldindan buyurtmada bitta kiyimdan {n} tadan ko‘p emas",
+       preToPre:"Oldindan buyurtma qilish", preDays:"20–25 kun",
+       preNowMix:"Hozir to‘lanadi", preLaterMix:"Oldindan buyurtma uchun qolgan to‘lov, kelganda (70%)",
+       preCartNote:"Savatda oldindan buyurtma bor: hozir 30% to‘laysiz, qolgan 70% — mahsulot kelganda (20–25 kun).",
+       preCartNoteMix:"Mavjud mahsulotlar to‘liq to‘lanadi va darhol yuboriladi. Oldindan buyurtma uchun — hozir 30%, qolgan 70% — mahsulot kelganda (20–25 kun).",
+       preMixInStock:"Mavjud mahsulotlar ({sum}) to‘liq to‘lanadi va darhol yuboriladi.", prePayMixBtn:"To‘lash",
+       preMixShip:"Mavjud mahsulotlarni darhol yuboramiz, oldindan buyurtmani — kelganda.", prePayBalanceMix:"Oldindan buyurtma uchun to‘lash" },
+  tr:{ preNowInStock:"Ön siparişin bir kısmı stoğa girdi — tutar güncellendi, kontrol edip tekrar dokunun", preMixShipped:"Stoktaki ürünler gönderildi, ön sipariş geldiğinde.", preCart:"Sepete · ön sipariş", preAdded:"Sepete eklendi — ön sipariş", preNeedSize:"Beden seçin", preMaxQty:"Ön siparişte bir üründen en fazla {n} adet",
+       preToPre:"Ön sipariş olarak ver", preDays:"20–25 gün",
+       preNowMix:"Şimdi ödenecek", preLaterMix:"Ön sipariş için kalan ödeme, gelince (%70)",
+       preCartNote:"Sepette ön sipariş var: şimdi %30 ödersiniz, kalan %70 ürün geldiğinde (20–25 gün).",
+       preCartNoteMix:"Stoktaki ürünlerin tamamı ödenir ve hemen gönderilir. Ön sipariş için şimdi %30, kalan %70 ürün geldiğinde (20–25 gün).",
+       preMixInStock:"Stoktaki ürünler ({sum}) tamamen ödenir ve hemen gönderilir.", prePayMixBtn:"Öde",
+       preMixShip:"Stoktaki ürünleri hemen gönderiyoruz, ön siparişi geldiğinde.", prePayBalanceMix:"Ön sipariş için öde" },
+  az:{ preNowInStock:"Öncədən sifarişin bir hissəsi mövcud oldu — məbləğ yeniləndi, yoxlayıb yenidən toxunun", preMixShipped:"Mövcud məhsullar göndərildi, öncədən sifariş — gələndə.", preCart:"Səbətə · öncədən sifariş", preAdded:"Səbətə əlavə olundu — öncədən sifariş", preNeedSize:"Ölçü seçin", preMaxQty:"Öncədən sifarişdə bir məhsuldan {n} ədəddən çox olmaz",
+       preToPre:"Öncədən sifariş et", preDays:"20–25 gün",
+       preNowMix:"İndi ödəniləcək", preLaterMix:"Öncədən sifariş üçün qalan ödəniş, gələndə (70%)",
+       preCartNote:"Səbətdə öncədən sifariş var: indi 30% ödəyirsiniz, qalan 70% — məhsul gələndə (20–25 gün).",
+       preCartNoteMix:"Mövcud məhsullar tam ödənilir və dərhal göndərilir. Öncədən sifariş üçün — indi 30%, qalan 70% — məhsul gələndə (20–25 gün).",
+       preMixInStock:"Mövcud məhsullar ({sum}) tam ödənilir və dərhal göndərilir.", prePayMixBtn:"Ödə",
+       preMixShip:"Mövcud məhsulları dərhal göndəririk, öncədən sifarişi — gələndə.", prePayBalanceMix:"Öncədən sifariş üçün ödə" },
+  en:{ preNowInStock:"Part of your pre-order is now in stock — the amount was updated, please check and tap again", preMixShipped:"In-stock items have been shipped, the pre-order — when it arrives.", preCart:"Add to cart · pre-order", preAdded:"Added to cart — pre-order", preNeedSize:"Choose a size", preMaxQty:"Up to {n} pcs of one item per pre-order",
+       preToPre:"Make it a pre-order", preDays:"20–25 days",
+       preNowMix:"To pay now", preLaterMix:"Pre-order remainder, on arrival (70%)",
+       preCartNote:"Your cart has a pre-order: you pay 30% now and the remaining 70% when the item arrives (20–25 days).",
+       preCartNoteMix:"In-stock items are paid in full and shipped right away. For the pre-order — 30% now, the remaining 70% when it arrives (20–25 days).",
+       preMixInStock:"In-stock items ({sum}) are paid in full and shipped right away.", prePayMixBtn:"Pay",
+       preMixShip:"In-stock items ship right away, the pre-order — when it arrives.", prePayBalanceMix:"Pay for the pre-order" }
+};
+Object.keys(STR_PRECART).forEach(l => Object.assign(STR[l], STR_PRECART[l]));
 const STR_QA = {
   ru:{ sizeOut:'Размер {s} закончился', nothingFound:'Ничего не найдено — попробуйте другой фильтр' },
   uz:{ sizeOut:'{s} oʻlcham tugagan', nothingFound:'Hech narsa topilmadi — boshqa filtrni sinab koʻring' },
@@ -3003,7 +3054,7 @@ function applyLang(){
   renderSupportMsgs();
   if (!faqCustomized){ faqItems = defaultFaqItems(); }
   renderFaq();                 // и свой список из админки: встроенный вопрос «Как отследить заказ?» тоже переводится
-  try{ if (preorderItem) renderPreBox(); }catch(e){} // предзаказ на оформлении: условия и кнопка «Оплатить предоплату» на новом языке
+  try{ const _cf = document.getElementById('checkoutFlow'); if (_cf && _cf.classList.contains('pre-mode')) renderPreBox(); }catch(e){} // предзаказ на оформлении: условия и кнопка «Оплатить предоплату» на новом языке
   renderRatingSummary();       // строка со звёздами «N отзывов покупателей» на главной
   try{ renderAbroad(); }catch(e){} // названия стран и итог доставки за рубеж
   try{ if (appliedPromo) renderPromoStatus(appliedPromo); }catch(e){}
@@ -5048,6 +5099,8 @@ function cartItemStock(item){
   const hasColors = p.colors && p.colors.length;
   const c = hasColors ? p.colors.find(x => x.name === item.colorName) : null;
   if (hasColors && !c) return 0;
+  const own = (Array.isArray(p.sizes) ? p.sizes : []).map(s => (s && typeof s === 'object') ? s.size : s);
+  if (own.length && !own.includes(item.size)) return 0; // такого размера у товара нет
   return Math.max(0, Number(getSizeStock(p, c, item.size)) || 0);
 }
 function syncCartWithProducts(){
@@ -5058,6 +5111,13 @@ function syncCartWithProducts(){
     if (!p) return;
     const price = effPrice(p), old = Number(p.price || 0), disc = discOf(p);
     if (item.price !== price || item.oldPrice !== old || (item.discount || 0) !== disc){ item.price = price; item.oldPrice = old; item.discount = disc; changed = true; }
+  });
+  // предзаказ, размер которого снова появился в наличии (хватает на всё количество) — становится обычной позицией
+  cart.forEach(item => {
+    if (!item.pre || cart.some(x => x !== item && !x.pre && x.productId === item.productId && x.size === item.size && x.colorName === item.colorName)) return;
+    const k = cartStockBucket(item);
+    const used = cart.filter(x => !x.pre && cartStockBucket(x) === k).reduce((a, x) => a + (x.qty || 0), 0); // общий остаток делят другие позиции
+    if (cartItemStock(item) - used >= item.qty){ delete item.pre; changed = true; }
   });
   if (changed){ try{ localStorage.setItem('milaisss_cart', JSON.stringify(cart)); }catch(e){} }
   return changed;
@@ -5074,8 +5134,27 @@ function cartStockBucket(item){
 }
 function cartProblems(){
   const need = {};
-  cart.forEach(i => { const k = cartStockBucket(i); need[k] = (need[k] || 0) + (i.qty || 0); });
-  return cart.filter(item => cartItemStock(item) < need[cartStockBucket(item)]);
+  cart.forEach(i => { if (i.pre) return; const k = cartStockBucket(i); need[k] = (need[k] || 0) + (i.qty || 0); });
+  // предзаказ: остаток не нужен, но товар должен быть в каталоге (не скрыт и не удалён)
+  return cart.filter(item => item.pre ? !preLineValid(item) : cartItemStock(item) < need[cartStockBucket(item)]);
+}
+// позиция предзаказа ещё существует: товар в каталоге, цвет есть, размер — из размеров товара
+function preLineValid(item){
+  const p = products.find(x => x.id === item.productId); if (!p) return false;
+  if (p.colors && p.colors.length && !p.colors.some(c => c && c.name === item.colorName)) return false;
+  const own = (Array.isArray(p.sizes) ? p.sizes : []).map(s => (s && typeof s === 'object') ? s.size : s);
+  return !own.length || own.includes(item.size);
+}
+// позицию, которой нет в наличии, переводим в предзаказ (с той же вещью-предзаказом — объединяем)
+function cartToPre(idx){
+  const it = cart[idx]; if (!it || it.pre) return;
+  const p = products.find(x => x.id === it.productId);
+  if (!p || p.hidden){ showToast(t('preNoProduct')); return; }
+  const ex = cart.find(x => x !== it && x.pre === true && x.productId === it.productId && x.size === it.size && x.colorName === it.colorName);
+  const capped = (ex ? ex.qty + it.qty : it.qty) > PRE_MAX_QTY;
+  if (ex){ ex.qty = Math.min(PRE_MAX_QTY, ex.qty + it.qty); cart.splice(idx, 1); }
+  else { it.pre = true; it.qty = Math.min(PRE_MAX_QTY, it.qty); }
+  updateCartBadge(); renderCart(); showToast(capped ? t('preMaxQty').replace('{n}', PRE_MAX_QTY) : t('preAdded'));
 }
 // перед оформлением: свежие остатки прямо с сервера (а не из памяти страницы)
 async function verifyCartWithServer(){
@@ -5392,10 +5471,15 @@ function updateRestockBtn(){
   const out = !!chosen && pageSizeStock(chosen, selectedSize) <= 0;
   btn.classList.toggle('show', out);
   const pb = document.getElementById('preorderBtn');
+  const canPre = out && !currentProduct.hidden;
   if (pb){
-    pb.classList.toggle('show', out && !currentProduct.hidden);
+    pb.classList.toggle('show', canPre);
     pb.innerHTML = `<span class="pb-row">${PREORDER_ICON}<span>${t('preBtn')}</span></span><small>${t('preSub')}</small>`;
   }
+  // нет в наличии: «Добавить в корзину» кладёт предзаказ, «Заказать сразу» прячем (его заменяет «Сделать предзаказ»)
+  const ab = document.getElementById('addBtn'), bb = document.getElementById('buyNowBtn');
+  if (ab && canPre){ ab.disabled = false; ab.textContent = t('preCart'); }
+  if (bb) bb.classList.toggle('pre-hide', canPre);
   if (!out){ note.classList.remove('show'); return; }
   const done = !!myRestock[restockKey(currentProduct.id, chosen.name, selectedSize)];
   btn.classList.toggle('done', done);
@@ -5525,7 +5609,7 @@ function buyNow(){
   if (!currentProduct) return;
   const chosen = currentColors[selectedColorIdx]; if (!chosen) return;
   if (getSizeStock(currentProduct, chosen, selectedSize) <= 0) return;
-  const has = cart.some(c => c.productId === currentProduct.id && c.size === selectedSize && c.colorName === chosen.name);
+  const has = cart.some(c => !c.pre && c.productId === currentProduct.id && c.size === selectedSize && c.colorName === chosen.name);
   if (!has) addToCart(true);
   showScreen('cart');
 }
@@ -5533,10 +5617,12 @@ function addToCart(silent){
   if (!currentProduct) return;
   const chosen = currentColors[selectedColorIdx];
   if (!chosen) return;
+  // размера нет в наличии — кладём в корзину как предзаказ
+  if (pageSizeStock(chosen, selectedSize) <= 0) return addPreToCart(silent);
   const stockLimit = getSizeStock(currentProduct, chosen, selectedSize);
   if (stockLimit <= 0) return;
   const colorName = chosen.name;
-  const existing = cart.find(c => c.productId === currentProduct.id && c.size === selectedSize && c.colorName === colorName);
+  const existing = cart.find(c => !c.pre && c.productId === currentProduct.id && c.size === selectedSize && c.colorName === colorName);
   if (existing){
     if (existing.qty >= stockLimit){ showToast(t('noMoreStock')); return; }
     existing.qty++;
@@ -5574,7 +5660,7 @@ function renderCart(){
   let cartBad = false;
   let total = 0, totalOld = 0, discSet = new Set(), allDisc = true;
   const itemsHtml = cart.map((item, idx) => {
-    total += item.price * item.qty;
+    total += preLineSum(item);
     const oldP = (item.oldPrice && item.oldPrice > item.price) ? item.oldPrice : item.price;
     totalOld += oldP * item.qty;
     if (oldP > item.price) discSet.add(item.discount || Math.round((1 - item.price / oldP) * 100)); else allDisc = false;
@@ -5584,11 +5670,13 @@ function renderCart(){
     const left = cartItemStock(item);
     const bad = _probs.includes(item);
     if (bad) cartBad = true;
-    const badNote = bad ? `<div class="cart-oos">${left <= 0 ? t('cartItemOut') : t('cartItemLeft').replace('{n}', left)}</div>` : '';
+    const canConvert = bad && !item.pre && left <= 0 && product && !product.hidden;
+    const badNote = bad ? `<div class="cart-oos">${item.pre ? t('preNoProduct') : left <= 0 ? t('cartItemOut') : t('cartItemLeft').replace('{n}', left)}</div>${canConvert ? `<button type="button" class="cart-to-pre" onclick="cartToPre(${idx})">${PREORDER_ICON}<span>${escH(t('preToPre'))}</span></button>` : ''}` : '';
     return `
-      <div class="cart-item${bad ? ' is-oos' : ''}">
+      <div class="cart-item${bad ? ' is-oos' : ''}${item.pre ? ' is-pre' : ''}">
         <div class="thumb" ${thumbStyle}>${item.image ? '' : item.emoji}</div>
         <div class="meta">
+          ${item.pre ? `<span class="pre-badge">${escH(t('preBadge'))} · ${escH(t('preDays'))}</span>` : ''}
           <div class="name">${displayName}</div>
           <div class="opts">${t('sizeWord')} ${item.size} · ${item.colorName} · ${item.qty} ${t('pcsWord')}</div>
           <div class="price">${oldP > item.price ? `<span class="old">${fmt(oldP * item.qty)}</span>` : ''}${fmt(item.price * item.qty)}</div>
@@ -5598,6 +5686,7 @@ function renderCart(){
       </div>`;
   }).join('');
 
+  const _ct = cartTotals();
   content.innerHTML = `
     <div class="cart-list">${itemsHtml}</div>
     <div class="cart-summary">
@@ -5605,7 +5694,10 @@ function renderCart(){
       ${totalOld > total ? `<div class="sum-row"><span>${t('discountWord')}${(allDisc && discSet.size === 1) ? ' −' + [...discSet][0] + '%' : ''}</span><span>−${fmt(totalOld - total)}</span></div>` : ''}
       <div class="sum-row"><span>${t('deliveryLabel')}</span><span>${t('deliveryAgreed')}</span></div>
       <div class="sum-row total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
+      ${_ct.preSum > 0 ? `<div class="sum-row pre-now"><span>${escH(t(_ct.mixed ? 'preNowMix' : 'preNow'))}</span><span>${fmt(_ct.now)}</span></div>
+      <div class="sum-row"><span>${escH(t(_ct.mixed ? 'preLaterMix' : 'preLater'))}</span><span>${fmt(_ct.later)}</span></div>` : ''}
     </div>
+    ${_ct.preSum > 0 ? `<div class="cart-pre-note">${escH(t(_ct.mixed ? 'preCartNoteMix' : 'preCartNote'))}</div>` : ''}
     ${cartBad ? `<div class="cart-oos-banner">${t('cartFixItems')}</div>` : ''}
     <button class="checkout-btn" ${cartBad ? 'disabled data-blocked="1"' : ''} onclick="goToCheckoutFlow()">${t('checkoutBtn')}</button>
     <div class="hint">${t('nextStepHint')}</div>
@@ -5615,8 +5707,10 @@ function renderCart(){
 function goToCheckoutFlow(){
   if (cart.length === 0) return;
   if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
-  preorderItem = null; setPreMode(false); // обычное оформление из корзины
   prepCheckoutForm();
+  // в корзине есть предзаказ: без промокода и доставки за рубеж, с условиями предзаказа и согласием
+  if (cartHasPre()) setShipType('uz');
+  setPreMode(cartHasPre());
   showScreen('checkoutFlow');
 }
 function prepCheckoutForm(){
@@ -5742,11 +5836,13 @@ function uzPhoneOk(v){
 
 function confirmPayment(){
   unlockSfx(); // iOS разрешает звук только в момент касания — «разблокируем» его сейчас, проиграем позже
-  if (preorderItem){
+  // оформление открыто «вперёд» в браузере, а корзина с тех пор изменилась — приводим экран в порядок
+  { const _cf = document.getElementById('checkoutFlow'); if (_cf && cartHasPre() !== _cf.classList.contains('pre-mode')){ if (cartHasPre()) setShipType('uz'); setPreMode(cartHasPre()); return; } }
+  if (cartHasPre()){
     const ag = document.getElementById('preAgree');
     if (!ag || !ag.checked){ const row = document.getElementById('preAgreeRow'); if (row){ row.classList.remove('bad'); void row.offsetWidth; row.classList.add('bad'); row.scrollIntoView({ block:'center', behavior:'smooth' }); } showToast(t('preNeedAgree')); return; }
   }
-  if (shipType === 'abroad' && !preorderItem) return confirmAbroad();
+  if (shipType === 'abroad' && !cartHasPre()) return confirmAbroad();
   const phone = document.getElementById('phoneInput').value.trim();
   const branch = selectedBtsBranch;
 
@@ -5759,7 +5855,7 @@ function confirmPayment(){
   if (!selectedPayMethod){ showToast(t('choosePay')); return; }
 
   window._payTapAt = Date.now(); // момент нажатия «Перейти к оплате» — нужен, чтобы сразу открыть приложение Uzum
-  if (!preorderItem && cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
+  if (cartProblems().length){ showToast(t('cartFixItems')); showScreen('cart'); return; }
   try{ rememberDelivery({ phone: (customerProfile && customerProfile.phone) ? '' : phone, bts: branch }); }catch(e){}
   finalizeOrder(phone, branch);
 }
@@ -5796,47 +5892,93 @@ const PREORDER_PERCENT = 30;
 const PRE_WAIT = 'Предзаказ: ждём поступления', PRE_ARRIVED = 'Прибыл, ждём доплату';
 const BALANCE_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 const depositOf = total => Math.round((Number(total) || 0) * PREORDER_PERCENT / 100);
-var preorderItem = null;
+const PRE_MAX_QTY = 5;   // одной позиции предзаказа — не больше 5 шт
+/* Корзина может содержать и товары в наличии, и предзаказ (позиции с pre: true).
+   Сейчас платится: товары в наличии — полностью, предзаказ — 30%. Доплата — 70% от предзаказа.
+   Та же формула — в платёжном воркере и в админке (orderDeposit). */
+function orderItemsList(o){ return Array.isArray(o && o.items) ? o.items.filter(it => it && typeof it === 'object') : []; }
+function orderPreItems(o){
+  if (!o || o.preorder !== true) return [];
+  const items = orderItemsList(o);
+  return items.some(it => it.pre === true) ? items.filter(it => it.pre === true) : items; // старые предзаказы: весь заказ
+}
+function orderIsMixed(o){
+  if (!o || o.preorder !== true) return false;
+  const items = orderItemsList(o);
+  return items.some(it => it.pre === true) && items.some(it => it.pre !== true);
+}
+const preLineSum = it => Math.round(Number(it.price) || 0) * (Number(it.qty) || 0);
+function orderDeposit(o){
+  const total = Number(o && o.total) || 0;
+  if (!orderIsMixed(o)) return depositOf(total);
+  const pre = orderPreItems(o).reduce((a, it) => a + preLineSum(it), 0);
+  if (!(pre > 0) || pre >= total) return depositOf(total); // некорректные данные — как обычный предзаказ
+  return total - (pre - depositOf(pre));
+}
+function cartHasPre(){ return cart.some(c => c.pre === true); }
+// итоги корзины: всего, товары предзаказа, к оплате сейчас, доплата потом
+function cartTotals(){
+  const total = cart.reduce((a, c) => a + preLineSum(c), 0);
+  const preSum = cart.filter(c => c.pre === true).reduce((a, c) => a + preLineSum(c), 0);
+  const o = { preorder: preSum > 0, total, items: cart.map(c => ({ price: c.price, qty: c.qty, pre: c.pre === true })) };
+  const now = preSum > 0 ? orderDeposit(o) : total;
+  return { total, preSum, now, later: total - now, mixed: preSum > 0 && preSum < total };
+}
 var currentOwnSizes = [];
 // остаток размера в открытой карточке: размеры из полной сетки, которых у товара нет, — всегда 0
 function pageSizeStock(color, size){
   if (size !== undefined && size !== null && currentOwnSizes.length && !currentOwnSizes.includes(size)) return 0;
   return getSizeStock(currentProduct, color, size);
 }
-function startPreorder(){
-  if (!currentProduct || currentProduct.hidden){ showToast(t('preNoProduct')); return; }
-  const c = currentColors[selectedColorIdx]; if (!c) return;
-  if (!selectedSize && currentOwnSizes.length) return;
+// предзаказ кладётся в корзину (pre: true); «Сделать предзаказ» — сразу открывает корзину
+function addPreToCart(silent){
+  if (!currentProduct || currentProduct.hidden){ showToast(t('preNoProduct')); return false; }
+  const c = currentColors[selectedColorIdx]; if (!c) return false;
+  if (!selectedSize && currentOwnSizes.length){ showToast(t('preNeedSize')); return false; }
   const p = currentProduct;
-  goToPreorderFlow({ productId:p.id, name:p.name, image:c.image || p.image || '', emoji:p.emoji || '👟', price:effPrice(p), oldPrice:Number(p.price || 0), discount:discOf(p), size:selectedSize, colorName:c.name, qty:1 });
+  const ex = cart.find(x => x.pre === true && x.productId === p.id && x.size === selectedSize && x.colorName === c.name);
+  if (ex){
+    if (ex.qty >= PRE_MAX_QTY){ showToast(t('preMaxQty').replace('{n}', PRE_MAX_QTY)); return false; }
+    ex.qty++;
+  } else {
+    cart.push({ productId:p.id, name:p.name, image:c.image || p.image || '', emoji:p.emoji || '👟', price:effPrice(p), oldPrice:Number(p.price || 0), discount:discOf(p), size:selectedSize, colorName:c.name, qty:1, pre:true });
+  }
+  updateCartBadge();
+  if (tg) try{ tg.HapticFeedback.notificationOccurred('success'); }catch(e){}
+  if (silent !== true) showToast(t('preAdded'));
+  return true;
+}
+function startPreorder(){
+  if (addPreToCart(true)) showScreen('cart');
 }
 function renderPreBox(){
   const box = document.getElementById('preBox'); if (!box) return;
-  const it = preorderItem; if (!it){ box.innerHTML = ''; return; }
-  const pr = products.find(x => x.id === it.productId);
-  const nm = pr ? getTranslatedProductName(pr) : it.name;
-  const total = it.price * it.qty, dep = depositOf(total);
-  const img = it.image ? `background-image:url('${String(it.image).replace(/'/g, '%27')}')` : '';
+  syncCartWithProducts();
+  const pres = cart.filter(c => c.pre === true);
+  if (!pres.length){ setPreMode(false); return; } // предзаказ стал товаром в наличии — обычное оформление
+  const ct = cartTotals();
+  const rows = pres.map(it => {
+    const pr = products.find(x => x.id === it.productId);
+    const nm = pr ? getTranslatedProductName(pr) : it.name;
+    const img = it.image ? `background-image:url('${String(it.image).replace(/'/g, '%27')}')` : '';
+    return `<div class="pre-item"><div class="pi-img" style="${img}"></div><div><span class="pre-badge">${escH(t('preBadge'))}</span><b>${escH(nm)}</b><small>${escH(String(it.size == null ? '' : it.size))}${it.colorName ? ' · ' + escH(it.colorName) : ''} · ${it.qty} ${escH(t('pcsWord'))} · ${fmt(preLineSum(it))}</small></div></div>`;
+  }).join('');
+  const preDep = depositOf(ct.preSum);
   box.innerHTML = `
-    <div class="pre-item"><div class="pi-img" style="${img}"></div><div><span class="pre-badge">${escH(t('preBadge'))}</span><b>${escH(nm)}</b><small>${escH(String(it.size == null ? '' : it.size))}${it.colorName ? ' · ' + escH(it.colorName) : ''} · ${fmt(total)}</small></div></div>
-    <div class="pre-sum"><div class="now"><small>${escH(t('preNow'))}</small><b>${fmt(dep)}</b></div><div><small>${escH(t('preLater'))}</small><b>${fmt(total - dep)}</b></div></div>
-    <div class="pre-terms"><b>${escH(t('preTitle'))}</b><ul>${t('preTerms').replace('{dep}', fmt(dep))}</ul></div>
+    <div class="pre-list">${rows}</div>
+    ${ct.mixed ? `<div class="pre-mix">${escH(t('preMixInStock')).replace('{sum}', fmt(ct.total - ct.preSum))}</div>` : ''}
+    <div class="pre-sum"><div class="now"><small>${escH(t(ct.mixed ? 'preNowMix' : 'preNow'))}</small><b>${fmt(ct.now)}</b></div><div><small>${escH(t(ct.mixed ? 'preLaterMix' : 'preLater'))}</small><b>${fmt(ct.later)}</b></div></div>
+    <div class="pre-terms"><b>${escH(t('preTitle'))}</b><ul>${t('preTerms').replace('{dep}', fmt(preDep))}</ul></div>
     <label class="pre-agree" id="preAgreeRow"><input type="checkbox" id="preAgree" onchange="document.getElementById('preAgreeRow').classList.remove('bad')"><span>${escH(t('preAgree'))}</span></label>`;
   const btn = document.getElementById('confirmPaymentBtn');
-  if (btn) btn.textContent = `${t('prePayBtn')} · ${fmt(dep)}`;
+  if (btn) btn.textContent = `${t(ct.mixed ? 'prePayMixBtn' : 'prePayBtn')} · ${fmt(ct.now)}`;
 }
 function setPreMode(on){
   const scr = document.getElementById('checkoutFlow'); if (scr) scr.classList.toggle('pre-mode', !!on);
   const btn = document.getElementById('confirmPaymentBtn');
   if (on) renderPreBox(); else { const box = document.getElementById('preBox'); if (box) box.innerHTML = ''; if (btn) btn.textContent = t('confirmTransferBtn'); }
 }
-function goToPreorderFlow(item){
-  preorderItem = item;
-  prepCheckoutForm();
-  setShipType('uz');
-  setPreMode(true);
-  showScreen('checkoutFlow');
-}
+
 /* ---------- онлайн-оплата через Click ---------- */
 const CLICK_SERVICE_ID = '114488';
 const CLICK_MERCHANT_ID = '66057';
@@ -5943,9 +6085,9 @@ function payOrderAgain(orderId){
   if (payLeftMs(o) <= 0){ showToast(t('payExpired')); return; }
   if (o.paymentMethod === 'Uzum Bank'){
     try{ localStorage.setItem('milaisss_uzum_wait', JSON.stringify({ id: o.id, t: Date.now() })); }catch(e){}
-    _uzumUrl = uzumPayUrl(o.id, o.preorder ? depositOf(o.total) : o.total); openUzumLink(_uzumUrl); return;
+    _uzumUrl = uzumPayUrl(o.id, o.preorder ? orderDeposit(o) : o.total); openUzumLink(_uzumUrl); return;
   }
-  goToOnlinePay('click', o.id, o.preorder ? depositOf(o.total) : o.total);
+  goToOnlinePay('click', o.id, o.preorder ? orderDeposit(o) : o.total);
 }
 // доплата 70% по предзаказу, когда товар приехал (3 дня с момента «Прибыл»)
 function balanceOpen(o){ return o && o.preorder === true && o.depositPaid === true && o.paid !== true && o.status === PRE_ARRIVED && Number(o.arrivedAt) > 0; }
@@ -5956,7 +6098,7 @@ function payBalance(orderId, method){
   if (balanceLeftMs(o) <= 0){ showToast(t('preBalanceExpired')); return; }
   // доплата — тем же способом, что и предоплата (так пробивается один чек на полную сумму)
   if (o.depositMethod === 'Click') method = 'click'; else if (o.depositMethod === 'Uzum Bank') method = 'uzum';
-  const pid = o.id + '_b', amount = Number(o.total) - depositOf(o.total);
+  const pid = o.id + '_b', amount = Number(o.total) - orderDeposit(o);
   window._payTapAt = Date.now();
   if (method === 'uzum'){
     try{ localStorage.setItem('milaisss_uzum_wait', JSON.stringify({ id: pid, t: Date.now() })); }catch(e){}
@@ -6174,25 +6316,21 @@ async function applyPromo(){
 }
 
 function finalizeOrder(phone, branch){
-  const pre = preorderItem;
-  if (_ordering || (!pre && !cart.length)) return;
-  if (pre){
-    // предзаказ: актуальная цена товара из каталога
-    const pp = products.find(x => x.id === pre.productId);
-    if (!pp || pp.hidden){ showToast(t('preNoProduct')); return; }
-    pre.price = effPrice(pp); pre.oldPrice = Number(pp.price || 0); pre.discount = discOf(pp); pre.qty = 1;
-  } else {
-    syncCartWithProducts(); // актуальные цены (если ты изменил цену, пока клиент был на оформлении)
-  }
+  if (_ordering || !cart.length) return;
+  const _preBefore = cart.filter(c => c.pre).length;
+  syncCartWithProducts(); // актуальные цены (если ты изменил цену, пока клиент был на оформлении)
+  // предзаказ только что появился в наличии — сумма к оплате изменилась: показываем новую и ждём повторного нажатия
+  if (cart.filter(c => c.pre).length !== _preBefore){ setPreMode(cartHasPre()); showToast(t('preNowInStock')); return; }
+  const pre = cartHasPre();          // в заказе есть предзаказ (pre: true)
   _ordering = true;
   const _payMethod = selectedPayMethod;
   let total = 0;
-  let text = pre ? "Здравствуйте! Хочу оформить ПРЕДЗАКАЗ (предоплата " + PREORDER_PERCENT + "%):\n\n" : "Здравствуйте! Хочу оформить заказ:\n\n";
+  let text = pre ? "Здравствуйте! Хочу оформить заказ с ПРЕДЗАКАЗОМ (предоплата " + PREORDER_PERCENT + "% за предзаказ):\n\n" : "Здравствуйте! Хочу оформить заказ:\n\n";
   const orderItems = [];
-  (pre ? [pre] : cart).forEach(item => {
-    total += item.price * item.qty;
-    text += `• ${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
-    orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:item.price, oldPrice:item.oldPrice||item.price, discount:item.discount||0, image:item.image||'' });
+  cart.forEach(item => {
+    total += preLineSum(item);
+    text += `• ${item.pre ? '🕓 ПРЕДЗАКАЗ: ' : ''}${item.name} — размер ${item.size}, цвет: ${item.colorName}, ${item.qty} шт\n`;
+    orderItems.push({ productId:item.productId, name:item.name, size:item.size, colorName:item.colorName, qty:item.qty, price:Math.round(Number(item.price) || 0), oldPrice:item.oldPrice||item.price, discount:item.discount||0, image:item.image||'', ...(item.pre ? { pre:true } : {}) });
   });
   const methodLabel = PAY_METHOD_LABELS[selectedPayMethod] || selectedPayMethod || 'Уточняется';
   const orderNote = ((document.getElementById('orderNoteInput')||{}).value || '').trim().slice(0,300);
@@ -6233,8 +6371,11 @@ function finalizeOrder(phone, branch){
   if (confirmBtn){ confirmBtn.disabled = true; confirmBtn.textContent = t('confirmingText'); }
 
   const notifyChatId = '';
-  const deposit = pre ? depositOf(total) : 0;
-  if (pre) text += `\n🕓 Предзаказ: предоплата ${PREORDER_PERCENT}% — ${fmtRu(deposit)}, остаток ${fmtRu(total - deposit)} при поступлении`;
+  const deposit = pre ? orderDeposit({ preorder: true, items: orderItems, total }) : 0;
+  const mixed = pre && orderIsMixed({ preorder: true, items: orderItems });
+  if (pre) text += mixed
+    ? `\n🕓 Оплата сейчас: ${fmtRu(deposit)} (товары в наличии полностью + ${PREORDER_PERCENT}% за предзаказ), доплата ${fmtRu(total - deposit)} при поступлении`
+    : `\n🕓 Предзаказ: предоплата ${PREORDER_PERCENT}% — ${fmtRu(deposit)}, остаток ${fmtRu(total - deposit)} при поступлении`;
   const payAmount = pre ? deposit : total; // сколько платим сейчас
   const orderData = {
     customerId, customerName, items: orderItems, total,
@@ -6243,14 +6384,15 @@ function finalizeOrder(phone, branch){
     lang, notifyChatId, ...promoFields, ...abroadFields,
     ...(pre ? { preorder: true, depositPercent: PREORDER_PERCENT, deposit } : {})
   };
-  // обычный заказ: проверка наличия, списание и запись заказа — одна транзакция по свежим данным сервера.
-  // предзаказ: товара нет в наличии — только записываем заказ, остатки не трогаем
+  // проверка наличия, списание и запись заказа — одна транзакция по свежим данным сервера.
+  // позиции предзаказа (pre: true) со склада не списываются — их нет в наличии
   const orderRef = db.collection('orders').doc();
-  (pre ? orderRef.set(orderData) : decrementStockForOrder(orderItems, orderRef, orderData)).then(() => {
+  const stockItems = orderItems.filter(it => !it.pre);
+  (stockItems.length ? decrementStockForOrder(stockItems, orderRef, orderData) : orderRef.set(orderData)).then(() => {
     const orderId = orderRef.id;
     const payOnline = ONLINE_PAY_METHODS.includes(selectedPayMethod) && orderId;
-    const _custNote = workerNotify('customer', buildOrderNotifyText(orderItems, total, branch) + (pre ? `\n\n🕓 ${t('preBadge')}: ${t('preDep')} — ${fmt(deposit)}, ${t('preBal')} — ${fmt(total - deposit)}` : ''));
-    if (pre){ preorderItem = null; setPreMode(false); } else { cart = []; updateCartBadge(); }
+    const _custNote = workerNotify('customer', buildOrderNotifyText(orderItems, total, branch) + (pre ? `\n\n🕓 ${t('preBadge')}: ${t(mixed ? 'preNowMix' : 'preDep')} — ${fmt(deposit)}, ${t(mixed ? 'preLaterMix' : 'preBal')} — ${fmt(total - deposit)}` : ''));
+    cart = []; updateCartBadge(); setPreMode(false);
     clearPromo(true);
     document.getElementById('phoneInput').value = '';
     const _n2 = document.getElementById('orderNoteInput'); if (_n2) _n2.value = '';
@@ -6277,7 +6419,7 @@ function finalizeOrder(phone, branch){
       showToast(t('orderFail'));
     }
   }).finally(() => {
-    if (confirmBtn){ confirmBtn.disabled = false; confirmBtn.textContent = confirmBtnOriginalText; }
+    if (confirmBtn){ confirmBtn.disabled = false; confirmBtn.textContent = cart.length ? confirmBtnOriginalText : t('confirmTransferBtn'); }
   });
 }
 
@@ -6492,29 +6634,30 @@ function _renderStatusListInner(wrap, orders){
         const img = it.image || (pr && pr.image) || '';
         const nm = pr ? getTranslatedProductName(pr) : it.name;
         return `<div class="trk-item"><div class="trk-img" style="${img ? `background-image:url('${String(img).replace(/'/g,"%27")}')` : ''}">${img ? '' : '👟'}</div>
-          <div class="trk-info"><div class="trk-name">${nm}</div>
+          <div class="trk-info">${o.preorder === true && orderPreItems(o).includes(it) && orderIsMixed(o) ? `<span class="pre-badge">${escH(t('preBadge'))}</span>` : ''}<div class="trk-name">${nm}</div>
           <div class="trk-chips"><span>${it.size}</span><span>${it.colorName}</span><span>× ${it.qty}</span><span class="pr">${fmt(it.price*it.qty)}</span></div></div></div>`;
       }).join('')}
       ${o.status === 'Доставлен' ? (o.items||[]).map((it, ii) => reviewFormHTML(o, it, ii)).join('') : ''}
       <div class="trk-state"><span>${new Date(o.createdAt).toLocaleDateString('ru-RU')}</span><b>${translateStatus(o.status)}</b></div>
       ${o.preorder === true ? preorderInfoHTML(o) : ''}
-      ${isUnpaidOnline(o) ? `<button class="trk-pay" type="button" data-exp="${(Number(o.createdAt)||0) + PAY_WINDOW_MS}" onclick="payOrderAgain('${String(o.id).replace(/[^A-Za-z0-9_-]/g,'')}')">${t('payNow')} · ${fmt(o.preorder ? depositOf(o.total) : o.total)} · <span class="cd">${fmtLeft(payLeftMs(o))}</span></button>` : ''}
+      ${isUnpaidOnline(o) ? `<button class="trk-pay" type="button" data-exp="${(Number(o.createdAt)||0) + PAY_WINDOW_MS}" onclick="payOrderAgain('${String(o.id).replace(/[^A-Za-z0-9_-]/g,'')}')">${t('payNow')} · ${fmt(o.preorder ? orderDeposit(o) : o.total)} · <span class="cd">${fmtLeft(payLeftMs(o))}</span></button>` : ''}
       ${o.status === 'Отменён' ? `<div class="trk-expired">${t('payExpired')}</div>` : trackHTML(o.status)}
     </div>`).join('');
 }
 function preorderInfoHTML(o){
   const id = String(o.id).replace(/[^A-Za-z0-9_-]/g, '');
-  const dep = depositOf(o.total), bal = Number(o.total) - dep;
+  const dep = orderDeposit(o), bal = Number(o.total) - dep, mix = orderIsMixed(o);
   const depOk = o.depositPaid === true || o.paid === true, balOk = o.paid === true;
   let h = `<div class="trk-pre"><span class="pre-badge">${escH(t('preBadge'))}</span>
-    <div class="pr-row"><span>${escH(t('preDep'))} · ${fmt(dep)}</span><span class="${depOk ? 'ok' : 'no'}">${depOk ? '✓ ' + escH(t('prePaid')) : escH(t('preNotPaid'))}</span></div>
-    <div class="pr-row"><span>${escH(t('preBal'))} · ${fmt(bal)}</span><span class="${balOk ? 'ok' : 'no'}">${balOk ? '✓ ' + escH(t('prePaid')) : escH(t('preNotPaid'))}</span></div>`;
+    ${mix ? `<div class="pr-mix">${o.inStockShippedAt ? '✓ ' + escH(t('preMixShipped')) : escH(t('preMixShip'))}</div>` : ''}
+    <div class="pr-row"><span>${escH(t(mix ? 'preNowMix' : 'preDep'))} · ${fmt(dep)}</span><span class="${depOk ? 'ok' : 'no'}">${depOk ? '✓ ' + escH(t('prePaid')) : escH(t('preNotPaid'))}</span></div>
+    <div class="pr-row"><span>${escH(t(mix ? 'preLaterMix' : 'preBal'))} · ${fmt(bal)}</span><span class="${balOk ? 'ok' : 'no'}">${balOk ? '✓ ' + escH(t('prePaid')) : escH(t('preNotPaid'))}</span></div>`;
   const aph = (Array.isArray(o.arrivalPhotos) ? o.arrivalPhotos : []).filter(u => safeUrl(u)).slice(0, 3);
   if (aph.length) h += `<div class="trk-aph"><small>${escH(t('preArrPhoto'))}</small><div>${aph.map((u, k) => `<img src="${safeUrl(u)}" alt="" loading="lazy" onclick="openLightbox(Array.from(this.parentNode.querySelectorAll('img')).map(i => i.getAttribute('src')), ${k})">`).join('')}</div></div>`;
   if (balanceOpen(o)){
     if (balanceLeftMs(o) > 0){
       const until = new Date(Number(o.arrivedAt) + BALANCE_WINDOW_MS).toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
-      h += `<div class="trk-bal"><div class="trk-bal-note">${escH(t('prePayBalance'))} · <b>${fmt(bal)}</b> · ${escH(t('preUntil'))} ${escH(until)}</div>
+      h += `<div class="trk-bal"><div class="trk-bal-note">${escH(t(mix ? 'prePayBalanceMix' : 'prePayBalance'))} · <b>${fmt(bal)}</b> · ${escH(t('preUntil'))} ${escH(until)}</div>
         ${o.depositMethod === 'Uzum Bank' ? '' : `<button type="button" onclick="payBalance('${id}','click')">Click</button>`}${o.depositMethod === 'Click' ? '' : `<button type="button" onclick="payBalance('${id}','uzum')">Uzum Bank</button>`}</div>`;
     } else h += `<div class="trk-expired">${escH(t('preBalanceExpired'))}</div>`;
   }
@@ -7227,7 +7370,7 @@ const inCartN = id => cart.some(c => c.productId === id);
 function nxPieceStates(){ document.querySelectorAll('#nxPieces .nx-piece').forEach(r => { const on = inCartN(r.dataset.id); const b = r.querySelector('.nx-plus'); b.classList.toggle('on', on); b.setAttribute('aria-label', on ? '✓' : '+'); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
 function nxPutInCart(p, c, size){ // тот же формат позиции, что у кнопки «Добавить в корзину» в карточке
   if (getSizeStock(p, c, size) <= 0) return false;
-  if (!cart.some(x => x.productId === p.id && x.size === size && x.colorName === c.name))
+  if (!cart.some(x => !x.pre && x.productId === p.id && x.size === size && x.colorName === c.name))
     cart.push({ productId:p.id, name:p.name, image:c.image || p.image || '', emoji:p.emoji || '👟', price:effPrice(p), oldPrice:Number(p.price || 0), discount:discOf(p), size, colorName:c.name, qty:1 });
   updateCartBadge(); if (typeof tg !== 'undefined' && tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
   showToast(t('addedCart')); return true;

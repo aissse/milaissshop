@@ -54,7 +54,7 @@ const REQUISITES = {
   email:    "",   // эл. почта
   hours:    ""    // например: ежедневно 09:00–20:00
 };
-const EDITION = "26.11.2026";
+const EDITION = "27.11.2026";
 
 const LANGS = { ru:'RU', uz:'UZ', tr:'TR', az:'AZ', en:'EN' };
 
@@ -109,7 +109,8 @@ const T = {
        "Ориентировочный срок поступления Товара — 20–25 дней с момента оплаты предоплаты. Если Товар не поступил в течение 25 дней, Покупатель вправе отказаться от предзаказа и получить предоплату обратно в полном объёме. Если Покупатель согласен ожидать Товар дольше, предоплата засчитывается в его стоимость.",
        "После оплаты предоплаты Покупатель не вправе отказаться от предзаказа, за исключением случая, указанного выше.",
        "О поступлении Товара Продавец сообщает через Telegram-бот и в личном кабинете. Остаток стоимости должен быть оплачен в течение 3 дней с момента уведомления. Если остаток не оплачен в этот срок, предзаказ аннулируется, а предоплата не возвращается, так как Товар был заказан специально для Покупателя.",
-       "Отправка Товара через BTS производится после полной оплаты. Фискальный чек выдаётся на полную стоимость Товара после полной оплаты."]]
+       "Отправка Товара через BTS производится после полной оплаты. Фискальный чек выдаётся на полную стоимость Товара после полной оплаты.",
+       "Товары в наличии и предзаказ можно оформить в одном заказе. В этом случае товары в наличии оплачиваются полностью и отправляются сразу, а предоплата 30% и остаток 70% рассчитываются от стоимости товаров предзаказа. Фискальный чек на весь заказ выдаётся после его полной оплаты."]]
     ]
   },
   uz:{
@@ -162,7 +163,8 @@ const T = {
        "Mahsulotning taxminiy kelish muddati — oldindan to‘lov qilingan kundan boshlab 20–25 kun. Agar Mahsulot 25 kun ichida kelmasa, Xaridor oldindan buyurtmadan voz kechib, oldindan to‘lovni to‘liq qaytarib olishga haqli. Agar Xaridor uzoqroq kutishga rozi bo‘lsa, oldindan to‘lov Mahsulot narxiga hisoblanadi.",
        "Oldindan to‘lovdan keyin Xaridor yuqorida ko‘rsatilgan holatdan tashqari oldindan buyurtmadan voz kechishga haqli emas.",
        "Mahsulot kelgani haqida Sotuvchi Telegram-bot va shaxsiy kabinet orqali xabar beradi. Qolgan summa xabardan keyin 3 kun ichida to‘lanishi kerak. Agar shu muddatda to‘lanmasa, oldindan buyurtma bekor qilinadi va oldindan to‘lov qaytarilmaydi, chunki Mahsulot aynan Xaridor uchun buyurtma qilingan.",
-       "Mahsulot BTS orqali to‘liq to‘lovdan keyin yuboriladi. Fiskal chek to‘liq to‘lovdan keyin Mahsulotning to‘liq narxiga beriladi."]]
+       "Mahsulot BTS orqali to‘liq to‘lovdan keyin yuboriladi. Fiskal chek to‘liq to‘lovdan keyin Mahsulotning to‘liq narxiga beriladi.",
+       "Mavjud mahsulotlar va oldindan buyurtmani bitta buyurtmada rasmiylashtirish mumkin. Bunda mavjud mahsulotlar to‘liq to‘lanadi va darhol yuboriladi, 30% oldindan to‘lov va qolgan 70% esa oldindan buyurtma mahsulotlari narxidan hisoblanadi. Butun buyurtma uchun fiskal chek u to‘liq to‘langandan keyin beriladi."]]
     ]
   },
   tr:{
@@ -215,7 +217,8 @@ const T = {
        "Ürünün tahmini geliş süresi ön ödemeden itibaren 20–25 gündür. Ürün 25 gün içinde gelmezse Alıcı ön siparişten vazgeçip ön ödemenin tamamını geri alma hakkına sahiptir. Alıcı daha uzun beklemeyi kabul ederse ön ödeme Ürün bedeline sayılır.",
        "Ön ödemeden sonra Alıcı, yukarıda belirtilen durum dışında ön siparişten vazgeçemez.",
        "Satıcı, Ürünün geldiğini Telegram botu ve kişisel hesap üzerinden bildirir. Kalan tutar bildirimden itibaren 3 gün içinde ödenmelidir. Bu süre içinde ödenmezse ön sipariş iptal edilir ve ön ödeme iade edilmez; çünkü Ürün özellikle Alıcı için sipariş edilmiştir.",
-       "Ürün, tam ödemeden sonra BTS ile gönderilir. Mali fiş, tam ödemeden sonra Ürünün toplam bedeli için verilir."]]
+       "Ürün, tam ödemeden sonra BTS ile gönderilir. Mali fiş, tam ödemeden sonra Ürünün toplam bedeli için verilir.",
+       "Stoktaki ürünler ve ön sipariş tek bir siparişte verilebilir. Bu durumda stoktaki ürünlerin tamamı ödenir ve hemen gönderilir; %30 ön ödeme ve kalan %70 ise ön sipariş ürünlerinin fiyatı üzerinden hesaplanır. Siparişin tamamı için mali fiş, sipariş tamamen ödendikten sonra verilir."]]
     ]
   },
   az:{
@@ -268,7 +271,8 @@ const T = {
        "Məhsulun təxmini gəlmə müddəti ilkin ödənişdən 20–25 gündür. Məhsul 25 gün ərzində gəlməsə, Alıcı öncədən sifarişdən imtina edib ilkin ödənişi tam geri almaq hüququna malikdir. Alıcı daha uzun gözləməyə razıdırsa, ilkin ödəniş Məhsulun dəyərinə hesablanır.",
        "İlkin ödənişdən sonra Alıcı yuxarıda göstərilən hal istisna olmaqla öncədən sifarişdən imtina edə bilməz.",
        "Satıcı Məhsulun gəlməsi barədə Telegram-bot və şəxsi kabinet vasitəsilə məlumat verir. Qalan məbləğ bildirişdən sonra 3 gün ərzində ödənilməlidir. Bu müddətdə ödənilməsə, öncədən sifariş ləğv edilir və ilkin ödəniş qaytarılmır, çünki Məhsul məhz Alıcı üçün sifariş edilib.",
-       "Məhsul tam ödənişdən sonra BTS ilə göndərilir. Fiskal çek tam ödənişdən sonra Məhsulun tam dəyərinə verilir."]]
+       "Məhsul tam ödənişdən sonra BTS ilə göndərilir. Fiskal çek tam ödənişdən sonra Məhsulun tam dəyərinə verilir.",
+       "Mövcud məhsullar və öncədən sifariş bir sifarişdə rəsmiləşdirilə bilər. Bu halda mövcud məhsullar tam ödənilir və dərhal göndərilir, 30% ilkin ödəniş və qalan 70% isə öncədən sifariş məhsullarının dəyərindən hesablanır. Bütün sifariş üçün fiskal çek o tam ödənildikdən sonra verilir."]]
     ]
   },
   en:{
@@ -321,7 +325,8 @@ const T = {
        "The estimated arrival time is 20–25 days from the deposit payment. If the Product has not arrived within 25 days, the Buyer may cancel the pre-order and receive the deposit back in full. If the Buyer agrees to wait longer, the deposit counts towards the price of the Product.",
        "After paying the deposit, the Buyer may not cancel the pre-order except in the case described above.",
        "The Seller notifies the Buyer of the Product’s arrival via the Telegram bot and the personal account. The remaining amount must be paid within 3 days of the notification. If it is not paid within this period, the pre-order is cancelled and the deposit is not refunded, as the Product was ordered specifically for the Buyer.",
-       "The Product is shipped via BTS after full payment. The fiscal receipt is issued for the full price of the Product after full payment."]]
+       "The Product is shipped via BTS after full payment. The fiscal receipt is issued for the full price of the Product after full payment.",
+       "In-stock Products and pre-orders may be placed in one order. In that case, in-stock Products are paid in full and shipped right away, while the 30% deposit and the remaining 70% are calculated from the price of the pre-ordered Products. The fiscal receipt for the whole order is issued after it is paid in full."]]
     ]
   }
 };
