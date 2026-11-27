@@ -252,7 +252,32 @@
     <div class="tab-panel" id="tab-stock">
       <div class="card">
         <h1>Остатки по складу</h1>
-        <p class="hint" style="margin-top:0;">Наличие по каждому цвету всех товаров.</p>
+        <p class="hint" style="margin-top:0;">Нажмите на категорию, затем на товар — откроются остатки по цветам и размерам.</p>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+          <input type="search" id="stockSearch" placeholder="Поиск товара…" oninput="renderStockList()" style="flex:1; min-width:160px;">
+          <select id="stockFilter" onchange="renderStockList()" style="width:auto;">
+            <option value="all">Все</option><option value="in">✅ Есть в наличии</option><option value="low">⚠️ Мало (1–2 шт)</option><option value="out">⏳ Нет в наличии</option>
+          </select>
+        </div>
+        <style>
+          .stk-cat{ border:1px solid var(--line); border-radius:12px; margin-bottom:8px; overflow:hidden; }
+          .stk-cat > summary{ list-style:none; cursor:pointer; padding:12px 14px; display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; background:rgba(0,0,0,.025); }
+          .stk-cat > summary::-webkit-details-marker, .stk-p > summary::-webkit-details-marker{ display:none; }
+          .stk-cat > summary::after, .stk-p > summary::after{ content:'›'; margin-left:auto; font-size:20px; line-height:1; transition:transform .2s; color:#888; }
+          .stk-cat[open] > summary::after, .stk-p[open] > summary::after{ transform:rotate(90deg); }
+          .stk-cat .stk-cnt{ font-weight:600; font-size:12px; color:#777; }
+          .stk-p{ border-top:1px solid var(--line); }
+          .stk-p > summary{ list-style:none; cursor:pointer; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:13px; }
+          .stk-p > summary img{ width:40px; height:40px; border-radius:8px; object-fit:cover; background:#f2f2f2; flex-shrink:0; }
+          .stk-p .stk-nm{ font-weight:700; line-height:1.25; }
+          .stk-tag{ font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; white-space:nowrap; }
+          .stk-tag.in{ background:#E3F4E8; color:#1E6B3A; } .stk-tag.low{ background:#FFF1D6; color:#8A5A1E; } .stk-tag.out{ background:#FBE4E4; color:#a83232; }
+          .stk-body{ padding:4px 14px 12px 64px; }
+          .stk-color{ font-size:12px; font-weight:700; margin:6px 0 4px; }
+          .stk-sizes{ display:flex; flex-wrap:wrap; gap:5px; }
+          .stk-sizes span{ font-size:12px; padding:4px 8px; border-radius:8px; background:#f3f3f3; }
+          .stk-sizes span.zero{ background:#FBE4E4; color:#a83232; font-weight:700; } .stk-sizes span.low{ background:#FFF1D6; color:#8A5A1E; font-weight:700; }
+        </style>
         <div id="stockList"></div>
       </div>
     </div>
@@ -1348,22 +1373,43 @@ function renderRestock(){
   wrap.querySelectorAll('[data-restock-id]').forEach(el => { el.onclick = () => deleteRestock(el.dataset.restockId); });
 }
 
+// какие категории и товары раскрыты — сохраняем, чтобы при обновлении списка ничего не схлопывалось
+const _stkOpenCats = new Set(), _stkOpenProds = new Set();
 function renderStockList(){
   const wrap = document.getElementById('stockList');
   if (allProducts.length === 0){ wrap.innerHTML = '<p class="hint">Пока нет товаров</p>'; return; }
-  wrap.innerHTML = allProducts.map(p => {
-    const colors = (p.colors && p.colors.length) ? p.colors : [{name:'Стандарт', stock:p.stock||0}];
-    const breakdownHTML = colors.map(c => {
-      if (c.sizeStocks && Object.keys(c.sizeStocks).length){
-        return Object.entries(c.sizeStocks).map(([size, stock]) => `<div class="stock-item ${(Number(stock)||0)<=0?'zero':''}"><span>${escH(c.name)} · ${escH(size)}</span><span>${Number(stock)||0} шт</span></div>`).join('');
-      }
-      return `<div class="stock-item ${(Number(c.stock)||0)<=0?'zero':''}"><span>${escH(c.name)}</span><span>${Number(c.stock)||0} шт</span></div>`;
+  const q = String((document.getElementById('stockSearch') || {}).value || '').trim().toLowerCase();
+  const flt = (document.getElementById('stockFilter') || {}).value || 'all';
+  const rows = allProducts.map(p => {
+    const colors = (p.colors && p.colors.length) ? p.colors : [{ name:'Стандарт', stock:p.stock || 0 }];
+    let total = 0, minPos = Infinity;
+    const body = colors.map(c => {
+      const pairs = (c.sizeStocks && Object.keys(c.sizeStocks).length) ? Object.entries(c.sizeStocks) : [['', c.stock]];
+      return `<div class="stk-color">${escH(c.name || 'Стандарт')}</div><div class="stk-sizes">${pairs.map(([sz, st]) => {
+        const n = Number(st) || 0; total += n; if (n > 0) minPos = Math.min(minPos, n);
+        return `<span class="${n <= 0 ? 'zero' : n <= 2 ? 'low' : ''}">${sz ? escH(sz) + ': ' : ''}${n} шт</span>`;
+      }).join('')}</div>`;
     }).join('');
-    return `<div style="margin-bottom:10px;">
-      <div style="font-weight:700; font-size:13px; margin-bottom:4px;">${escH(p.name)}</div>
-      ${breakdownHTML}
-    </div>`;
+    const state = total <= 0 ? 'out' : total <= 2 ? 'low' : 'in';
+    return { p, body, total, state, cat: p.category || 'Без категории' };
+  }).filter(r => (!q || String(r.p.name || '').toLowerCase().includes(q)) && (flt === 'all' || r.state === flt || (flt === 'in' && r.state === 'low')));
+  if (!rows.length){ wrap.innerHTML = '<p class="hint">Ничего не найдено</p>'; return; }
+  const cats = [];
+  rows.forEach(r => { let g = cats.find(x => x.cat === r.cat); if (!g) cats.push(g = { cat: r.cat, rows: [] }); g.rows.push(r); });
+  const tagTxt = { in:'в наличии', low:'мало', out:'нет в наличии' };
+  wrap.innerHTML = cats.map(g => {
+    const sum = g.rows.reduce((a, r) => a + r.total, 0), outN = g.rows.filter(r => r.state === 'out').length;
+    const open = q || _stkOpenCats.has(g.cat);
+    return `<details class="stk-cat" data-cat="${escH(g.cat)}"${open ? ' open' : ''}>
+      <summary>${escH(g.cat)} <span class="stk-cnt">· ${g.rows.length} тов. · ${sum} шт${outN ? ` · <span style="color:#a83232;">${outN} нет</span>` : ''}</span></summary>
+      ${g.rows.map(r => `<details class="stk-p" data-id="${escH(r.p.id)}"${_stkOpenProds.has(r.p.id) ? ' open' : ''}>
+        <summary>${r.p.image ? `<img src="${escH(r.p.image)}" alt="" loading="lazy">` : ''}<div style="min-width:0;"><div class="stk-nm">${escH(r.p.name || '')}</div><div style="font-size:12px; color:#777;">${r.total} шт</div></div><span class="stk-tag ${r.state}">${tagTxt[r.state]}</span></summary>
+        <div class="stk-body">${r.body}</div>
+      </details>`).join('')}
+    </details>`;
   }).join('');
+  wrap.querySelectorAll('details.stk-cat').forEach(d => d.addEventListener('toggle', () => { d.open ? _stkOpenCats.add(d.dataset.cat) : _stkOpenCats.delete(d.dataset.cat); }));
+  wrap.querySelectorAll('details.stk-p').forEach(d => d.addEventListener('toggle', () => { d.open ? _stkOpenProds.add(d.dataset.id) : _stkOpenProds.delete(d.dataset.id); }));
 }
 
 // Запись в базу с ответом: «Сохранено ✓» или понятная ошибка (раньше ошибки молча терялись,
