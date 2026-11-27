@@ -2047,7 +2047,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261127-210";
+  const CURRENT_VERSION = "20261127-211";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -4988,8 +4988,8 @@ function sizeGridFor(p, own){
   return []; // особые размеры (например, «Universal») — сетку не навязываем
 }
 function fullSizeLabels(p, own){
-  const grid = sizeGridFor(p, own);
-  const all = own.slice(); grid.forEach(g => { if (!all.includes(g)) all.push(g); });
+  // показываем ровно те размеры, что отмечены у товара в админке; полная сетка — только если размеров не задано
+  const all = own.length ? own.slice() : sizeGridFor(p, own).slice();
   const ord = v => { const n = parseFloat(v); if (!isNaN(n)) return n; const i = ['XXS','XS','S','M','L','XL','XXL','XXXL'].indexOf(String(v).toUpperCase()); return i < 0 ? 999 : 100 + i; };
   return all.sort((a, b) => ord(a) - ord(b));
 }

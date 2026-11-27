@@ -1107,13 +1107,11 @@ function editProduct(id, p){
     else { labelList.push(s); }
   });
 
+  // размеры — ровно те, что выбраны у товара (на сайте показываются только они); у товара без размеров — вся сетка
   if (typeConfig.sizeMode === 'free'){
-    // у обуви всегда полная сетка 38–45 (+ свои размеры товара, если есть особые)
-    const numeric = !labelList.length || labelList.every(v => /^\d{2}(\.5)?$/.test(String(v).trim()));
-    const merged = numeric ? Array.from(new Set(labelList.concat(SHOE_GRID_A))).sort((a, b) => parseFloat(a) - parseFloat(b)) : labelList;
-    document.getElementById(`f_sizes_${suf}`).value = merged.join(', ');
+    document.getElementById(`f_sizes_${suf}`).value = (labelList.length ? labelList : SHOE_GRID_A).join(', ');
   } else {
-    document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => { cb.checked = true; }); // одежда: всегда S–XXL
+    document.querySelectorAll(`#sizeCheck_${suf} .size-check`).forEach(cb => { cb.checked = labelList.length ? labelList.includes(cb.value) : true; });
   }
 
   clearColorRows(`colorRows_${suf}`);
