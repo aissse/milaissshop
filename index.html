@@ -70,7 +70,7 @@
     .grid{ grid-template-columns:repeat(4,1fr); }
     .hero-photo{ aspect-ratio:2.6/1; max-height:460px; }
   }
-  .display{ font-family:'Space Grotesk',sans-serif; }
+  .display{ font-family:'Space Grotesk','Inter',sans-serif; }
   .logo{ font-family:var(--logofont); font-size:32px; font-weight:800; text-align:center; color:var(--ink); letter-spacing:-.035em; }
   .logo .slash, .app-loader-logo .slash{ color:var(--orange); }
 
@@ -114,7 +114,7 @@
   .hero-btn{ background:var(--orange); color:var(--on-orange); border:none; padding:9px 16px; border-radius:100px; font-size:12px; font-weight:700; cursor:pointer; }
 
   .section-head{ display:flex; align-items:baseline; justify-content:space-between; padding:0 20px; margin-bottom:12px; }
-  .section-head h3{ font-family:'Space Grotesk'; font-size:17px; }
+  .section-head h3{ font-family:'Space Grotesk','Inter',sans-serif; font-size:17px; }
   .view-toggle{ display:flex; gap:6px; }
   .vt-btn{ width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:var(--muted); border:1px solid var(--line); }
   .vt-btn.active{ background:var(--ink); color:var(--on-ink); border-color:var(--ink); }
@@ -140,10 +140,10 @@
   #detailPrice{ text-align:right; }
   .card .price{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; }
   .card .price .old{ order:2; display:inline; margin:0; }
-  .disc-badge{ position:absolute; top:10px; left:10px; z-index:2; background:var(--orange); color:var(--on-orange); font-size:11px; font-weight:700; padding:4px 8px; border-radius:100px; font-family:'Space Grotesk'; letter-spacing:.01em; }
+  .disc-badge{ position:absolute; top:10px; left:10px; z-index:2; background:var(--orange); color:var(--on-orange); font-size:11px; font-weight:700; padding:4px 8px; border-radius:100px; font-family:'Space Grotesk','Inter',sans-serif; letter-spacing:.01em; }
   .disc-line{ display:block; margin-top:4px; font-size:12px; font-weight:700; color:var(--ink); background:none; padding:0; white-space:nowrap; }
   .detail-body .p{ flex-shrink:0; }
-  .card .price{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; margin-top:auto; } /* цена всегда прижата к низу карточки — в одном ряду все цены на одной линии */
+  .card .price{ font-family:'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:15px; margin-top:auto; } /* цена всегда прижата к низу карточки — в одном ряду все цены на одной линии */
 
   @keyframes cardFadeIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
   .grid .card{ animation: cardFadeIn .35s ease both; }
@@ -201,8 +201,8 @@
 
   .detail-body{ padding:0 20px; }
   .detail-body .rowtop{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-  .detail-body h2{ font-family:'Space Grotesk'; font-size:21px; line-height:1.3; }
-  .detail-body .p{ font-family:'Space Grotesk'; font-size:22px; font-weight:700; white-space:nowrap; }
+  .detail-body h2{ font-family:'Space Grotesk','Inter',sans-serif; font-size:21px; line-height:1.3; }
+  .detail-body .p{ font-family:'Space Grotesk','Inter',sans-serif; font-size:22px; font-weight:700; white-space:nowrap; }
   .rating{ font-size:12px; color:var(--muted); margin-top:6px; }
   .rating .rlink{ color:var(--ink); font-weight:700; text-decoration:underline; cursor:pointer; }
   .stock-note{ font-size:12px; margin-top:6px; font-weight:600; }
@@ -250,7 +250,7 @@
   .restock-note{ display:none; flex:0 0 100%; font-size:12px; line-height:1.45; color:var(--muted); text-align:center; }
   .restock-note.show{ display:block; }
   /* предзаказ на оформлении */
-  .pre-box{ display:none; margin:0 0 16px; padding:16px; border:1px solid var(--line); border-radius:18px; background:var(--surface, transparent); }
+  .pre-box{ display:none; margin:0 20px 16px; padding:16px; border:1px solid var(--line); border-radius:18px; background:var(--surface, transparent); }
   #checkoutFlow.pre-mode .pre-box{ display:block; }
   #checkoutFlow.pre-mode #shipTypeBlock, #checkoutFlow.pre-mode #promoField, #checkoutFlow.pre-mode #abroadBlock{ display:none !important; }
   .pre-item{ display:flex; gap:12px; align-items:center; }
@@ -324,14 +324,16 @@
   .trk-item + .trk-item{ border-top:1px dashed var(--line); padding-top:12px; }
   .trk-img{ width:64px; height:64px; border-radius:16px; border:1.5px solid var(--line); background:var(--stone) center/cover no-repeat; display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0; }
   .trk-info{ flex:1; min-width:0; }
-  .trk-name{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; line-height:1.25; margin-bottom:8px; }
+  .trk-name{ font-family:'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:15px; line-height:1.25; margin-bottom:8px; }
   .trk-chips{ display:flex; flex-wrap:wrap; gap:6px; }
   .trk-chips span{ font-size:12px; font-weight:700; padding:5px 10px; border-radius:100px; background:var(--stone); color:var(--on-stone, var(--ink)); }
   .trk-chips span.pr{ background:rgba(47,91,234,.12); color:var(--trk-blue); }
   .trk-state{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); font-weight:600; margin:2px 0 12px; }
   .trk-state b{ color:var(--ink); }
   .trk{ position:relative; display:grid; grid-template-columns:repeat(4,1fr); --ic-off:#c9c9d0; }
-  html[data-theme="dark"] .trk{ --ic-off:#4a4a52; }
+  html[data-theme="dark"] .trk{ --ic-off:#5c5c66; }
+  html[data-theme="dark"] .trk-chips span.pr{ background:rgba(120,150,255,.18); color:#a9bcff; }
+  .trk-col:not(.done):not(.cur){ color:var(--muted); }
   .trk-bar{ position:absolute; top:50px; left:12.5%; right:12.5%; height:4px; border-radius:4px; background:var(--line); overflow:hidden; }
   .trk-fill{ height:100%; width:0; border-radius:4px; transition:width 1s cubic-bezier(.32,.72,0,1); }
   .trk-col{ position:relative; display:flex; flex-direction:column; align-items:center; gap:10px; font-size:11px; font-weight:700; color:var(--ic-off); text-align:center; }
@@ -365,14 +367,14 @@
   .orders-collapse > div{ overflow:hidden; min-height:0; }
   .cart-title.orders-toggle{ transition:border-color .4s ease; }
   .cart-title.orders-toggle.is-open{ border-bottom-color:transparent; }
-  .cart-title h2{ font-family:'Space Grotesk'; font-size:21px; }
+  .cart-title h2{ font-family:'Space Grotesk','Inter',sans-serif; font-size:21px; }
   .cart-list{ padding:10px 20px; display:flex; flex-direction:column; gap:12px; }
   .cart-item{ display:flex; gap:12px; border:1px solid var(--line); border-radius:16px; padding:12px; }
   .cart-item .thumb{ width:56px; height:56px; border-radius:12px; background:var(--stone); display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0; background-size:cover; background-position:center; }
   .cart-item .meta{ flex:1; }
   .cart-item .meta .name{ font-size:13px; font-weight:600; }
   .cart-item .meta .opts{ font-size:11px; color:var(--muted); margin:2px 0 6px; }
-  .cart-item .meta .price{ font-family:'Space Grotesk'; font-weight:700; font-size:14px; }
+  .cart-item .meta .price{ font-family:'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:14px; }
   .cart-item.is-oos{ border-color:var(--err-border, #c0392b); }
   .cart-item.is-oos .thumb{ opacity:.5; }
   .cart-oos{ color:var(--err-text, #c0392b); font-size:12px; font-weight:700; margin-top:4px; }
@@ -383,7 +385,7 @@
 
   .cart-summary{ padding:16px 20px 4px; }
   .sum-row{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; color:var(--text-soft); }
-  .sum-row.total{ font-family:'Space Grotesk'; font-size:17px; font-weight:700; color:var(--ink); }
+  .sum-row.total{ font-family:'Space Grotesk','Inter',sans-serif; font-size:17px; font-weight:700; color:var(--ink); }
   .checkout-btn{ width:calc(100% - 40px); margin:14px 20px 24px; background:var(--orange); color:var(--on-orange); border:none; border-radius:16px; padding:16px; font-weight:700; font-size:15px; cursor:pointer; transition:transform .15s ease, opacity .15s ease; }
   .checkout-btn:active{ transform:scale(0.97); opacity:.9; }
   .checkout-btn:disabled{ opacity:.7; cursor:default; display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -394,7 +396,10 @@
 
   #netBanner{ position:fixed; left:16px; right:16px; top:calc(env(safe-area-inset-top,0px) + 12px); z-index:900; display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--ink); color:var(--on-ink); padding:12px 14px 12px 18px; border-radius:18px; font-size:13px; font-weight:600; box-shadow:0 12px 30px -10px rgba(0,0,0,.4); }
   #netBanner button{ background:var(--orange); color:var(--on-orange); border:0; border-radius:100px; padding:8px 16px; font-size:13px; font-weight:700; cursor:pointer; }
+  #avatarGrid > .hint, #tgAvatarGrid > .hint{ grid-column:1 / -1; text-align:center; }
   .toast{ position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--on-ink); padding:12px 20px; border-radius:100px; font-size:13px; font-weight:600; opacity:0; transition:all .25s; z-index:200; white-space:normal; width:max-content; max-width:calc(100vw - 40px); text-align:center; line-height:1.35; }
+  body:has(#detail.active) .toast{ bottom:auto; top:calc(84px + env(safe-area-inset-top)); transform:translateX(-50%) translateY(-20px); }
+  body:has(#detail.active) .toast.show{ transform:translateX(-50%) translateY(0); }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
   .lightbox{ position:fixed; inset:0; background:#000; z-index:300; display:none; }
@@ -438,7 +443,7 @@
   .reviews-list{ padding:0 20px 20px; }
   .review-item{ border-bottom:1px solid var(--line); padding:14px 0; font-size:13px; line-height:1.5; }
   .reviews-summary-head{ display:flex; align-items:baseline; gap:8px; padding:6px 0 16px; }
-  .rs-avg{ font-family:'Space Grotesk'; font-size:26px; font-weight:700; }
+  .rs-avg{ font-family:'Space Grotesk','Inter',sans-serif; font-size:26px; font-weight:700; }
   .rs-sub{ font-size:12px; color:var(--muted); }
   .rev-top{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
   .rev-avatar{ width:36px; height:36px; border-radius:50%; background:var(--stone); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
@@ -559,11 +564,11 @@
   .hero-photo-text .tag{ display:inline-block; font-size:10px; color:var(--on-orange); background:var(--orange); font-weight:800; letter-spacing:.1em; text-transform:uppercase; padding:5px 10px; border-radius:6px; }
   .hero-slide .hero-btn{ background:#fff; color:#121212; padding:11px 18px; display:inline-flex; align-items:center; gap:8px; }
   .hero-slide .hero-btn::after{ content:'→'; font-size:14px; }
-  .hero-photo-text h2{ font-family:'Space Grotesk'; font-size:20px; margin:6px 0 12px; line-height:1.25; }
+  .hero-photo-text h2{ font-family:'Space Grotesk','Inter',sans-serif; font-size:20px; margin:6px 0 12px; line-height:1.25; }
 
   .rating-summary{ text-align:center; padding:10px 20px 30px; }
   .rating-summary .stars-big{ color:var(--star); font-size:20px; letter-spacing:2px; }
-  .rating-summary .rs-num{ font-family:'Space Grotesk'; font-weight:700; font-size:18px; margin-left:6px; }
+  .rating-summary .rs-num{ font-family:'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:18px; margin-left:6px; }
   .rating-summary .rs-count{ font-size:12px; color:var(--muted); margin-top:4px; }
 
   .newsletter-block{ background:var(--stone); margin:0 20px 30px; border-radius:18px; padding:26px 20px; text-align:center; }
@@ -893,6 +898,7 @@
   @media (min-width:1100px){
     .bottomnav{ max-width:560px; }
     #cart, #checkoutFlow, #profile, #support, #settings{ max-width:none; }
+    #checkoutFlow.screen.active{ max-width:640px; margin-left:auto; margin-right:auto; }
     .topbar{ padding-left:40px; padding-right:40px; }
     .cat-pills-row{ padding-left:40px; padding-right:40px; }
   }
@@ -1101,13 +1107,14 @@
   .nx-hero-info{ position:relative; z-index:3; order:2; }
   .nx-idx{ font-size:11px; font-weight:800; letter-spacing:.14em; color:var(--muted); margin-bottom:8px; }
   .nx-title{ font-size:clamp(38px,10vw,58px); color:var(--ink); height:1.92em; overflow:hidden; position:relative; }
-  .nx-title span{ display:block; transition:transform .75s cubic-bezier(.7,0,.2,1), opacity .5s ease; }
+  .nx-title span{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; transition:transform .75s cubic-bezier(.7,0,.2,1), opacity .5s ease; }
   .nx-title span.out{ transform:translateY(-105%); opacity:0; position:absolute; inset:0 auto auto 0; }
   .nx-title span.pre{ transform:translateY(105%); opacity:0; }
   .nx-meta{ color:var(--muted); font-size:13px; margin-top:8px; min-height:18px; }
   .nx-price{ font-family:'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:20px; color:var(--ink); margin:10px 0 12px; }
   .nx-price s{ color:var(--muted); font-size:14px; margin-left:8px; font-weight:500; }
   .nx-orbit{ position:relative; order:1; height:min(62vh, 520px); height:min(62svh, 520px); touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none; }
+  @media (max-width:767px){ .nx-hero{ align-content:start; padding-bottom:calc(96px + env(safe-area-inset-bottom)); } .nx-orbit{ height:min(52vh, 440px); height:min(52svh, 440px); } }
   .nx-orbit.drag{ cursor:grabbing; }
   .nx-orbit.wait::after{ content:''; position:absolute; left:50%; top:42%; width:46px; height:46px; margin:-23px 0 0 -23px; border-radius:50%; border:2px solid var(--line); border-top-color:var(--burgundy, #6A1626); animation:nxSpin .9s linear infinite; }
   @keyframes nxSpin{ to{ transform:rotate(360deg); } }
@@ -1178,6 +1185,8 @@
   .nx-cbtn svg{ width:16px; height:16px; }
   .nx-steps{ flex:1; display:flex; gap:10px; overflow:hidden; }
   .nx-step{ flex:1; font-size:10px; font-weight:800; letter-spacing:.1em; color:var(--muted); padding-top:8px; border-top:2px solid var(--line); cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:none; border-left:0; border-right:0; border-bottom:0; text-align:left; font-family:inherit; }
+  .nx-step em{ font-style:normal; }
+  @media (max-width:767px){ .nx-step em{ display:none; } .nx-step{ text-align:center; } }
   .nx-step.on{ color:var(--ink); border-top-color:var(--orange); }
   .nx-side-h{ display:flex; justify-content:space-between; font-weight:800; font-size:15px; margin-bottom:12px; }
   .nx-side-h small{ font-size:10px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
@@ -1836,8 +1845,8 @@
     <div class="filter-panel" id="filterPanel">
       <label class="block-label" style="margin-top:0;" data-i18n="fltPrice">Цена, сум</label>
       <div class="row" style="display:flex; gap:8px;">
-        <input type="number" id="filterMin" data-i18n-ph="fltFrom" placeholder="От" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
-        <input type="number" id="filterMax" data-i18n-ph="fltTo" placeholder="До" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
+        <input type="number" id="filterMin" data-i18n-ph="fltFrom" placeholder="От" style="flex:1; min-width:0; width:0; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
+        <input type="number" id="filterMax" data-i18n-ph="fltTo" placeholder="До" style="flex:1; min-width:0; width:0; border:1px solid var(--line); border-radius:10px; padding:9px 12px;">
       </div>
       <button class="btn-apply-filter" onclick="applyPriceFilter()" data-i18n="fltApply">Применить</button>
     </div>
@@ -2049,7 +2058,7 @@
 <script>
 /* ---------- auto cache-buster: reloads instantly if a newer version exists ---------- */
 (function(){
-  const CURRENT_VERSION = "20261127-213";
+  const CURRENT_VERSION = "20261127-214";
   try {
     fetch('./version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.text() : null)
@@ -2591,7 +2600,9 @@ function discOf(p){ const d = Number(p && p.discount) || 0; return (d > 0 && d <
 function effPrice(p){ const d = discOf(p); return d ? Math.round(Number(p.price||0) * (100 - d) / 100 / 100) * 100 : Number(p.price||0); }
 function priceHTML(p){ return discOf(p) ? `<span class="old">${fmt(p.price)}</span>${fmt(effPrice(p))}` : fmt(p.price); }
 function discBadge(p){ return discOf(p) ? `<div class="disc-badge">−${discOf(p)}%</div>` : ''; }
-function fmt(n){ return Number(n||0).toLocaleString('ru-RU') + " сум"; }
+const CUR = { ru:'сум', uz:'so‘m', tr:'sum', az:'sum', en:'UZS' };
+function fmtRu(n){ return Number(n||0).toLocaleString('ru-RU') + " сум"; }
+function fmt(n){ return Number(n||0).toLocaleString('ru-RU') + " " + (CUR[lang] || 'сум'); }
 
 /* ---------- i18n ---------- */
 const FLAG_CODES = { ru:"ru", uz:"uz", tr:"tr", az:"az", en:"gb" };
@@ -2827,6 +2838,14 @@ const STR_PREORDER = {
        faqQPre4:"What if I don’t pay the rest?", faqAPre4:"If the item has arrived and the payment isn’t made within 3 days, the pre-order is cancelled and the deposit is not refunded — the item was ordered especially for you." }
 };
 Object.keys(STR_PREORDER).forEach(l => Object.assign(STR[l], STR_PREORDER[l]));
+const STR_QA = {
+  ru:{ sizeOut:'Размер {s} закончился', nothingFound:'Ничего не найдено — попробуйте другой фильтр' },
+  uz:{ sizeOut:'{s} oʻlcham tugagan', nothingFound:'Hech narsa topilmadi — boshqa filtrni sinab koʻring' },
+  tr:{ sizeOut:'{s} beden tükendi', nothingFound:'Sonuç bulunamadı — başka bir filtre deneyin' },
+  az:{ sizeOut:'{s} ölçü bitib', nothingFound:'Heç nə tapılmadı — başqa filtr yoxlayın' },
+  en:{ sizeOut:'Size {s} is sold out', nothingFound:'Nothing found — try another filter' }
+};
+Object.keys(STR_QA).forEach(l => Object.assign(STR[l], STR_QA[l]));
 /* Доставка за рубеж (BTS Global) */
 const STR_ABROAD = {
   ru:{ shipSoon:"скоро", shipSoonToast:"Доставка за рубеж скоро будет доступна", shipWhereLabel:"Куда доставить?", shipUz:"По Узбекистану", shipAbroad:"За рубеж", abroadCountry:"Страна",
@@ -3628,7 +3647,7 @@ function renderShopAllGrid(){
 
   const wrap = document.getElementById('shopAllGrid');
   wrap.innerHTML = '';
-  if (list.length === 0){ wrap.innerHTML = `<div class="empty-state">${t('noProductsYet')}</div>`; return; }
+  if (list.length === 0){ wrap.innerHTML = `<div class="empty-state">${t((priceMin !== null || priceMax !== null || shopAllCategory !== 'Все') ? 'nothingFound' : 'noProductsYet')}</div>`; return; }
   list.forEach(p => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -4097,6 +4116,7 @@ function goBack(fallback){
   showScreen(fallback || 'home');
 }
 function showScreen(name, fromPop){
+  try{ if (window.nxCloseLookSheet) window.nxCloseLookSheet(); }catch(e){}
   if (!fromPop && name !== _curScreen){ try{ history.pushState({s:name}, ''); _navDepth++; }catch(e){} }
   _curScreen = name;
   try{ if (tg && tg.BackButton){ name === 'home' ? tg.BackButton.hide() : tg.BackButton.show(); } }catch(e){}
@@ -5218,7 +5238,7 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
   function refreshStockUI(idx){
     const colorStock = getColorSizeStock(idx, selectedSize);
     if (colorStock <= 0){
-      stockNote.textContent = `${t('outOfStock')} (${getTranslatedColorName(colors[idx])})`;
+      stockNote.textContent = selectedSize ? t('sizeOut').replace('{s}', selectedSize) + ` (${getTranslatedColorName(colors[idx])})` : `${t('outOfStock')} (${getTranslatedColorName(colors[idx])})`;
       stockNote.className = 'stock-note out';
       addBtn.disabled = true; addBtn.textContent = t('addToCart');
     } else if (colorStock <= 3){
@@ -6198,9 +6218,9 @@ function finalizeOrder(phone, branch){
     total += ab.shippingFee;
     abroadFields = Object.assign({}, ab, { subtotal });
   }
-  text += `\nИтого: ${fmt(total)}`;
-  if (promoFields.promoCode) text += ` (товары ${fmt(subtotal)}, промокод ${promoFields.promoCode}: −${fmt(promoFields.promoDiscount)})`;
-  if (ab) text += `\n🌍 Доставка за рубеж: ${STR.ru['c' + ab.country] || ab.country} — ${fmt(ab.shippingFee)}`;
+  text += `\nИтого: ${fmtRu(total)}`;
+  if (promoFields.promoCode) text += ` (товары ${fmtRu(subtotal)}, промокод ${promoFields.promoCode}: −${fmtRu(promoFields.promoDiscount)})`;
+  if (ab) text += `\n🌍 Доставка за рубеж: ${STR.ru['c' + ab.country] || ab.country} — ${fmtRu(ab.shippingFee)}`;
   text += `\n📍 Пункт БТС: ${branch}\n📞 Телефон: ${phone}\n💰 Способ оплаты: ${methodLabel}`;
   if (orderNote) text += `\n📝 Примечание: ${orderNote}`;
 
@@ -6214,7 +6234,7 @@ function finalizeOrder(phone, branch){
 
   const notifyChatId = '';
   const deposit = pre ? depositOf(total) : 0;
-  if (pre) text += `\n🕓 Предзаказ: предоплата ${PREORDER_PERCENT}% — ${fmt(deposit)}, остаток ${fmt(total - deposit)} при поступлении`;
+  if (pre) text += `\n🕓 Предзаказ: предоплата ${PREORDER_PERCENT}% — ${fmtRu(deposit)}, остаток ${fmtRu(total - deposit)} при поступлении`;
   const payAmount = pre ? deposit : total; // сколько платим сейчас
   const orderData = {
     customerId, customerName, items: orderItems, total,
@@ -6794,6 +6814,13 @@ const NX = {
        bandH:'Simple pieces. Loud style.', bandP:'New drops, private sales and shop news — first.', bandPh:'Campaign photo', fShop:'Shop', fHelp:'Help', fAbout:'milaisss', fFollow:'Follow', fNew:'New in', fCart:'Bag', fFav:'Favorites', fOrders:'My orders', fFaq:'FAQ', fSupport:'Support', fOffer:'Terms', fRet:'7-day returns', fShip:'Free delivery from 850 000 sum' }
 };
 const T = k => (NX[lang] && NX[lang][k]) || NX.ru[k] || k;
+const NX_PL = { ru:{ pcs:['вещь','вещи','вещей'], styles:['модель','модели','моделей'] }, en:{ pcs:['piece','pieces','pieces'], styles:['style','styles','styles'] } };
+function TP(n, k){
+  const f = NX_PL[lang] && NX_PL[lang][k]; if (!f) return T(k);
+  if (lang === 'en') return n === 1 ? f[0] : f[1];
+  const a = Math.abs(n) % 100, b = a % 10;
+  return (a > 10 && a < 20) ? f[2] : b === 1 ? f[0] : (b >= 2 && b <= 4) ? f[1] : f[2];
+}
 const $ = id => document.getElementById(id);
 const escN = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
@@ -7089,7 +7116,7 @@ function buildCats(){
     const items = products.filter(p => (p.category || '').trim().toLowerCase() === String(c).trim().toLowerCase());
     const pics = items.filter(p => okUrl(p.showcaseImage) || imgOf(p)).map(picHTML);
     const tile = pics.length ? `<div class="nx-fade">${pics.map((h, k) => k === 0 ? h.replace('<img ', '<img data-on="1" ') : h).join('')}</div>` : (items[0] ? picHTML(items[0]) : '<div class="nx-ph">👕</div>');
-    return `<button class="nx-cat nx-reveal" data-c="${escN(c)}">${tile}<div class="nx-cat-b"><div><b>${escN(typeof translateCategory === 'function' ? translateCategory(c) : c)}</b><small>${items.length} ${T('styles')}</small></div><span class="nx-arrow">${ARROW}</span></div></button>`;
+    return `<button class="nx-cat nx-reveal" data-c="${escN(c)}">${tile}<div class="nx-cat-b"><div><b>${escN(typeof translateCategory === 'function' ? translateCategory(c) : c)}</b><small>${items.length} ${TP(items.length, 'styles')}</small></div><span class="nx-arrow">${ARROW}</span></div></button>`;
   }).join('');
   box.querySelectorAll('.nx-fade').forEach(f => { const first = f.firstElementChild; if (first) first.classList.add('on'); });
   clearInterval(buildCats._t);
@@ -7119,7 +7146,7 @@ function buildLooks(){
     const h = l.photo ? `<img src="${escN(l.photo)}" alt="" loading="lazy">` : (l.pieces[0] ? picHTML(l.pieces[0].p) : '');
     const pins = l.pieces.map((pc, k) => { const ok = v => v !== null && v !== undefined && v !== '' && isFinite(Number(v)); const x = Number(pc.x), y = Number(pc.y); return (ok(pc.x) && ok(pc.y)) ? `<button class="nx-pin" style="left:${x}%;top:${y}%" data-x="${x}" data-y="${y}" data-id="${escN(pc.p.id)}"><b>${k + 1}</b><span>${escN(nameOf(pc.p))}</span></button>` : ''; }).join('');
     return `<div class="nx-fig${h.includes('blend') ? ' blend' : ''}" data-i="${i}"><div class="nx-figin">${h}${pins}</div></div>`; }).join('');
-  $('nxSteps').innerHTML = looks.map((l, i) => `<button class="nx-step" data-i="${i}">${String(i + 1).padStart(2, '0')} ${escN(l.pieces[0] ? nameOf(l.pieces[0].p).split(' ')[0] : '')}</button>`).join('');
+  $('nxSteps').innerHTML = looks.map((l, i) => `<button class="nx-step" data-i="${i}">${String(i + 1).padStart(2, '0')}<em> ${escN(l.pieces[0] ? nameOf(l.pieces[0].p).split(' ')[0] : '')}</em></button>`).join('');
   $('nxSteps').querySelectorAll('.nx-step').forEach(b => b.onclick = () => showLook(+b.dataset.i, true));
   stage.querySelectorAll('.nx-figin > img').forEach(im => { if (im.complete) layoutPins(); else im.addEventListener('load', layoutPins, { once:true }); });
   stage.querySelectorAll('.nx-pin').forEach(b => b.onclick = e => { e.stopPropagation(); if (+b.closest('.nx-fig').dataset.i === li) openProduct(b.dataset.id); });
@@ -7158,7 +7185,7 @@ function showLook(i, user){
   $('nxPieces').querySelectorAll('.nx-piece').forEach(r => r.onclick = e => { if (e.target.closest('.nx-plus')) return; openProduct(r.dataset.id); });
   $('nxPieces').querySelectorAll('.nx-plus').forEach(b => b.onclick = e => { e.stopPropagation(); nxTogglePiece(b.closest('.nx-piece').dataset.id); });
   nxPieceStates();
-  $('nxPcs').textContent = `${l.length} ${T('pcs')}`;
+  $('nxPcs').textContent = `${l.length} ${TP(l.length, 'pcs')}`;
   if (user) schedule();
 }
 const homeVisible = () => !document.hidden && document.getElementById('home') && document.getElementById('home').classList.contains('active');
@@ -7251,7 +7278,7 @@ function nxOpenLookSheet(i){
     : `<div class="nx-ls-collage">${items.map(it => `<div>${picHTML(it.p)}</div>`).join('')}</div>`;
   el.querySelector('.nx-ls-body').innerHTML = `
     <div class="nx-ls-top">${photo}</div>
-    <div class="nx-ls-h"><small>${escN(T('lsLook'))} ${String(i + 1).padStart(2, '0')} / ${String(looks.length).padStart(2, '0')}</small><b>${items.length} ${escN(T('pcs'))}</b></div>
+    <div class="nx-ls-h"><small>${escN(T('lsLook'))} ${String(i + 1).padStart(2, '0')} / ${String(looks.length).padStart(2, '0')}</small><b>${items.length} ${escN(TP(items.length, 'pcs'))}</b></div>
     <div class="nx-ls-list">${items.map((it, k) => `
       <div class="nx-ls-it${it.opts.length ? '' : ' none'}" data-k="${k}">
         <button type="button" class="nx-ls-chk" aria-label="${escN(T('lsSel'))}"></button>
@@ -7283,7 +7310,7 @@ function nxLsSync(){
     row.querySelectorAll('.nx-ls-sz button').forEach(b => b.classList.toggle('sel', +b.dataset.j === it.pick));
     if (it.on){ sum += effPrice(it.p); n++; }
   });
-  el.querySelector('.nx-ls-sum small').textContent = `${T('lsTotal')} · ${n} ${T('pcs')}`;
+  el.querySelector('.nx-ls-sum small').textContent = `${T('lsTotal')} · ${n} ${TP(n, 'pcs')}`;
   el.querySelector('.nx-ls-sum b').textContent = fmt(sum);
   const go = el.querySelector('.nx-ls-go'); go.textContent = T('lsCheckout'); go.disabled = n === 0;
 }
@@ -7292,6 +7319,7 @@ function nxCloseLookSheet(){
   el.classList.remove('open'); document.documentElement.classList.remove('nx-ls-open');
   lookHold = false; lookIdleUntil = Date.now() + 1500;
 }
+window.nxCloseLookSheet = nxCloseLookSheet;
 function nxLookCheckout(){
   if (!_ls) return;
   const el = document.getElementById('nxLs');
