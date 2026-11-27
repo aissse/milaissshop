@@ -5261,10 +5261,24 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
     updateActivePhoto(photoIdx);
   }
 
-  let currentGalleryImages = [];
-  function renderColorGallery(colorIdx){
-    const c = colors[colorIdx];
-    currentGalleryImages = getColorImages(c);
+  // одна лента со всеми фото всех цветов: листаем подряд; кнопка цвета плавно переводит к его первому фото,
+  // а когда долистали до фото другого цвета — этот цвет выбирается сам
+  let currentGalleryImages = [], colorStarts = [], colorOfPhoto = [], galTarget = -1, galPending = -1;
+  function renderColorGallery(){
+    const all = []; colorStarts = []; colorOfPhoto = [];
+    colors.forEach((c, ci) => {
+      const imgs = getColorImages(c);
+      colorStarts[ci] = all.length;
+      let first = true;
+      imgs.forEach(u => {
+        const at = all.indexOf(u);
+        if (at > -1){ if (first) colorStarts[ci] = at; first = false; return; } // одно и то же фото у разных цветов — не дублируем
+        if (first){ colorStarts[ci] = all.length; first = false; }
+        all.push(u); colorOfPhoto.push(ci);
+      });
+      if (first) colorStarts[ci] = 0;
+    });
+    currentGalleryImages = all;
     const list = currentGalleryImages.length ? currentGalleryImages : [''];
     currentDetailImages = currentGalleryImages.slice();
     carousel.innerHTML = ''; dotsWrap.innerHTML = ''; thumbRail.innerHTML = '';
@@ -5287,12 +5301,25 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
     });
     carousel.scrollLeft = 0;
   }
+  function showColorPhotos(idx, smooth){
+    const at = colorStarts[idx] || 0;
+    if (!carousel.clientWidth){ galPending = at; updateActivePhoto(at); return; } // экран ещё скрыт — прокрутим после показа
+    const cur = Math.round(carousel.scrollLeft / carousel.clientWidth);
+    if (colorOfPhoto[cur] === idx || cur === at) return; // уже смотрим фото этого цвета
+    galTarget = at; clearTimeout(carousel._gt); carousel._gt = setTimeout(() => { galTarget = -1; }, 1500);
+    carousel.scrollTo({ left: at * carousel.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
+    updateActivePhoto(at);
+  }
   carousel.onscroll = () => {
     clearTimeout(carousel._t);
     carousel._t = setTimeout(() => {
+      if (!carousel.clientWidth) return;
       const i = Math.round(carousel.scrollLeft / carousel.clientWidth);
       updateActivePhoto(i);
-    }, 80);
+      if (galTarget > -1){ if (i === galTarget) galTarget = -1; return; } // идёт прокрутка по кнопке цвета
+      const ci = colorOfPhoto[i];
+      if (ci != null && ci !== selectedColorIdx) selectColor(ci, true);
+    }, 120);
   };
 
   const detailLayout = document.getElementById('detailLayout');
@@ -5355,17 +5382,17 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
     });
   }
 
-  function selectColor(idx){
+  function selectColor(idx, fromSwipe){
     selectedColorIdx = idx;
     document.querySelectorAll('.color-dot').forEach((el,i) => el.classList.toggle('active', i===idx));
     document.getElementById('colorLabel').textContent = getTranslatedColorName(colors[idx]);
-    renderColorGallery(idx);
+    if (!fromSwipe) showColorPhotos(idx, true);
     if (getColorSizeStock(idx, selectedSize) <= 0) selectedSize = pickInitialSize(idx);
     renderSizeRow(idx);
     refreshStockUI(idx);
   }
 
-  renderColorGallery(0);
+  renderColorGallery();
   renderSizeRow(0);
   refreshStockUI(0);
   window._refreshDetailStock = () => refreshStockUI(selectedColorIdx);
@@ -5396,14 +5423,15 @@ function openProduct(id, preferredColor, preferredSize, preferredImage){
 
   showScreen('detail');
 
-  // открыли из «Избранного» — сразу листаем галерею к сохранённой фотографии
-  if (preferredImage){
-    const photoIdx = currentDetailImages.indexOf(preferredImage);
-    if (photoIdx > 0) requestAnimationFrame(() => {
-      carousel.scrollLeft = photoIdx * carousel.clientWidth;
-      updateActivePhoto(photoIdx);
-    });
-  }
+  // открыли из «Избранного» — сразу листаем галерею к сохранённой фотографии (иначе — к фото выбранного цвета)
+  const _favIdx = preferredImage ? currentDetailImages.indexOf(preferredImage) : -1;
+  const _startIdx = _favIdx > -1 ? _favIdx : galPending;
+  galPending = -1;
+  if (_startIdx > 0) requestAnimationFrame(() => {
+    galTarget = _startIdx;
+    carousel.scrollLeft = _startIdx * carousel.clientWidth;
+    updateActivePhoto(_startIdx);
+  });
 }
 
 /* ссылка из сообщения «Доставлен»: milaisss.com/?review=ORDER_ID — открывает профиль и форму отзыва этого заказа */
